@@ -1,0 +1,22 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "Book Tracker"
+include ':app'
+include ':core'
+include ':compose-ui'
+include ':core-database'
+include ':core-datastore'
+include ':core-network'
+include ':feature:on-boarding'
