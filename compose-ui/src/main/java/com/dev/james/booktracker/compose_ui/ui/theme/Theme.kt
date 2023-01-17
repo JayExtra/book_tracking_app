@@ -1,22 +1,26 @@
-package com.dev.james.booktracker.ui.theme
+package com.dev.james.booktracker.compose_ui.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    primary = Orange,
+    primaryVariant = OrangeLight  ,
+    secondary = OrangeDark ,
+    onPrimary = Color.White ,
+    secondaryVariant = OrangeLight,
+    onSecondary = Color.White ,
+    error = Color.Red
 )
 
 private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200
-
+    primary = Brown,
+    primaryVariant = BrownLight,
+    secondary = Orange
     /* Other default colors to override
     background = Color.White,
     surface = Color.White,
@@ -37,8 +41,8 @@ fun BookTrackerTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compo
 
     MaterialTheme(
         colors = colors,
-        typography = Typography,
-        shapes = Shapes,
+        typography = BookAppTypography,
+        shapes = BookAppShapes,
         content = content
     )
 }

@@ -8,7 +8,7 @@ apply {
 }
 
 android {
-    namespace = "com.dev.james.core"
+
     compileSdk = AndroidSdk.compileSdk
 
     defaultConfig {
