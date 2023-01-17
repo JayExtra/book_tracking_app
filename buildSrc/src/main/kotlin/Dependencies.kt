@@ -40,6 +40,8 @@ object Plugins {
     const val androidApplication = "com.android.application"
     const val androidLibrary = "com.android.library"
     const val kotlinPlugin = "org.jetbrains.kotlin.android"
+    const val spotlessPlugin = "com.diffplug.spotless"
+    const val ktlintPlugin = "org.jlleitschuh.gradle.ktlint"
 }
 
 object Versions{
@@ -47,5 +49,7 @@ object Versions{
     const val composeUiVersion = "1.1.1"
     const val kotlinCompilerVersion = "1.1.1"
     const val jvmTargetVersion = "1.8"
+    const val spotlessVersion = "6.13.0"
+    const val ktlintVersion = "11.0.0"
 
 }

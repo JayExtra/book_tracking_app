@@ -8,7 +8,7 @@ apply {
 }
 
 android {
-    namespace = "com.dev.james.mylibrary"
+
     compileSdk = AndroidSdk.compileSdk
 
     defaultConfig {
@@ -34,6 +34,17 @@ android {
     }
     kotlinOptions {
         jvmTarget = Versions.jvmTargetVersion
+    }
+    buildFeatures{
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = Versions.composeCompiler
+    }
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
