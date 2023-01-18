@@ -15,6 +15,7 @@ plugins {
     id (Plugins.androidApplication) version (Plugins.androidApplicationVersion) apply false
     id (Plugins.androidLibrary) version (Plugins.androidLibraryVersion) apply false
     id (Plugins.kotlinPlugin) version (Plugins.kotlinPluginVersion) apply false
+    id(Plugins.kotlinJvm) version (Plugins.kotlinPluginVersion) apply false
     id (Plugins.spotlessPlugin) version (Versions.spotlessVersion)
     id (Plugins.ktlintPlugin) version (Versions.ktlintVersion)
 }

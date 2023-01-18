@@ -1,6 +1,9 @@
 plugins {
     id(Plugins.androidApplication)
     id(Plugins.kotlinPlugin)
+    id(Plugins.kapt)
+    id(Plugins.parcelize)
+    id(Plugins.kspPlugin) version (Plugins.kspPluginVersion)
 }
 
 apply {
@@ -51,10 +54,21 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    applicationVariants.all{
+        kotlin.sourceSets {
+            getByName(name){
+                kotlin.srcDir("build/generated/ksp/$name/kotlin")
+            }
+        }
+    }
 }
 
 dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.composeUi))
     implementation(project(Modules.onBoarding))
+
+    implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
+    ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
 }
