@@ -35,13 +35,18 @@ object Modules {
 object Plugins {
     const val androidApplicationVersion = "7.3.1"
     const val androidLibraryVersion = "7.3.1"
-    const val kotlinPluginVersion = "1.6.10"
+    const val kotlinPluginVersion = "1.7.10"
+    const val kspPluginVersion = "1.7.20-1.0.8"
 
     const val androidApplication = "com.android.application"
     const val androidLibrary = "com.android.library"
     const val kotlinPlugin = "org.jetbrains.kotlin.android"
     const val spotlessPlugin = "com.diffplug.spotless"
     const val ktlintPlugin = "org.jlleitschuh.gradle.ktlint"
+    const val kspPlugin = "com.google.devtools.ksp"
+    const val parcelize = "kotlin-parcelize"
+    const val kapt = "kotlin-kapt"
+    const val kotlinJvm = "org.jetbrains.kotlin.jvm"
 }
 
 object Versions{
@@ -51,5 +56,7 @@ object Versions{
     const val jvmTargetVersion = "1.8"
     const val spotlessVersion = "6.13.0"
     const val ktlintVersion = "11.0.0"
+
+    const val navDestinations = "1.7.32-beta"
 
 }
