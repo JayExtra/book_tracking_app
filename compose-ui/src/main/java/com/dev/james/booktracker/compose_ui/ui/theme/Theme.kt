@@ -10,10 +10,9 @@ import androidx.compose.ui.graphics.Color
 private val DarkColorPalette = darkColors(
     primary = Orange,
     primaryVariant = OrangeLight  ,
-    secondary = OrangeDark ,
-    onPrimary = Color.White ,
-    secondaryVariant = OrangeLight,
-    onSecondary = Color.White ,
+    secondary = Orange ,
+    onPrimary = Color.Black ,
+    onSecondary = Color.Black ,
     error = Color.Red
 )
 
@@ -32,15 +31,12 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-fun BookTrackerTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
+fun BookTrackerTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit) {
 
     MaterialTheme(
-        colors = colors,
+        colors = if(darkTheme) DarkColorPalette else LightColorPalette,
         typography = BookAppTypography,
         shapes = BookAppShapes,
         content = content
