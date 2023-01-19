@@ -19,7 +19,7 @@ private val Montserrat = FontFamily(
 // Set of Material typography styles to start with
 val BookAppTypography = Typography(
     h4 = TextStyle(
-        fontFamily = Montserrat ,
+        fontFamily = Montserrat,
         fontWeight = FontWeight.W600 ,
         fontSize = 30.sp
     ),
