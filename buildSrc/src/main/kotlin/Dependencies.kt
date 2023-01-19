@@ -35,7 +35,7 @@ object Modules {
 object Plugins {
     const val androidApplicationVersion = "7.3.1"
     const val androidLibraryVersion = "7.3.1"
-    const val kotlinPluginVersion = "1.7.10"
+    const val kotlinPluginVersion = "1.7.20"
     const val kspPluginVersion = "1.7.20-1.0.8"
 
     const val androidApplication = "com.android.application"
@@ -50,8 +50,8 @@ object Plugins {
 }
 
 object Versions{
-    const val composeCompiler = "1.1.1"
-    const val composeUiVersion = "1.1.1"
+    const val composeCompiler = "1.3.2"
+    const val composeUiVersion = "1.3.2"
     const val kotlinCompilerVersion = "1.1.1"
     const val jvmTargetVersion = "1.8"
     const val spotlessVersion = "6.13.0"
