@@ -1,8 +1,6 @@
-import org.gradle.internal.impldep.org.eclipse.jgit.util.RawCharUtil.trimTrailingWhitespace
-
 buildscript {
     extra.apply{
-        set("compose_ui_version" , "1.1.1")
+        set("compose_ui_version" , "1.3.2")
     }
     repositories {
         google()
@@ -16,6 +14,7 @@ plugins {
     id (Plugins.androidLibrary) version (Plugins.androidLibraryVersion) apply false
     id (Plugins.kotlinPlugin) version (Plugins.kotlinPluginVersion) apply false
     id(Plugins.kotlinJvm) version (Plugins.kotlinPluginVersion) apply false
+    id(Plugins.daggerHilt) version (Versions.daggerHiltVersion) apply false
     id (Plugins.spotlessPlugin) version (Versions.spotlessVersion)
     id (Plugins.ktlintPlugin) version (Versions.ktlintVersion)
 }

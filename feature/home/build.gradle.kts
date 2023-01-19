@@ -11,7 +11,6 @@ apply {
 }
 
 android {
-
     compileSdk = AndroidSdk.compileSdk
 
     defaultConfig {
@@ -38,17 +37,6 @@ android {
     kotlinOptions {
         jvmTarget = Versions.jvmTargetVersion
     }
-    buildFeatures{
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.composeCompiler
-    }
-    packagingOptions {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
 }
 
 kotlin {
@@ -63,6 +51,7 @@ kotlin {
 }
 
 dependencies {
+
     implementation(project(Modules.core))
     implementation(project(Modules.composeUi))
     implementation(project(Modules.coreDataStore))
@@ -71,3 +60,4 @@ dependencies {
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
 
 }
+

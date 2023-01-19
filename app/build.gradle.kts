@@ -3,6 +3,7 @@ plugins {
     id(Plugins.kotlinPlugin)
     id(Plugins.kapt)
     id(Plugins.parcelize)
+    id(Plugins.daggerHilt)
     id(Plugins.kspPlugin) version (Plugins.kspPluginVersion)
 }
 
