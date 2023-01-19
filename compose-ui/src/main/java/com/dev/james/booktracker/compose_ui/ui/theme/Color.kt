@@ -9,3 +9,5 @@ val BrownDark = Color(0xFF321911)
 val Orange = Color(0xFFBF360C)
 val OrangeLight = Color(0xFFF9683A)
 val OrangeDark = Color(0xFF870000)
+
+val GrayHue = Color(0xFF999794)
