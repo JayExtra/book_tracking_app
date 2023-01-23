@@ -29,6 +29,7 @@ object Modules {
     const val coreNetwork = ":core-network"
     const val composeUi = ":compose-ui"
     const val onBoarding = ":feature:on-boarding"
+    const val home = ":feature:home"
 }
 
 //plugins

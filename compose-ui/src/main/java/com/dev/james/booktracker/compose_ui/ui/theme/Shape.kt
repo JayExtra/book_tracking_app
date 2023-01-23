@@ -7,5 +7,8 @@ import androidx.compose.ui.unit.dp
 val BookAppShapes = Shapes(
     small = RoundedCornerShape(5.dp),
     medium = RoundedCornerShape(25.dp),
-    large = RoundedCornerShape(0.dp)
+    large = RoundedCornerShape(
+        bottomStart = 50.dp ,
+        bottomEnd = 50.dp
+    )
 )

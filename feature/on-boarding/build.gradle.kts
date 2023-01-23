@@ -37,6 +37,12 @@ android {
     kotlinOptions {
         jvmTarget = Versions.jvmTargetVersion
     }
+    buildFeatures{
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = Versions.composeCompiler
+    }
 }
 
 kotlin {
@@ -51,6 +57,10 @@ kotlin {
 }
 
 dependencies {
+
+    implementation(project(Modules.core))
+    implementation(project(Modules.composeUi))
+    implementation(project(Modules.coreDataStore))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
