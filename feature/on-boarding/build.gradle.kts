@@ -66,3 +66,8 @@ dependencies {
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
 
 }
+
+ksp{
+    arg("compose-destinations.mode", "destinations")
+    arg("compose-destinations.moduleName" , "on-boarding")
+}

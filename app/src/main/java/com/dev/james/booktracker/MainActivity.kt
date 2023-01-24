@@ -11,15 +11,24 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.home.presentation.screens.HomeScreen
+import com.dev.james.booktracker.navigation.AppNavigation
 import com.dev.james.booktracker.on_boarding.ui.screens.OnBoardingWelcomeScreen
+import dagger.hilt.android.AndroidEntryPoint
 
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val mainViewModel : MainViewModel by viewModels()
     @RequiresApi(Build.VERSION_CODES.S)
@@ -55,7 +64,15 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                   OnBoardingWelcomeScreen()
+                   val navController = rememberNavController()
+                    val newBackStackEntry by navController.currentBackStackEntryAsState()
+                    val route = newBackStackEntry?.destination?.route
+                    val hasOnBoarded = mainViewModel.isOnBoarded.collectAsStateWithLifecycle()
+                    AppNavigation(
+                        navController = navController,
+                        hasOnBoarded = hasOnBoarded.value ,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
         }

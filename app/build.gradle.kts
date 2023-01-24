@@ -70,6 +70,7 @@ dependencies {
     implementation(project(Modules.composeUi))
     implementation(project(Modules.onBoarding))
     implementation(project(Modules.home))
+    implementation(project(Modules.coreDataStore))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")

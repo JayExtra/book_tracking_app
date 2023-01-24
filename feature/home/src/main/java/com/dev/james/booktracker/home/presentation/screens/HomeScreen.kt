@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
+@Destination
 @Preview("Home Screen")
 fun HomeScreen() {
     Column(
