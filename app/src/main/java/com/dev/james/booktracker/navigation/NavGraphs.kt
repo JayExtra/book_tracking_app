@@ -17,7 +17,8 @@ object NavGraphs {
         override val startRoute: Route = OnBoardingWelcomeScreenDestination routedIn this
 
         override val destinationsByRoute = listOf<DestinationSpec<*>>(
-            OnBoardingWelcomeScreenDestination
+            OnBoardingWelcomeScreenDestination ,
+            HomeScreenDestination
         ).routedIn(this)
             .associateBy { it.route }
 
@@ -32,7 +33,8 @@ object NavGraphs {
             HomeScreenDestination routedIn this
 
         override val destinationsByRoute = listOf<DestinationSpec<*>>(
-            HomeScreenDestination
+            HomeScreenDestination ,
+            OnBoardingWelcomeScreenDestination
         ).routedIn(this)
             .associateBy { it.route }
 
@@ -57,6 +59,7 @@ object NavGraphs {
             home
         override val destinationsByRoute = emptyMap<String, DestinationSpec<*>>()
         override val nestedNavGraphs = listOf(
+            onBoarding,
             home
         )
     }

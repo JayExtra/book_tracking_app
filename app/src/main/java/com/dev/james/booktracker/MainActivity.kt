@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -25,6 +26,7 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.home.presentation.screens.HomeScreen
 import com.dev.james.booktracker.navigation.AppNavigation
 import com.dev.james.booktracker.on_boarding.ui.screens.OnBoardingWelcomeScreen
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -40,7 +42,7 @@ class MainActivity : ComponentActivity() {
                 mainViewModel.isLoading.value
             })
         }
-        splashScreen.setOnExitAnimationListener { splashScreenView ->
+        /*splashScreen.setOnExitAnimationListener { splashScreenView ->
             // Create your custom animation.
             val slideLeft = ObjectAnimator.ofFloat(
                 splashScreenView,
@@ -56,7 +58,7 @@ class MainActivity : ComponentActivity() {
 
             // Run your animation.
             slideLeft.start()
-        }
+        }*/
         setContent {
             BookTrackerTheme {
                 // A surface container using the 'background' color from the theme
@@ -68,11 +70,16 @@ class MainActivity : ComponentActivity() {
                     val newBackStackEntry by navController.currentBackStackEntryAsState()
                     val route = newBackStackEntry?.destination?.route
                     val hasOnBoarded = mainViewModel.isOnBoarded.collectAsStateWithLifecycle()
-                    AppNavigation(
-                        navController = navController,
-                        hasOnBoarded = hasOnBoarded.value ,
-                        modifier = Modifier.fillMaxSize()
-                    )
+
+                    Scaffold(modifier = Modifier.fillMaxSize()) { contentPadding ->
+                        AppNavigation(
+                            navController = navController,
+                            hasOnBoarded = hasOnBoarded.value ,
+                            modifier = Modifier.fillMaxSize()
+                                .padding(contentPadding)
+                        )
+                    }
+
                 }
             }
         }

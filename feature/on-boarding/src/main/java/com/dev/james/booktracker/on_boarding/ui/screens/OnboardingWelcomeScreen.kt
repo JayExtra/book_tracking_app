@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.on_boarding.ui.screens
 
+import android.widget.Toast
 import androidx.annotation.RawRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,13 +11,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.airbnb.lottie.compose.*
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.theme.Brown
+import com.dev.james.booktracker.on_boarding.ui.components.StatefulRoundOutlineButton
 import com.dev.james.booktracker.on_boarding.ui.components.StatelessRoundOutlineButton
+import com.dev.james.booktracker.on_boarding.ui.navigation.OnBoardingNavigator
+import com.dev.james.booktracker.on_boarding.ui.viewmodel.OnBoardingWelcomeScreenViewModel
 import com.dev.james.on_boarding.R
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -25,9 +31,14 @@ import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
 @Destination
-@Preview(name = "On-Boarding welcome screen", widthDp = 320, heightDp = 700)
-fun OnBoardingWelcomeScreen(modifier: Modifier = Modifier) {
+//@Preview(name = "On-Boarding welcome screen", widthDp = 320, heightDp = 700)
+fun OnBoardingWelcomeScreen(
+    modifier: Modifier = Modifier ,
+    onBoardingWelcomeScreenViewModel: OnBoardingWelcomeScreenViewModel = hiltViewModel() ,
+    onBoardingNavigator : OnBoardingNavigator
+) {
 
+    val context = LocalContext.current
     Box(
         modifier = Modifier.fillMaxSize() ,
         contentAlignment = Alignment.Center
@@ -52,7 +63,13 @@ fun OnBoardingWelcomeScreen(modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                StatelessRoundOutlineButton()
+                StatefulRoundOutlineButton(
+                    text = "Next"
+                ){
+                    //Toast.makeText(context, "Next button clicked", Toast.LENGTH_SHORT).show()
+                    onBoardingWelcomeScreenViewModel.finishOnBoardingStatus()
+                    onBoardingNavigator.openHome()
+                }
             }
         }
 
@@ -93,12 +110,12 @@ fun LottieAnimationSection(
         spec = anim
     )
 
-    val lottieAnimation by animateLottieCompositionAsState(
+    val lottieAnimationState by animateLottieCompositionAsState(
         composition = composition ,
-        iterations = 1 ,
+        iterations = LottieConstants.IterateForever ,
         isPlaying = isLottiePlaying ,
         speed = animationSpeed ,
-        restartOnPlay = false
+        restartOnPlay = true
     )
 
     Box(
@@ -107,7 +124,7 @@ fun LottieAnimationSection(
     ){
         LottieAnimation(
             composition = composition ,
-            lottieAnimation,
+            lottieAnimationState,
             modifier = Modifier.size(300.dp)
         )
     }

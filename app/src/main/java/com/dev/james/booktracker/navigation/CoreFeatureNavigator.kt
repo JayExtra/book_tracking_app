@@ -6,12 +6,14 @@ import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScre
 import com.dev.james.booktracker.on_boarding.ui.navigation.OnBoardingNavigator
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
 import com.ramcosta.composedestinations.dynamic.within
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.navigate
+import com.ramcosta.composedestinations.navigation.popUpTo
 import com.ramcosta.composedestinations.spec.NavGraphSpec
 import timber.log.Timber
 
 class CoreFeatureNavigator(
-    private val navGraph: NavGraphSpec ,
+    private val navGraph: NavGraphSpec,
     private val navController: NavController
 ) : HomeNavigator , OnBoardingNavigator {
 
@@ -30,7 +32,11 @@ class CoreFeatureNavigator(
     }
 
     override fun openHome() {
-        navController.navigate(HomeScreenDestination within navGraph)
+        navController.navigate(direction = HomeScreenDestination within navGraph){
+            popUpTo(NavGraphs.rootWithOnBoarding){
+                inclusive = true
+            }
+        }
     }
 
     override fun openHomeScreen() {

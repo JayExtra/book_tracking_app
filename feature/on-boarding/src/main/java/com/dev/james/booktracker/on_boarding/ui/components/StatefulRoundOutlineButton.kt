@@ -22,12 +22,27 @@ fun StatefulRoundOutlineButton(
     text: String,
     onClick: () -> Unit
 ) {
-    StatelessRoundOutlineButton(
-        modifier = Modifier.clickable {
-            onClick()
-        } ,
-        text = text
-    )
+    Box(
+        modifier = Modifier
+            .clip(
+                RoundedCornerShape(10.dp)
+            )
+            .border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(10.dp))
+            .width(intrinsicSize = IntrinsicSize.Max)
+            .height(30.dp)
+            .background(color = Brown)
+            .clickable {
+                  onClick()
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text.lowercase(),
+            style = BookAppTypography.body2,
+            color = Color.White ,
+            modifier = Modifier.padding(bottom = 5.dp , start = 20.dp , end = 20.dp)
+        )
+    }
 
 }
 

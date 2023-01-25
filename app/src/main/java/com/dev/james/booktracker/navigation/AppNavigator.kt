@@ -7,6 +7,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.rememberNavHostEngine
 import com.ramcosta.composedestinations.scope.DestinationScope
@@ -31,8 +32,8 @@ internal fun AppNavigation(
 
 fun DestinationScope<*>.currentNavigator(hasOnBoarded: Boolean): CoreFeatureNavigator {
     return CoreFeatureNavigator(
-        navBackStackEntry.destination.navGraph(hasOnBoarded),
-        navController
+        navController = navController ,
+        navGraph = navBackStackEntry.destination.navGraph(hasOnBoarded)
     )
 }
 
