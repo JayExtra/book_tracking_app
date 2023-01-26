@@ -29,7 +29,7 @@ fun StatefulRoundOutlineButton(
             )
             .border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(10.dp))
             .width(intrinsicSize = IntrinsicSize.Max)
-            .height(30.dp)
+            .height(40.dp)
             .background(color = Brown)
             .clickable {
                   onClick()
@@ -38,9 +38,9 @@ fun StatefulRoundOutlineButton(
     ) {
         Text(
             text = text.lowercase(),
-            style = BookAppTypography.body2,
+            style = BookAppTypography.body1,
             color = Color.White ,
-            modifier = Modifier.padding(bottom = 5.dp , start = 20.dp , end = 20.dp)
+            modifier = Modifier.padding(bottom = 5.dp , start = 30.dp , end = 30.dp)
         )
     }
 
