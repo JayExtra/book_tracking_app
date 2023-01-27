@@ -25,23 +25,23 @@ private val DarkColorPalette = darkColors(
     primary = Orange,
     primaryVariant = OrangeLight  ,
     secondary = Orange ,
-    onPrimary = Color.Black ,
-    onSecondary = Color.Black ,
+    onPrimary = White ,
+    onSecondary = White ,
     error = Color.Red
 )
 
 private val LightColorPalette = lightColors(
     primary = Brown,
     primaryVariant = BrownLight,
-    secondary = Orange
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
+    secondary = Orange,
+//     Other default colors to override
+    background = White,
+//    surface = Color.White,
+    onPrimary = Color.Black,
     onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
+//    onBackground = Color.Black,
+//    onSurface = Color.Black,
+//
 )
 
 @Composable
@@ -51,12 +51,12 @@ fun BookTrackerTheme(
     val systemUiController = rememberSystemUiController()
     if(darkTheme){
       systemUiController.setStatusBarColor(
-          color = Color.White,
+          color = White,
           darkIcons = true
       )
     }else{
         systemUiController.setStatusBarColor(
-            color = Color.White ,
+            color = White ,
             darkIcons = true
         )
     }

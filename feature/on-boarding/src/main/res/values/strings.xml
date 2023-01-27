@@ -12,6 +12,8 @@
     Set your daily , weekly or yearly book reading goals then monitor your progress. Make adjustments throughout your journey.
     </string>
 
+    <string name="welcome_hello_message">Hello and thank you for downloading this application. We do hope that it will change your book reading experience by helping you achieve your reading goals. First , lets start by getting to know you and setting up your experience.</string>
+
     <string name="on_boarding_title_1">
         Read books to increase your knowledge
     </string>
