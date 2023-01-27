@@ -43,7 +43,6 @@ import com.ramcosta.composedestinations.annotation.Destination
 //@Preview(name = "On-Boarding welcome screen", widthDp = 320, heightDp = 700)
 fun OnBoardingWelcomeScreen(
     modifier: Modifier = Modifier,
-    onBoardingWelcomeScreenViewModel: OnBoardingWelcomeScreenViewModel = hiltViewModel(),
     onBoardingNavigator: OnBoardingNavigator
 ) {
 
@@ -80,14 +79,10 @@ fun OnBoardingWelcomeScreen(
                 StatefulRoundOutlineButton(
                     text = if (position == 3) "Finish" else "Next"
                 ) {
-                    //Toast.makeText(context, "Next button clicked", Toast.LENGTH_SHORT).show()
-                    /*onBoardingWelcomeScreenViewModel.finishOnBoardingStatus()
-                    onBoardingNavigator.openHome()*/
                     if (position < 3) {
                         position += 1
                     } else {
-                        onBoardingWelcomeScreenViewModel.finishOnBoardingStatus()
-                        onBoardingNavigator.openHome()
+                        onBoardingNavigator.openWelcomeMessageScreen()
                     }
 
                 }
