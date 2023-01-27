@@ -29,6 +29,7 @@ object Modules {
     const val coreNetwork = ":core-network"
     const val composeUi = ":compose-ui"
     const val onBoarding = ":feature:on-boarding"
+    const val home = ":feature:home"
 }
 
 //plugins
@@ -47,6 +48,7 @@ object Plugins {
     const val parcelize = "kotlin-parcelize"
     const val kapt = "kotlin-kapt"
     const val kotlinJvm = "org.jetbrains.kotlin.jvm"
+    const val daggerHilt = "com.google.dagger.hilt.android"
 }
 
 object Versions{
@@ -58,5 +60,6 @@ object Versions{
     const val ktlintVersion = "11.0.0"
 
     const val navDestinations = "1.7.32-beta"
+    const val daggerHiltVersion = "2.44"
 
 }

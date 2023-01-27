@@ -1,6 +1,8 @@
 plugins {
     id(Plugins.androidLibrary)
     id(Plugins.kotlinPlugin)
+    id(Plugins.daggerHilt)
+    id(Plugins.kapt)
 }
 
 apply {

@@ -42,7 +42,7 @@ val BookAppTypography = Typography(
         fontFamily = Montserrat,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp
-    ),
+    ) ,
     button = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.W500,
