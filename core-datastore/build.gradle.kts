@@ -1,6 +1,8 @@
 plugins {
     id(Plugins.androidLibrary)
     id(Plugins.kotlinPlugin)
+    id(Plugins.daggerHilt)
+    id(Plugins.kapt)
 }
 
 apply {
@@ -35,8 +37,14 @@ android {
     kotlinOptions {
         jvmTarget = Versions.jvmTargetVersion
     }
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 dependencies {
+    implementation(project(Modules.core))
 
 }

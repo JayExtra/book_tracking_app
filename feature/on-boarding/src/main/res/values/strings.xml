@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_boarding_message_1">
+        Knowledge is power , increase your knowledge by reading more books. Challenge yourself today , push your boundaries.
+    </string>
+
+    <string name="on_boarding_message_2">
+     Set reading goals and get reminders to help you stay in track with your  goals.
+    </string>
+
+    <string name="on_boarding_message_3">
+    Set your daily , weekly or yearly book reading goals then monitor your progress. Make adjustments throughout your journey.
+    </string>
+
+    <string name="on_boarding_title_1">
+        Read books to increase your knowledge
+    </string>
+    <string name="on_boarding_title_2">Get book reading reminders on time</string>
+    <string name="on_boarding_title_3">Monitor your progress</string>
+
+</resources>

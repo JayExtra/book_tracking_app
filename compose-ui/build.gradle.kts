@@ -1,6 +1,9 @@
 plugins {
     id(Plugins.androidLibrary)
     id(Plugins.kotlinPlugin)
+    id(Plugins.daggerHilt)
+    id(Plugins.kapt)
+    id(Plugins.kspPlugin) version (Plugins.kspPluginVersion)
 }
 
 apply {
@@ -48,6 +51,22 @@ android {
     }
 }
 
+kotlin {
+    sourceSets {
+        debug {
+            kotlin.srcDir("build/generated/ksp/debug/kotlin")
+        }
+        release {
+            kotlin.srcDir("build/generated/ksp/release/kotlin")
+        }
+    }
+}
+
 dependencies {
+    implementation(project(Modules.core))
+    implementation(project(Modules.coreDataStore))
+
+    implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
+    ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
 
 }
