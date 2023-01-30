@@ -11,3 +11,15 @@ val OrangeLight = Color(0xFFF9683A)
 val OrangeDark = Color(0xFF870000)
 
 val GrayHue = Color(0xFF999794)
+
+val PrimaryTextColor = Color(0xffffffff)
+val SecondaryTextColor = Color(0xff000000)
+
+val BackgroundLightColor = Color(0xffF1F0F5)
+val BackgroundDarkColor = Color(0xff121212)
+
+val SurfaceDark = Color(0xFF3A3A3A)
+val SurfaceLight = Color(0xFFFFFFFF)
+
+val ErrorColor = Color(0xFFf20707)
+val OnErrorColor = Color(0xFF000000)

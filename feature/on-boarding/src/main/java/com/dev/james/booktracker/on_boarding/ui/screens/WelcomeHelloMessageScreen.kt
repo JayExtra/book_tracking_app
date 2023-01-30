@@ -2,6 +2,8 @@ package com.dev.james.booktracker.on_boarding.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.*
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.on_boarding.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.on_boarding.ui.navigation.HelloMessageNavigator
 import com.dev.james.on_boarding.R
@@ -30,18 +33,19 @@ fun WelcomeHelloMessageScreen(
         horizontalAlignment = Alignment.CenterHorizontally ,
         verticalArrangement = Arrangement.Center ,
         modifier = Modifier.fillMaxSize()
-    //        .background(color = Color.White)
     ) {
         WelcomeLottieAnimation(
             animation = LottieCompositionSpec.RawRes(R.raw.hello_lottie)
         )
-        
-        Text(
-            text = stringResource(id = R.string.welcome_hello_message) ,
-            style = BookAppTypography.body1 ,
-            textAlign = TextAlign.Center ,
-            modifier = Modifier.padding(start = 16.dp , end = 16.dp , bottom = 16.dp)
-        )
+
+            Text(
+                modifier = Modifier.padding(start = 16.dp , end = 16.dp , bottom = 16.dp),
+                text = stringResource(id = R.string.welcome_hello_message) ,
+                style = MaterialTheme.typography.body1,
+                textAlign = TextAlign.Center ,
+                color = MaterialTheme.colors.onPrimary
+            )
+
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -73,7 +77,7 @@ fun WelcomeLottieAnimation(
 
         val lottieAnimationState by animateLottieCompositionAsState(
             composition = composition,
-            iterations = LottieConstants.IterateForever,
+            iterations = 1,
             isPlaying = isLottiePlaying,
             speed = animationSpeed,
             restartOnPlay = true
@@ -82,7 +86,8 @@ fun WelcomeLottieAnimation(
         LottieAnimation(
             composition = composition,
             lottieAnimationState,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .height(300.dp)
         )
     }
