@@ -10,7 +10,7 @@ val Orange = Color(0xFFBF360C)
 val OrangeLight = Color(0xFFF9683A)
 val OrangeDark = Color(0xFF870000)
 
-val GrayHue = Color(0xFF999794)
+val GrayHue = Color(0xFFD9D9D9)
 
 val PrimaryTextColor = Color(0xffffffff)
 val SecondaryTextColor = Color(0xff000000)
