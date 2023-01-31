@@ -43,9 +43,9 @@ fun Step(modifier: Modifier = Modifier, isCompete: Boolean, isCurrent: Boolean ,
     val color by animateColorAsState(
         targetValue = if (isCompete || isCurrent) Orange else GrayHue ,
         animationSpec = tween(
-            delayMillis = 200 ,
+            delayMillis = 10 ,
             easing = FastOutLinearInEasing ,
-            durationMillis = 2000
+            durationMillis = 400
         )
     )
     val innerCircleColor by animateColorAsState(
@@ -87,7 +87,7 @@ fun Step(modifier: Modifier = Modifier, isCompete: Boolean, isCurrent: Boolean ,
 @Preview
 @Composable
 fun HorizontalStepsProgressBarPreview() {
-    val currentStep = remember { mutableStateOf(1) }
+    val currentStep = remember { mutableStateOf(0) }
     StepsProgressBar(
         modifier = Modifier.fillMaxWidth()
             .padding(start = 60.dp),
