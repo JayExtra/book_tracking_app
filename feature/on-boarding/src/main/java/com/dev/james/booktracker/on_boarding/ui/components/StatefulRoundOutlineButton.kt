@@ -20,6 +20,9 @@ import com.dev.james.booktracker.compose_ui.ui.theme.Brown
 @Composable
 fun StatefulRoundOutlineButton(
     text: String,
+    backgroundColor : Color ,
+    outlineColor : Color ,
+    textColor : Color ,
     onClick: () -> Unit
 ) {
     Box(
@@ -27,10 +30,10 @@ fun StatefulRoundOutlineButton(
             .clip(
                 RoundedCornerShape(10.dp)
             )
-            .border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(10.dp))
+            .border(width = 2.dp, color = outlineColor, shape = RoundedCornerShape(10.dp))
             .width(intrinsicSize = IntrinsicSize.Max)
             .height(40.dp)
-            .background(color = Brown)
+            .background(color = backgroundColor)
             .clickable {
                   onClick()
             },
@@ -39,7 +42,7 @@ fun StatefulRoundOutlineButton(
         Text(
             text = text.lowercase(),
             style = BookAppTypography.body1,
-            color = Color.White ,
+            color = textColor ,
             modifier = Modifier.padding(bottom = 5.dp , start = 30.dp , end = 30.dp)
         )
     }
@@ -50,23 +53,26 @@ fun StatefulRoundOutlineButton(
 @Preview
 fun StatelessRoundOutlineButton(
     modifier: Modifier = Modifier,
-    text: String = "Next"
+    text: String = "Next",
+    backgroundColor : Color = Brown,
+    textColor: Color = Color.White,
+    outlineColor : Color = Color.White,
 ) {
     Box(
         modifier = Modifier
             .clip(
                 RoundedCornerShape(10.dp)
             )
-            .border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(10.dp))
+            .border(width = 2.dp, color = outlineColor, shape = RoundedCornerShape(10.dp))
             .width(intrinsicSize = IntrinsicSize.Max)
             .height(30.dp)
-            .background(color = Brown) ,
+            .background(color = backgroundColor) ,
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text.lowercase(),
             style = BookAppTypography.body2,
-            color = Color.White ,
+            color = textColor ,
             modifier = Modifier.padding(bottom = 5.dp , start = 20.dp , end = 20.dp)
         )
     }

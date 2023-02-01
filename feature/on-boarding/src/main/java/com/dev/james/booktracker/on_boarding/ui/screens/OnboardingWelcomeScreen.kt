@@ -77,7 +77,10 @@ fun OnBoardingWelcomeScreen(
                 CircularProgressIndicator(progress = position , count = 3)
 
                 StatefulRoundOutlineButton(
-                    text = if (position == 3) "Finish" else "Next"
+                    text = if (position == 3) "Finish" else "Next" ,
+                    backgroundColor = Brown ,
+                    outlineColor = Color.White ,
+                    textColor = Color.White
                 ) {
                     if (position < 3) {
                         position += 1

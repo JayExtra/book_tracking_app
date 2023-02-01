@@ -5,7 +5,9 @@ import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.navigation.HelloMessageNavigator
 import com.dev.james.booktracker.on_boarding.ui.navigation.OnBoardingNavigator
+import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNavigator
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
+import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
 import com.ramcosta.composedestinations.dynamic.within
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -17,7 +19,11 @@ import timber.log.Timber
 class CoreFeatureNavigator(
     private val navGraph: NavGraphSpec,
     private val navController: NavController
-) : HomeNavigator , OnBoardingNavigator , HelloMessageNavigator {
+) : HomeNavigator ,
+    OnBoardingNavigator ,
+    HelloMessageNavigator ,
+    UserSetupScreenNavigator
+{
 
     override fun openOnBoardingWelcomeScreen() {
         navController.navigate(
@@ -31,9 +37,6 @@ class CoreFeatureNavigator(
         )
     }
 
-    override fun openOnBoardingPreferenceSetupScreen() {
-        Timber.d("On boarding preference setup screens")
-    }
 
     override fun openHome() {
         navController.navigate(direction = HomeScreenDestination within navGraph){
@@ -48,7 +51,17 @@ class CoreFeatureNavigator(
     }
 
     override fun navigateToUserDetailsCaptureScreen() {
-        Timber.d("User details capture screen")
+        navController.navigate(
+            UserPreferenceSetupScreenDestination within navGraph
+        )
+    }
+
+    override fun navigateToHomeScreen() {
+        navController.navigate(direction = HomeScreenDestination within navGraph){
+            popUpTo(NavGraphs.rootWithOnBoarding){
+                inclusive = true
+            }
+        }
     }
 
 }
