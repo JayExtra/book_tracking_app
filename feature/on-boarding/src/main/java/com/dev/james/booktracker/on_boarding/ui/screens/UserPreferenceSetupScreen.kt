@@ -1,20 +1,33 @@
 package com.dev.james.booktracker.on_boarding.ui.screens
 
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.FabPosition
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -23,11 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dev.james.booktracker.compose_ui.ui.theme.Brown
+import com.dev.james.booktracker.compose_ui.ui.theme.BrownLight
+import com.dev.james.booktracker.compose_ui.ui.theme.GrayHue
 import com.dev.james.booktracker.compose_ui.ui.theme.Orange
-import com.dev.james.booktracker.on_boarding.ui.components.HorizontalStepsProgressBarPreview
-import com.dev.james.booktracker.on_boarding.ui.components.RoundedInputText
-import com.dev.james.booktracker.on_boarding.ui.components.StatefulRoundOutlineButton
-import com.dev.james.booktracker.on_boarding.ui.components.StepsProgressBar
+import com.dev.james.booktracker.on_boarding.ui.components.*
 import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNavigator
 import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupViewModel
 import com.dev.james.on_boarding.R
@@ -64,7 +76,8 @@ fun UserPreferenceSetupScreen(
                     .height(60.dp))
 
                 StepsProgressBar(
-                    Modifier.fillMaxWidth()
+                    Modifier
+                        .fillMaxWidth()
                         .padding(start = 60.dp) ,
                     numberOfSteps = 4 ,
                     currentStep = currentPosition /* will be updated by state*/
@@ -81,8 +94,12 @@ fun UserPreferenceSetupScreen(
                 // avatar selection section , material theme section etc
                 when(currentPosition){
                     0 ->  NameSection(text = "Some text" , onValueChanged = { })
-                    1 ->  AvatarGridSection()
-                    2 ->  GenreSelectionSection()
+                    1 ->  AvatarGridSection(){
+                            Toast.makeText(context, "avatar $it selected", Toast.LENGTH_SHORT).show()
+                        }
+                    2 ->  GenreSelectionSection(){
+                        Toast.makeText(context, "$it genre selected", Toast.LENGTH_SHORT).show()
+                    }
                     3 ->  ThemeSection()
                 }
 
@@ -225,7 +242,9 @@ fun BottomNextPreviousButtons(
                 visible = currentPosition > 0 ,
                 enter = fadeIn(animationSpec = tween(
                     durationMillis = 100 ,
-                    delayMillis = 10 ,
+                    delayMillis = 10
+
+                    ,
                     easing = FastOutSlowInEasing
                 )) ,
                 exit = fadeOut(animationSpec = tween(
@@ -236,7 +255,7 @@ fun BottomNextPreviousButtons(
             ) {
                 StatefulRoundOutlineButton(
                     text = "Previous",
-                    backgroundColor = Color.White ,
+                    backgroundColor = Color.Transparent,
                     outlineColor = Orange ,
                     textColor = Orange
                 ) {
@@ -249,7 +268,7 @@ fun BottomNextPreviousButtons(
 
             StatefulRoundOutlineButton(
                 text = if (currentPosition == 3) "Finish" else "Next",
-                backgroundColor = Color.White ,
+                backgroundColor = Color.Transparent ,
                 outlineColor = Orange ,
                 textColor = Orange
             ) {
@@ -264,16 +283,91 @@ fun BottomNextPreviousButtons(
 
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AvatarGridSection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier ,
+    avatarSelected : (Int) -> Unit
 ){
-   Box(
-       contentAlignment = Alignment.Center ,
+    var currentSelectedAvatar by remember {
+        mutableStateOf(0)
+    }
+    val avatarImageList = listOf(
+        R.drawable.dragon,
+        R.drawable.iron_man,
+        R.drawable.princess,
+        R.drawable.warrior,
+        R.drawable.knight,
+        R.drawable.super_mario,
+        R.drawable.king,
+        R.drawable.lego_head,
+        R.drawable.steampunk,
+    )
+   Column(
+       verticalArrangement = Arrangement.Center ,
+       horizontalAlignment = Alignment.CenterHorizontally,
        modifier = modifier.fillMaxWidth()
    ) {
-      Text(text = "2", fontSize = 32.sp , modifier = Modifier.padding(32.dp))
+       Spacer(modifier = modifier
+           .fillMaxWidth()
+           .height(60.dp))
+
+       Text(
+           text = "Please select your avatar" ,
+           style = MaterialTheme.typography.body1,
+           modifier = Modifier.padding(16.dp)
+       )
+       val cellConfiguration = if (LocalConfiguration.current.orientation == ORIENTATION_LANDSCAPE) {
+           GridCells.Adaptive(minSize = 175.dp)
+       } else GridCells.Fixed(3)
+
+      LazyVerticalGrid(
+          modifier  = Modifier.padding(32.dp),
+          columns = cellConfiguration ,
+          verticalArrangement = Arrangement.spacedBy(16.dp),
+          horizontalArrangement = Arrangement.spacedBy(16.dp)
+      ){
+          items(avatarImageList){
+                AvatarItem(
+                    image = it ,
+                    isSelected = currentSelectedAvatar == it
+                ){ avatarResource ->
+                    avatarSelected(avatarResource)
+                    currentSelectedAvatar = avatarResource
+                }
+          }
+      }
    }
+}
+
+@Composable
+fun AvatarItem(
+    image : Int ,
+    isSelected : Boolean = false ,
+    avatarSelected: (Int) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(90.dp)
+            .clip(shape = RoundedCornerShape(10.dp))
+            .border(
+                color = if (isSelected) Orange else Color.Transparent,
+                width = 2.dp,
+                shape = RoundedCornerShape(10.dp)
+            )
+            .background(Color.White)
+            .clickable {
+                avatarSelected(image)
+            }
+            ,
+        contentAlignment = Alignment.Center
+    ){
+        Image(
+            painter = painterResource(id = image) ,
+            contentDescription = "Avatar images",
+            contentScale = ContentScale.Crop ,
+        )
+    }
 }
 
 @Composable
@@ -288,14 +382,72 @@ fun ThemeSection(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GenreSelectionSection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier ,
+    genreSelected : (String) -> Unit
 ){
-    Box(
-        contentAlignment = Alignment.Center ,
-        modifier = modifier.fillMaxWidth()
+    val genreList = listOf(
+        "Crime" ,
+        "Fiction" ,
+        "Action and Adventure" ,
+        "Thriller" ,
+        "Horror" ,
+        "Drama" ,
+        "Romance" ,
+        "Sci-fi" ,
+        "Erotic" ,
+        "Legal" ,
+        "Scientific" ,
+        "Educational" ,
+        "Motivational" ,
+        "Fitness and Health" ,
+        "Sports" ,
+        "Film" ,
+        "Autobiography"
+    )
+    val selectedGenres =  remember { mutableStateListOf<String>() }
+
+    Column(
+        verticalArrangement = Arrangement.Center ,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "3", fontSize = 32.sp , modifier = Modifier.padding(32.dp))
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+        )
+        Text(
+            text = "Please select your favourite genres" ,
+            style = MaterialTheme.typography.body1,
+            modifier = Modifier.padding(16.dp)
+        )
+
+        val cellConfiguration = if (LocalConfiguration.current.orientation == ORIENTATION_LANDSCAPE) {
+            StaggeredGridCells.Adaptive(minSize = 175.dp)
+        } else StaggeredGridCells.Fixed(4)
+
+        LazyHorizontalStaggeredGrid(
+            modifier  = Modifier.padding( bottom = 100.dp , start = 16.dp  , top = 70.dp) ,
+            rows = cellConfiguration ,
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(genreList){genre ->
+                SelectableChip(chipIsSelected = {
+                    if(selectedGenres.contains(it)){
+                        selectedGenres.remove(it)
+                    }else {
+                        selectedGenres.add(it)
+                    }
+                    genreSelected(genre)
+
+                }, text = genre ,
+                    isChipSelected = selectedGenres.contains(genre)
+                )
+            }
+        }
+        
     }
 }

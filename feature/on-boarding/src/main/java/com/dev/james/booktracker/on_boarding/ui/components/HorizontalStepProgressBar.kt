@@ -45,7 +45,7 @@ fun Step(modifier: Modifier = Modifier, isCompete: Boolean, isCurrent: Boolean ,
         animationSpec = tween(
             delayMillis = 10 ,
             easing = FastOutLinearInEasing ,
-            durationMillis = 400
+            durationMillis = 100
         )
     )
     val innerCircleColor by animateColorAsState(
