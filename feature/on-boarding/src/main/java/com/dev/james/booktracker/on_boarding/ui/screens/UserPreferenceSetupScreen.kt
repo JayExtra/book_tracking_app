@@ -9,17 +9,17 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.FabPosition
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,10 +30,15 @@ import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
+import androidx.constraintlayout.compose.Dimension
+import androidx.constraintlayout.compose.HorizontalAnchorable
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dev.james.booktracker.compose_ui.ui.theme.Brown
 import com.dev.james.booktracker.compose_ui.ui.theme.BrownLight
@@ -41,6 +46,7 @@ import com.dev.james.booktracker.compose_ui.ui.theme.GrayHue
 import com.dev.james.booktracker.compose_ui.ui.theme.Orange
 import com.dev.james.booktracker.on_boarding.ui.components.*
 import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNavigator
+import com.dev.james.booktracker.on_boarding.ui.states.ThemeItem
 import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupViewModel
 import com.dev.james.on_boarding.R
 import com.ramcosta.composedestinations.annotation.Destination
@@ -100,7 +106,9 @@ fun UserPreferenceSetupScreen(
                     2 ->  GenreSelectionSection(){
                         Toast.makeText(context, "$it genre selected", Toast.LENGTH_SHORT).show()
                     }
-                    3 ->  ThemeSection()
+                    3 ->  ThemeSection {
+                        Toast.makeText(context, "$it theme selected", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
             }
@@ -372,14 +380,148 @@ fun AvatarItem(
 
 @Composable
 fun ThemeSection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier ,
+    onThemeSelected : (String) -> Unit
 ){
-    Box(
-        contentAlignment = Alignment.Center ,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Text(text = "4", fontSize = 32.sp , modifier = Modifier.padding(32.dp))
+    var themeCode by remember {
+        mutableStateOf(0)
     }
+   Column(
+       modifier = modifier.fillMaxWidth() ,
+       verticalArrangement = Arrangement.Center ,
+       horizontalAlignment = Alignment.CenterHorizontally
+   ){
+       Text(
+           text = "Please select your favourable theme" ,
+           style = MaterialTheme.typography.body1 ,
+           textAlign = TextAlign.Center
+       )
+
+       Spacer(modifier = Modifier
+           .height(16.dp)
+           .fillMaxWidth())
+
+       val themeList = listOf<ThemeItem>(
+           ThemeItem(
+               id = ThemeConstants.SYSTEM_DEFAULT ,
+               themeIcon = R.drawable.baseline_settings_24 ,
+               themeName = "System Default" ,
+               themeMessage = "Sticking with the status quo!"
+           ) ,
+           ThemeItem(
+               id = ThemeConstants.MATERIAL_YOU ,
+               themeIcon = R.drawable.outline_material_you ,
+               themeName = "Material you" ,
+               themeMessage = "Express yourself freely!"
+           ) ,
+           ThemeItem(
+               id = ThemeConstants.LIGHT_MODE ,
+               themeIcon = R.drawable.outline_light_mode_24 ,
+               themeName = "Light Mode" ,
+               themeMessage = "A little sun don't burn!"
+           ) ,
+           ThemeItem(
+               id = ThemeConstants.DARK_MODE ,
+               themeIcon = R.drawable.baseline_dark_mode_24 ,
+               themeName = "Dark Mode" ,
+               themeMessage = "In with the dark side!"
+           )
+       )
+
+       LazyColumn(
+           modifier = Modifier
+               .fillMaxWidth()
+               .padding(16.dp) ,
+           contentPadding = PaddingValues(bottom = 16.dp)
+
+       ){
+           items(themeList){ themeItem ->
+               ThemeCardItem(
+                   themeName = themeItem.themeName ,
+                   themeMessage = themeItem.themeMessage,
+                   themeIcon = themeItem.themeIcon ,
+                   isSelected = themeItem.id == themeCode
+               ) {
+                   themeCode = themeItem.id
+                   onThemeSelected(themeItem.themeName)
+               }
+           }
+       }
+
+
+   }
+}
+
+@Composable
+fun ThemeCardItem(
+    modifier: Modifier = Modifier ,
+    themeName : String ,
+    themeMessage : String  ,
+    themeIcon : Int ,
+    isSelected : Boolean = false ,
+    onThemeCardClick : () -> Unit
+){
+    Surface(
+        shape = RoundedCornerShape(10.dp) ,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(110.dp)
+            .padding(8.dp)
+            .clickable { onThemeCardClick() }
+    ) {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(shape = RoundedCornerShape(10.dp))
+                .background(
+                    color = if (isSelected) Orange else GrayHue
+                )
+
+        ) {
+            val (icon , title , body) = createRefs()
+            
+            Icon(
+                painter = painterResource(id = themeIcon),
+                contentDescription = "Theme type icon" , 
+                modifier = Modifier.constrainAs(
+                    icon
+                ){
+                    top.linkTo(anchor = parent.top , margin = 16.dp)
+                    start.linkTo(anchor = parent.start , margin = 16.dp)
+                } ,
+                tint = if(isSelected) Color.White else Color.Black
+            )
+
+            Text(
+                text = themeName ,
+                style = MaterialTheme.typography.h6 ,
+                modifier = Modifier.constrainAs(
+                    title
+                ){
+                    top.linkTo(icon.top)
+                    start.linkTo(icon.end , margin = 16.dp)
+                    bottom.linkTo(icon.bottom , margin = 4.dp)
+                    width = Dimension.fillToConstraints
+                },
+                color = if(isSelected) Color.White else MaterialTheme.colors.onPrimary
+            )
+
+            Text(
+                text = themeMessage ,
+                style = MaterialTheme.typography.body1 ,
+                modifier = Modifier.constrainAs(
+                    body
+                ){
+                    top.linkTo(title.bottom , margin = 8.dp)
+                    start.linkTo(title.start)
+                    width = Dimension.fillToConstraints
+                },
+                color = if(isSelected) Color.White else MaterialTheme.colors.onPrimary
+            )
+
+        }
+    }
+
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -450,4 +592,13 @@ fun GenreSelectionSection(
         }
         
     }
+}
+
+
+
+object ThemeConstants {
+    const val MATERIAL_YOU = 34753
+    const val SYSTEM_DEFAULT = 46293
+    const val LIGHT_MODE = 15679
+    const val DARK_MODE = 23453
 }
