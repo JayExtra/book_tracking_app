@@ -2,11 +2,9 @@ package com.dev.james.booktracker.on_boarding.ui.screens
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,6 +48,7 @@ import com.dev.james.booktracker.on_boarding.ui.states.ThemeItem
 import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupViewModel
 import com.dev.james.on_boarding.R
 import com.ramcosta.composedestinations.annotation.Destination
+import timber.log.Timber
 
 @Composable
 @Destination
@@ -62,7 +61,7 @@ fun UserPreferenceSetupScreen(
         mutableStateOf(0)
     }
     var previousPosition by remember {
-        mutableStateOf( currentPosition - 1)
+        mutableStateOf(0)
     }
     val context = LocalContext.current
 
@@ -90,26 +89,105 @@ fun UserPreferenceSetupScreen(
                 )
             }
 
-            Column(
-                modifier = Modifier.weight(0.5f) ,
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
+            Box(
+                modifier = Modifier.weight(0.8f) ,
+                contentAlignment = Alignment.TopCenter
             ) {
                 //depending on the position we are in , we will
                 // swap with different section i.e name section
                 // avatar selection section , material theme section etc
-                when(currentPosition){
-                    0 ->  NameSection(text = "Some text" , onValueChanged = { })
-                    1 ->  AvatarGridSection(){
-                            Toast.makeText(context, "avatar $it selected", Toast.LENGTH_SHORT).show()
-                        }
-                    2 ->  GenreSelectionSection(){
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = currentPosition == 0 ,
+                    enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }) ,
+                    exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it })
+                ) {
+                    NameSection(
+                        text = "Some text" , onValueChanged = { }
+                    )
+                }
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = currentPosition == 1 ,
+                    enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }) ,
+                    exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it })
+                ){
+                    AvatarGridSection(){
+                        Toast.makeText(context, "avatar $it selected", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = currentPosition == 2 ,
+                    enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }) ,
+                    exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it })
+                ){
+                    GenreSelectionSection(){
                         Toast.makeText(context, "$it genre selected", Toast.LENGTH_SHORT).show()
                     }
-                    3 ->  ThemeSection {
+                }
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = currentPosition == 3 ,
+                    enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }) ,
+                    exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it })
+                ){
+                    ThemeSection {
                         Toast.makeText(context, "$it theme selected", Toast.LENGTH_SHORT).show()
                     }
                 }
+
+
+               /* when(currentPosition){
+                    0 -> {
+                        AnimatedVisibility(
+                            visible = true ,
+                            enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }) ,
+                            exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it })
+                        ) {
+                            NameSection(text = "Some text" , onValueChanged = { })
+                        }
+                        Timber.d("current position $currentPosition previous position $previousPosition")
+                    }
+                    1 -> {
+                        AnimatedVisibility(
+                            visible = true ,
+                            enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }) ,
+                            exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it })
+                        ){
+                            AvatarGridSection(){
+                                Toast.makeText(context, "avatar $it selected", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        Timber.d("current position $currentPosition previous position $previousPosition")
+                    }
+                    2 -> {
+                        AnimatedVisibility(
+                            visible = true ,
+                            enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }) ,
+                            exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it })
+                        ){
+                            GenreSelectionSection(){
+                                Toast.makeText(context, "$it genre selected", Toast.LENGTH_SHORT).show()
+
+                            }
+                        }
+                        Timber.d("current position $currentPosition previous position $previousPosition")
+                    }
+                    3 -> {
+                        AnimatedVisibility(
+                            visible = true ,
+                            enter = fadeIn() + slideInHorizontally(initialOffsetX = { it }) ,
+                            exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it })
+                        ){
+                            ThemeSection {
+                                Toast.makeText(context, "$it theme selected", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        Timber.d("current position $currentPosition previous position $previousPosition")
+                    }
+                }*/
 
             }
 
@@ -121,6 +199,7 @@ fun UserPreferenceSetupScreen(
                     /* update the current position we are in during on boarding*/
                     if(currentPosition < 3){
                         currentPosition += 1
+                        previousPosition = currentPosition - 1
                     }else {
                         //navigate to home screen
                         Toast.makeText(
@@ -135,6 +214,7 @@ fun UserPreferenceSetupScreen(
                     /* update the current position we are in during on boarding*/
                     if(currentPosition > 0){
                         currentPosition -= 1
+                        previousPosition = currentPosition - 1
                     }else {
                         Toast.makeText(
                             context ,
@@ -171,12 +251,12 @@ fun UserPreferenceSetupScreenPreview(){
                 .height(60.dp))
             HorizontalStepsProgressBarPreview()
         }
-        
-        Column(
-            modifier = Modifier.weight(0.5f) ,
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+
+
+        Box(
+            modifier = Modifier.weight(0.8f) ,
+            contentAlignment = Alignment.TopCenter
+        ){
             //depending on the position we are in , we will
             // swap with different section i.e name section
             // avatar selection section , material theme section etc
@@ -391,15 +471,16 @@ fun ThemeSection(
        verticalArrangement = Arrangement.Center ,
        horizontalAlignment = Alignment.CenterHorizontally
    ){
+
+       Spacer(modifier = Modifier
+           .height(60.dp)
+           .fillMaxWidth())
+
        Text(
            text = "Please select your favourable theme" ,
            style = MaterialTheme.typography.body1 ,
            textAlign = TextAlign.Center
        )
-
-       Spacer(modifier = Modifier
-           .height(16.dp)
-           .fillMaxWidth())
 
        val themeList = listOf<ThemeItem>(
            ThemeItem(
@@ -427,11 +508,10 @@ fun ThemeSection(
                themeMessage = "In with the dark side!"
            )
        )
-
        LazyColumn(
            modifier = Modifier
                .fillMaxWidth()
-               .padding(16.dp) ,
+               .padding(start = 16.dp , end = 16.dp , top = 32.dp) ,
            contentPadding = PaddingValues(bottom = 16.dp)
 
        ){
@@ -602,3 +682,5 @@ object ThemeConstants {
     const val LIGHT_MODE = 15679
     const val DARK_MODE = 23453
 }
+
+
