@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -61,6 +59,8 @@ fun UserPreferenceSetupScreen(
     val context = LocalContext.current
 
     val screenState = userPreferenceSetupViewModel.prefScreenState.collectAsStateWithLifecycle()
+
+
 
     Column(
         modifier = Modifier.fillMaxSize() ,
@@ -133,8 +133,14 @@ fun UserPreferenceSetupScreen(
                     enter = fadeIn() + slideInHorizontally  { if (currentPosition > previousPosition) it else -it },
                     exit = fadeOut() + slideOutHorizontally { if (currentPosition > previousPosition) -it else it }
                 ){
-                    GenreSelectionSection(){
-                        Toast.makeText(context, "$it genre selected", Toast.LENGTH_SHORT).show()
+                    GenreSelectionSection(
+                       selectedGenres =  screenState.value.genreList
+                    ){ genre ->
+                        //Toast.makeText(context, "$it genre selected", Toast.LENGTH_SHORT).show()
+                        userPreferenceSetupViewModel.setUserPreference(
+                            UserPreferenceSetupViewModel.UserPreferenceSetupActions
+                               .AddSelectedGenre(genre = genre)
+                        )
                     }
                 }
 
@@ -581,7 +587,8 @@ fun ThemeCardItem(
 @Composable
 fun GenreSelectionSection(
     modifier: Modifier = Modifier ,
-    genreSelected : (String) -> Unit
+    selectedGenres: List<String>,
+    genreSelected: (String) -> Unit
 ){
     val genreList = listOf(
         "Crime" ,
@@ -602,7 +609,6 @@ fun GenreSelectionSection(
         "Film" ,
         "Autobiography"
     )
-    val selectedGenres =  remember { mutableStateListOf<String>() }
 
     Column(
         verticalArrangement = Arrangement.Center ,
@@ -623,7 +629,7 @@ fun GenreSelectionSection(
         } else StaggeredGridCells.Fixed(4)
 
         LazyHorizontalStaggeredGrid(
-            modifier  = Modifier.padding( bottom = 100.dp , start = 16.dp  , top = 70.dp) ,
+           // modifier  = Modifier.padding( bottom = 100.dp , start = 16.dp  , top = 70.dp) ,
             rows = cellConfiguration ,
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -631,11 +637,6 @@ fun GenreSelectionSection(
         ) {
             items(genreList){genre ->
                 SelectableChip(chipIsSelected = {
-                    if(selectedGenres.contains(it)){
-                        selectedGenres.remove(it)
-                    }else {
-                        selectedGenres.add(it)
-                    }
                     genreSelected(genre)
                 }, text = genre ,
                     isChipSelected = selectedGenres.contains(genre)

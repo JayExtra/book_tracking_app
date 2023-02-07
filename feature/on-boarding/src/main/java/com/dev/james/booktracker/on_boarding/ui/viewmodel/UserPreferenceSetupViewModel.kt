@@ -1,13 +1,11 @@
 package com.dev.james.booktracker.on_boarding.ui.viewmodel
 
-import android.hardware.biometrics.BiometricManager.Strings
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import com.dev.james.booktracker.on_boarding.ui.screens.ThemeConstants
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.buffer
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,6 +15,10 @@ class UserPreferenceSetupViewModel @Inject constructor() : ViewModel() {
         UserPrefScreenState()
     )
     val prefScreenState get() = _prefScreenState.asStateFlow()
+
+    var selectedGenresList = mutableStateListOf<String>()
+
+
 
     fun setUserPreference(userPreferenceSetupActions: UserPreferenceSetupActions) {
         when (userPreferenceSetupActions) {
@@ -40,10 +42,20 @@ class UserPreferenceSetupViewModel @Inject constructor() : ViewModel() {
                 )
             }
 
-            is UserPreferenceSetupActions.AddGenresList -> {
-                _prefScreenState.value = _prefScreenState.value.copy(
-                    genreList = userPreferenceSetupActions.genreList
-                )
+            is UserPreferenceSetupActions.AddSelectedGenre -> {
+                val selectedGenre = userPreferenceSetupActions.genre
+                if(selectedGenresList.contains(userPreferenceSetupActions.genre)){
+                    selectedGenresList.remove(selectedGenre)
+                    _prefScreenState.value = _prefScreenState.value.copy(
+                        genreList = selectedGenresList.toList()
+                    )
+                }else{
+                    selectedGenresList.add(selectedGenre)
+                    _prefScreenState.value = _prefScreenState.value.copy(
+                        genreList = selectedGenresList.toList()
+                    )
+                }
+
             }
 
             is UserPreferenceSetupActions.SelectTheme -> {
@@ -58,7 +70,7 @@ class UserPreferenceSetupViewModel @Inject constructor() : ViewModel() {
     sealed class UserPreferenceSetupActions {
         data class UpdateUserName(val name: String) : UserPreferenceSetupActions()
         data class SelectAvatar(val avatar: Int) : UserPreferenceSetupActions()
-        data class AddGenresList(val genreList: List<String>) : UserPreferenceSetupActions()
+        data class AddSelectedGenre(val genre : String) : UserPreferenceSetupActions()
         data class SelectTheme(val theme : Int) : UserPreferenceSetupActions()
 
 
