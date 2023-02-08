@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.on_boarding.ui.screens
 
+import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.widget.Toast
 import androidx.compose.animation.*
@@ -53,15 +54,18 @@ fun UserPreferenceSetupScreen(
     userPreferenceSetupViewModel: UserPreferenceSetupViewModel = hiltViewModel()
 ) {
 
-    var currentPosition by rememberSaveable {
+    /*var currentPosition by rememberSaveable {
         mutableStateOf(0)
     }
     var previousPosition by rememberSaveable {
         mutableStateOf(0)
-    }
+    }*/
     val context = LocalContext.current
 
     val screenState = userPreferenceSetupViewModel.prefScreenState.collectAsStateWithLifecycle()
+
+    var currentPosition = screenState.value.currentPosition
+    var previousPosition = screenState.value.previousPosition
 
 
 
@@ -87,7 +91,7 @@ fun UserPreferenceSetupScreen(
                     .fillMaxWidth()
                     .padding(start = 60.dp),
                 numberOfSteps = 4,
-                currentStep = currentPosition /* will be updated by state*/
+                currentStep = screenState.value.currentPosition /* will be updated by state*/
             )
         }
 
@@ -123,7 +127,8 @@ fun UserPreferenceSetupScreen(
                 exit = fadeOut() + slideOutHorizontally { if (currentPosition > previousPosition) -it else it }
             ) {
                 AvatarGridSection(
-                    currentSelectedAvatar = screenState.value.currentSelectedAvatar
+                    currentSelectedAvatar = screenState.value.currentSelectedAvatar ,
+                    errorMessage = screenState.value.avatarSelectionError
                 ) { avatarId ->
                     /*Toast.makeText(context, "avatar $avatarId selected", Toast.LENGTH_SHORT).show()*/
                     userPreferenceSetupViewModel.setUserPreference(
@@ -139,7 +144,7 @@ fun UserPreferenceSetupScreen(
                 exit = fadeOut() + slideOutHorizontally { if (currentPosition > previousPosition) -it else it }
             ) {
                 GenreSelectionSection(
-                    selectedGenres = screenState.value.genreList ,
+                    selectedGenres = screenState.value.genreList,
                     chipSelectionError = screenState.value.chipSelectionError
                 ) { genre ->
                     //Toast.makeText(context, "$it genre selected", Toast.LENGTH_SHORT).show()
@@ -173,22 +178,34 @@ fun UserPreferenceSetupScreen(
                 .padding(16.dp),
             onNextClicked = {
                 /* update the current position we are in during on boarding*/
-                if (currentPosition < 3) {
+               /* if (currentPosition < 3) {
                     previousPosition = currentPosition
                     currentPosition += 1
                 } else {
-                    //navigate to home screen
-                    Toast.makeText(
-                        context,
-                        "Reached the end of the process",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    //save user data and navigate to home screen
+                    userPreferenceSetupViewModel.setUserPreference(
+                        UserPreferenceSetupViewModel
+                            .UserPreferenceSetupActions.SavePreferenceData
+                    )
+                }*/
+                userPreferenceSetupViewModel.setUserPreference(
+                    UserPreferenceSetupViewModel
+                        .UserPreferenceSetupActions.MoveNext(
+                            screenState.value.currentPosition
+                        )
+                )
+
+                if(currentPosition == 3){
+                    userPreferenceSetupViewModel.setUserPreference(
+                        UserPreferenceSetupViewModel
+                            .UserPreferenceSetupActions.SavePreferenceData
+                    )
                 }
 
             },
             onPreviousClicked = {
                 /* update the current position we are in during on boarding*/
-                if (currentPosition > 0) {
+              /*  if (currentPosition > 0) {
                     previousPosition = currentPosition
                     currentPosition -= 1
                 } else {
@@ -197,7 +214,13 @@ fun UserPreferenceSetupScreen(
                         "Back at the beggining",
                         Toast.LENGTH_SHORT
                     ).show()
-                }
+                }*/
+                userPreferenceSetupViewModel.setUserPreference(
+                   UserPreferenceSetupViewModel
+                       .UserPreferenceSetupActions.MovePrevious(
+                           screenState.value.currentPosition
+                       )
+                )
             },
             previousPosition = previousPosition,
             currentPosition = currentPosition
@@ -238,12 +261,12 @@ fun UserPreferenceSetupScreenPreview() {
             //depending on the position we are in , we will
             // swap with different section i.e name section
             // avatar selection section , material theme section etc
-           /* NameSection(text = "Some text", onValueChanged = { })*/
+            /* NameSection(text = "Some text", onValueChanged = { })*/
             GenreSelectionSection(
-                selectedGenres = listOf() ,
+                selectedGenres = listOf(),
                 genreSelected = {
 
-                } ,
+                },
                 chipSelectionError = "Some error message"
             )
         }
@@ -284,9 +307,10 @@ fun NameSection(
             style = MaterialTheme.typography.body1
         )
 
-        RoundedInputText(modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 32.dp, end = 32.dp, top = 32.dp),
+        RoundedInputText(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(start = 32.dp, end = 32.dp, top = 32.dp),
             onValueChanged = {
                 onValueChanged(it)
             },
@@ -296,9 +320,11 @@ fun NameSection(
         )
 
         if (errorMessage != null) {
-            Spacer(modifier = modifier
-                .fillMaxWidth()
-                .height(16.dp))
+            Spacer(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(16.dp)
+            )
             Text(
                 text = errorMessage,
                 style = MaterialTheme.typography.body1,
@@ -380,6 +406,7 @@ fun BottomNextPreviousButtons(
 fun AvatarGridSection(
     modifier: Modifier = Modifier,
     currentSelectedAvatar: Int = 0,
+    errorMessage : String?,
     avatarSelected: (Int) -> Unit,
 ) {
     val avatarImageList = listOf(
@@ -409,6 +436,15 @@ fun AvatarGridSection(
             style = MaterialTheme.typography.body1,
             modifier = Modifier.padding(16.dp)
         )
+
+        if(errorMessage != null){
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.body1,
+                modifier = Modifier.padding(4.dp) ,
+                color = MaterialTheme.colors.error
+            )
+        }
         val cellConfiguration =
             if (LocalConfiguration.current.orientation == ORIENTATION_LANDSCAPE) {
                 GridCells.Adaptive(minSize = 175.dp)
@@ -465,8 +501,8 @@ fun AvatarItem(
 fun ThemeSection(
     modifier: Modifier = Modifier,
     selectedTheme: Int = 0,
+    context : Context = LocalContext.current ,
     onThemeSelected: (Int) -> Unit
-
 ) {
 
     Column(
@@ -531,7 +567,6 @@ fun ThemeSection(
                 }
             }
         }
-
 
     }
 }
@@ -614,7 +649,7 @@ fun ThemeCardItem(
 fun GenreSelectionSection(
     modifier: Modifier = Modifier,
     selectedGenres: List<String>,
-    chipSelectionError : String?,
+    chipSelectionError: String?,
     genreSelected: (String) -> Unit
 ) {
     val genreList = listOf(
@@ -651,12 +686,13 @@ fun GenreSelectionSection(
             style = MaterialTheme.typography.body1,
             modifier = Modifier.padding(8.dp)
         )
-        if(chipSelectionError != null){
+        if (chipSelectionError != null) {
             Text(
                 text = chipSelectionError,
                 style = MaterialTheme.typography.body1,
-                modifier = Modifier.padding(4.dp) ,
-                color = MaterialTheme.colors.error
+                modifier = Modifier.padding(top = 4.dp , bottom = 4.dp , start = 16.dp , end = 16.dp),
+                color = MaterialTheme.colors.error ,
+                textAlign = TextAlign.Center
             )
         }
 
@@ -665,10 +701,10 @@ fun GenreSelectionSection(
                 StaggeredGridCells.Adaptive(minSize = 100.dp)
             } else StaggeredGridCells.Fixed(4)
         val paddingValues =
-            if(LocalConfiguration.current.orientation == ORIENTATION_LANDSCAPE){
-                PaddingValues(start = 8.dp , end = 8.dp , bottom = 60.dp , top = 16.dp)
-            }else {
-                PaddingValues(start = 16.dp , bottom = 250.dp , top = 24.dp )
+            if (LocalConfiguration.current.orientation == ORIENTATION_LANDSCAPE) {
+                PaddingValues(start = 8.dp, end = 8.dp, bottom = 60.dp, top = 16.dp)
+            } else {
+                PaddingValues(start = 16.dp, bottom = 250.dp, top = 24.dp)
             }
 
         LazyHorizontalStaggeredGrid(
