@@ -47,13 +47,23 @@ class UserPreferenceSetupViewModel @Inject constructor() : ViewModel() {
                 if(selectedGenresList.contains(userPreferenceSetupActions.genre)){
                     selectedGenresList.remove(selectedGenre)
                     _prefScreenState.value = _prefScreenState.value.copy(
-                        genreList = selectedGenresList.toList()
+                        genreList = selectedGenresList.toList() ,
+                        chipSelectionError = null
                     )
-                }else{
-                    selectedGenresList.add(selectedGenre)
-                    _prefScreenState.value = _prefScreenState.value.copy(
-                        genreList = selectedGenresList.toList()
-                    )
+                }else {
+                    if (selectedGenresList.size != 5) {
+                        selectedGenresList.add(selectedGenre)
+                        _prefScreenState.value = _prefScreenState.value.copy(
+                            genreList = selectedGenresList.toList() ,
+                            chipSelectionError = null
+                        )
+                    } else {
+                        _prefScreenState.value = _prefScreenState.value.copy(
+                            genreList = selectedGenresList.toList() ,
+                            chipSelectionError = "You are only allowed a selection of 5 genres."
+                        )
+                    }
+
                 }
 
             }
@@ -84,5 +94,8 @@ data class UserPrefScreenState(
     val currentSelectedAvatar: Int = 0,
     val genreList: List<String> = emptyList(),
     val currentSelectedTheme: Int = ThemeConstants.SYSTEM_DEFAULT,
-    val userNameFieldError: String? = null
+    val userNameFieldError : String? = null ,
+    val chipSelectionError : String? = null ,
+    val avatarSelectionError : String? = null ,
+    val allSelectionError : String? = null
 )

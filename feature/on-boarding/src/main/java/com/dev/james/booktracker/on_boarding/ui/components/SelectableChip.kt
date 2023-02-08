@@ -38,6 +38,7 @@ fun SelectableChip(
                 color = Orange,
                 shape = RoundedCornerShape(25.dp)
             )
+           // .padding(8.dp)
             .width(intrinsicSize = IntrinsicSize.Max)
             .background(color = if (isChipSelected) Orange else Color.Transparent)
             .clickable {
@@ -50,7 +51,7 @@ fun SelectableChip(
             text = text.lowercase(),
             style = BookAppTypography.body1,
             color = if (isChipSelected) Color.White else Orange ,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(10.dp)
         )
 
         if (isChipSelected){
