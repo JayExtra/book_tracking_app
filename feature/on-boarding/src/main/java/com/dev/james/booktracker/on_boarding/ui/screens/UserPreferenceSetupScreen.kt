@@ -2,12 +2,10 @@ package com.dev.james.booktracker.on_boarding.ui.screens
 
 import android.content.Context
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,7 +19,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,12 +37,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.theme.GrayHue
 import com.dev.james.booktracker.compose_ui.ui.theme.Orange
+import com.dev.james.booktracker.core.ThemeConstants
 import com.dev.james.booktracker.on_boarding.ui.components.*
 import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNavigator
 import com.dev.james.booktracker.on_boarding.ui.states.ThemeItem
 import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupViewModel
 import com.dev.james.on_boarding.R
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 @Destination
@@ -54,18 +53,22 @@ fun UserPreferenceSetupScreen(
     userPreferenceSetupViewModel: UserPreferenceSetupViewModel = hiltViewModel()
 ) {
 
-    /*var currentPosition by rememberSaveable {
-        mutableStateOf(0)
-    }
-    var previousPosition by rememberSaveable {
-        mutableStateOf(0)
-    }*/
     val context = LocalContext.current
 
     val screenState = userPreferenceSetupViewModel.prefScreenState.collectAsStateWithLifecycle()
+    val currentPosition = screenState.value.currentPosition
+    val previousPosition = screenState.value.previousPosition
 
-    var currentPosition = screenState.value.currentPosition
-    var previousPosition = screenState.value.previousPosition
+    LaunchedEffect(key1 = Unit){
+        userPreferenceSetupViewModel.prefScreenUiEvents
+            .collectLatest { event ->
+                when(event){
+                    is UserPreferenceSetupViewModel.UserPreferenceSetupUiEvents.NavigateToHomeScreen -> {
+                        userSetupScreenNavigator.navigateToHomeScreen()
+                    }
+                }
+            }
+    }
 
 
 
@@ -113,8 +116,8 @@ fun UserPreferenceSetupScreen(
                     text = screenState.value.userName, onValueChanged = { name ->
                         //call text update from viewmodel
                         userPreferenceSetupViewModel.setUserPreference(
-                            UserPreferenceSetupViewModel.UserPreferenceSetupActions
-                                .UpdateUserName(name = name)
+                            UserPreferenceSetupViewModel.UserPreferenceSetupUiActions
+                                .UpdateUserNameUi(name = name)
                         )
                     },
                     errorMessage = screenState.value.userNameFieldError
@@ -132,7 +135,7 @@ fun UserPreferenceSetupScreen(
                 ) { avatarId ->
                     /*Toast.makeText(context, "avatar $avatarId selected", Toast.LENGTH_SHORT).show()*/
                     userPreferenceSetupViewModel.setUserPreference(
-                        UserPreferenceSetupViewModel.UserPreferenceSetupActions
+                        UserPreferenceSetupViewModel.UserPreferenceSetupUiActions
                             .SelectAvatar(avatar = avatarId)
                     )
                 }
@@ -149,7 +152,7 @@ fun UserPreferenceSetupScreen(
                 ) { genre ->
                     //Toast.makeText(context, "$it genre selected", Toast.LENGTH_SHORT).show()
                     userPreferenceSetupViewModel.setUserPreference(
-                        UserPreferenceSetupViewModel.UserPreferenceSetupActions
+                        UserPreferenceSetupViewModel.UserPreferenceSetupUiActions
                             .AddSelectedGenre(genre = genre)
                     )
                 }
@@ -165,7 +168,7 @@ fun UserPreferenceSetupScreen(
                 ) { themeId ->
                     /* Toast.makeText(context, "$it theme selected", Toast.LENGTH_SHORT).show()*/
                     userPreferenceSetupViewModel.setUserPreference(
-                        UserPreferenceSetupViewModel.UserPreferenceSetupActions
+                        UserPreferenceSetupViewModel.UserPreferenceSetupUiActions
                             .SelectTheme(theme = themeId)
                     )
                 }
@@ -190,7 +193,7 @@ fun UserPreferenceSetupScreen(
                 }*/
                 userPreferenceSetupViewModel.setUserPreference(
                     UserPreferenceSetupViewModel
-                        .UserPreferenceSetupActions.MoveNext(
+                        .UserPreferenceSetupUiActions.MoveNext(
                             screenState.value.currentPosition
                         )
                 )
@@ -198,7 +201,7 @@ fun UserPreferenceSetupScreen(
                 if(currentPosition == 3){
                     userPreferenceSetupViewModel.setUserPreference(
                         UserPreferenceSetupViewModel
-                            .UserPreferenceSetupActions.SavePreferenceData
+                            .UserPreferenceSetupUiActions.SavePreferenceDataUi
                     )
                 }
 
@@ -217,7 +220,7 @@ fun UserPreferenceSetupScreen(
                 }*/
                 userPreferenceSetupViewModel.setUserPreference(
                    UserPreferenceSetupViewModel
-                       .UserPreferenceSetupActions.MovePrevious(
+                       .UserPreferenceSetupUiActions.MovePrevious(
                            screenState.value.currentPosition
                        )
                 )
@@ -727,13 +730,6 @@ fun GenreSelectionSection(
     }
 }
 
-
-object ThemeConstants {
-    const val MATERIAL_YOU = 34753
-    const val SYSTEM_DEFAULT = 46293
-    const val LIGHT_MODE = 15679
-    const val DARK_MODE = 23453
-}
 
 
 

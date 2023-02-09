@@ -1,53 +1,62 @@
 package com.dev.james.booktracker.on_boarding.ui.viewmodel
 
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-import com.dev.james.booktracker.on_boarding.ui.screens.ThemeConstants
+import androidx.lifecycle.viewModelScope
+import com.dev.james.booktracker.core.ThemeConstants
+import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
+import com.dev.james.booktracker.on_boarding.domain.models.UserDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class UserPreferenceSetupViewModel @Inject constructor() : ViewModel() {
+class UserPreferenceSetupViewModel @Inject constructor(
+    private val onBoardingRepository: OnBoardingRepository
+) : ViewModel() {
 
     private var _prefScreenState: MutableStateFlow<UserPrefScreenState> = MutableStateFlow(
         UserPrefScreenState()
     )
     val prefScreenState get() = _prefScreenState.asStateFlow()
 
-    var selectedGenresList = mutableStateListOf<String>()
+    private var selectedGenresList = mutableStateListOf<String>()
+
+    private var _uiEvents : Channel<UserPreferenceSetupUiEvents> = Channel()
+    val prefScreenUiEvents get() = _uiEvents.receiveAsFlow()
 
 
 
-    fun setUserPreference(userPreferenceSetupActions: UserPreferenceSetupActions) {
-        when (userPreferenceSetupActions) {
-            is UserPreferenceSetupActions.UpdateUserName -> {
-                if (userPreferenceSetupActions.name.isBlank()) {
+    fun setUserPreference(userPreferenceSetupUiActions: UserPreferenceSetupUiActions) {
+        when (userPreferenceSetupUiActions) {
+            is UserPreferenceSetupUiActions.UpdateUserNameUi -> {
+                if (userPreferenceSetupUiActions.name.isBlank()) {
                     _prefScreenState.value = _prefScreenState.value.copy(
                         userName = "",
                         userNameFieldError = "Username should not be empty"
                     )
                 } else {
                     _prefScreenState.value = _prefScreenState.value.copy(
-                        userName = userPreferenceSetupActions.name,
+                        userName = userPreferenceSetupUiActions.name,
                         userNameFieldError = null
                     )
                 }
 
             }
-            is UserPreferenceSetupActions.SelectAvatar -> {
+            is UserPreferenceSetupUiActions.SelectAvatar -> {
                 _prefScreenState.value = _prefScreenState.value.copy(
-                    currentSelectedAvatar = userPreferenceSetupActions.avatar ,
+                    currentSelectedAvatar = userPreferenceSetupUiActions.avatar ,
                     avatarSelectionError = null
                 )
             }
 
-            is UserPreferenceSetupActions.AddSelectedGenre -> {
-                val selectedGenre = userPreferenceSetupActions.genre
-                if(selectedGenresList.contains(userPreferenceSetupActions.genre)){
+            is UserPreferenceSetupUiActions.AddSelectedGenre -> {
+                val selectedGenre = userPreferenceSetupUiActions.genre
+                if(selectedGenresList.contains(userPreferenceSetupUiActions.genre)){
                     selectedGenresList.remove(selectedGenre)
                     _prefScreenState.value = _prefScreenState.value.copy(
                         genreList = selectedGenresList.toList() ,
@@ -71,13 +80,13 @@ class UserPreferenceSetupViewModel @Inject constructor() : ViewModel() {
 
             }
 
-            is UserPreferenceSetupActions.SelectTheme -> {
+            is UserPreferenceSetupUiActions.SelectTheme -> {
                 _prefScreenState.value = _prefScreenState.value.copy(
-                    currentSelectedTheme = userPreferenceSetupActions.theme
+                    currentSelectedTheme = userPreferenceSetupUiActions.theme
                 )
             }
 
-            is UserPreferenceSetupActions.SavePreferenceData -> {
+            is UserPreferenceSetupUiActions.SavePreferenceDataUi -> {
                 if(_prefScreenState.value.userName.isBlank()){
                     _prefScreenState.value = _prefScreenState.value.copy(
                         userName = "",
@@ -102,10 +111,24 @@ class UserPreferenceSetupViewModel @Inject constructor() : ViewModel() {
                     return
                 }
                 Timber.d("Saving user data to database")
+                viewModelScope.launch {
+                    onBoardingRepository.saveUserDetails(
+                        UserDetails(
+                            username = _prefScreenState.value.userName ,
+                            favouriteGenres = _prefScreenState.value.genreList ,
+                            selectedAvatar = _prefScreenState.value.currentSelectedAvatar
+                        )
+                    )
+                    onBoardingRepository.updateOnBoardingStatus(status = true)
+                    onBoardingRepository.saveCurrentTheme(
+                        currentTheme = _prefScreenState.value.currentSelectedTheme
+                    )
+                    _uiEvents.send(UserPreferenceSetupUiEvents.NavigateToHomeScreen)
+                }
             }
 
-            is UserPreferenceSetupActions.MoveNext -> {
-                val currentPosition = userPreferenceSetupActions.currentPos
+            is UserPreferenceSetupUiActions.MoveNext -> {
+                val currentPosition = userPreferenceSetupUiActions.currentPos
                 if (currentPosition < 3) {
                     _prefScreenState.value = _prefScreenState.value.copy(
                         previousPosition = currentPosition ,
@@ -114,8 +137,8 @@ class UserPreferenceSetupViewModel @Inject constructor() : ViewModel() {
                 }
             }
 
-            is UserPreferenceSetupActions.MovePrevious -> {
-                val currentPosition = userPreferenceSetupActions.currentPos
+            is UserPreferenceSetupUiActions.MovePrevious -> {
+                val currentPosition = userPreferenceSetupUiActions.currentPos
                 if (currentPosition > 0) {
                     _prefScreenState.value = _prefScreenState.value.copy(
                         previousPosition = currentPosition ,
@@ -127,17 +150,19 @@ class UserPreferenceSetupViewModel @Inject constructor() : ViewModel() {
     }
 
 
-    sealed class UserPreferenceSetupActions {
-        data class UpdateUserName(val name: String) : UserPreferenceSetupActions()
-        data class SelectAvatar(val avatar: Int) : UserPreferenceSetupActions()
-        data class AddSelectedGenre(val genre : String) : UserPreferenceSetupActions()
-        data class SelectTheme(val theme : Int) : UserPreferenceSetupActions()
-        object SavePreferenceData : UserPreferenceSetupActions()
-        data class MoveNext(val currentPos : Int) : UserPreferenceSetupActions()
-        data class MovePrevious(val currentPos : Int) : UserPreferenceSetupActions()
+    sealed class UserPreferenceSetupUiActions {
+        data class UpdateUserNameUi(val name: String) : UserPreferenceSetupUiActions()
+        data class SelectAvatar(val avatar: Int) : UserPreferenceSetupUiActions()
+        data class AddSelectedGenre(val genre : String) : UserPreferenceSetupUiActions()
+        data class SelectTheme(val theme : Int) : UserPreferenceSetupUiActions()
+        object SavePreferenceDataUi : UserPreferenceSetupUiActions()
+        data class MoveNext(val currentPos : Int) : UserPreferenceSetupUiActions()
+        data class MovePrevious(val currentPos : Int) : UserPreferenceSetupUiActions()
 
+    }
 
-
+    sealed class UserPreferenceSetupUiEvents {
+        object NavigateToHomeScreen : UserPreferenceSetupUiEvents()
     }
 
 }
@@ -148,9 +173,9 @@ data class UserPrefScreenState(
     val currentSelectedAvatar: Int = 0,
     val genreList: List<String> = emptyList(),
     val currentSelectedTheme: Int = ThemeConstants.SYSTEM_DEFAULT,
-    val userNameFieldError : String? = null ,
-    val chipSelectionError : String? = null ,
-    val avatarSelectionError : String? = null ,
-    val currentPosition : Int = 0 ,
+    val userNameFieldError : String? = null,
+    val chipSelectionError : String? = null,
+    val avatarSelectionError : String? = null,
+    val currentPosition : Int = 0,
     val previousPosition : Int = 0
 )
