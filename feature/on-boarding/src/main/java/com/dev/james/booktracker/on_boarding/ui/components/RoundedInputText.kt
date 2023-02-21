@@ -9,7 +9,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,7 +21,8 @@ fun RoundedInputText(
     modifier: Modifier = Modifier,
     onValueChanged: (String) -> Unit,
     @DrawableRes icon: Int,
-    text: String
+    text: String,
+    isErrorEnabled : Boolean = false,
 ){
 
     TextField(
@@ -54,6 +54,8 @@ fun RoundedInputText(
             errorLabelColor = ErrorColor ,
             errorCursorColor = ErrorColor
         ) ,
+        isError = isErrorEnabled
+
     )
 
 }
