@@ -59,7 +59,7 @@ fun UserPreferenceSetupScreen(
     val currentPosition = screenState.value.currentPosition
     val previousPosition = screenState.value.previousPosition
 
-    LaunchedEffect(key1 = Unit){
+    LaunchedEffect(key1 = true){
         userPreferenceSetupViewModel.prefScreenUiEvents
             .collectLatest { event ->
                 when(event){
