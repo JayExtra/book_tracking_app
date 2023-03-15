@@ -12,4 +12,6 @@ interface DataStoreManager {
     suspend fun storeIntValue(key : Preferences.Key<Int> , value : Int)
     suspend fun readIntValueOnce(key : Preferences.Key<Int> ) : Int
     fun readIntValueAsFlow(key: Preferences.Key<Int>) : Flow<Int>
+
+    fun getSelectedThemeStream(key : Preferences.Key<Int>) : Flow<Int>
 }

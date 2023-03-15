@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.theme.*
 import com.dev.james.on_boarding.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoundedInputText(
     modifier: Modifier = Modifier,
@@ -34,12 +36,12 @@ fun RoundedInputText(
         onValueChange = {
             onValueChanged(it)
         } ,
-        textStyle = MaterialTheme.typography.body1 ,
+        textStyle = MaterialTheme.typography.bodyMedium ,
         leadingIcon = {
             Icon(
                 painter = painterResource(id = icon),
                 contentDescription = "User icon" ,
-                tint = BrownLight
+                tint = MaterialTheme.colorScheme.onPrimary
             )
         } ,
         keyboardOptions = KeyboardOptions(
@@ -48,11 +50,13 @@ fun RoundedInputText(
         singleLine = true ,
         colors = TextFieldDefaults.textFieldColors(
             unfocusedIndicatorColor = GrayHue ,
-            focusedIndicatorColor = GrayHue ,
-            cursorColor = Orange ,
-            errorIndicatorColor = ErrorColor ,
-            errorLabelColor = ErrorColor ,
-            errorCursorColor = ErrorColor
+            focusedIndicatorColor = MaterialTheme.colorScheme.onPrimary ,
+            cursorColor = MaterialTheme.colorScheme.onPrimary ,
+            errorIndicatorColor = ErrorColor49 ,
+            errorLabelColor = ErrorColor49 ,
+            errorCursorColor = ErrorColor49 ,
+            containerColor = MaterialTheme.colorScheme.onBackground ,
+            textColor = MaterialTheme.colorScheme.onPrimary
         ) ,
         isError = isErrorEnabled
 
@@ -60,6 +64,7 @@ fun RoundedInputText(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview(showBackground = true)
 fun RoundedInputTextPreview(
@@ -74,12 +79,12 @@ fun RoundedInputTextPreview(
         onValueChange = {
              text = it
         } ,
-        textStyle = MaterialTheme.typography.body1 ,
+        textStyle = MaterialTheme.typography.bodyMedium ,
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.outline_account_circle_24),
                 contentDescription = "User icon" ,
-                tint = BrownLight
+                tint = Brown50
             )
         } ,
         keyboardOptions = KeyboardOptions(
@@ -89,10 +94,10 @@ fun RoundedInputTextPreview(
         colors = TextFieldDefaults.textFieldColors(
             unfocusedIndicatorColor = GrayHue ,
             focusedIndicatorColor = GrayHue ,
-            cursorColor = Orange ,
-            errorIndicatorColor = ErrorColor ,
-            errorLabelColor = ErrorColor ,
-            errorCursorColor = ErrorColor ,
+            cursorColor = Orange40 ,
+            errorIndicatorColor = ErrorColor49 ,
+            errorLabelColor = ErrorColor49 ,
+            errorCursorColor = ErrorColor49 ,
         ) ,
     )
 }

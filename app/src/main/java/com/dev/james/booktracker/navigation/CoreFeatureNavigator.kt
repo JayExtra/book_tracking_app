@@ -53,7 +53,11 @@ class CoreFeatureNavigator(
     override fun navigateToUserDetailsCaptureScreen() {
         navController.navigate(
             UserPreferenceSetupScreenDestination within navGraph
-        )
+        ){
+            popUpTo(NavGraphs.rootWithOnBoarding){
+                inclusive = true
+            }
+        }
     }
 
     override fun navigateToHomeScreen() {
