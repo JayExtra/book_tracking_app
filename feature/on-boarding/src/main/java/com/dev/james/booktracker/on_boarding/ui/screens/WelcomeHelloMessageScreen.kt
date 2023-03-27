@@ -41,8 +41,7 @@ fun WelcomeHelloMessageScreen(
                 modifier = Modifier.padding(start = 16.dp , end = 16.dp , bottom = 16.dp),
                 text = stringResource(id = R.string.welcome_hello_message) ,
                 style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center ,
-                color = Color.White
+                textAlign = TextAlign.Center 
             )
 
 
