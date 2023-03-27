@@ -1,8 +1,8 @@
 package com.dev.james.booktracker.core_datastore.local.datastore
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
@@ -43,4 +43,38 @@ class DataStoreManagerImpl @Inject constructor(
             Constants.DEFAULT_VALUE
         }
     }
+
+    override suspend fun storeIntValue(key: Preferences.Key<Int>, value: Int) {
+        context.datastore.edit {
+            it[key] = value
+        }
+    }
+
+    override suspend fun readIntValueOnce(key: Preferences.Key<Int>): Int {
+        return context.datastore.data.first()[key] ?: 0
+    }
+
+    override fun readIntValueAsFlow(key: Preferences.Key<Int>): Flow<Int> {
+        return context.datastore.data.map {
+            it[key] ?: 0
+        }.catch { exception ->
+            if(exception is IOException){
+                Timber.e( "Datastore read string value error io exception =>" + exception.message)
+            }
+            Timber.e( "Datastore read string value error =>" + exception.localizedMessage)
+        }
+    }
+
+    override fun getSelectedThemeStream(key: Preferences.Key<Int>): Flow<Int> {
+        return context.datastore.data.map {
+            it[key] ?: AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }.catch { exception ->
+            if(exception is IOException){
+                Timber.e( "Datastore reading theme value error io exception =>" + exception.message)
+            }
+            Timber.e( "Datastore read theme value error =>" + exception.localizedMessage)
+        }
+    }
+
+
 }

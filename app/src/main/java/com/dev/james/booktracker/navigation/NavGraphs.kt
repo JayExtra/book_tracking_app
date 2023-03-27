@@ -2,6 +2,8 @@ package com.dev.james.booktracker.navigation
 
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
+import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
+import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.dynamic.routedIn
 import com.ramcosta.composedestinations.spec.DestinationSpec
@@ -18,10 +20,11 @@ object NavGraphs {
 
         override val destinationsByRoute = listOf<DestinationSpec<*>>(
             OnBoardingWelcomeScreenDestination ,
-            HomeScreenDestination
+            HomeScreenDestination ,
+            WelcomeHelloMessageScreenDestination ,
+            UserPreferenceSetupScreenDestination
         ).routedIn(this)
             .associateBy { it.route }
-
     }
 
     val home = object  : NavGraphSpec {

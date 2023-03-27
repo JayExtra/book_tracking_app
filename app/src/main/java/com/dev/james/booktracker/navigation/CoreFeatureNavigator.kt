@@ -3,8 +3,12 @@ package com.dev.james.booktracker.navigation
 import androidx.navigation.NavController
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
+import com.dev.james.booktracker.on_boarding.ui.navigation.HelloMessageNavigator
 import com.dev.james.booktracker.on_boarding.ui.navigation.OnBoardingNavigator
+import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNavigator
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
+import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
+import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
 import com.ramcosta.composedestinations.dynamic.within
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.navigate
@@ -15,7 +19,11 @@ import timber.log.Timber
 class CoreFeatureNavigator(
     private val navGraph: NavGraphSpec,
     private val navController: NavController
-) : HomeNavigator , OnBoardingNavigator {
+) : HomeNavigator ,
+    OnBoardingNavigator ,
+    HelloMessageNavigator ,
+    UserSetupScreenNavigator
+{
 
     override fun openOnBoardingWelcomeScreen() {
         navController.navigate(
@@ -24,12 +32,11 @@ class CoreFeatureNavigator(
     }
 
     override fun openWelcomeMessageScreen() {
-        Timber.d("welcome screen with message")
+        navController.navigate(
+            WelcomeHelloMessageScreenDestination within navGraph
+        )
     }
 
-    override fun openOnBoardingPreferenceSetupScreen() {
-        Timber.d("On boarding preference setup screens")
-    }
 
     override fun openHome() {
         navController.navigate(direction = HomeScreenDestination within navGraph){
@@ -41,6 +48,24 @@ class CoreFeatureNavigator(
 
     override fun openHomeScreen() {
         navController.navigate(HomeScreenDestination within navGraph)
+    }
+
+    override fun navigateToUserDetailsCaptureScreen() {
+        navController.navigate(
+            UserPreferenceSetupScreenDestination within navGraph
+        ){
+            popUpTo(NavGraphs.rootWithOnBoarding){
+                inclusive = true
+            }
+        }
+    }
+
+    override fun navigateToHomeScreen() {
+        navController.navigate(direction = HomeScreenDestination within navGraph){
+            popUpTo(NavGraphs.rootWithOnBoarding){
+                inclusive = true
+            }
+        }
     }
 
 }

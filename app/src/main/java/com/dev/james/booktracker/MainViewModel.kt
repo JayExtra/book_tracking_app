@@ -2,6 +2,7 @@ package com.dev.james.booktracker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.james.booktracker.core.user_preferences.domain.UserPreferencesRepository
 import com.dev.james.booktracker.domain.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -13,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val mainRepository: MainRepository
+    private val mainRepository: MainRepository ,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val _isLoading : MutableStateFlow<Boolean> = MutableStateFlow(value = true)
@@ -22,6 +24,7 @@ class MainViewModel @Inject constructor(
     private val _isOnBoarded = MutableStateFlow(value = false)
     val isOnBoarded get() = _isOnBoarded.asStateFlow()
 
+    val theme = userPreferencesRepository.getSelectedTheme()
 
     init {
         viewModelScope.launch {

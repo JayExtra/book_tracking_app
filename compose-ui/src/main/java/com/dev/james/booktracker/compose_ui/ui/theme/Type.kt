@@ -1,6 +1,6 @@
 package com.dev.james.booktracker.compose_ui.ui.theme
 
-import androidx.compose.material.Typography
+import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -18,35 +18,52 @@ private val Montserrat = FontFamily(
 )
 // Set of Material typography styles to start with
 val BookAppTypography = Typography(
-    h4 = TextStyle(
+
+    headlineLarge = TextStyle(
         fontFamily = Montserrat,
-        fontWeight = FontWeight.W600 ,
+        fontWeight = FontWeight.Bold ,
         fontSize = 30.sp
     ),
-    h5 = TextStyle(
+    headlineMedium = TextStyle(
         fontFamily = Montserrat ,
-        fontWeight = FontWeight.W600 ,
+        fontWeight = FontWeight.Bold ,
         fontSize = 24.sp
     ),
-    h6 = TextStyle(
+    headlineSmall = TextStyle(
         fontFamily = Montserrat ,
-        fontWeight = FontWeight.W600 ,
+        fontWeight = FontWeight.Bold ,
         fontSize = 20.sp
     ),
-    body1 = TextStyle(
+    bodyLarge = TextStyle(
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.Normal,
+        fontSize = 18.sp
+    ),
+    bodyMedium = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
-    ),
-    body2 = TextStyle(
+    ) ,
+    bodySmall = TextStyle(
         fontFamily = Montserrat,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp
     ) ,
-    button = TextStyle(
+
+    displaySmall = TextStyle(
         fontFamily = Montserrat,
-        fontWeight = FontWeight.W500,
+        fontWeight = FontWeight.Bold,
         fontSize = 14.sp
+    ) ,
+    displayMedium = TextStyle(
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp
+    ) ,
+    displayLarge = TextStyle(
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 20.sp
     )
     /* Other default text styles to override
     button = TextStyle(
