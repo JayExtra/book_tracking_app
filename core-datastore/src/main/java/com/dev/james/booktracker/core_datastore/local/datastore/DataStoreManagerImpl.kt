@@ -1,12 +1,11 @@
 package com.dev.james.booktracker.core_datastore.local.datastore
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
-import com.dev.james.booktracker.core.ThemeConstants
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -63,9 +62,19 @@ class DataStoreManagerImpl @Inject constructor(
                 Timber.e( "Datastore read string value error io exception =>" + exception.message)
             }
             Timber.e( "Datastore read string value error =>" + exception.localizedMessage)
-
-            ThemeConstants.SYSTEM_DEFAULT
         }
     }
+
+    override fun getSelectedThemeStream(key: Preferences.Key<Int>): Flow<Int> {
+        return context.datastore.data.map {
+            it[key] ?: AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }.catch { exception ->
+            if(exception is IOException){
+                Timber.e( "Datastore reading theme value error io exception =>" + exception.message)
+            }
+            Timber.e( "Datastore read theme value error =>" + exception.localizedMessage)
+        }
+    }
+
 
 }

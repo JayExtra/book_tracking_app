@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.compose_ui.ui.theme.Brown
+import com.dev.james.booktracker.compose_ui.ui.theme.Brown30
 
 @Composable
 fun StatefulRoundOutlineButton(
@@ -41,7 +40,7 @@ fun StatefulRoundOutlineButton(
     ) {
         Text(
             text = text.lowercase(),
-            style = BookAppTypography.body1,
+            style = BookAppTypography.displayMedium,
             color = textColor ,
             modifier = Modifier.padding(bottom = 5.dp , start = 30.dp , end = 30.dp)
         )
@@ -54,7 +53,7 @@ fun StatefulRoundOutlineButton(
 fun StatelessRoundOutlineButton(
     modifier: Modifier = Modifier,
     text: String = "Next",
-    backgroundColor : Color = Brown,
+    backgroundColor : Color = Brown30,
     textColor: Color = Color.White,
     outlineColor : Color = Color.White,
 ) {
@@ -71,7 +70,7 @@ fun StatelessRoundOutlineButton(
     ) {
         Text(
             text = text.lowercase(),
-            style = BookAppTypography.body2,
+            style = BookAppTypography.bodyMedium,
             color = textColor ,
             modifier = Modifier.padding(bottom = 5.dp , start = 20.dp , end = 20.dp)
         )

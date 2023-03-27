@@ -3,78 +3,100 @@ package com.dev.james.booktracker.compose_ui.ui.theme
 import android.os.Build
 import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.*
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
-private val DarkColorPalette = darkColors(
-    primary = Orange,
-    onPrimary = PrimaryTextColor ,
-    secondary = OrangeLight ,
-    onSecondary = SecondaryTextColor ,
-    error = Color.Red,
-    background = BackgroundDarkColor ,
-    onBackground = Color.White ,
-    surface = SurfaceDark ,
-    onSurface = Color.White ,
-    secondaryVariant = Color.White ,
-    onError = OnErrorColor
+private val DarkColorPalette = darkColorScheme(
+    primary = Orange60,
+    onPrimary = Orange30 ,
+    primaryContainer = Orange40 ,
+    onPrimaryContainer= Orange70 ,
+    inversePrimary = Orange50 ,
+    secondary = DarkOrange45 ,
+    onSecondary = DarkOrange20 ,
+    secondaryContainer =  DarkOrange30,
+    onSecondaryContainer = DarkOrange25,
+    error = ErrorColor60,
+    background = SurfaceDark23 ,
+    onBackground = SurfaceDark80 ,
+    surface = Brown60 ,
+    onSurface = Brown80 ,
+    onError = ErrorColor70 ,
+    surfaceVariant = Brown60 ,
+    onSurfaceVariant = Brown80
 )
 
-private val LightColorPalette = lightColors(
-    primary = Brown,
-    primaryVariant = BrownLight,
-    secondary = Orange,
-    onSecondary = PrimaryTextColor,
+private val LightColorPalette = lightColorScheme(
+    primary = Brown30,
+    onPrimary = Brown50,
+    primaryContainer = Brown40 ,
+    onPrimaryContainer= Brown60 ,
+    secondary = Brown20,
+    onSecondary = Brown70,
+    inversePrimary = Brown40 ,
 //     Other default colors to override
-    background = BackgroundLightColor,
-    onBackground = Color.Black,
-    surface = SurfaceLight,
-    onPrimary = SecondaryTextColor,
-    onSurface = Color.Black ,
-    error = ErrorColor ,
-    onError = OnErrorColor
+    background = SurfaceLight ,
+    onBackground = SurfaceDark70 ,
+    surface = Brown60 ,
+    onSurface = Brown80 ,
+    error = ErrorColor60,
+    onError = ErrorColor70 ,
+    surfaceVariant = Brown60 ,
+    onSurfaceVariant = Brown80
 //
 )
 
 @Composable
 fun BookTrackerTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    theme : Int,
     content: @Composable () -> Unit) {
+    val autoColors = if(isSystemInDarkTheme()) DarkColorPalette else LightColorPalette
+
+    val dynamicColors = if(supportsDynamicTheming()) {
+        val context = LocalContext.current
+        if(isSystemInDarkTheme()){
+            dynamicDarkColorScheme(context)
+        }else {
+            dynamicLightColorScheme(context)
+        }
+    } else {
+        autoColors
+    }
+
+    val colors = when(theme) {
+        Theme.LIGHT_THEME.themeValue -> LightColorPalette
+        Theme.DARK_THEME.themeValue -> DarkColorPalette
+        Theme.MATERIAL_YOU.themeValue -> dynamicColors
+        else -> autoColors
+    }
+
     val systemUiController = rememberSystemUiController()
-    if(darkTheme){
-      systemUiController.setStatusBarColor(
-          color = Black,
-          darkIcons = false
-      )
+    if(isSystemInDarkTheme()){
+        SideEffect {
+            systemUiController.setStatusBarColor(
+                color = Black,
+                darkIcons = false
+            )
+        }
     }else{
-        systemUiController.setStatusBarColor(
-            color = White ,
-            darkIcons = true
-        )
+        SideEffect {
+            systemUiController.setStatusBarColor(
+                color = White ,
+                darkIcons = true
+            )
+        }
     }
 
     MaterialTheme(
-        colors = if(darkTheme) DarkColorPalette else LightColorPalette,
+        colorScheme = colors ,
         typography = BookAppTypography,
         shapes = BookAppShapes,
         content = content

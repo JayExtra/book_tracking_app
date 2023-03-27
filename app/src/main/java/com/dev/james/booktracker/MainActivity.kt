@@ -11,9 +11,10 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -23,16 +24,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
+import com.dev.james.booktracker.compose_ui.ui.theme.Theme
 import com.dev.james.booktracker.home.presentation.screens.HomeScreen
 import com.dev.james.booktracker.navigation.AppNavigation
 import com.dev.james.booktracker.on_boarding.ui.screens.OnBoardingWelcomeScreen
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val mainViewModel : MainViewModel by viewModels()
+    @OptIn(ExperimentalMaterial3Api::class)
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,12 +63,21 @@ class MainActivity : ComponentActivity() {
             // Run your animation.
             slideLeft.start()
         }*/
+
         setContent {
-            BookTrackerTheme {
+
+            val theme by mainViewModel.theme.collectAsState(
+                initial = Theme.FOLLOW_SYSTEM.themeValue ,
+                context = Dispatchers.Main.immediate
+            )
+
+            BookTrackerTheme(
+                theme = theme
+            ) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    color = MaterialTheme.colorScheme.background
                 ) {
                    val navController = rememberNavController()
                     val newBackStackEntry by navController.currentBackStackEntryAsState()
@@ -75,7 +88,8 @@ class MainActivity : ComponentActivity() {
                         AppNavigation(
                             navController = navController,
                             hasOnBoarded = hasOnBoarded.value ,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
                                 .padding(contentPadding)
                         )
                     }

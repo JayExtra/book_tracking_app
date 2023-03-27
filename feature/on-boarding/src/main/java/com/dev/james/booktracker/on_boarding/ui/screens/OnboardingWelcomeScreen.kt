@@ -6,7 +6,6 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -22,16 +21,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.airbnb.lottie.compose.*
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.compose_ui.ui.theme.Brown
+import com.dev.james.booktracker.compose_ui.ui.theme.Brown30
 import com.dev.james.booktracker.on_boarding.ui.components.StatefulRoundOutlineButton
 import com.dev.james.booktracker.on_boarding.ui.navigation.OnBoardingNavigator
-import com.dev.james.booktracker.on_boarding.ui.viewmodel.OnBoardingWelcomeScreenViewModel
 import com.dev.james.on_boarding.R
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -60,7 +56,7 @@ fun OnBoardingWelcomeScreen(
             verticalArrangement = Arrangement.Bottom,
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = Brown)
+                .background(color = Brown30)
         ) {
             //pass in the button composable , progress , title texts and message texts
 
@@ -78,7 +74,7 @@ fun OnBoardingWelcomeScreen(
 
                 StatefulRoundOutlineButton(
                     text = if (position == 3) "Finish" else "Next" ,
-                    backgroundColor = Brown ,
+                    backgroundColor = Brown30 ,
                     outlineColor = Color.White ,
                     textColor = Color.White
                 ) {
@@ -178,18 +174,7 @@ fun OnBoardingMessageBlock(
     modifier: Modifier = Modifier,
     position: Int
 ) {
-    /*val title = when(position){
-        1 -> "Some title 1"
-        2 -> "Some title 2"
-        3 -> "Some title 3"
-        else -> " "
-    }
-    val body = when(position){
-        1 -> R.string.on_boarding_message_1
-        2 -> R.string.on_boarding_message_2
-        3 -> R.string.on_boarding_message_2
-        else -> { 0 }
-    }*/
+
     val (title, body) = when (position) {
         1 -> Pair(R.string.on_boarding_title_1, R.string.on_boarding_message_1)
         2 -> Pair(R.string.on_boarding_title_2, R.string.on_boarding_message_2)
@@ -215,7 +200,7 @@ fun OnBoardingMessageBlock(
         ) { targetState ->
             Text(
                 text = stringResource(id = targetState),
-                style = BookAppTypography.h5,
+                style = BookAppTypography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = Color.White
             )
@@ -237,7 +222,7 @@ fun OnBoardingMessageBlock(
         ) { targetState ->
             Text(
                 text = stringResource(id = targetState),
-                style = BookAppTypography.body1,
+                style = BookAppTypography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = Color.White
             )

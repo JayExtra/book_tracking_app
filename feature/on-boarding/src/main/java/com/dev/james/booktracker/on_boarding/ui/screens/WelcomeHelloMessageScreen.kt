@@ -2,8 +2,7 @@ package com.dev.james.booktracker.on_boarding.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,9 +40,9 @@ fun WelcomeHelloMessageScreen(
             Text(
                 modifier = Modifier.padding(start = 16.dp , end = 16.dp , bottom = 16.dp),
                 text = stringResource(id = R.string.welcome_hello_message) ,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center ,
-                color = MaterialTheme.colors.onPrimary
+                color = Color.White
             )
 
 

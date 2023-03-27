@@ -3,6 +3,7 @@ package com.dev.james.booktracker.on_boarding.ui.viewmodel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.james.booktracker.compose_ui.ui.theme.Theme
 import com.dev.james.booktracker.core.ThemeConstants
 import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
 import com.dev.james.booktracker.on_boarding.domain.models.UserDetails
@@ -84,6 +85,12 @@ class UserPreferenceSetupViewModel @Inject constructor(
                 _prefScreenState.value = _prefScreenState.value.copy(
                     currentSelectedTheme = userPreferenceSetupUiActions.theme
                 )
+                viewModelScope.launch {
+                    onBoardingRepository.saveCurrentTheme(
+                        currentTheme =  userPreferenceSetupUiActions.theme
+                    )
+                }
+
             }
 
             is UserPreferenceSetupUiActions.SavePreferenceDataUi -> {
@@ -120,9 +127,6 @@ class UserPreferenceSetupViewModel @Inject constructor(
                         )
                     )
                     onBoardingRepository.updateOnBoardingStatus(status = true)
-                    onBoardingRepository.saveCurrentTheme(
-                        currentTheme = _prefScreenState.value.currentSelectedTheme
-                    )
                     _uiEvents.send(UserPreferenceSetupUiEvents.NavigateToHomeScreen)
                 }
             }
@@ -172,7 +176,7 @@ data class UserPrefScreenState(
     val userName: String = "",
     val currentSelectedAvatar: Int = 0,
     val genreList: List<String> = emptyList(),
-    val currentSelectedTheme: Int = ThemeConstants.SYSTEM_DEFAULT,
+    val currentSelectedTheme: Int = Theme.FOLLOW_SYSTEM.themeValue,
     val userNameFieldError : String? = null,
     val chipSelectionError : String? = null,
     val avatarSelectionError : String? = null,

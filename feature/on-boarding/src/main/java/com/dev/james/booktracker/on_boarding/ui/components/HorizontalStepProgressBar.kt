@@ -9,7 +9,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Divider
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.theme.GrayHue
-import com.dev.james.booktracker.compose_ui.ui.theme.Orange
+import com.dev.james.booktracker.compose_ui.ui.theme.Orange40
 
 @Composable
 fun StepsProgressBar(modifier: Modifier = Modifier, numberOfSteps: Int, currentStep: Int) {
@@ -41,7 +42,7 @@ fun StepsProgressBar(modifier: Modifier = Modifier, numberOfSteps: Int, currentS
 @Composable
 fun Step(modifier: Modifier = Modifier, isCompete: Boolean, isCurrent: Boolean , isLast : Boolean) {
     val color by animateColorAsState(
-        targetValue = if (isCompete || isCurrent) Orange else GrayHue ,
+        targetValue = if (isCompete || isCurrent) MaterialTheme.colorScheme.primaryContainer else GrayHue ,
         animationSpec = tween(
             delayMillis = 10 ,
             easing = FastOutLinearInEasing ,
@@ -49,7 +50,7 @@ fun Step(modifier: Modifier = Modifier, isCompete: Boolean, isCurrent: Boolean ,
         )
     )
     val innerCircleColor by animateColorAsState(
-        targetValue = if (isCompete) Orange else GrayHue ,
+        targetValue = if (isCompete) MaterialTheme.colorScheme.primaryContainer else GrayHue ,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessVeryLow

@@ -18,6 +18,10 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,8 +40,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.theme.GrayHue
-import com.dev.james.booktracker.compose_ui.ui.theme.Orange
-import com.dev.james.booktracker.core.ThemeConstants
+import com.dev.james.booktracker.compose_ui.ui.theme.Orange40
+import com.dev.james.booktracker.compose_ui.ui.theme.Theme
 import com.dev.james.booktracker.on_boarding.ui.components.*
 import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNavigator
 import com.dev.james.booktracker.on_boarding.ui.states.ThemeItem
@@ -307,7 +311,7 @@ fun NameSection(
         )
         Text(
             text = "What is your name? ",
-            style = MaterialTheme.typography.body1
+            style = MaterialTheme.typography.bodyLarge
         )
 
         RoundedInputText(
@@ -319,7 +323,7 @@ fun NameSection(
             },
             icon = R.drawable.outline_account_circle_24,
             text = text,
-            isErrorEnabled = errorMessage != null
+            isErrorEnabled = errorMessage != null ,
         )
 
         if (errorMessage != null) {
@@ -330,9 +334,9 @@ fun NameSection(
             )
             Text(
                 text = errorMessage,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colors.error
+                color = MaterialTheme.colorScheme.error
             )
         }
 
@@ -377,8 +381,8 @@ fun BottomNextPreviousButtons(
                 StatefulRoundOutlineButton(
                     text = "Previous",
                     backgroundColor = Color.Transparent,
-                    outlineColor = Orange,
-                    textColor = Orange
+                    outlineColor = MaterialTheme.colorScheme.onPrimary,
+                    textColor = MaterialTheme.colorScheme.onPrimary ,
                 ) {
                     //execute click action
                     onPreviousClicked()
@@ -390,8 +394,8 @@ fun BottomNextPreviousButtons(
             StatefulRoundOutlineButton(
                 text = if (currentPosition == 3) "Finish" else "Next",
                 backgroundColor = Color.Transparent,
-                outlineColor = Orange,
-                textColor = Orange
+                outlineColor = MaterialTheme.colorScheme.onPrimary,
+                textColor = MaterialTheme.colorScheme.onPrimary
             ) {
                 //execute click action
                 onNextClicked()
@@ -436,16 +440,16 @@ fun AvatarGridSection(
 
         Text(
             text = "Please select your avatar",
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(16.dp)
         )
 
         if(errorMessage != null){
             Text(
                 text = errorMessage,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(4.dp) ,
-                color = MaterialTheme.colors.error
+                color = MaterialTheme.colorScheme.error
             )
         }
         val cellConfiguration =
@@ -482,11 +486,11 @@ fun AvatarItem(
             .size(90.dp)
             .clip(shape = RoundedCornerShape(10.dp))
             .border(
-                color = if (isSelected) Orange else Color.Transparent,
-                width = 2.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else Color.Transparent,
+                width = 4.dp,
                 shape = RoundedCornerShape(10.dp)
             )
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.onBackground)
             .clickable {
                 avatarSelected(image)
             },
@@ -522,31 +526,31 @@ fun ThemeSection(
 
         Text(
             text = "Please select your favourable theme",
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
 
         val themeList = listOf<ThemeItem>(
             ThemeItem(
-                id = ThemeConstants.SYSTEM_DEFAULT,
+                id = Theme.FOLLOW_SYSTEM.themeValue,
                 themeIcon = R.drawable.baseline_settings_24,
                 themeName = "System Default",
                 themeMessage = "Sticking with the status quo!"
             ),
             ThemeItem(
-                id = ThemeConstants.MATERIAL_YOU,
+                id = Theme.MATERIAL_YOU.themeValue,
                 themeIcon = R.drawable.outline_material_you,
                 themeName = "Material you",
                 themeMessage = "Express yourself freely!"
             ),
             ThemeItem(
-                id = ThemeConstants.LIGHT_MODE,
+                id = Theme.LIGHT_THEME.themeValue,
                 themeIcon = R.drawable.outline_light_mode_24,
                 themeName = "Light Mode",
                 themeMessage = "A little sun don't burn!"
             ),
             ThemeItem(
-                id = ThemeConstants.DARK_MODE,
+                id = Theme.DARK_THEME.themeValue,
                 themeIcon = R.drawable.baseline_dark_mode_24,
                 themeName = "Dark Mode",
                 themeMessage = "In with the dark side!"
@@ -596,7 +600,7 @@ fun ThemeCardItem(
                 .fillMaxSize()
                 .clip(shape = RoundedCornerShape(10.dp))
                 .background(
-                    color = if (isSelected) Orange else GrayHue
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                 )
 
         ) {
@@ -611,12 +615,12 @@ fun ThemeCardItem(
                     top.linkTo(anchor = parent.top, margin = 16.dp)
                     start.linkTo(anchor = parent.start, margin = 16.dp)
                 },
-                tint = if (isSelected) Color.White else Color.Black
+                tint = if (isSelected) Color.White  else MaterialTheme.colorScheme.onPrimary
             )
 
             Text(
                 text = themeName,
-                style = MaterialTheme.typography.h6,
+                style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.constrainAs(
                     title
                 ) {
@@ -625,12 +629,12 @@ fun ThemeCardItem(
                     bottom.linkTo(icon.bottom, margin = 4.dp)
                     width = Dimension.fillToConstraints
                 },
-                color = if (isSelected) Color.White else MaterialTheme.colors.onPrimary
+                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onPrimary
             )
 
             Text(
                 text = themeMessage,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.constrainAs(
                     body
                 ) {
@@ -638,7 +642,7 @@ fun ThemeCardItem(
                     start.linkTo(title.start)
                     width = Dimension.fillToConstraints
                 },
-                color = if (isSelected) Color.White else MaterialTheme.colors.onPrimary
+                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onPrimary
             )
 
         }
@@ -686,15 +690,15 @@ fun GenreSelectionSection(
         )
         Text(
             text = "Please select your favourite genres",
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(8.dp)
         )
         if (chipSelectionError != null) {
             Text(
                 text = chipSelectionError,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 4.dp , bottom = 4.dp , start = 16.dp , end = 16.dp),
-                color = MaterialTheme.colors.error ,
+                color = MaterialTheme.colorScheme.error ,
                 textAlign = TextAlign.Center
             )
         }
