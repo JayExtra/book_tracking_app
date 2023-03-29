@@ -7,7 +7,6 @@ import com.dev.james.on_boarding.data.datasource.FakeOnBoardingLocalDataSource
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
