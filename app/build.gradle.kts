@@ -71,6 +71,7 @@ dependencies {
     implementation(project(Modules.onBoarding))
     implementation(project(Modules.home))
     implementation(project(Modules.coreDataStore))
+    implementation(project(Modules.coreNavigation))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")

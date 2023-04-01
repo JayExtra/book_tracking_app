@@ -22,8 +22,8 @@ object AndroidSdk {
 //all your modules will be defined here
 object Modules {
     const val app = ":app"
-
     const val core = ":core"
+    const val coreNavigation = ":core-navigation"
     const val coreDatabase = ":core-database"
     const val coreDataStore = ":core-datastore"
     const val coreNetwork = ":core-network"

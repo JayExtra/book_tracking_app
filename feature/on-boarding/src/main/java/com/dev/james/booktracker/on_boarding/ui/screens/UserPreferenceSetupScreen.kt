@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -308,8 +309,10 @@ fun NameSection(
             modifier = modifier
                 .fillMaxWidth()
                 .height(90.dp)
+                .testTag("Spacer 1")
         )
         Text(
+           modifier = Modifier.testTag("what is your name text"),
             text = "What is your name? ",
             style = MaterialTheme.typography.bodyLarge
         )
@@ -317,13 +320,15 @@ fun NameSection(
         RoundedInputText(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(start = 32.dp, end = 32.dp, top = 32.dp),
+                .padding(start = 32.dp, end = 32.dp, top = 32.dp)
+               .testTag("rounded input text")
+                      ,
             onValueChanged = {
                 onValueChanged(it)
             },
             icon = R.drawable.outline_account_circle_24,
             text = text,
-            isErrorEnabled = errorMessage != null ,
+            isErrorEnabled = errorMessage != null
         )
 
         if (errorMessage != null) {
@@ -331,8 +336,10 @@ fun NameSection(
                 modifier = modifier
                     .fillMaxWidth()
                     .height(16.dp)
+                    .testTag("spacer 2")
             )
             Text(
+                modifier = Modifier.testTag("error message"),
                 text = errorMessage,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,

@@ -41,15 +41,5 @@ android {
 dependencies {
 
     implementation(project(Modules.core))
-    // Room
-    implementation("androidx.room:room-runtime:2.5.0")
-    kapt("androidx.room:room-compiler:2.5.0")
-    testImplementation("androidx.room:room-testing:2.5.0")
-    androidTestImplementation("androidx.room:room-testing:2.5.0")
-
-    // Kotlin Extensions and Coroutines support for Room
-    implementation("androidx.room:room-ktx:2.5.0")
-
-    implementation("com.google.code.gson:gson:2.9.0")
 
 }

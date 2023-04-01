@@ -1,7 +1,6 @@
 plugins {
     id(Plugins.androidLibrary)
     id(Plugins.kotlinPlugin)
-    id(Plugins.daggerHilt)
     id(Plugins.kapt)
     id(Plugins.kspPlugin) version (Plugins.kspPluginVersion)
 }
@@ -17,7 +16,6 @@ android {
         minSdk = AndroidSdk.minSdk
         targetSdk = AndroidSdk.targetSdk
 
-        //replace with custom hilt test runner for ui tests
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -61,15 +59,11 @@ dependencies {
 
     implementation(project(Modules.core))
     implementation(project(Modules.composeUi))
-    implementation(project(Modules.coreDataStore))
-    implementation(project(Modules.coreDatabase))
+    implementation(project(Modules.home))
+    implementation(project(Modules.onBoarding))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
 
 }
 
-ksp{
-    arg("compose-destinations.mode", "destinations")
-    arg("compose-destinations.moduleName" , "on-boarding")
-}

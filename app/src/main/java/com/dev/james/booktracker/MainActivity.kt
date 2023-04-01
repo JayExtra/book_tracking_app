@@ -1,10 +1,7 @@
 package com.dev.james.booktracker
 
-import android.animation.ObjectAnimator
 import android.os.Build
 import android.os.Bundle
-import android.view.View
-import android.view.animation.AnticipateInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -18,17 +15,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
-import com.dev.james.booktracker.home.presentation.screens.HomeScreen
-import com.dev.james.booktracker.navigation.AppNavigation
-import com.dev.james.booktracker.on_boarding.ui.screens.OnBoardingWelcomeScreen
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.example.core_navigation.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 
