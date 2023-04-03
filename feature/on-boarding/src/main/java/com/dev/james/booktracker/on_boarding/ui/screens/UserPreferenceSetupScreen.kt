@@ -534,6 +534,7 @@ fun ThemeSection(
         )
 
         Text(
+            modifier = Modifier.testTag("theme section heading") ,
             text = "Please select your favourable theme",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
@@ -568,7 +569,8 @@ fun ThemeSection(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 32.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 32.dp)
+                .testTag("theme lazy column"),
             contentPadding = PaddingValues(bottom = 16.dp)
 
         ) {
@@ -700,7 +702,7 @@ fun GenreSelectionSection(
         Text(
             text = "Please select your favourite genres",
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp).testTag("genre heading")
         )
         if (chipSelectionError != null) {
             Text(
@@ -724,6 +726,7 @@ fun GenreSelectionSection(
             }
 
         LazyHorizontalStaggeredGrid(
+            modifier = Modifier.testTag("genre chips grid") ,
             rows = cellConfiguration,
             contentPadding = paddingValues,
             verticalArrangement = Arrangement.spacedBy(8.dp),

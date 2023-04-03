@@ -19,7 +19,6 @@ import org.junit.Test
     OnBoardingModule::class ,
     DatabaseModule::class
 )*/
-@OptIn(ExperimentalCoroutinesApi::class)
 class UserPreferenceSetupScreenTest {
 
  /*   @get:Rule(order = 0)
@@ -88,6 +87,85 @@ class UserPreferenceSetupScreenTest {
         val selectedAvatar = viewModel.prefScreenState.value.currentSelectedAvatar
         assertThat(selectedAvatar).isGreaterThan(0)
     }
+
+    @Test
+    fun clickingOnNextTwice_showsGenreSection(){
+        composeTestRule.onNodeWithTag("rounded outlined button").performClick()
+        composeTestRule.onAllNodesWithTag("rounded outlined button")
+            .filterToOne(hasText("next"))
+            .performClick()
+        composeTestRule.onNodeWithTag("genre chips grid").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("genre heading").assertIsDisplayed()
+    }
+
+    @Test
+    fun selectingAGenre_addsGenreToSelectedGenreList(){
+        composeTestRule.onNodeWithTag("rounded outlined button").performClick()
+        composeTestRule.onAllNodesWithTag("rounded outlined button")
+            .filterToOne(hasText("next"))
+            .performClick()
+        composeTestRule.onNodeWithTag("genre chips grid").onChildAt(
+            1
+        ).performClick()
+
+        val genreList = viewModel.prefScreenState.value.genreList
+        assertThat(genreList).isNotEmpty()
+    }
+
+    @Test
+    fun clickingNext3Times_displaysThemeSectionAndNextButtonBecomesFinish(){
+        composeTestRule.onNodeWithTag("rounded outlined button").performClick()
+        for(num in 0..1){
+            composeTestRule.onAllNodesWithTag("rounded outlined button")
+                .filterToOne(hasText("next"))
+                .performClick()
+        }
+        composeTestRule.onAllNodesWithTag("rounded outlined button")
+            .assertAny(hasText("finish"))
+        composeTestRule.onNodeWithTag("theme lazy column").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("theme section heading").assertIsDisplayed()
+    }
+
+
+    @Test
+    fun selectingTheme_updatesSelectedThemeUiStateValue(){
+        composeTestRule.onNodeWithTag("rounded outlined button").performClick()
+        for(num in 0..1){
+            composeTestRule.onAllNodesWithTag("rounded outlined button")
+                .filterToOne(hasText("next"))
+                .performClick()
+        }
+        composeTestRule.onNodeWithTag("theme lazy column")
+            .onChildAt(1)
+            .performClick()
+
+        val selectedTheme = viewModel.prefScreenState.value.currentSelectedTheme
+        assertThat(selectedTheme).isGreaterThan(0)
+
+    }
+
+   /* @Test
+    fun clickingOnFinishWithoutSettingUsername_showsUserNameError(){
+        composeTestRule.onNodeWithTag("rounded outlined button").performClick()
+        for(num in 0..2){
+            if (num != 2 ){
+                composeTestRule.onAllNodesWithTag("rounded outlined button")
+                    .filterToOne(hasText("next"))
+                    .performClick()
+            }else {
+                composeTestRule.onAllNodesWithTag("rounded outlined button")
+                    .filterToOne(hasText("finish"))
+                    .performClick()
+            }
+
+           // composeTestRule.onNodeWithTag("rounded input text").assertIsDisplayed()
+            //composeTestRule.onNodeWithTag("error message").assertIsDisplayed()
+
+            val inputTextError = viewModel.prefScreenState.value.userNameFieldError
+            assertThat(inputTextError).isNotNull()
+
+        }
+    }*/
 
 
 
