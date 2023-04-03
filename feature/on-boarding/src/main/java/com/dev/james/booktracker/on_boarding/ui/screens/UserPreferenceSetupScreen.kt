@@ -449,6 +449,7 @@ fun AvatarGridSection(
             text = "Please select your avatar",
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(16.dp)
+                .testTag("avatar section title")
         )
 
         if(errorMessage != null){
@@ -465,7 +466,8 @@ fun AvatarGridSection(
             } else GridCells.Fixed(3)
 
         LazyVerticalGrid(
-            modifier = Modifier.padding(32.dp),
+            modifier = Modifier.padding(32.dp)
+                .testTag("avatar grid"),
             columns = cellConfiguration,
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)

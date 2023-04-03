@@ -5,18 +5,14 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
 import com.dev.james.booktracker.on_boarding.ui.screens.UserPreferenceSetupScreen
-import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPrefScreenState
 import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupViewModel
 import com.dev.james.on_boarding.data.FakeOnBoardingRepository
 import com.dev.james.on_boarding.ui.navigation.TestUserPreferenceScreenNavigator
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito
 
 /*@UninstallModules(
     DataStoreModule::class ,
@@ -64,6 +60,35 @@ class UserPreferenceSetupScreenTest {
         composeTestRule.onNodeWithTag("rounded button text" , useUnmergedTree = true)
             .assertTextEquals("next")
     }
+
+
+    @Test
+    fun whenNextButtonIsClicked_updatesCurrentPosTo1_previousButtonShown(){
+       composeTestRule.onNodeWithTag("rounded outlined button").performClick()
+        val currentPos = viewModel.prefScreenState.value.currentPosition
+        assertThat(currentPos).isEqualTo(1)
+        composeTestRule.onAllNodesWithTag("rounded button text" , useUnmergedTree = true)
+            .filterToOne(hasText("previous"))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun whenNextButtonIsClicked_nameSectionDisappears_avatarSectionAppears(){
+        composeTestRule.onNodeWithTag("rounded outlined button").performClick()
+        composeTestRule.onNodeWithTag("avatar section title").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("avatar grid").assertIsDisplayed()
+    }
+
+    @Test
+    fun whenAvatarItemIsClicked_avatarIsSelected(){
+        composeTestRule.onNodeWithTag("rounded outlined button").performClick()
+        composeTestRule.onNodeWithTag("avatar grid").onChildAt(1)
+            .performClick()
+
+        val selectedAvatar = viewModel.prefScreenState.value.currentSelectedAvatar
+        assertThat(selectedAvatar).isGreaterThan(0)
+    }
+
 
 
 }
