@@ -1,4 +1,4 @@
-package com.dev.james.on_boarding.di
+package com.dev.james.booktracker.feature.on_boarding.di
 
 import android.content.Context
 import androidx.room.Room

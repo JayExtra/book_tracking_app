@@ -9,7 +9,6 @@ import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupVie
 import com.dev.james.on_boarding.data.FakeOnBoardingRepository
 import com.dev.james.on_boarding.ui.navigation.TestUserPreferenceScreenNavigator
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -144,28 +143,33 @@ class UserPreferenceSetupScreenTest {
 
     }
 
-   /* @Test
+    @Test
     fun clickingOnFinishWithoutSettingUsername_showsUserNameError(){
         composeTestRule.onNodeWithTag("rounded outlined button").performClick()
         for(num in 0..2){
-            if (num != 2 ){
-                composeTestRule.onAllNodesWithTag("rounded outlined button")
-                    .filterToOne(hasText("next"))
-                    .performClick()
-            }else {
+            if (num == 2 ){
                 composeTestRule.onAllNodesWithTag("rounded outlined button")
                     .filterToOne(hasText("finish"))
                     .performClick()
+                val currentPos = viewModel.prefScreenState.value.currentPosition
+                assertThat(currentPos).isEqualTo(0)
+
+                 composeTestRule.onNodeWithTag("rounded input text").assertIsDisplayed()
+                 composeTestRule.onNodeWithTag("error message").assertIsDisplayed()
+
+            }else {
+                composeTestRule.onAllNodesWithTag("rounded outlined button")
+                    .filterToOne(hasText("next"))
+                    .performClick()
             }
 
-           // composeTestRule.onNodeWithTag("rounded input text").assertIsDisplayed()
-            //composeTestRule.onNodeWithTag("error message").assertIsDisplayed()
 
+/*
             val inputTextError = viewModel.prefScreenState.value.userNameFieldError
-            assertThat(inputTextError).isNotNull()
+            assertThat(inputTextError).isNotNull()*/
 
         }
-    }*/
+    }
 
 
 

@@ -22,7 +22,7 @@ android {
         versionCode = 1
         versionName = AndroidSdk.versionName
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.dev.james.booktracker.test_utils.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -71,6 +71,7 @@ dependencies {
     implementation(project(Modules.onBoarding))
     implementation(project(Modules.home))
     implementation(project(Modules.coreDataStore))
+    implementation(project(Modules.coreDatabase))
     implementation(project(Modules.coreNavigation))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
