@@ -56,7 +56,7 @@ private val LightColorPalette = lightColorScheme(
 
 @Composable
 fun BookTrackerTheme(
-    theme : Int,
+    theme : Int = Theme.FOLLOW_SYSTEM.themeValue ,
     content: @Composable () -> Unit) {
     val autoColors = if(isSystemInDarkTheme()) DarkColorPalette else LightColorPalette
 

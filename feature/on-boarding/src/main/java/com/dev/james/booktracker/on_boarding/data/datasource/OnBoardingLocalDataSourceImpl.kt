@@ -31,6 +31,12 @@ class OnBoardingLocalDataSourceImpl @Inject constructor(
         )
     }
 
+    override fun getSelectedTheme(): Flow<Int> {
+        return dataStoreManager.readIntValueAsFlow(
+            DataStorePreferenceKeys.CURRENT_THEME_SELECTED
+        )
+    }
+
     override suspend fun saveUserDetails(userDetails: UserDetailsEntity) {
         dao.addUserData(userDetails)
     }

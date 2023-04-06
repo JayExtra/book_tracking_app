@@ -10,4 +10,6 @@ interface OnBoardingRepository {
     suspend fun saveUserDetails(userDetails: UserDetails)
     suspend fun saveCurrentTheme(currentTheme : Int)
 
+    fun getSelectedTheme() : Flow<Int>
+
 }

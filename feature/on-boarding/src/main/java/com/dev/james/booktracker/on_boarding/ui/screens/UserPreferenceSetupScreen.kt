@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -308,8 +309,10 @@ fun NameSection(
             modifier = modifier
                 .fillMaxWidth()
                 .height(90.dp)
+                .testTag("Spacer 1")
         )
         Text(
+           modifier = Modifier.testTag("what is your name text"),
             text = "What is your name? ",
             style = MaterialTheme.typography.bodyLarge
         )
@@ -317,13 +320,15 @@ fun NameSection(
         RoundedInputText(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(start = 32.dp, end = 32.dp, top = 32.dp),
+                .padding(start = 32.dp, end = 32.dp, top = 32.dp)
+               .testTag("rounded input text")
+                      ,
             onValueChanged = {
                 onValueChanged(it)
             },
             icon = R.drawable.outline_account_circle_24,
             text = text,
-            isErrorEnabled = errorMessage != null ,
+            isErrorEnabled = errorMessage != null
         )
 
         if (errorMessage != null) {
@@ -331,8 +336,10 @@ fun NameSection(
                 modifier = modifier
                     .fillMaxWidth()
                     .height(16.dp)
+                    .testTag("spacer 2")
             )
             Text(
+                modifier = Modifier.testTag("error message"),
                 text = errorMessage,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
@@ -442,6 +449,7 @@ fun AvatarGridSection(
             text = "Please select your avatar",
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(16.dp)
+                .testTag("avatar section title")
         )
 
         if(errorMessage != null){
@@ -458,7 +466,8 @@ fun AvatarGridSection(
             } else GridCells.Fixed(3)
 
         LazyVerticalGrid(
-            modifier = Modifier.padding(32.dp),
+            modifier = Modifier.padding(32.dp)
+                .testTag("avatar grid"),
             columns = cellConfiguration,
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -525,6 +534,7 @@ fun ThemeSection(
         )
 
         Text(
+            modifier = Modifier.testTag("theme section heading") ,
             text = "Please select your favourable theme",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
@@ -559,7 +569,8 @@ fun ThemeSection(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 32.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 32.dp)
+                .testTag("theme lazy column"),
             contentPadding = PaddingValues(bottom = 16.dp)
 
         ) {
@@ -691,7 +702,7 @@ fun GenreSelectionSection(
         Text(
             text = "Please select your favourite genres",
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp).testTag("genre heading")
         )
         if (chipSelectionError != null) {
             Text(
@@ -715,6 +726,7 @@ fun GenreSelectionSection(
             }
 
         LazyHorizontalStaggeredGrid(
+            modifier = Modifier.testTag("genre chips grid") ,
             rows = cellConfiguration,
             contentPadding = paddingValues,
             verticalArrangement = Arrangement.spacedBy(8.dp),

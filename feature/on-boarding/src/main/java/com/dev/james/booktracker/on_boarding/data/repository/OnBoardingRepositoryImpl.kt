@@ -41,4 +41,8 @@ class OnBoardingRepositoryImpl @Inject constructor(
             currentTheme
         )
     }
+
+    override fun getSelectedTheme(): Flow<Int> {
+        return onBoardingLocalDataSource.getSelectedTheme()
+    }
 }

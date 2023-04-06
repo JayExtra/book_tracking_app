@@ -17,6 +17,7 @@ android {
         minSdk = AndroidSdk.minSdk
         targetSdk = AndroidSdk.targetSdk
 
+        //replace with custom hilt test runner for ui tests
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
