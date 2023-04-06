@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.navigation
+package com.example.core_navigation.navigation
 
 import androidx.navigation.NavController
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
@@ -9,12 +9,11 @@ import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNaviga
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
+import com.example.core_navigation.navigation.NavGraphs
 import com.ramcosta.composedestinations.dynamic.within
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.navigation.popUpTo
 import com.ramcosta.composedestinations.spec.NavGraphSpec
-import timber.log.Timber
 
 class CoreFeatureNavigator(
     private val navGraph: NavGraphSpec,

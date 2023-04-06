@@ -1,9 +1,7 @@
 plugins {
-    id(Plugins.androidApplication)
+    id(Plugins.androidLibrary)
     id(Plugins.kotlinPlugin)
     id(Plugins.kapt)
-    id(Plugins.parcelize)
-    id(Plugins.daggerHilt)
     id(Plugins.kspPlugin) version (Plugins.kspPluginVersion)
 }
 
@@ -12,20 +10,14 @@ apply {
 }
 
 android {
-    namespace = "com.dev.james.booktracker"
-    compileSdk =  AndroidSdk.compileSdk
+    compileSdk = AndroidSdk.compileSdk
 
     defaultConfig {
-        applicationId =  AndroidSdk.applicationId
         minSdk = AndroidSdk.minSdk
         targetSdk = AndroidSdk.targetSdk
-        versionCode = 1
-        versionName = AndroidSdk.versionName
 
-        testInstrumentationRunner = "com.dev.james.booktracker.test_utils.HiltTestRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -44,36 +36,34 @@ android {
     kotlinOptions {
         jvmTarget = Versions.jvmTargetVersion
     }
-    buildFeatures {
+    buildFeatures{
         compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = Versions.composeCompiler
     }
-    packagingOptions {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
+}
 
-    applicationVariants.all{
-        kotlin.sourceSets {
-            getByName(name){
-                kotlin.srcDir("build/generated/ksp/$name/kotlin")
-            }
+kotlin {
+    sourceSets {
+        debug {
+            kotlin.srcDir("build/generated/ksp/debug/kotlin")
+        }
+        release {
+            kotlin.srcDir("build/generated/ksp/release/kotlin")
         }
     }
 }
 
 dependencies {
+
     implementation(project(Modules.core))
     implementation(project(Modules.composeUi))
-    implementation(project(Modules.onBoarding))
     implementation(project(Modules.home))
-    implementation(project(Modules.coreDataStore))
-    implementation(project(Modules.coreDatabase))
-    implementation(project(Modules.coreNavigation))
+    implementation(project(Modules.onBoarding))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
+
 }
+

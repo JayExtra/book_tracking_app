@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
@@ -35,7 +36,7 @@ fun StatefulRoundOutlineButton(
             .background(color = backgroundColor)
             .clickable {
                   onClick()
-            },
+            }.testTag("rounded outlined button"),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -43,6 +44,7 @@ fun StatefulRoundOutlineButton(
             style = BookAppTypography.displayMedium,
             color = textColor ,
             modifier = Modifier.padding(bottom = 5.dp , start = 30.dp , end = 30.dp)
+                .testTag("rounded button text")
         )
     }
 

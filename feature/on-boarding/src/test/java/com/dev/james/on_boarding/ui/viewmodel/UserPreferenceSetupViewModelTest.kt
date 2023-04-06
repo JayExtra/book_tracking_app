@@ -1,5 +1,6 @@
 package com.dev.james.on_boarding.ui.viewmodel
 
+import com.dev.james.booktracker.core.test_commons.MainCoroutineRule
 import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
 import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupViewModel
 import com.google.common.truth.Truth.assertThat

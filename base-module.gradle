@@ -6,11 +6,26 @@ dependencies{
     implementation ("androidx.compose.ui:ui:${Versions.composeUiVersion}")
     implementation ("androidx.compose.ui:ui-tooling-preview:${Versions.composeUiVersion}")
     testImplementation ("junit:junit:4.13.2")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
     androidTestImplementation ("androidx.test.ext:junit:1.1.5")
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation ("androidx.compose.ui:ui-test-junit4:${Versions.composeUiVersion}")
     debugImplementation ("androidx.compose.ui:ui-tooling:${Versions.composeUiVersion}")
     debugImplementation ("androidx.compose.ui:ui-test-manifest:${Versions.composeUiVersion}")
+
+    //hilt testing
+    testImplementation("com.google.dagger:hilt-android-testing:2.44")
+    kaptTest("com.google.dagger:hilt-android-compiler:2.44")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.44")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.44@aar")
+    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.44")
+
+    implementation("androidx.test:runner:1.5.2")
+
+    androidTestImplementation ("com.google.truth:truth:1.1.3")
+    testImplementation("com.google.truth:truth:1.1.3")
+    androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+
 
     testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
     androidTestImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
@@ -21,9 +36,6 @@ dependencies{
 
     implementation("androidx.appcompat:appcompat:1.6.1")
 
-    androidTestImplementation ("com.google.truth:truth:1.1.3")
-    testImplementation("com.google.truth:truth:1.1.3")
-    androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
 
 
 
@@ -78,6 +90,16 @@ dependencies{
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
 
+    // Room
+    implementation("androidx.room:room-runtime:2.5.0")
+    kapt("androidx.room:room-compiler:2.5.0")
+    testImplementation("androidx.room:room-testing:2.5.0")
+    androidTestImplementation("androidx.room:room-testing:2.5.0")
+
+    // Kotlin Extensions and Coroutines support for Room
+    implementation("androidx.room:room-ktx:2.5.0")
+
+    implementation("com.google.code.gson:gson:2.9.0")
 
 
 }
