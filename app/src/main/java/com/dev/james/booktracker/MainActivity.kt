@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     private val mainViewModel : MainViewModel by viewModels()
     @OptIn(ExperimentalMaterial3Api::class)
     @RequiresApi(Build.VERSION_CODES.S)

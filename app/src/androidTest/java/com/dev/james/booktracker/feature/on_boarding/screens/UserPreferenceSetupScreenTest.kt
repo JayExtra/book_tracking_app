@@ -1,7 +1,9 @@
 package com.dev.james.booktracker.feature.on_boarding.screens
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.navigation.compose.rememberNavController
 import com.dev.james.booktracker.MainActivity
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
@@ -19,6 +21,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 
 
 @HiltAndroidTest
@@ -50,5 +53,13 @@ class UserPreferenceSetupScreenTest {
             }
         }
     }
+
+    @Test
+    fun userSetsUpTheirPreferences_preferencesSavedToPhone_userNavigatedToHomeScreen(){
+        composeTestRule.onNodeWithTag("what is your name text").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("rounded input text").assertIsDisplayed()
+    }
+    
+
 
 }
