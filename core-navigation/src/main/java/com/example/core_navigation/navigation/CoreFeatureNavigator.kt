@@ -1,6 +1,7 @@
 package com.example.core_navigation.navigation
 
 import androidx.navigation.NavController
+import com.dev.james.achievements.presentation.navigation.AchievementsScreenNavigator
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.navigation.HelloMessageNavigator
@@ -9,6 +10,7 @@ import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNaviga
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
+import com.dev.james.my_library.presentation.navigation.MyLibraryScreenNavigator
 import com.example.core_navigation.navigation.NavGraphs
 import com.ramcosta.composedestinations.dynamic.within
 import com.ramcosta.composedestinations.navigation.navigate
@@ -21,7 +23,9 @@ class CoreFeatureNavigator(
 ) : HomeNavigator ,
     OnBoardingNavigator ,
     HelloMessageNavigator ,
-    UserSetupScreenNavigator
+    UserSetupScreenNavigator ,
+        AchievementsScreenNavigator ,
+        MyLibraryScreenNavigator
 {
 
     override fun openOnBoardingWelcomeScreen() {
@@ -65,6 +69,15 @@ class CoreFeatureNavigator(
                 inclusive = true
             }
         }
+    }
+
+
+    override fun goToHomeDestination() {
+        TODO("Not yet implemented")
+    }
+
+    override fun openHomeScreenDestination() {
+        TODO("Not yet implemented")
     }
 
 }

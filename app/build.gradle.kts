@@ -70,6 +70,8 @@ dependencies {
     implementation(project(Modules.composeUi))
     implementation(project(Modules.onBoarding))
     implementation(project(Modules.home))
+    implementation(project(Modules.myLibrary))
+    implementation(project(Modules.achievements))
     implementation(project(Modules.coreDataStore))
     implementation(project(Modules.coreDatabase))
     implementation(project(Modules.coreNavigation))

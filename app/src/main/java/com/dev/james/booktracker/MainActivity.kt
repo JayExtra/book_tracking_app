@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,8 +20,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.dev.james.achievements.presentation.ui.screens.destinations.AchievementsScreenDestination
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
+import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
+import com.dev.james.booktracker.ui.components.StandardScaffold
+import com.dev.james.my_library.presentation.ui.destinations.MyLibraryScreenDestination
 import com.example.core_navigation.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -73,19 +78,29 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                   val navController = rememberNavController()
+                    val navController = rememberNavController()
                     val newBackStackEntry by navController.currentBackStackEntryAsState()
                     val route = newBackStackEntry?.destination?.route
                     val hasOnBoarded = mainViewModel.isOnBoarded.collectAsStateWithLifecycle()
 
-                    Scaffold(modifier = Modifier.fillMaxSize()) { contentPadding ->
-                        AppNavigation(
-                            navController = navController,
-                            hasOnBoarded = hasOnBoarded.value ,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(contentPadding)
+                    StandardScaffold(
+                        navController = navController ,
+                        showBottomBar = route in listOf(
+                            "home/${HomeScreenDestination.route}" ,
+                            "my-library/${MyLibraryScreenDestination.route}" ,
+                            "achievements/${AchievementsScreenDestination.route}"
                         )
+                    ) { innerPadding ->
+
+                        Box(modifier = Modifier.padding(innerPadding)){
+                            AppNavigation(
+                                navController = navController,
+                                hasOnBoarded = hasOnBoarded.value ,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                            )
+                        }
+
                     }
 
                 }
