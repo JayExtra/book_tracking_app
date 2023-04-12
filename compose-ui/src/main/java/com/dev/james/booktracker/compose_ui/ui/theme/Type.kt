@@ -64,6 +64,21 @@ val BookAppTypography = Typography(
         fontFamily = Montserrat,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 20.sp
+    ) ,
+    labelSmall = TextStyle(
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.Bold ,
+        fontSize = 11.sp
+    ) ,
+    labelMedium = TextStyle(
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.Bold ,
+        fontSize = 14.sp
+    ) ,
+    labelLarge = TextStyle(
+        fontFamily = Montserrat,
+        fontWeight = FontWeight.Bold ,
+        fontSize = 16.sp
     )
     /* Other default text styles to override
     button = TextStyle(

@@ -65,8 +65,13 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
-            val theme by mainViewModel.theme.collectAsState(
-                initial = Theme.FOLLOW_SYSTEM.themeValue ,
+            val theme by mainViewModel.theme.collectAsStateWithLifecycle(
+                initialValue = Theme.FOLLOW_SYSTEM.themeValue ,
+                context = Dispatchers.Main.immediate
+            )
+
+            val hasOnBoarded by mainViewModel.isOnBoarded.collectAsStateWithLifecycle(
+                initialValue = false ,
                 context = Dispatchers.Main.immediate
             )
 
@@ -81,7 +86,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val newBackStackEntry by navController.currentBackStackEntryAsState()
                     val route = newBackStackEntry?.destination?.route
-                    val hasOnBoarded = mainViewModel.isOnBoarded.collectAsStateWithLifecycle()
+
 
                     StandardScaffold(
                         navController = navController ,
@@ -89,13 +94,14 @@ class MainActivity : ComponentActivity() {
                             "home/${HomeScreenDestination.route}" ,
                             "my-library/${MyLibraryScreenDestination.route}" ,
                             "achievements/${AchievementsScreenDestination.route}"
-                        )
+                        ) ,
+                        hasOnBoarded = hasOnBoarded
                     ) { innerPadding ->
 
                         Box(modifier = Modifier.padding(innerPadding)){
                             AppNavigation(
                                 navController = navController,
-                                hasOnBoarded = hasOnBoarded.value ,
+                                hasOnBoarded = hasOnBoarded ,
                                 modifier = Modifier
                                     .fillMaxSize()
                             )

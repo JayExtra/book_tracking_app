@@ -10,19 +10,21 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptionsBuilder
+import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.example.core_navigation.navigation.BottomNavItem
 import com.example.core_navigation.navigation.NavGraphs
 import com.example.core_navigation.navigation.navGraph
 import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.spec.NavGraphSpec
 import com.ramcosta.composedestinations.utils.currentDestinationAsState
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StandardScaffold(
     navController : NavController ,
     showBottomBar : Boolean = true ,
-    hasOnBoarded : Boolean = true ,
+    hasOnBoarded : Boolean ,
     navItems : List<BottomNavItem> = listOf(
         BottomNavItem.Home ,
         BottomNavItem.MyLibrary ,
@@ -30,6 +32,9 @@ fun StandardScaffold(
     ) ,
     content : @Composable (paddingValues : PaddingValues) -> Unit
 ){
+    Timber.tag("StandardScaffold").d(
+        "current graph => $navController \n show bottom bar => $showBottomBar \n has on boarded => $hasOnBoarded"
+    )
 
     Scaffold(
         bottomBar = {
@@ -57,7 +62,7 @@ fun StandardScaffold(
                            label = {
                                Text(
                                    text = item.title,
-                                   fontSize = 9.sp,
+                                   style = BookAppTypography.labelSmall,
                                    color = if (currentSelectedItem == item.screen) {
                                        MaterialTheme.colorScheme.primary
                                    } else {
@@ -70,7 +75,7 @@ fun StandardScaffold(
                                    }
                                )
                            },
-                           alwaysShowLabel = true,
+                           alwaysShowLabel = false,
                            selected = currentSelectedItem == item.screen ,
                            onClick = {
                                 navController.navigate(
