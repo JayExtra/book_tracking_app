@@ -30,6 +30,8 @@ object Modules {
     const val composeUi = ":compose-ui"
     const val onBoarding = ":feature:on-boarding"
     const val home = ":feature:home"
+    const val myLibrary = ":feature:my-library"
+    const val achievements = ":feature:achievements"
 }
 
 //plugins

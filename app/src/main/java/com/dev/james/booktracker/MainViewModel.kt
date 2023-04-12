@@ -21,8 +21,9 @@ class MainViewModel @Inject constructor(
     private val _isLoading : MutableStateFlow<Boolean> = MutableStateFlow(value = true)
     val isLoading get() = _isLoading.asStateFlow()
 
-    private val _isOnBoarded = MutableStateFlow(value = false)
-    val isOnBoarded get() = _isOnBoarded.asStateFlow()
+   /* private val _isOnBoarded = MutableStateFlow(value = false)*/
+
+    val isOnBoarded = userPreferencesRepository.getOnBoardingStatus()
 
     val theme = userPreferencesRepository.getSelectedTheme()
 
@@ -31,18 +32,17 @@ class MainViewModel @Inject constructor(
             delay(2000L)
             _isLoading.value = false
         }
-        getOnBoardingStatus()
     }
 
-   private fun getOnBoardingStatus(){
+  /* private fun getOnBoardingStatus(){
        viewModelScope.launch {
            Timber.d("on boarding value => ${mainRepository.getOnBoardingStatus()}")
            _isOnBoarded.value = mainRepository.getOnBoardingStatus()
        }
-       /*viewModelScope.launch {
+       *//*viewModelScope.launch {
            _isOnBoarded.value = mainRepository.getOnBoardingStatus()
-       }*/
-   }
+       }*//*
+   }*/
 
 
 }

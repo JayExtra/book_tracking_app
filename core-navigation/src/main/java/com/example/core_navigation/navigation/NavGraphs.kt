@@ -1,9 +1,11 @@
 package com.example.core_navigation.navigation
 
+import com.dev.james.achievements.presentation.ui.screens.destinations.AchievementsScreenDestination
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
+import com.dev.james.my_library.presentation.ui.destinations.MyLibraryScreenDestination
 import com.ramcosta.composedestinations.dynamic.routedIn
 import com.ramcosta.composedestinations.spec.DestinationSpec
 import com.ramcosta.composedestinations.spec.NavGraphSpec
@@ -21,7 +23,9 @@ object NavGraphs {
             OnBoardingWelcomeScreenDestination ,
             HomeScreenDestination ,
             WelcomeHelloMessageScreenDestination ,
-            UserPreferenceSetupScreenDestination
+            UserPreferenceSetupScreenDestination ,
+            AchievementsScreenDestination ,
+            MyLibraryScreenDestination
         ).routedIn(this)
             .associateBy { it.route }
     }
@@ -42,6 +46,38 @@ object NavGraphs {
 
     }
 
+    val myLibrary = object : NavGraphSpec {
+
+        override val route: String =
+            "my-library"
+
+        override val startRoute: Route =
+            MyLibraryScreenDestination routedIn this
+
+        override val destinationsByRoute =
+            listOf<DestinationSpec<*>>(
+                MyLibraryScreenDestination
+            ).routedIn(this)
+                .associateBy { it.route }
+
+    }
+
+    val achievements = object : NavGraphSpec {
+
+        override val route: String =
+            "achievements"
+
+        override val startRoute: Route =
+            AchievementsScreenDestination routedIn this
+
+        override val destinationsByRoute =
+            listOf<DestinationSpec<*>>(
+                AchievementsScreenDestination
+            ).routedIn(this)
+                .associateBy { it.route }
+
+    }
+
     val rootWithOnBoarding = object : NavGraphSpec {
         override val route: String = "rootWithOnBoarding"
         override val startRoute: Route
@@ -50,7 +86,9 @@ object NavGraphs {
 
         override val nestedNavGraphs = listOf(
             onBoarding ,
-            home
+            home ,
+            myLibrary ,
+            achievements
         )
     }
 
@@ -62,7 +100,9 @@ object NavGraphs {
         override val destinationsByRoute = emptyMap<String, DestinationSpec<*>>()
         override val nestedNavGraphs = listOf(
             onBoarding,
-            home
+            home ,
+            myLibrary ,
+            achievements
         )
     }
 }

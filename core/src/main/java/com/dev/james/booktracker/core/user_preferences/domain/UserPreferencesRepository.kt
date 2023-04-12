@@ -4,5 +4,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface UserPreferencesRepository {
     fun getSelectedTheme() : Flow<Int>
-    suspend fun getOnBoardingStatus() : Boolean
+    fun getOnBoardingStatus() : Flow<Boolean>
+
 }
