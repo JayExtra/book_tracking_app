@@ -14,8 +14,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
             DataStorePreferenceKeys.CURRENT_THEME_SELECTED
         )
     }
-    override suspend fun getOnBoardingStatus(): Boolean {
-        return dataStoreManager.readBooleanValueOnce(
+    override fun getOnBoardingStatus(): Flow<Boolean> {
+        return dataStoreManager.readBooleanValueAsFlow(
             DataStorePreferenceKeys.HAS_FINISHED_ON_BOARDING
         )
     }
