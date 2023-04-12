@@ -24,6 +24,7 @@ import timber.log.Timber
 fun StandardScaffold(
     navController : NavController ,
     showBottomBar : Boolean = true ,
+    showTopBar : Boolean = true ,
     hasOnBoarded : Boolean ,
     navItems : List<BottomNavItem> = listOf(
         BottomNavItem.Home ,
@@ -37,6 +38,12 @@ fun StandardScaffold(
     )
 
     Scaffold(
+        topBar = {
+                 if(showTopBar){
+
+                 }
+        },
+
         bottomBar = {
               if(showBottomBar) {
                   val currentSelectedItem by navController.currentScreenAsState(hasOnBoarded)
