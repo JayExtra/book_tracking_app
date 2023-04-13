@@ -5,9 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,18 +30,29 @@ fun MainTopBar(
 ){
 
     Row(
-        horizontalArrangement = Arrangement.SpaceEvenly ,
+        horizontalArrangement = Arrangement.Start ,
         verticalAlignment = Alignment.CenterVertically ,
         modifier = Modifier
             .background(
                 color = MaterialTheme.colorScheme.background
             )
+            .padding(top = 8.dp , bottom = 8.dp , end = 16.dp , start = 16.dp)
             .fillMaxWidth()
     ) {
         Text(
-            text = username ,
-            style = BookAppTypography.bodyMedium ,
+            modifier = Modifier.weight(0.8f) ,
+            text = "Hello $username !",
+            style = BookAppTypography.headlineSmall ,
+            color = MaterialTheme.colorScheme.secondary
         )
+
+        IconButton(onClick = { onSettingsClick()}) {
+            Icon(
+                imageVector = Icons.Rounded.Settings,
+                contentDescription = "settings icon" ,
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        }
         
         Box(
             modifier = Modifier
@@ -55,6 +66,7 @@ fun MainTopBar(
                 .clip(shape = BookAppShapes.medium) ,
             contentAlignment = Alignment.Center
         ){
+            /* Will replace with coil when image uplaoding becomes possible */
             Image(
                 painter = painterResource(id = avatarImage),
                 contentDescription = "avatar image" ,

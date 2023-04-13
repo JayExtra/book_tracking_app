@@ -2,14 +2,13 @@ package com.dev.james.booktracker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dev.james.booktracker.core.user_preferences.domain.UserPreferencesRepository
+import com.dev.james.booktracker.core.user_preferences.domain.repo.UserPreferencesRepository
 import com.dev.james.booktracker.domain.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,6 +25,8 @@ class MainViewModel @Inject constructor(
     val isOnBoarded = userPreferencesRepository.getOnBoardingStatus()
 
     val theme = userPreferencesRepository.getSelectedTheme()
+
+    val user = userPreferencesRepository.getUserDetails()
 
     init {
         viewModelScope.launch {

@@ -6,31 +6,31 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptionsBuilder
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.core.user_preferences.data.models.UserDetails
 import com.example.core_navigation.navigation.BottomNavItem
 import com.example.core_navigation.navigation.NavGraphs
 import com.example.core_navigation.navigation.navGraph
 import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.spec.NavGraphSpec
-import com.ramcosta.composedestinations.utils.currentDestinationAsState
 import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StandardScaffold(
-    navController : NavController ,
-    showBottomBar : Boolean = true ,
-    showTopBar : Boolean = true ,
-    hasOnBoarded : Boolean ,
+    navController : NavController,
+    showBottomBar : Boolean = true,
+    showTopBar : Boolean = true,
+    hasOnBoarded : Boolean,
     navItems : List<BottomNavItem> = listOf(
         BottomNavItem.Home ,
         BottomNavItem.MyLibrary ,
         BottomNavItem.Achievements
-    ) ,
+    ),
+    userDetails : UserDetails,
     content : @Composable (paddingValues : PaddingValues) -> Unit
 ){
     Timber.tag("StandardScaffold").d(
@@ -40,7 +40,10 @@ fun StandardScaffold(
     Scaffold(
         topBar = {
                  if(showTopBar){
-
+                    MainTopBar(
+                        username = userDetails.username ,
+                        avatarImage = userDetails.selectedAvatar ,
+                    ){/*executes navigation action to navigate to settings screen*/}
                  }
         },
 
