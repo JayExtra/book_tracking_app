@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.dev.james.achievements.presentation.ui.screens.destinations.AchievementsScreenDestination
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
+import com.dev.james.booktracker.core.user_preferences.data.models.UserDetails
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.ui.components.StandardScaffold
 import com.dev.james.my_library.presentation.ui.destinations.MyLibraryScreenDestination
@@ -75,6 +76,11 @@ class MainActivity : ComponentActivity() {
                 context = Dispatchers.Main.immediate
             )
 
+            val user by mainViewModel.user.collectAsStateWithLifecycle(
+                initialValue = UserDetails("fetching.." , emptyList() , selectedAvatar = R.drawable.round_account_circle_24),
+                context = Dispatchers.Main.immediate
+            )
+
             BookTrackerTheme(
                 theme = theme
             ) {
@@ -95,7 +101,13 @@ class MainActivity : ComponentActivity() {
                             "my-library/${MyLibraryScreenDestination.route}" ,
                             "achievements/${AchievementsScreenDestination.route}"
                         ) ,
-                        hasOnBoarded = hasOnBoarded
+                        hasOnBoarded = hasOnBoarded ,
+                        showTopBar = route in listOf(
+                            "home/${HomeScreenDestination.route}" ,
+                            "my-library/${MyLibraryScreenDestination.route}" ,
+                            "achievements/${AchievementsScreenDestination.route}"
+                        ) ,
+                        userDetails = user
                     ) { innerPadding ->
 
                         Box(modifier = Modifier.padding(innerPadding)){
