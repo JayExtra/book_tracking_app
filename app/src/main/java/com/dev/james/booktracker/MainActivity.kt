@@ -66,20 +66,11 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
-            val theme by mainViewModel.theme.collectAsStateWithLifecycle(
-                initialValue = Theme.FOLLOW_SYSTEM.themeValue ,
-                context = Dispatchers.Main.immediate
-            )
+            val theme by mainViewModel.theme.collectAsStateWithLifecycle()
 
-            val hasOnBoarded by mainViewModel.isOnBoarded.collectAsStateWithLifecycle(
-                initialValue = false ,
-                context = Dispatchers.Main.immediate
-            )
+            val hasOnBoarded by mainViewModel.isOnBoarded.collectAsStateWithLifecycle()
 
-            val user by mainViewModel.user.collectAsStateWithLifecycle(
-                initialValue = UserDetails("fetching.." , emptyList() , selectedAvatar = R.drawable.round_account_circle_24),
-                context = Dispatchers.Main.immediate
-            )
+            val user by mainViewModel.user.collectAsStateWithLifecycle()
 
             BookTrackerTheme(
                 theme = theme

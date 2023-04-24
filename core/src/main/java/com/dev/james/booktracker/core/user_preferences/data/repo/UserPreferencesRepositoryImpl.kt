@@ -6,8 +6,7 @@ import com.dev.james.booktracker.core.user_preferences.domain.repo.UserPreferenc
 import com.dev.james.booktracker.core_database.room.dao.CoreDao
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStorePreferenceKeys
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 class UserPreferencesRepositoryImpl @Inject constructor(
@@ -25,8 +24,14 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         )
     }
     override fun getUserDetails(): Flow<UserDetails> {
-        return dao.getUserInformation().map {
-            it[0].toDomain()
-        }
+        val userInfo = dao.getUserInformation()
+            .filter {
+                it.isNotEmpty()
+            }.map {
+                it[0].toDomain()
+            }
+
+        return userInfo
+
     }
 }

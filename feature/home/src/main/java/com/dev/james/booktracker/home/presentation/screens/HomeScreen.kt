@@ -1,24 +1,31 @@
 package com.dev.james.booktracker.home.presentation.screens
 
+import androidx.annotation.RawRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.LottieAnimationView
+import com.airbnb.lottie.compose.*
+import com.dev.james.booktracker.compose_ui.ui.components.EmptyAnimationWithMessageComponent
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
+import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.core.R
 import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
@@ -30,22 +37,50 @@ fun HomeScreen() {
      modifier = Modifier.fillMaxSize() ,
      contentAlignment = Alignment.TopCenter
     ){
+
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "Home Screen",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center ,
-                modifier = Modifier.padding(16.dp) ,
-                color = Color.White
+
+            EmptyAnimationSection(
+                animation = LottieCompositionSpec.RawRes(R.raw.shake_a_empty_box) ,
+                shouldShow = true ,
+                message = "No goals or current read set. Click the button below to add a current read and goals."
             )
+
+            ElevatedButton(
+                onClick = { /*Take user to goals addition*/ } ,
+                shape = BookAppShapes.medium ,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ) ,
+                contentPadding = PaddingValues(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add button icon" ,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                Text(
+                    text = "Add goals and current read" ,
+                    style = BookAppTypography.labelMedium ,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+            }
+
+            Spacer(modifier = Modifier
+                .height(100.dp)
+                .fillMaxWidth())
         }
 
+
         FloatingActionButton(
-            modifier = Modifier.align(Alignment.BottomEnd)
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
                 .padding(16.dp),
             shape = BookAppShapes.medium ,
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -59,6 +94,82 @@ fun HomeScreen() {
                 tint = MaterialTheme.colorScheme.primary
             )
         }
+    }
+
+}
+
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun EmptyAnimationSection(
+    modifier: Modifier = Modifier ,
+    shouldShow : Boolean = false ,
+    animation : LottieCompositionSpec.RawRes ,
+    message : String = ""
+){
+
+    AnimatedVisibility(
+        visible = shouldShow,
+        enter = scaleIn(
+            animationSpec = spring(
+                stiffness = Spring.StiffnessMediumLow
+            )
+        ),
+        exit = scaleOut(
+            animationSpec = spring(
+                stiffness = Spring.StiffnessMediumLow
+            )
+        )
+
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            val isLottiePlaying by remember {
+                mutableStateOf(true)
+            }
+            val animationSpeed by remember {
+                mutableStateOf(1f)
+            }
+            val composition by rememberLottieComposition(
+                spec = animation
+            )
+
+            val lottieAnimationState by animateLottieCompositionAsState(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                isPlaying = isLottiePlaying,
+                speed = animationSpeed,
+                restartOnPlay = true
+            )
+
+            LottieAnimation(
+                composition = composition,
+                lottieAnimationState,
+                modifier = Modifier.size(200.dp)
+            )
+
+            Spacer(modifier = Modifier
+                .height(8.dp)
+                .fillMaxWidth())
+
+
+            Text(
+                text = message,
+                style = BookAppTypography.bodyMedium,
+                color = MaterialTheme.colorScheme.secondary,
+                textAlign = TextAlign.Center ,
+                modifier = Modifier.padding(start = 16.dp , end = 16.dp)
+            )
+
+            Spacer(
+                modifier = Modifier
+                    .height(16.dp)
+                    .fillMaxWidth()
+            )
+        }
+
     }
 
 }
