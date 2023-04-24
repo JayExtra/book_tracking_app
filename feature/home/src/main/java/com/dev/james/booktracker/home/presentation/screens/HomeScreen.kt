@@ -30,12 +30,16 @@ import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
 @Destination
-@Preview("Home Screen")
 fun HomeScreen() {
+    StatelessHomeScreen()
+}
 
+@Composable
+@Preview("Home Screen")
+fun StatelessHomeScreen(){
     Box(
-     modifier = Modifier.fillMaxSize() ,
-     contentAlignment = Alignment.TopCenter
+        modifier = Modifier.fillMaxSize() ,
+        contentAlignment = Alignment.TopCenter
     ){
 
         Column(
@@ -85,7 +89,7 @@ fun HomeScreen() {
             shape = BookAppShapes.medium ,
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             onClick = {
-            /*navigate or show goal addition bottom sheet*/
+                /*navigate or show goal addition bottom sheet*/
             }
         ) {
             Icon(
@@ -95,7 +99,6 @@ fun HomeScreen() {
             )
         }
     }
-
 }
 
 
