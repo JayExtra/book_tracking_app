@@ -26,17 +26,29 @@ import com.dev.james.booktracker.compose_ui.ui.components.EmptyAnimationWithMess
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.R
+import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
 @Destination
-fun HomeScreen() {
-    StatelessHomeScreen()
+fun HomeScreen(
+    homeNavigator: HomeNavigator
+) {
+    StatelessHomeScreen(
+        onAddButtonClick = {
+            homeNavigator.openReadGoalsScreen()
+        }
+    ){
+       homeNavigator.openReadGoalsScreen()
+    }
 }
 
 @Composable
-@Preview("Home Screen")
-fun StatelessHomeScreen(){
+@Preview("Home Screen" , showBackground = true)
+fun StatelessHomeScreen(
+    onAddButtonClick : () -> Unit = {} ,
+    onAddFabClick : () -> Unit = {}
+){
     Box(
         modifier = Modifier.fillMaxSize() ,
         contentAlignment = Alignment.TopCenter
@@ -78,7 +90,8 @@ fun StatelessHomeScreen(){
 
             Spacer(modifier = Modifier
                 .height(100.dp)
-                .fillMaxWidth())
+                .fillMaxWidth()
+            )
         }
 
 

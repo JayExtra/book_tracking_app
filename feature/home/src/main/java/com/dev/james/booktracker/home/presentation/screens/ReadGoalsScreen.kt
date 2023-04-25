@@ -55,11 +55,20 @@ import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
+import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
 @Destination
-fun ReadGoalScreen(){
+fun ReadGoalScreen(
+    homeNavigator: HomeNavigator
+){
+
+    StatelessReadGoalScreen(
+        popBackStack = {
+            homeNavigator.openHomeScreen()
+        }
+    )
 }
 
 @Composable
@@ -113,7 +122,10 @@ fun StatelessReadGoalScreen(
 
 @Composable
 @Preview("CurrentReadForm")
-fun CurrentReadForm(){
+fun CurrentReadForm(
+    //will take in form state
+    onSaveBookClicked : () -> Unit = {}
+){
     Column(
         verticalArrangement = Arrangement.Top ,
         horizontalAlignment = Alignment.CenterHorizontally ,
@@ -191,6 +203,7 @@ fun CurrentReadForm(){
 fun ImageSelectorComponent(
     showProgressBar : Boolean = false ,
     showPlaceHolder : Boolean = true ,
+    //could be image could be uri , subject to change
     selectedImage : String = "" ,
     onSelect : () -> Unit = {}
 ){
@@ -202,6 +215,7 @@ fun ImageSelectorComponent(
             .clip(shape = RoundedCornerShape(20.dp))
             .background(color = MaterialTheme.colorScheme.secondaryContainer)
             .clickable {
+                //starts the image picking flow
                 onSelect()
             }
     ) {
@@ -269,6 +283,7 @@ fun TextFieldComponent(
             text = label ,
             style = BookAppTypography.labelMedium ,
             modifier = Modifier.fillMaxWidth()
+           //also adjust error color and text if error is available
         )
 
         OutlinedTextField(
@@ -281,6 +296,7 @@ fun TextFieldComponent(
                 .border(
                     width = 2.dp,
                     shape = RoundedCornerShape(0.dp),
+                    //if error is available , change the color of border to error color
                     color = MaterialTheme.colorScheme.secondary
                 )
                 .fillMaxWidth()
@@ -289,10 +305,14 @@ fun TextFieldComponent(
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = MaterialTheme.colorScheme.background ,
                 cursorColor = MaterialTheme.colorScheme.secondary,
-                textColor = MaterialTheme.colorScheme.onPrimary
+                textColor = MaterialTheme.colorScheme.onPrimary ,
+                errorLabelColor = MaterialTheme.colorScheme.error ,
+                errorCursorColor = MaterialTheme.colorScheme.error
             ) ,
             textStyle = BookAppTypography.bodyMedium ,
-            shape = RoundedCornerShape(0.dp)
+            shape = RoundedCornerShape(0.dp) ,
+            //adjust error depending if error is available
+            isError = true ,
         )
 
     }
