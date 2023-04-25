@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.home.presentation.screens
 
+import android.widget.Toast
 import androidx.annotation.RawRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -17,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,11 +36,14 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun HomeScreen(
     homeNavigator: HomeNavigator
 ) {
+    val context = LocalContext.current
     StatelessHomeScreen(
         onAddButtonClick = {
+           // Toast.makeText(context , "add button clicked", Toast.LENGTH_SHORT).show()
             homeNavigator.openReadGoalsScreen()
         }
     ){
+       // Toast.makeText(context , "add button FAB clicked", Toast.LENGTH_SHORT).show()
        homeNavigator.openReadGoalsScreen()
     }
 }
@@ -67,7 +72,7 @@ fun StatelessHomeScreen(
             )
 
             ElevatedButton(
-                onClick = { /*Take user to goals addition*/ } ,
+                onClick = { onAddButtonClick() } ,
                 shape = BookAppShapes.medium ,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer
@@ -103,6 +108,7 @@ fun StatelessHomeScreen(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             onClick = {
                 /*navigate or show goal addition bottom sheet*/
+                onAddFabClick()
             }
         ) {
             Icon(

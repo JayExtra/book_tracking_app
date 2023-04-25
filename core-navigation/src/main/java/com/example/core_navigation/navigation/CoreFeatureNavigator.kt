@@ -51,7 +51,11 @@ class CoreFeatureNavigator(
     }
 
     override fun openHomeScreen() {
-        navController.navigate(HomeScreenDestination within navGraph)
+        navController.navigate(HomeScreenDestination within navGraph){
+            popUpTo(NavGraphs.root){
+                inclusive = true
+            }
+        }
     }
 
     override fun openReadGoalsScreen() {
@@ -80,11 +84,11 @@ class CoreFeatureNavigator(
 
 
     override fun goToHomeDestination() {
-        TODO("Not yet implemented")
+        navController.navigate(HomeScreenDestination within navGraph)
     }
 
     override fun openHomeScreenDestination() {
-        TODO("Not yet implemented")
+        navController.navigate(HomeScreenDestination within navGraph)
     }
 
 }

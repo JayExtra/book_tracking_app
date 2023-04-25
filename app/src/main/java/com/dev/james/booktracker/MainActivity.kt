@@ -30,6 +30,7 @@ import com.dev.james.my_library.presentation.ui.destinations.MyLibraryScreenDest
 import com.example.core_navigation.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import timber.log.Timber
 
 
 @AndroidEntryPoint
@@ -71,6 +72,8 @@ class MainActivity : ComponentActivity() {
             val hasOnBoarded by mainViewModel.isOnBoarded.collectAsStateWithLifecycle()
 
             val user by mainViewModel.user.collectAsStateWithLifecycle()
+
+            Timber.tag("MainActivity").d("user => $user")
 
             BookTrackerTheme(
                 theme = theme
