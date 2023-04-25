@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.home.presentation.screens
 
+import android.graphics.Color
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,12 +16,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -44,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
+import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
 import com.ramcosta.composedestinations.annotation.Destination
@@ -54,7 +63,7 @@ fun ReadGoalScreen(){
 }
 
 @Composable
-@Preview(name = "ReadGoalScreen")
+@Preview(name = "ReadGoalScreen" , showBackground = true)
 fun StatelessReadGoalScreen(
     popBackStack : () -> Unit = {} ,
     onGoogleIconClicked : () -> Unit  = {}
@@ -65,16 +74,24 @@ fun StatelessReadGoalScreen(
       modifier = Modifier.fillMaxSize()
   ){
       StandardToolBar(
-         /* navActions = {
+          navActions = {
               //control visibility depending on where we are
-              Icon(
-                  painter = painterResource(id = R.drawable.google_icon_24),
-                  contentDescription = "google icon for searching books" ,
-                  modifier = Modifier.clickable {
+              IconButton(
+                  onClick = {
                       onGoogleIconClicked()
-                  }
-              )
-          } ,*/
+                  } ,
+                  colors = IconButtonDefaults.iconButtonColors(
+                      containerColor = MaterialTheme.colorScheme.secondaryContainer
+                  ) ,
+                  modifier = Modifier.clip(shape = CircleShape) ,
+              ){
+                  Icon(
+                      painter = painterResource(id = R.drawable.google_icon_24),
+                      contentDescription = "google icon for searching books",
+                      tint = MaterialTheme.colorScheme.secondary
+                  )
+              }
+          } ,
           navigate = {
               //navigate back to home screen
               popBackStack()
@@ -82,8 +99,8 @@ fun StatelessReadGoalScreen(
       ) {
           Text(
               text = "Add your current read",
-              style = BookAppTypography.headlineMedium,
-              color = MaterialTheme.colorScheme.onPrimary
+              style = BookAppTypography.headlineSmall,
+              color = MaterialTheme.colorScheme.secondary
           )
       }
 
@@ -110,7 +127,9 @@ fun CurrentReadForm(){
         TextFieldComponent(
             label = "Title"
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier
+            .height(16.dp)
+            .padding(start = 16.dp))
 
         TextFieldComponent(
             label = "Author"
@@ -119,9 +138,8 @@ fun CurrentReadForm(){
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top ,
-            modifier = Modifier.fillMaxWidth()
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
             DropDownComponent(
@@ -129,9 +147,38 @@ fun CurrentReadForm(){
                 dropDownItems = listOf<String>("1" , "2" , "3")
             )
 
+           Spacer(modifier = Modifier.width(30.dp))
+
             DropDownComponent(
                 label = "Current chapter" ,
                 dropDownItems = listOf<String>("1" , "2" , "3")
+            )
+
+
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextFieldComponent(
+            label = "Current chapter title"
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        ElevatedButton(
+            modifier = Modifier.fillMaxWidth() ,
+            onClick = { } ,
+            shape = RoundedCornerShape(10.dp) ,
+            contentPadding = PaddingValues(16.dp) ,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            )
+        ) {
+            Text(
+                text = "Add book" ,
+                style = BookAppTypography.labelLarge,
+                textAlign = TextAlign.Center ,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
 
@@ -153,7 +200,7 @@ fun ImageSelectorComponent(
             .width(158.dp)
             .height(191.dp)
             .clip(shape = RoundedCornerShape(20.dp))
-            .background(color = MaterialTheme.colorScheme.background)
+            .background(color = MaterialTheme.colorScheme.secondaryContainer)
             .clickable {
                 onSelect()
             }
@@ -233,18 +280,19 @@ fun TextFieldComponent(
                 .padding(top = 8.dp)
                 .border(
                     width = 2.dp,
-                    shape = RoundedCornerShape(5.dp),
-                    color = MaterialTheme.colorScheme.primary
+                    shape = RoundedCornerShape(0.dp),
+                    color = MaterialTheme.colorScheme.secondary
                 )
                 .fillMaxWidth()
             ,
 
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = MaterialTheme.colorScheme.background ,
-                cursorColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.secondary,
                 textColor = MaterialTheme.colorScheme.onPrimary
             ) ,
-            textStyle = BookAppTypography.bodyMedium
+            textStyle = BookAppTypography.bodyMedium ,
+            shape = RoundedCornerShape(0.dp)
         )
 
     }
@@ -255,6 +303,7 @@ fun TextFieldComponent(
 @Composable
 @Preview("DropDownComponent")
 fun DropDownComponent(
+    modifier: Modifier = Modifier ,
     label : String = "some label" ,
     dropDownItems : List<String> = listOf() ,
     onListItemSelected : (String) -> Unit = {}
@@ -277,7 +326,6 @@ fun DropDownComponent(
             value = selectedText,
             onValueChange = { selectedText = it },
             modifier = Modifier
-                .padding(top = 8.dp)
                 .width(180.dp)
                 .onGloballyPositioned { coordinates ->
                     //This value is used to assign to the DropDown the same width
@@ -285,15 +333,16 @@ fun DropDownComponent(
                 }
                 .border(
                     width = 2.dp,
-                    shape = RoundedCornerShape(5.dp),
-                    color = MaterialTheme.colorScheme.primary
+                    shape = RoundedCornerShape(0.dp),
+                    color = MaterialTheme.colorScheme.secondary
                 ),
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = MaterialTheme.colorScheme.background ,
                 textColor = MaterialTheme.colorScheme.onPrimary
-            )
-
+            ) ,
+            shape = RoundedCornerShape(0.dp)
         )
+        
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
