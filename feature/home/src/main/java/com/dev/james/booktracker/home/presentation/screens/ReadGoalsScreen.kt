@@ -67,7 +67,6 @@ import timber.log.Timber
 fun ReadGoalScreen(
     homeNavigator: HomeNavigator
 ) {
-
     StatelessReadGoalScreen(
         popBackStack = {
             homeNavigator.openHomeScreen()
@@ -126,8 +125,6 @@ fun StatelessReadGoalScreen(
 
         CurrentReadForm()
 
-        Spacer(modifier = Modifier.height(24.dp))
-
         BottomNextPreviousButtons(
             modifier = Modifier.padding(16.dp) ,
             currentPosition = 0
@@ -153,7 +150,7 @@ fun CurrentReadForm(
 
         ImageSelectorComponent()
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         TextFieldComponent(
             label = "Title"

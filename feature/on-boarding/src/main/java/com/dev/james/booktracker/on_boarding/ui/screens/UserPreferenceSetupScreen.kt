@@ -45,7 +45,6 @@ import com.dev.james.booktracker.compose_ui.ui.components.SelectableChip
 import com.dev.james.booktracker.compose_ui.ui.components.StatefulRoundOutlineButton
 import com.dev.james.booktracker.compose_ui.ui.components.StepsProgressBar
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
-import com.dev.james.booktracker.on_boarding.ui.components.*
 import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNavigator
 import com.dev.james.booktracker.on_boarding.ui.states.ThemeItem
 import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupViewModel

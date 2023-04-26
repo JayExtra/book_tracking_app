@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,24 +28,23 @@ fun RoundedBrownButton(
     onClick : () -> Unit = {}
 ){
 
-    Box(
+    ElevatedButton(
         modifier = Modifier
-            .clip(
-                RoundedCornerShape(cornerRadius)
-            )
             .width(intrinsicSize = IntrinsicSize.Max)
-            .height(40.dp)
-            .background(color = color)
-            .clickable {
-                onClick()
-            },
-        contentAlignment = Alignment.Center
+            .height(40.dp),
+        shape = RoundedCornerShape(cornerRadius) ,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = color
+        ) ,
+        onClick = {
+            onClick()
+        } ,
+        contentPadding = PaddingValues(bottom = 5.dp , start = 35.dp , end = 35.dp)
     ) {
         Text(
             text = label,
-            style = BookAppTypography.bodyMedium,
-            color = Color.White ,
-            modifier = Modifier.padding(bottom = 5.dp , start = 35.dp , end = 35.dp)
+            style = BookAppTypography.labelLarge,
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
