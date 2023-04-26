@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.*
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.theme.Brown30
-import com.dev.james.booktracker.on_boarding.ui.components.StatefulRoundOutlineButton
+import com.dev.james.booktracker.compose_ui.ui.components.StatefulRoundOutlineButton
 import com.dev.james.booktracker.on_boarding.ui.navigation.OnBoardingNavigator
 import com.dev.james.on_boarding.R
 import com.ramcosta.composedestinations.annotation.Destination
