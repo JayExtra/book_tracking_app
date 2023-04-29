@@ -4,6 +4,7 @@ data class AddReadFormState(
     val showPlaceHolderImage : Boolean = true ,
     val showImageProgress : Boolean = false ,
     val selectedImage : String = "" ,
+    val noImageSelectedError : String = "" ,
     val titleText : String = "" ,
     val titleFieldError : String? = null ,
     val authorText : String = "" ,

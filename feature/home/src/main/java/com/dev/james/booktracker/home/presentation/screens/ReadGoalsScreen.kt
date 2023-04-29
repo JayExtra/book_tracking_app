@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,23 +54,34 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.components.StatefulRoundOutlineButton
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
+import com.dev.james.booktracker.home.presentation.ReadGoalsScreenViewModel
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
+import com.dsc.form_builder.FormState
+import com.dsc.form_builder.TextFieldState
+import com.dsc.form_builder.Validators
 import com.ramcosta.composedestinations.annotation.Destination
 import timber.log.Timber
 
 @Composable
 @Destination
 fun ReadGoalScreen(
-    homeNavigator: HomeNavigator
+    homeNavigator: HomeNavigator ,
+    readGoalsScreenViewModel : ReadGoalsScreenViewModel = hiltViewModel()
 ) {
+    val currentReadFormState by remember { mutableStateOf( readGoalsScreenViewModel.currentReadFormState) }
     StatelessReadGoalScreen(
+        currentReadFormState = currentReadFormState ,
         popBackStack = {
             homeNavigator.openHomeScreen()
+        } ,
+        onGoogleIconClicked = {
+
         }
     )
 }
@@ -77,6 +89,7 @@ fun ReadGoalScreen(
 @Composable
 @Preview(name = "ReadGoalScreen", showBackground = true)
 fun StatelessReadGoalScreen(
+    currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
     popBackStack: () -> Unit = {},
     onGoogleIconClicked: () -> Unit = {}
 ) {
@@ -123,15 +136,17 @@ fun StatelessReadGoalScreen(
             )
         }
 
-        CurrentReadForm()
+        CurrentReadForm(
+            currentReadFormState = currentReadFormState ,
+            onSaveBookClicked = {
+
+            }
+        )
 
         BottomNextPreviousButtons(
             modifier = Modifier.padding(16.dp) ,
             currentPosition = 0
         )
-
-
-
 
     }
 }
@@ -140,8 +155,10 @@ fun StatelessReadGoalScreen(
 @Preview("CurrentReadForm")
 fun CurrentReadForm(
     //will take in form state
+    currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()) ,
     onSaveBookClicked: () -> Unit = {}
 ) {
+
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -152,17 +169,30 @@ fun CurrentReadForm(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+
+        val titleFieldState : TextFieldState = currentReadFormState.getState(name = "title")
+
         TextFieldComponent(
-            label = "Title"
+            label = "Title" ,
+            text = titleFieldState.value ,
+            onTextChanged = {fieldValue ->
+                titleFieldState.change(fieldValue)
+            }
         )
+
         Spacer(
             modifier = Modifier
                 .height(16.dp)
                 .padding(start = 16.dp)
         )
 
+        val authorFieldState : TextFieldState = currentReadFormState.getState("author")
         TextFieldComponent(
-            label = "Author"
+            label = "Author" ,
+            text = authorFieldState.value ,
+            onTextChanged = {fieldValue ->
+                authorFieldState.change(fieldValue)
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -179,30 +209,46 @@ fun CurrentReadForm(
                 )
             }
 
+            val chapterDropDownState : TextFieldState = currentReadFormState.getState("chapters")
+
             DropDownComponent(
                 label = "Chapters",
-                dropDownItems = chapterCount.toList()
-            ) { chapter ->
-                Timber.tag("ReadGoalsScreen").d(chapter)
-                //update chapter count
-            }
+                selectedText = chapterDropDownState.value,
+                dropDownItems = chapterCount.toList() ,
+                onListItemSelected = {chapter ->
+                    Timber.tag("ReadGoalsScreen").d(chapter)
+                    chapterDropDownState.change(chapter)
+                    //update chapter count
+                }
+            )
 
             Spacer(modifier = Modifier.width(30.dp))
 
+            val currentChapterDropDownState : TextFieldState = currentReadFormState.getState("current chapter")
+
             DropDownComponent(
                 label = "Current chapter",
-                dropDownItems = chapterCount.toList()
-            ) { chapter ->
-                Timber.tag("ReadGoalsScreen").d(chapter)
-                //update current selected chapter
-            }
+                selectedText = currentChapterDropDownState.value,
+                dropDownItems = chapterCount.toList(),
+                onListItemSelected = {  chapter ->
+                    Timber.tag("ReadGoalsScreen").d(chapter)
+                    currentChapterDropDownState.change(chapter)
+                    //update current selected chapter
+                }
+            )
 
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val chapterTitleState : TextFieldState = currentReadFormState.getState("chapter title")
+
         TextFieldComponent(
-            label = "Current chapter title"
+            text = chapterTitleState.value,
+            label = "Current chapter title" ,
+            onTextChanged = {text ->
+                chapterTitleState.change(text)
+            }
         )
 
         Spacer(modifier = Modifier.height(18.dp))
@@ -352,13 +398,13 @@ fun TextFieldComponent(
 @Preview("DropDownComponent")
 fun DropDownComponent(
     modifier: Modifier = Modifier,
+    selectedText : String = "" ,
     label: String = "some label",
     dropDownItems: List<String> = listOf(),
     onListItemSelected: (String) -> Unit = {}
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     //var textFieldSize by remember { mutableStateOf(Size.Zero)}
-    var selectedText by remember { mutableStateOf("") }
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -377,7 +423,7 @@ fun DropDownComponent(
         ) {
             TextField(
                 value = selectedText,
-                onValueChange = { selectedText = it },
+                onValueChange = { /*selectedText = it*/ },
                 modifier = Modifier
                     .border(
                         width = 2.dp,
@@ -405,7 +451,6 @@ fun DropDownComponent(
                     DropdownMenuItem(
                         onClick = {
                             onListItemSelected(item)
-                            selectedText = item
                             isExpanded = false
                         },
                         text = {
