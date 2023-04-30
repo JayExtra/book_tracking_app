@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.home.presentation.screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -42,13 +43,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -57,31 +57,62 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
-import com.dev.james.booktracker.compose_ui.ui.components.StatefulRoundOutlineButton
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.home.presentation.ReadGoalsScreenViewModel
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
-import com.dsc.form_builder.Validators
 import com.ramcosta.composedestinations.annotation.Destination
 import timber.log.Timber
 
 @Composable
 @Destination
 fun ReadGoalScreen(
-    homeNavigator: HomeNavigator ,
-    readGoalsScreenViewModel : ReadGoalsScreenViewModel = hiltViewModel()
+    homeNavigator: HomeNavigator,
+    readGoalsScreenViewModel: ReadGoalsScreenViewModel = hiltViewModel()
 ) {
-    val currentReadFormState by remember { mutableStateOf( readGoalsScreenViewModel.currentReadFormState) }
+    val context = LocalContext.current
+
+    val currentReadFormState by remember { mutableStateOf(readGoalsScreenViewModel.currentReadFormState) }
+
+    var currentSelectedImage by remember { mutableStateOf("") }
+
+    var imageSelectedError by remember {
+        mutableStateOf(false)
+    }
+
+
     StatelessReadGoalScreen(
-        currentReadFormState = currentReadFormState ,
+        currentReadFormState = currentReadFormState,
         popBackStack = {
             homeNavigator.openHomeScreen()
-        } ,
+        },
         onGoogleIconClicked = {
 
+        } ,
+        selectedImage = currentSelectedImage ,
+        onSaveClicked = {
+            /*titleFieldState.validate()
+                authorFieldState.validate()
+                chapterTitleState.validate()
+                currentChapterDropDownState.validate()
+                chapterDropDownState.validate()*/
+            val formValidationResult = currentReadFormState.validate()
+            imageSelectedError = currentSelectedImage.isBlank()
+
+            if( formValidationResult && !imageSelectedError){
+                //start saving process to db
+                Toast.makeText(context , "Form is properly filled , saving data..." , Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+        } ,
+        imageSelectedError = imageSelectedError ,
+        onImageSelectorClicked = {
+            //launch image picker
+            currentSelectedImage = "some image selected"
+            imageSelectedError = currentSelectedImage.isBlank()
         }
     )
 }
@@ -90,8 +121,12 @@ fun ReadGoalScreen(
 @Preview(name = "ReadGoalScreen", showBackground = true)
 fun StatelessReadGoalScreen(
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
+    selectedImage : String = "",
+    imageSelectedError: Boolean = false,
     popBackStack: () -> Unit = {},
-    onGoogleIconClicked: () -> Unit = {}
+    onGoogleIconClicked: () -> Unit = {},
+    onSaveClicked : () -> Unit = {} ,
+    onImageSelectorClicked : () -> Unit = {}
 ) {
     Column(
         verticalArrangement = Arrangement.Top,
@@ -137,14 +172,19 @@ fun StatelessReadGoalScreen(
         }
 
         CurrentReadForm(
-            currentReadFormState = currentReadFormState ,
+            currentReadFormState = currentReadFormState,
             onSaveBookClicked = {
-
+                onSaveClicked()
+            } ,
+            imageSelected = selectedImage ,
+            imageSelectedError = imageSelectedError ,
+            imageSelectorClicked = {
+                onImageSelectorClicked()
             }
         )
 
         BottomNextPreviousButtons(
-            modifier = Modifier.padding(16.dp) ,
+            modifier = Modifier.padding(16.dp),
             currentPosition = 0
         )
 
@@ -155,8 +195,11 @@ fun StatelessReadGoalScreen(
 @Preview("CurrentReadForm")
 fun CurrentReadForm(
     //will take in form state
-    currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()) ,
-    onSaveBookClicked: () -> Unit = {}
+    currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
+    imageSelected : String = "",
+    imageSelectedError : Boolean = false,
+    onSaveBookClicked: () -> Unit = {} ,
+    imageSelectorClicked : () -> Unit = {}
 ) {
 
     Column(
@@ -165,17 +208,36 @@ fun CurrentReadForm(
         modifier = Modifier.padding(16.dp)
     ) {
 
-        ImageSelectorComponent()
+        var showImagePickerProgress by remember {
+            mutableStateOf(false)
+        }
+        var showImagePlaceHolder by remember {
+            mutableStateOf(true)
+        }
+
+        ImageSelectorComponent(
+            onSelect = {
+                //start the image picker
+                showImagePickerProgress = !showImagePickerProgress
+                showImagePlaceHolder = !showImagePlaceHolder
+                imageSelectorClicked()
+            } ,
+            showProgressBar = showImagePickerProgress ,
+            showPlaceHolder = showImagePlaceHolder ,
+            selectedImage = imageSelected ,
+            isError = imageSelectedError
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
 
-        val titleFieldState : TextFieldState = currentReadFormState.getState(name = "title")
+        val titleFieldState: TextFieldState = currentReadFormState.getState(name = "title")
 
         TextFieldComponent(
-            label = "Title" ,
-            text = titleFieldState.value ,
-            onTextChanged = {fieldValue ->
+            label = "Title",
+            text = titleFieldState.value,
+            hasError = titleFieldState.hasError,
+            onTextChanged = { fieldValue ->
                 titleFieldState.change(fieldValue)
             }
         )
@@ -186,16 +248,21 @@ fun CurrentReadForm(
                 .padding(start = 16.dp)
         )
 
-        val authorFieldState : TextFieldState = currentReadFormState.getState("author")
+        val authorFieldState: TextFieldState = currentReadFormState.getState("author")
         TextFieldComponent(
-            label = "Author" ,
-            text = authorFieldState.value ,
-            onTextChanged = {fieldValue ->
+            label = "Author",
+            text = authorFieldState.value,
+            hasError = authorFieldState.hasError,
+            onTextChanged = { fieldValue ->
                 authorFieldState.change(fieldValue)
             }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        val chapterDropDownState: TextFieldState = currentReadFormState.getState("chapters")
+        val currentChapterDropDownState: TextFieldState =
+            currentReadFormState.getState("current chapter")
 
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -209,13 +276,14 @@ fun CurrentReadForm(
                 )
             }
 
-            val chapterDropDownState : TextFieldState = currentReadFormState.getState("chapters")
+
 
             DropDownComponent(
                 label = "Chapters",
                 selectedText = chapterDropDownState.value,
-                dropDownItems = chapterCount.toList() ,
-                onListItemSelected = {chapter ->
+                dropDownItems = chapterCount.toList(),
+                hasError = chapterDropDownState.hasError,
+                onListItemSelected = { chapter ->
                     Timber.tag("ReadGoalsScreen").d(chapter)
                     chapterDropDownState.change(chapter)
                     //update chapter count
@@ -224,13 +292,14 @@ fun CurrentReadForm(
 
             Spacer(modifier = Modifier.width(30.dp))
 
-            val currentChapterDropDownState : TextFieldState = currentReadFormState.getState("current chapter")
+
 
             DropDownComponent(
                 label = "Current chapter",
                 selectedText = currentChapterDropDownState.value,
                 dropDownItems = chapterCount.toList(),
-                onListItemSelected = {  chapter ->
+                hasError = currentChapterDropDownState.hasError,
+                onListItemSelected = { chapter ->
                     Timber.tag("ReadGoalsScreen").d(chapter)
                     currentChapterDropDownState.change(chapter)
                     //update current selected chapter
@@ -241,12 +310,13 @@ fun CurrentReadForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        val chapterTitleState : TextFieldState = currentReadFormState.getState("chapter title")
+        val chapterTitleState: TextFieldState = currentReadFormState.getState("chapter title")
 
         TextFieldComponent(
             text = chapterTitleState.value,
-            label = "Current chapter title" ,
-            onTextChanged = {text ->
+            label = "Current chapter title",
+            hasError = chapterTitleState.hasError,
+            onTextChanged = { text ->
                 chapterTitleState.change(text)
             }
         )
@@ -255,7 +325,11 @@ fun CurrentReadForm(
 
         ElevatedButton(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { },
+            onClick = {
+                //validate with state show error where necessary
+               onSaveBookClicked()
+
+            },
             shape = RoundedCornerShape(10.dp),
             contentPadding = PaddingValues(16.dp),
             colors = ButtonDefaults.buttonColors(
@@ -279,10 +353,12 @@ fun CurrentReadForm(
 fun ImageSelectorComponent(
     showProgressBar: Boolean = false,
     showPlaceHolder: Boolean = true,
+    isError: Boolean = false,
     //could be image could be uri , subject to change
     selectedImage: String = "",
     onSelect: () -> Unit = {}
 ) {
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -290,6 +366,11 @@ fun ImageSelectorComponent(
             .height(191.dp)
             .clip(shape = RoundedCornerShape(20.dp))
             .background(color = MaterialTheme.colorScheme.secondaryContainer)
+            .border(
+                width = if (isError) 2.dp else 0.dp,
+                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondaryContainer ,
+                shape = RoundedCornerShape(20.dp)
+            )
             .clickable {
                 //starts the image picking flow
                 onSelect()
@@ -323,11 +404,11 @@ fun ImageSelectorComponent(
 
                 )
                 Text(
-                    text = "Add image",
+                    text = if (isError) "Add image*" else "Add image",
                     style = BookAppTypography.labelLarge,
                     modifier = Modifier.padding(16.dp),
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = if(isError)MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                 )
             }
         }
@@ -347,6 +428,7 @@ fun ImageSelectorComponent(
 @Preview(name = "TextFieldComponent")
 fun TextFieldComponent(
     text: String = "",
+    hasError: Boolean = false,
     label: String = "Some label",
     onTextChanged: (String) -> Unit = {}
 ) {
@@ -357,9 +439,10 @@ fun TextFieldComponent(
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = label,
+            text = if (hasError) "$label*" else label,
             style = BookAppTypography.labelMedium,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            color = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
             //also adjust error color and text if error is available
         )
 
@@ -374,19 +457,18 @@ fun TextFieldComponent(
                     width = 2.dp,
                     shape = RoundedCornerShape(0.dp),
                     //if error is available , change the color of border to error color
-                    color = MaterialTheme.colorScheme.secondary
+                    color = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                 )
                 .fillMaxWidth(),
 
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = MaterialTheme.colorScheme.background,
-                errorLabelColor = MaterialTheme.colorScheme.error,
                 errorCursorColor = MaterialTheme.colorScheme.error
             ),
             textStyle = BookAppTypography.bodyMedium,
             shape = RoundedCornerShape(0.dp),
             //adjust error depending if error is available
-            isError = true,
+            isError = hasError,
         )
 
     }
@@ -398,7 +480,8 @@ fun TextFieldComponent(
 @Preview("DropDownComponent")
 fun DropDownComponent(
     modifier: Modifier = Modifier,
-    selectedText : String = "" ,
+    selectedText: String = "",
+    hasError : Boolean = false ,
     label: String = "some label",
     dropDownItems: List<String> = listOf(),
     onListItemSelected: (String) -> Unit = {}
@@ -412,8 +495,9 @@ fun DropDownComponent(
     ) {
 
         Text(
-            text = label,
-            style = BookAppTypography.labelMedium
+            text = if(hasError)"$label*" else label,
+            style = BookAppTypography.labelMedium ,
+            color = if(hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
         )
 
         ExposedDropdownMenuBox(
@@ -428,7 +512,7 @@ fun DropDownComponent(
                     .border(
                         width = 2.dp,
                         shape = RoundedCornerShape(0.dp),
-                        color = MaterialTheme.colorScheme.secondary
+                        color = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                     )
                     .menuAnchor(),
                 colors = TextFieldDefaults.textFieldColors(
@@ -466,7 +550,7 @@ fun DropDownComponent(
 
 
 @Composable
-@Preview("BottomButtonsSection" , showBackground = true)
+@Preview("BottomButtonsSection", showBackground = true)
 fun BottomNextPreviousButtons(
     modifier: Modifier = Modifier,
     onNextClicked: () -> Unit = {},
