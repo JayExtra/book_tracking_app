@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,15 +56,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
+import com.dev.james.booktracker.home.presentation.ImageSelectorUiState
 import com.dev.james.booktracker.home.presentation.ReadGoalsScreenViewModel
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Composable
@@ -74,13 +81,15 @@ fun ReadGoalScreen(
 ) {
     val context = LocalContext.current
 
+    val coroutineScope = rememberCoroutineScope()
+
     val currentReadFormState by remember { mutableStateOf(readGoalsScreenViewModel.currentReadFormState) }
 
-    var currentSelectedImage by remember { mutableStateOf("") }
-
-    var imageSelectedError by remember {
-        mutableStateOf(false)
-    }
+    val imageSelectorState = readGoalsScreenViewModel.imageSelectorUiState
+        .collectAsStateWithLifecycle(
+            initialValue = ImageSelectorUiState() ,
+            minActiveState = Lifecycle.State.STARTED
+        )
 
 
     StatelessReadGoalScreen(
@@ -91,28 +100,46 @@ fun ReadGoalScreen(
         onGoogleIconClicked = {
 
         } ,
-        selectedImage = currentSelectedImage ,
+        imageSelectorState = imageSelectorState.value ,
         onSaveClicked = {
-            /*titleFieldState.validate()
-                authorFieldState.validate()
-                chapterTitleState.validate()
-                currentChapterDropDownState.validate()
-                chapterDropDownState.validate()*/
-            val formValidationResult = currentReadFormState.validate()
-            imageSelectedError = currentSelectedImage.isBlank()
 
-            if( formValidationResult && !imageSelectedError){
+            val formValidationResult = currentReadFormState.validate()
+
+            readGoalsScreenViewModel.validateImageSelected(
+                imageSelectedUri = imageSelectorState.value.imageSelectedUri
+            )
+
+            if( formValidationResult && !imageSelectorState.value.isError){
                 //start saving process to db
                 Toast.makeText(context , "Form is properly filled , saving data..." , Toast.LENGTH_SHORT)
                     .show()
             }
 
         } ,
-        imageSelectedError = imageSelectedError ,
         onImageSelectorClicked = {
-            //launch image picker
-            currentSelectedImage = "some image selected"
-            imageSelectedError = currentSelectedImage.isBlank()
+
+            /*currentSelectedImage = "some image selected"
+            imageSelectedError = currentSelectedImage.isBlank()*/
+
+            //1.update selector state to show circular progress
+            readGoalsScreenViewModel.passScreenAction(
+                ReadGoalsScreenViewModel.AddReadFormUiActions.LaunchImagePicker
+            )
+
+            //2.launch image picker
+            //this current implementation simulates the image picking action will replace
+            //with actual image picker implementation
+            coroutineScope.launch {
+                delay(5000L)
+
+                readGoalsScreenViewModel.passScreenAction(
+                    ReadGoalsScreenViewModel.AddReadFormUiActions
+                        .ImageSelected(imageUri = "some image uri")
+                )
+
+            }
+
+
         }
     )
 }
@@ -121,11 +148,10 @@ fun ReadGoalScreen(
 @Preview(name = "ReadGoalScreen", showBackground = true)
 fun StatelessReadGoalScreen(
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
-    selectedImage : String = "",
-    imageSelectedError: Boolean = false,
+    imageSelectorState : ImageSelectorUiState = ImageSelectorUiState(),
     popBackStack: () -> Unit = {},
     onGoogleIconClicked: () -> Unit = {},
-    onSaveClicked : () -> Unit = {} ,
+    onSaveClicked : () -> Unit = {},
     onImageSelectorClicked : () -> Unit = {}
 ) {
     Column(
@@ -176,8 +202,7 @@ fun StatelessReadGoalScreen(
             onSaveBookClicked = {
                 onSaveClicked()
             } ,
-            imageSelected = selectedImage ,
-            imageSelectedError = imageSelectedError ,
+            imageSelectorState = imageSelectorState ,
             imageSelectorClicked = {
                 onImageSelectorClicked()
             }
@@ -196,8 +221,7 @@ fun StatelessReadGoalScreen(
 fun CurrentReadForm(
     //will take in form state
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
-    imageSelected : String = "",
-    imageSelectedError : Boolean = false,
+    imageSelectorState : ImageSelectorUiState = ImageSelectorUiState(),
     onSaveBookClicked: () -> Unit = {} ,
     imageSelectorClicked : () -> Unit = {}
 ) {
@@ -208,24 +232,12 @@ fun CurrentReadForm(
         modifier = Modifier.padding(16.dp)
     ) {
 
-        var showImagePickerProgress by remember {
-            mutableStateOf(false)
-        }
-        var showImagePlaceHolder by remember {
-            mutableStateOf(true)
-        }
-
         ImageSelectorComponent(
             onSelect = {
                 //start the image picker
-                showImagePickerProgress = !showImagePickerProgress
-                showImagePlaceHolder = !showImagePlaceHolder
                 imageSelectorClicked()
             } ,
-            showProgressBar = showImagePickerProgress ,
-            showPlaceHolder = showImagePlaceHolder ,
-            selectedImage = imageSelected ,
-            isError = imageSelectedError
+            imageSelectorState = imageSelectorState
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -351,11 +363,7 @@ fun CurrentReadForm(
 @Composable
 @Preview("ImageSelectorComponent")
 fun ImageSelectorComponent(
-    showProgressBar: Boolean = false,
-    showPlaceHolder: Boolean = true,
-    isError: Boolean = false,
-    //could be image could be uri , subject to change
-    selectedImage: String = "",
+    imageSelectorState : ImageSelectorUiState = ImageSelectorUiState(),
     onSelect: () -> Unit = {}
 ) {
 
@@ -367,8 +375,8 @@ fun ImageSelectorComponent(
             .clip(shape = RoundedCornerShape(20.dp))
             .background(color = MaterialTheme.colorScheme.secondaryContainer)
             .border(
-                width = if (isError) 2.dp else 0.dp,
-                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondaryContainer ,
+                width = if (imageSelectorState.isError) 2.dp else 0.dp,
+                color = if (imageSelectorState.isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondaryContainer,
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable {
@@ -377,7 +385,7 @@ fun ImageSelectorComponent(
             }
     ) {
 
-        if (selectedImage.isNotBlank()) {
+        if (imageSelectorState.imageSelectedUri.isNotBlank()) {
             //will replace with coil
             Image(
                 painterResource(id = R.drawable.image_placeholder_24),
@@ -389,7 +397,7 @@ fun ImageSelectorComponent(
             )
         }
 
-        if (showPlaceHolder) {
+        if (imageSelectorState.imageSelectedUri.isBlank() && !imageSelectorState.showProgress) {
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -404,16 +412,16 @@ fun ImageSelectorComponent(
 
                 )
                 Text(
-                    text = if (isError) "Add image*" else "Add image",
+                    text = if (imageSelectorState.isError) "Add image*" else "Add image",
                     style = BookAppTypography.labelLarge,
                     modifier = Modifier.padding(16.dp),
                     textAlign = TextAlign.Center,
-                    color = if(isError)MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                    color = if(imageSelectorState.isError)MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                 )
             }
         }
 
-        if (showProgressBar) {
+        if (imageSelectorState.showProgress) {
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -487,7 +495,6 @@ fun DropDownComponent(
     onListItemSelected: (String) -> Unit = {}
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    //var textFieldSize by remember { mutableStateOf(Size.Zero)}
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -507,7 +514,7 @@ fun DropDownComponent(
         ) {
             TextField(
                 value = selectedText,
-                onValueChange = { /*selectedText = it*/ },
+                onValueChange = { onListItemSelected(it) },
                 modifier = Modifier
                     .border(
                         width = 2.dp,
