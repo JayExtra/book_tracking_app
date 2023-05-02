@@ -1,9 +1,7 @@
 package com.dev.james.booktracker.home.presentation.viewmodels
 
-import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import com.dsc.form_builder.FormState
-import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
 import com.dsc.form_builder.Validators
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +16,12 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
         ImageSelectorUiState()
     )
     val imageSelectorUiState get() = _imageSelectorState.asStateFlow()
+
+    private val _readGoalsScreenUiState: MutableStateFlow<ReadGoalsScreenState> = MutableStateFlow(
+        ReadGoalsScreenState()
+    )
+    val readGoalsScreenUiState get() = _readGoalsScreenUiState
+
 
     val currentReadFormState = FormState(
         fields = listOf(
@@ -59,7 +63,7 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun passScreenAction(action: AddReadFormUiActions) {
+    fun passAddReadFormAction(action: AddReadFormUiActions) {
         when (action) {
             is AddReadFormUiActions.LaunchImagePicker -> {
                 _imageSelectorState.value = _imageSelectorState.value.copy(
@@ -79,6 +83,31 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    fun passMainScreenActions(action: ReadGoalsUiActions) {
+        when (action) {
+            is ReadGoalsUiActions.MoveNext -> {
+                val currentPosition = action.currentPosition
+                if (currentPosition < 2) {
+                    _readGoalsScreenUiState.value = _readGoalsScreenUiState
+                        .value.copy(
+                            currentPosition = currentPosition + 1,
+                            previousPosition = currentPosition
+                        )
+                }
+            }
+            is ReadGoalsUiActions.MovePrevious -> {
+                val currentPosition = action.currentPosition
+                if (currentPosition > 0) {
+                    _readGoalsScreenUiState.value = _readGoalsScreenUiState
+                        .value.copy(
+                            currentPosition = currentPosition - 1,
+                            previousPosition = currentPosition
+                        )
+                }
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
     }
@@ -91,7 +120,8 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
 
     /*General screen ui actions*/
     sealed class ReadGoalsUiActions {
-
+        data class MoveNext(val currentPosition: Int) : ReadGoalsUiActions()
+        data class MovePrevious(val currentPosition: Int) : ReadGoalsUiActions()
     }
 
 }

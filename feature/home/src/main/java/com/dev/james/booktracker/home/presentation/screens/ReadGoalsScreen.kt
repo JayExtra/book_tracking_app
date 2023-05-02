@@ -6,6 +6,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +39,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -55,6 +59,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,6 +71,7 @@ import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiState
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
+import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
 import com.ramcosta.composedestinations.annotation.Destination
@@ -91,9 +97,16 @@ fun ReadGoalScreen(
             minActiveState = Lifecycle.State.STARTED
         )
 
+    val readGoalsScreenUiState = readGoalsScreenViewModel.readGoalsScreenUiState
+        .collectAsStateWithLifecycle(
+            initialValue = ReadGoalsScreenState() ,
+            minActiveState = Lifecycle.State.STARTED
+        )
+
 
     StatelessReadGoalScreen(
         currentReadFormState = currentReadFormState,
+        uiState = readGoalsScreenUiState.value,
         popBackStack = {
             homeNavigator.openHomeScreen()
         },
@@ -126,7 +139,7 @@ fun ReadGoalScreen(
             imageSelectedError = currentSelectedImage.isBlank()*/
 
             //1.update selector state to show circular progress
-            readGoalsScreenViewModel.passScreenAction(
+            readGoalsScreenViewModel.passAddReadFormAction(
                 ReadGoalsScreenViewModel.AddReadFormUiActions.LaunchImagePicker
             )
 
@@ -136,7 +149,7 @@ fun ReadGoalScreen(
             coroutineScope.launch {
                 delay(5000L)
 
-                readGoalsScreenViewModel.passScreenAction(
+                readGoalsScreenViewModel.passAddReadFormAction(
                     ReadGoalsScreenViewModel.AddReadFormUiActions
                         .ImageSelected(imageUri = "some image uri")
                 )
@@ -144,6 +157,21 @@ fun ReadGoalScreen(
             }
 
 
+        } ,
+
+        onNextClicked = {
+            readGoalsScreenViewModel.passMainScreenActions(
+                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
+                    currentPosition = readGoalsScreenUiState.value.currentPosition
+                )
+            )
+        } ,
+        onPreviousClicked = {
+            readGoalsScreenViewModel.passMainScreenActions(
+                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MovePrevious(
+                    currentPosition = readGoalsScreenUiState.value.currentPosition
+                )
+            )
         }
     )
 }
@@ -152,11 +180,14 @@ fun ReadGoalScreen(
 @Preview(name = "ReadGoalScreen", showBackground = true)
 fun StatelessReadGoalScreen(
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
+    uiState : ReadGoalsScreenState = ReadGoalsScreenState() ,
     imageSelectorState: ImageSelectorUiState = ImageSelectorUiState(),
     popBackStack: () -> Unit = {},
     onGoogleIconClicked: () -> Unit = {},
     onSaveClicked: () -> Unit = {},
-    onImageSelectorClicked: () -> Unit = {}
+    onImageSelectorClicked: () -> Unit = {} ,
+    onNextClicked: () -> Unit = {} ,
+    onPreviousClicked: () -> Unit = {}
 ) {
     Column(
         verticalArrangement = Arrangement.Top,
@@ -166,55 +197,91 @@ fun StatelessReadGoalScreen(
         StandardToolBar(
             navActions = {
                 //control visibility depending on where we are
-                Button(
-                    onClick = {
-                        onGoogleIconClicked()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    ),
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .size(40.dp),
-                    shape = CircleShape,
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.google_icon_24),
-                        contentDescription = "google icon for searching books",
-                        tint = MaterialTheme.colorScheme.secondary,
+                if(uiState.currentPosition == 0){
+                    Button(
+                        onClick = {
+                            onGoogleIconClicked()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        ),
                         modifier = Modifier
-                            .width(24.dp)
-                            .height(24.dp)
-                    )
+                            .padding(end = 8.dp)
+                            .size(40.dp),
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.google_icon_24),
+                            contentDescription = "google icon for searching books",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier
+                                .width(24.dp)
+                                .height(24.dp)
+                        )
+                    }
                 }
+
             },
             navigate = {
                 //navigate back to home screen
                 popBackStack()
             }
         ) {
+            val toolBarTitle =
+                if(uiState.currentPosition > 0){
+                    "Set goals"
+                }else{
+                    "Add your current read"
+                }
             Text(
-                text = "Add your current read",
+                text = toolBarTitle ,
                 style = BookAppTypography.headlineSmall,
                 color = MaterialTheme.colorScheme.secondary
             )
         }
 
-        CurrentReadForm(
-            currentReadFormState = currentReadFormState,
-            onSaveBookClicked = {
-                onSaveClicked()
-            },
-            imageSelectorState = imageSelectorState,
-            imageSelectorClicked = {
-                onImageSelectorClicked()
+        Box(
+            contentAlignment = Alignment.TopCenter ,
+            modifier = Modifier.weight(1f)
+        ){
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = uiState.currentPosition == 0,
+                enter = fadeIn() + slideInHorizontally { if (uiState.currentPosition > uiState.previousPosition) it else -it },
+                exit = fadeOut() + slideOutHorizontally { if (uiState.currentPosition > uiState.previousPosition) -it else it }
+            ) {
+                CurrentReadForm(
+                    currentReadFormState = currentReadFormState,
+                    onSaveBookClicked = {
+                        onSaveClicked()
+                    },
+                    imageSelectorState = imageSelectorState,
+                    imageSelectorClicked = {
+                        onImageSelectorClicked()
+                    }
+                )
             }
-        )
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = uiState.currentPosition == 1,
+                enter = fadeIn() + slideInHorizontally { if (uiState.currentPosition > uiState.previousPosition) it else -it },
+                exit = fadeOut() + slideOutHorizontally { if (uiState.currentPosition > uiState.previousPosition) -it else it }
+
+            ) {
+                OverallGoalsForm()
+            }
+        }
 
         BottomNextPreviousButtons(
             modifier = Modifier.padding(16.dp),
-            currentPosition = 0
+            currentPosition = uiState.currentPosition ,
+            onNextClicked = {
+                onNextClicked()
+            } ,
+            onPreviousClicked = {
+                onPreviousClicked()
+            }
         )
 
     }
@@ -297,7 +364,7 @@ fun CurrentReadForm(
 
 
             DropDownComponent(
-                modifier = Modifier.width(180.dp) ,
+                modifier = Modifier.width(180.dp),
                 label = "Chapters",
                 selectedText = chapterDropDownState.value,
                 dropDownItems = chapterCount.toList(),
@@ -306,7 +373,7 @@ fun CurrentReadForm(
                     Timber.tag("ReadGoalsScreen").d(chapter)
                     chapterDropDownState.change(chapter)
                     //update chapter count
-                } ,
+                },
                 canUserFill = true
             )
 
@@ -315,7 +382,7 @@ fun CurrentReadForm(
 
 
             DropDownComponent(
-                modifier = Modifier.width(180.dp) ,
+                modifier = Modifier.width(180.dp),
                 label = "Current chapter",
                 selectedText = currentChapterDropDownState.value,
                 dropDownItems = chapterCount.toList(),
@@ -324,7 +391,7 @@ fun CurrentReadForm(
                     Timber.tag("ReadGoalsScreen").d(chapter)
                     currentChapterDropDownState.change(chapter)
                     //update current selected chapter
-                } ,
+                },
                 canUserFill = true
             )
 
@@ -344,7 +411,7 @@ fun CurrentReadForm(
             }
         )
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         ElevatedButton(
             modifier = Modifier.fillMaxWidth(),
@@ -361,7 +428,7 @@ fun CurrentReadForm(
         ) {
             Text(
                 text = "Add book",
-                style = BookAppTypography.labelLarge,
+                style = BookAppTypography.labelMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onPrimary
             )
@@ -502,7 +569,7 @@ fun DropDownComponent(
     selectedText: String = "",
     hasError: Boolean = false,
     label: String = "",
-    placeHolderText : String = "" ,
+    placeHolderText: String = "",
     dropDownItems: List<String> = listOf(),
     onListItemSelected: (String) -> Unit = {},
     canUserFill: Boolean = false
@@ -516,7 +583,7 @@ fun DropDownComponent(
 
         if (label.isNotBlank()) {
             Text(
-                modifier = if(label.length > 15) Modifier.fillMaxWidth() else Modifier ,
+                modifier = if (label.length > 15) Modifier.fillMaxWidth() else Modifier,
                 text = if (hasError) "$label*" else label,
                 style = BookAppTypography.labelMedium,
                 color = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
@@ -647,7 +714,7 @@ fun OverallGoalsForm(
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(start = 16.dp , end = 16.dp)
     ) {
 
         Text(
@@ -666,7 +733,7 @@ fun OverallGoalsForm(
         Text(
             text = "In a day , I want to read for at least.",
             modifier = Modifier.fillMaxWidth(),
-            style = BookAppTypography.labelMedium ,
+            style = BookAppTypography.labelMedium,
             color = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
         )
 
@@ -708,39 +775,153 @@ fun OverallGoalsForm(
                 icon = R.drawable.baseline_access_alarm_24,
                 onClick = {
                     //launch alarm picker dialog
-                }
+                } ,
+                cornerRadius = 10.dp
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         val dropDownItems = listOf<String>(
-            "Every day" ,
-            "Every day except" ,
-            "Weekend only" ,
-            "Weekdays" ,
+            "Every day",
+            "Every day except",
+            "Weekend only",
+            "Weekdays",
             "Select specific days"
         )
 
         DropDownComponent(
-            label = "For how long do you want this goal to run?" ,
-            modifier = Modifier.fillMaxWidth() ,
-            selectedText = "" ,
-            canUserFill = false ,
-            dropDownItems = dropDownItems ,
+            label = "For how long do you want this goal to run?",
+            modifier = Modifier.fillMaxWidth(),
+            selectedText = "",
+            canUserFill = false,
+            dropDownItems = dropDownItems,
             onListItemSelected = {
                 //show items
-            } ,
+            },
             placeHolderText = "nothing selected"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        //will show whether or not if specific days are shown
         WeekDaySelectorComponent(
-            modifier = Modifier.fillMaxWidth() ,
+            modifier = Modifier.fillMaxWidth(),
             onDaySelected = {
                 //update selected days list
             }
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        SwitchSection(
+            onCheckChanged = { status ->
+                //update checked state
+            }
+        )
+
+        //show this section whether or when the switch is on or off
+        AlertSetupSection()
+
+       
+    }
+
+
+}
+
+@Composable
+fun AlertSetupSection(){
+    Column(
+        verticalArrangement = Arrangement.Top ,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextFieldComponent(
+            modifier = Modifier.fillMaxWidth() ,
+            label = "Add note" ,
+            onTextChanged = {
+                //update text action
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Time Set" ,
+            style = BookAppTypography.labelMedium ,
+            color = MaterialTheme.colorScheme.primary ,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically ,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(
+                text = "00:00 AM" ,
+                style = BookAppTypography.headlineLarge ,
+                modifier = Modifier.weight(1f) ,
+                color = MaterialTheme.colorScheme.secondary ,
+                fontSize = 32.sp
+            )
+
+            RoundedBrownButton(
+                icon = R.drawable.baseline_access_alarm_24 ,
+                label = "Set" ,
+                onClick = {
+                    //open
+                } ,
+                cornerRadius = 10.dp
+            )
+
+        }
+
+    }
+}
+
+@Composable
+fun SwitchSection(
+    isChecked : Boolean = false ,
+    onCheckChanged : (Boolean) -> Unit = {}
+){
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically ,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "Do you wish to get alerts?",
+            style = BookAppTypography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary ,
+            modifier = Modifier.weight(1f)
+        )
+
+
+        Switch(
+            checked = false,
+            onCheckedChange = { status ->
+                //update check state
+                onCheckChanged(status)
+            } ,
+            thumbContent = {
+                if(isChecked){
+                    Text(
+                        text = "On" ,
+                        style = BookAppTypography.labelSmall
+                    )
+                }else {
+                    Text(
+                        text = "Off" ,
+                        style = BookAppTypography.labelSmall
+                    )
+                }
+
+            }
+
         )
 
     }
