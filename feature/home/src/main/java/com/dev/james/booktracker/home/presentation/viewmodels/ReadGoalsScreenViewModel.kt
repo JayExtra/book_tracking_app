@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.home.presentation
+package com.dev.james.booktracker.home.presentation.viewmodels
 
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
