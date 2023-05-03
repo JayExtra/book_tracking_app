@@ -52,10 +52,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -72,7 +74,10 @@ import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiSta
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenState
+import com.dsc.form_builder.BaseState
+import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
+import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.delay
@@ -91,6 +96,8 @@ fun ReadGoalScreen(
 
     val currentReadFormState by remember { mutableStateOf(readGoalsScreenViewModel.currentReadFormState) }
 
+    val overallGoalsFormState by remember { mutableStateOf(readGoalsScreenViewModel.overallGoalFormState) }
+
     val imageSelectorState = readGoalsScreenViewModel.imageSelectorUiState
         .collectAsStateWithLifecycle(
             initialValue = ImageSelectorUiState(),
@@ -99,14 +106,18 @@ fun ReadGoalScreen(
 
     val readGoalsScreenUiState = readGoalsScreenViewModel.readGoalsScreenUiState
         .collectAsStateWithLifecycle(
-            initialValue = ReadGoalsScreenState() ,
+            initialValue = ReadGoalsScreenState(),
             minActiveState = Lifecycle.State.STARTED
         )
+
+    var checkedState by remember { mutableStateOf(false) }
 
 
     StatelessReadGoalScreen(
         currentReadFormState = currentReadFormState,
         uiState = readGoalsScreenUiState.value,
+        overallGoalsFormState = overallGoalsFormState,
+        alertSwitchState = checkedState,
         popBackStack = {
             homeNavigator.openHomeScreen()
         },
@@ -157,7 +168,10 @@ fun ReadGoalScreen(
             }
 
 
-        } ,
+        },
+        onAlertSwitchChecked = { status ->
+            checkedState = status
+        },
 
         onNextClicked = {
             readGoalsScreenViewModel.passMainScreenActions(
@@ -165,7 +179,7 @@ fun ReadGoalScreen(
                     currentPosition = readGoalsScreenUiState.value.currentPosition
                 )
             )
-        } ,
+        },
         onPreviousClicked = {
             readGoalsScreenViewModel.passMainScreenActions(
                 action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MovePrevious(
@@ -180,14 +194,17 @@ fun ReadGoalScreen(
 @Preview(name = "ReadGoalScreen", showBackground = true)
 fun StatelessReadGoalScreen(
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
-    uiState : ReadGoalsScreenState = ReadGoalsScreenState() ,
+    overallGoalsFormState: FormState<BaseState<out Any>> = FormState(fields = listOf()),
+    uiState: ReadGoalsScreenState = ReadGoalsScreenState(),
     imageSelectorState: ImageSelectorUiState = ImageSelectorUiState(),
+    alertSwitchState: Boolean = false,
     popBackStack: () -> Unit = {},
     onGoogleIconClicked: () -> Unit = {},
     onSaveClicked: () -> Unit = {},
-    onImageSelectorClicked: () -> Unit = {} ,
-    onNextClicked: () -> Unit = {} ,
-    onPreviousClicked: () -> Unit = {}
+    onImageSelectorClicked: () -> Unit = {},
+    onNextClicked: () -> Unit = {},
+    onPreviousClicked: () -> Unit = {},
+    onAlertSwitchChecked: (Boolean) -> Unit = {}
 ) {
     Column(
         verticalArrangement = Arrangement.Top,
@@ -197,7 +214,7 @@ fun StatelessReadGoalScreen(
         StandardToolBar(
             navActions = {
                 //control visibility depending on where we are
-                if(uiState.currentPosition == 0){
+                if (uiState.currentPosition == 0) {
                     Button(
                         onClick = {
                             onGoogleIconClicked()
@@ -229,22 +246,22 @@ fun StatelessReadGoalScreen(
             }
         ) {
             val toolBarTitle =
-                if(uiState.currentPosition > 0){
+                if (uiState.currentPosition > 0) {
                     "Set goals"
-                }else{
+                } else {
                     "Add your current read"
                 }
             Text(
-                text = toolBarTitle ,
+                text = toolBarTitle,
                 style = BookAppTypography.headlineSmall,
                 color = MaterialTheme.colorScheme.secondary
             )
         }
 
         Box(
-            contentAlignment = Alignment.TopCenter ,
+            contentAlignment = Alignment.TopCenter,
             modifier = Modifier.weight(1f)
-        ){
+        ) {
 
             androidx.compose.animation.AnimatedVisibility(
                 visible = uiState.currentPosition == 0,
@@ -269,16 +286,22 @@ fun StatelessReadGoalScreen(
                 exit = fadeOut() + slideOutHorizontally { if (uiState.currentPosition > uiState.previousPosition) -it else it }
 
             ) {
-                OverallGoalsForm()
+                OverallGoalsForm(
+                    overallGoalsFormState = overallGoalsFormState ,
+                    alertSwitchState = alertSwitchState ,
+                    onAlertSwitchChecked = { status ->
+                        onAlertSwitchChecked(status)
+                    }
+                )
             }
         }
 
         BottomNextPreviousButtons(
             modifier = Modifier.padding(16.dp),
-            currentPosition = uiState.currentPosition ,
+            currentPosition = uiState.currentPosition,
             onNextClicked = {
                 onNextClicked()
-            } ,
+            },
             onPreviousClicked = {
                 onPreviousClicked()
             }
@@ -613,7 +636,8 @@ fun DropDownComponent(
                     )
                     .menuAnchor(),
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = MaterialTheme.colorScheme.background,
+                    cursorColor = if (canUserFill) MaterialTheme.colorScheme.secondary else Color.Transparent
                 ),
                 shape = RoundedCornerShape(0.dp),
                 trailingIcon = {
@@ -708,13 +732,17 @@ fun BottomNextPreviousButtons(
 @Preview(name = "OverallGoalsForm", showBackground = true)
 fun OverallGoalsForm(
     modifier: Modifier = Modifier,
-    hasError: Boolean = false,
+    overallGoalsFormState: FormState<BaseState<out Any>> = FormState(fields = listOf()),
+    alertSwitchState: Boolean = false,
+    onAlertSwitchChecked: (Boolean) -> Unit = {},
+    startDialPickerDialog: () -> Unit = {},
+    startAlarmPickerDialog: () -> Unit = {}
 ) {
 
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(start = 16.dp , end = 16.dp)
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp)
     ) {
 
         Text(
@@ -730,11 +758,12 @@ fun OverallGoalsForm(
                 .fillMaxWidth()
         )
 
+        val minTimeField = overallGoalsFormState.getState<TextFieldState>(name = "time")
         Text(
             text = "In a day , I want to read for at least.",
             modifier = Modifier.fillMaxWidth(),
             style = BookAppTypography.labelMedium,
-            color = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+            color = if (minTimeField.hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
         )
 
         Row(
@@ -744,9 +773,9 @@ fun OverallGoalsForm(
         ) {
 
             OutlinedTextField(
-                value = "30 min",
+                value = minTimeField.value,
                 onValueChange = {
-                    /*onTextChanged(it)*/
+                    minTimeField.change(it)
                 },
                 modifier = Modifier
                     .padding(top = 8.dp)
@@ -754,7 +783,7 @@ fun OverallGoalsForm(
                         width = 2.dp,
                         shape = RoundedCornerShape(0.dp),
                         //if error is available , change the color of border to error color
-                        color = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                        color = if (minTimeField.hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                     )
                     .weight(1f),
 
@@ -765,7 +794,7 @@ fun OverallGoalsForm(
                 textStyle = BookAppTypography.bodyMedium,
                 shape = RoundedCornerShape(0.dp),
                 //adjust error depending if error is available
-                isError = hasError,
+                isError = minTimeField.hasError,
             )
 
             Spacer(modifier = Modifier.width(20.dp))
@@ -775,7 +804,7 @@ fun OverallGoalsForm(
                 icon = R.drawable.baseline_access_alarm_24,
                 onClick = {
                     //launch alarm picker dialog
-                } ,
+                },
                 cornerRadius = 10.dp
             )
         }
@@ -790,90 +819,119 @@ fun OverallGoalsForm(
             "Select specific days"
         )
 
+        val frequencyDropDownState =
+            overallGoalsFormState.getState<ChoiceState>(name = "frequency field")
         DropDownComponent(
             label = "For how long do you want this goal to run?",
             modifier = Modifier.fillMaxWidth(),
-            selectedText = "",
+            selectedText = frequencyDropDownState.value,
             canUserFill = false,
             dropDownItems = dropDownItems,
             onListItemSelected = {
                 //show items
+                frequencyDropDownState.change(it)
             },
-            placeHolderText = "nothing selected"
+            placeHolderText = "",
+            hasError = frequencyDropDownState.hasError
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         //will show whether or not if specific days are shown
+
+        val daysSelectorState = overallGoalsFormState.getState<SelectState>(name = "specific days")
         WeekDaySelectorComponent(
             modifier = Modifier.fillMaxWidth(),
-            onDaySelected = {
+            onDaySelected = { day ->
                 //update selected days list
-            }
+                if (daysSelectorState.value.contains(day)) {
+                    daysSelectorState.unselect(day)
+                } else {
+                    daysSelectorState.select(day)
+                }
+            } ,
+            selectedDays = daysSelectorState.value
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         SwitchSection(
+            isChecked = alertSwitchState,
             onCheckChanged = { status ->
                 //update checked state
+                onAlertSwitchChecked(status)
             }
         )
 
         //show this section whether or when the switch is on or off
-        AlertSetupSection()
+        val noteFieldState = overallGoalsFormState.getState<TextFieldState>("alert note")
+        AlertSetupSection(
+            noteText = noteFieldState.value ,
+            onNoteFieldChange = { note ->
+                noteFieldState.change(note)
+            }
+        )
 
-       
+
     }
 
 
 }
 
 @Composable
-fun AlertSetupSection(){
+fun AlertSetupSection(
+    noteText: String = "",
+    hasError: Boolean = false,
+    timeSet: String = "",
+    onNoteFieldChange: (String) -> Unit = {},
+    onTimeSelectorClicked: () -> Unit = {}
+) {
     Column(
-        verticalArrangement = Arrangement.Top ,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
         TextFieldComponent(
-            modifier = Modifier.fillMaxWidth() ,
-            label = "Add note" ,
-            onTextChanged = {
+            modifier = Modifier.fillMaxWidth(),
+            label = "Add note",
+            onTextChanged = { note ->
                 //update text action
-            }
+                onNoteFieldChange(note)
+            },
+            text = noteText
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Time Set" ,
-            style = BookAppTypography.labelMedium ,
-            color = MaterialTheme.colorScheme.primary ,
+            text = "Time Set",
+            style = BookAppTypography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
-            verticalAlignment = Alignment.CenterVertically ,
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Text(
-                text = "00:00 AM" ,
-                style = BookAppTypography.headlineLarge ,
-                modifier = Modifier.weight(1f) ,
-                color = MaterialTheme.colorScheme.secondary ,
+                text = "00:00 AM",
+                style = BookAppTypography.headlineLarge,
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 32.sp
             )
 
             RoundedBrownButton(
-                icon = R.drawable.baseline_access_alarm_24 ,
-                label = "Set" ,
+                icon = R.drawable.baseline_access_alarm_24,
+                label = "Set",
                 onClick = {
                     //open
-                } ,
+                    onTimeSelectorClicked()
+                },
                 cornerRadius = 10.dp
             )
 
@@ -884,38 +942,39 @@ fun AlertSetupSection(){
 
 @Composable
 fun SwitchSection(
-    isChecked : Boolean = false ,
-    onCheckChanged : (Boolean) -> Unit = {}
-){
+    isChecked: Boolean = false,
+    onCheckChanged: (Boolean) -> Unit = {}
+) {
 
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically ,
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             text = "Do you wish to get alerts?",
             style = BookAppTypography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary ,
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.weight(1f)
         )
 
 
         Switch(
-            checked = false,
+
+            checked = isChecked,
             onCheckedChange = { status ->
                 //update check state
                 onCheckChanged(status)
-            } ,
+            },
             thumbContent = {
-                if(isChecked){
+                if (isChecked) {
                     Text(
-                        text = "On" ,
+                        text = "On",
                         style = BookAppTypography.labelSmall
                     )
-                }else {
+                } else {
                     Text(
-                        text = "Off" ,
+                        text = "Off",
                         style = BookAppTypography.labelSmall
                     )
                 }

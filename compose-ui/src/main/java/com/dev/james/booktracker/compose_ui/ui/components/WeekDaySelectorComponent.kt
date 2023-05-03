@@ -76,7 +76,7 @@ fun DayItem(
     Box(
         contentAlignment = Alignment.Center ,
         modifier = Modifier
-            .size(60.dp)
+            .size(45.dp)
             .clip(shape = CircleShape)
             .border(
                 width = if (isSelected) 0.dp else 2.dp,
@@ -94,7 +94,7 @@ fun DayItem(
         Text(
             text = dayString ,
             color = if(isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary ,
-            style = BookAppTypography.bodyMedium
+            style = BookAppTypography.bodySmall
         )
         
     }

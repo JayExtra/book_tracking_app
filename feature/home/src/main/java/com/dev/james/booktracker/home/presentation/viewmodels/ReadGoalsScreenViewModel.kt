@@ -1,7 +1,9 @@
 package com.dev.james.booktracker.home.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
+import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
+import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
 import com.dsc.form_builder.Validators
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,6 +48,28 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
                 validators = listOf(Validators.Required(message = "Please specify the current chapter title."))
             ),
         )
+    )
+
+    val overallGoalFormState = FormState(
+
+        fields = listOf(
+            TextFieldState(
+                name = "time",
+                validators = listOf(Validators.Required(message = "Please provide minimum times"))
+            ) ,
+            ChoiceState(
+                name = "frequency field" ,
+                validators = listOf(Validators.Required())
+            ) ,
+            SelectState(
+                name = "specific days" ,
+                validators = listOf(Validators.Required( message = "You should provide specific days for alerts") , Validators.Min(limit = 1 , "Specified days should not be empty. "))
+            ) ,
+            TextFieldState(
+                name = "alert note" ,
+            )
+        )
+
     )
 
     fun validateImageSelected(imageSelectedUri: String) {
