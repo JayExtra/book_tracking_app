@@ -3,11 +3,15 @@ package com.dev.james.booktracker.home.presentation.screens
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +31,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,11 +55,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -62,6 +70,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -287,8 +297,8 @@ fun StatelessReadGoalScreen(
 
             ) {
                 OverallGoalsForm(
-                    overallGoalsFormState = overallGoalsFormState ,
-                    alertSwitchState = alertSwitchState ,
+                    overallGoalsFormState = overallGoalsFormState,
+                    alertSwitchState = alertSwitchState,
                     onAlertSwitchChecked = { status ->
                         onAlertSwitchChecked(status)
                     }
@@ -584,7 +594,7 @@ fun TextFieldComponent(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 @Preview("DropDownComponent")
 fun DropDownComponent(
@@ -597,7 +607,12 @@ fun DropDownComponent(
     onListItemSelected: (String) -> Unit = {},
     canUserFill: Boolean = false
 ) {
+    /*
+    component for a dropdown menu
+    */
+
     var isExpanded by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -617,12 +632,18 @@ fun DropDownComponent(
 
         ExposedDropdownMenuBox(
             expanded = isExpanded,
-            onExpandedChange = { isExpanded = it },
+            onExpandedChange = {
+                /*if (!canUserFill) {
+                    keyboardController?.hide()
+                }*/
+                isExpanded = it
+            },
             modifier = modifier
         ) {
 
             TextField(
                 value = selectedText.ifBlank { placeHolderText },
+                readOnly = !canUserFill,
                 onValueChange = {
                     if (canUserFill) {
                         onListItemSelected(it)
@@ -645,7 +666,12 @@ fun DropDownComponent(
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
-                )
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { keyboardController?.hide() }
+                ),
+                singleLine = true
+
             )
 
             ExposedDropdownMenu(
@@ -821,37 +847,56 @@ fun OverallGoalsForm(
 
         val frequencyDropDownState =
             overallGoalsFormState.getState<ChoiceState>(name = "frequency field")
-        DropDownComponent(
-            label = "For how long do you want this goal to run?",
-            modifier = Modifier.fillMaxWidth(),
-            selectedText = frequencyDropDownState.value,
-            canUserFill = false,
-            dropDownItems = dropDownItems,
-            onListItemSelected = {
-                //show items
-                frequencyDropDownState.change(it)
-            },
-            placeHolderText = "",
-            hasError = frequencyDropDownState.hasError
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         //will show whether or not if specific days are shown
-
-        val daysSelectorState = overallGoalsFormState.getState<SelectState>(name = "specific days")
-        WeekDaySelectorComponent(
-            modifier = Modifier.fillMaxWidth(),
-            onDaySelected = { day ->
-                //update selected days list
-                if (daysSelectorState.value.contains(day)) {
-                    daysSelectorState.unselect(day)
-                } else {
-                    daysSelectorState.select(day)
-                }
-            } ,
-            selectedDays = daysSelectorState.value
+        val supportedDays = listOf(
+            "Select specific days" ,  "Every day except"
         )
+        val daysSelectorState = overallGoalsFormState.getState<SelectState>(name = "specific days")
+
+
+       DropDownComponent(
+                label = "For how long do you want this goal to run?",
+                modifier = Modifier.fillMaxWidth(),
+                selectedText = frequencyDropDownState.value,
+                canUserFill = false,
+                dropDownItems = dropDownItems,
+                onListItemSelected = {
+                    //show items
+                    frequencyDropDownState.change(it)
+                },
+                placeHolderText = "",
+                hasError = frequencyDropDownState.hasError
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+         AnimatedVisibility(
+                visible = supportedDays.contains(frequencyDropDownState.value) ,
+                exit = slideOutVertically(
+                    animationSpec = tween(durationMillis = 500) ,
+                    targetOffsetY = { -it }
+                ) ,
+                enter = slideInVertically(
+                    animationSpec = tween(durationMillis = 500) ,
+                    initialOffsetY = { -it }
+                )
+            ) {
+                WeekDaySelectorComponent(
+                    modifier = Modifier.fillMaxWidth(),
+                    onDaySelected = { day ->
+                        //update selected days list
+                        if (daysSelectorState.value.contains(day)) {
+                            daysSelectorState.unselect(day)
+                        } else {
+                            daysSelectorState.select(day)
+                        }
+                    },
+                    selectedDays = daysSelectorState.value
+                )
+            }
+
+
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -866,7 +911,7 @@ fun OverallGoalsForm(
         //show this section whether or when the switch is on or off
         val noteFieldState = overallGoalsFormState.getState<TextFieldState>("alert note")
         AlertSetupSection(
-            noteText = noteFieldState.value ,
+            noteText = noteFieldState.value,
             onNoteFieldChange = { note ->
                 noteFieldState.change(note)
             }
