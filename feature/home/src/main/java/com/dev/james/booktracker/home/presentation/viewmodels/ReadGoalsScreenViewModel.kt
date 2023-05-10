@@ -85,7 +85,6 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
             ) ,
             ChoiceState(
                 name = "available_books" ,
-                initial = "Please select a book" ,
                 validators = emptyList()
             ) ,
             ChoiceState(

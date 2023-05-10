@@ -149,7 +149,7 @@ fun SpecificGoalsForm(
             modifier = Modifier.fillMaxWidth(),
             label = "Available books",
             canUserFill = false,
-            placeHolderText = availableBookFieldState.initial,
+            placeHolderText = "please select a book" ,
             dropDownItems = dropDownItems,
             onListItemSelected = { book ->
                 //select book
@@ -158,12 +158,29 @@ fun SpecificGoalsForm(
             selectedText = availableBookFieldState.value
         )
 
-        BookGoalsSection(
-            chapterHoursDropdownState = chapterHrsFieldState,
-            timeChapterFieldState = timeOrChapterFieldState ,
-            frequencyDropDownFieldState = frequencyDropDownState ,
-            daysSelectorState = selectedDaysState
-        )
+        AnimatedVisibility(
+            visible = availableBookFieldState.value.isNotBlank(),
+            exit = fadeOut(
+                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+            ) + slideOutVertically(
+                animationSpec = tween(durationMillis = 500),
+                targetOffsetY = { -it / 2 }
+            ),
+            enter = fadeIn(
+                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+            ) + slideInVertically(
+                animationSpec = tween(durationMillis = 500),
+                initialOffsetY = { -it / 2 }
+            )
+        ) {
+            BookGoalsSection(
+                chapterHoursDropdownState = chapterHrsFieldState,
+                timeChapterFieldState = timeOrChapterFieldState ,
+                frequencyDropDownFieldState = frequencyDropDownState ,
+                daysSelectorState = selectedDaysState
+            )
+        }
+
     }
 }
 
