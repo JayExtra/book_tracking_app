@@ -72,6 +72,51 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
 
     )
 
+
+    val specificGoalsFormState = FormState(
+        fields = listOf(
+            TextFieldState(
+                name = "books_month" ,
+                validators = listOf(
+                    Validators.Required(message = "Please provide number of books.") ,
+                    Validators.MinValue(0 , "The minimum number of books required is 1.")
+                ) ,
+                initial = "0"
+            ) ,
+            ChoiceState(
+                name = "available_books" ,
+                initial = "Please select a book" ,
+                validators = emptyList()
+            ) ,
+            ChoiceState(
+                name = "chapter_hours" ,
+                initial = "By Chapter" ,
+                validators = emptyList()
+            ) ,
+            TextFieldState(
+                name = "time_chapter" ,
+                validators = listOf(
+                    Validators.Required(message = "Time or chapter constraint needed for this goal.")
+                )
+            ) ,
+            ChoiceState(
+                name = "period" ,
+                initial = "select period" ,
+                validators = listOf(
+                    Validators.Required(message = "Please select how long you want this goal to run.")
+                )
+            ) ,
+            SelectState(
+                name = "period_days" ,
+                initial = mutableListOf() ,
+                validators = listOf(
+                    Validators.Required(message = "Please select the days you want") ,
+                    Validators.Min(limit = 1 , "Please select your days.")
+                )
+            )
+        )
+    )
+
     fun validateImageSelected(imageSelectedUri: String) {
         if (imageSelectedUri.isBlank()) {
             _imageSelectorState.value = _imageSelectorState.value.copy(

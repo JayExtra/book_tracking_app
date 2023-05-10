@@ -60,7 +60,7 @@ fun BottomNextPreviousButtons(
             }
 
             RoundedBrownButton(
-                label = if (currentPosition == 1) "Finish" else "Next",
+                label = if (currentPosition == 2) "Finish" else "Next",
                 cornerRadius = 8.dp
             ) {
                 onNextClicked()

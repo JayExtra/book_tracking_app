@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.home.presentation.screens
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -9,10 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,7 +20,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,18 +33,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.home.presentation.components.BottomNextPreviousButtons
-import com.dev.james.booktracker.home.presentation.components.TextFieldComponent
 import com.dev.james.booktracker.home.presentation.forms.CurrentReadForm
 import com.dev.james.booktracker.home.presentation.forms.OverallGoalsForm
+import com.dev.james.booktracker.home.presentation.forms.SpecificGoalsForm
 import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiState
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
@@ -73,6 +68,8 @@ fun ReadGoalScreen(
 
     val overallGoalsFormState by remember { mutableStateOf(readGoalsScreenViewModel.overallGoalFormState) }
 
+    val specificGoalsFormState by remember { mutableStateOf(readGoalsScreenViewModel.specificGoalsFormState) }
+
     val imageSelectorState = readGoalsScreenViewModel.imageSelectorUiState
         .collectAsStateWithLifecycle(
             initialValue = ImageSelectorUiState(),
@@ -92,6 +89,7 @@ fun ReadGoalScreen(
         currentReadFormState = currentReadFormState,
         uiState = readGoalsScreenUiState.value,
         overallGoalsFormState = overallGoalsFormState,
+        specificGoalsFormState = specificGoalsFormState ,
         alertSwitchState = checkedState,
         popBackStack = {
             homeNavigator.openHomeScreen()
@@ -168,8 +166,10 @@ fun ReadGoalScreen(
 @Composable
 @Preview(name = "ReadGoalScreen", showBackground = true)
 fun StatelessReadGoalScreen(
+    context : Context = LocalContext.current,
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
     overallGoalsFormState: FormState<BaseState<out Any>> = FormState(fields = listOf()),
+    specificGoalsFormState : FormState<BaseState<out Any>> = FormState(fields = listOf()) ,
     uiState: ReadGoalsScreenState = ReadGoalsScreenState(),
     imageSelectorState: ImageSelectorUiState = ImageSelectorUiState(),
     alertSwitchState: Boolean = false,
@@ -269,13 +269,29 @@ fun StatelessReadGoalScreen(
                     }
                 )
             }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = uiState.currentPosition == 2,
+                enter = fadeIn() + slideInHorizontally { if (uiState.currentPosition > uiState.previousPosition) it else -it },
+                exit = fadeOut() + slideOutHorizontally { if (uiState.currentPosition > uiState.previousPosition) -it else it }
+
+            ) {
+                SpecificGoalsForm(
+                    specificGoalsFormState = specificGoalsFormState
+                )
+            }
         }
 
         BottomNextPreviousButtons(
             modifier = Modifier.padding(16.dp),
             currentPosition = uiState.currentPosition,
             onNextClicked = {
-                onNextClicked()
+                if(uiState.currentPosition == 2){
+                    Toast.makeText(context , "We are at the last input" , Toast.LENGTH_SHORT)
+                        .show()
+                }else {
+                    onNextClicked()
+                }
             },
             onPreviousClicked = {
                 onPreviousClicked()
