@@ -59,7 +59,7 @@ fun AlertSetupComponent(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Text(
-                text = "00:00 AM",
+                text = timeSet,
                 style = BookAppTypography.headlineLarge,
                 modifier = Modifier.weight(1f),
                 color = MaterialTheme.colorScheme.secondary,

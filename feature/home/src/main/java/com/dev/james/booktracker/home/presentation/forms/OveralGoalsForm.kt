@@ -53,6 +53,12 @@ import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.MaterialDialogState
+import com.vanpra.composematerialdialogs.datetime.time.TimePickerColors
+import com.vanpra.composematerialdialogs.datetime.time.TimePickerDefaults
+import com.vanpra.composematerialdialogs.datetime.time.timepicker
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -69,30 +75,41 @@ fun OverallGoalsForm(
     startAlarmPickerDialog: () -> Unit = {}
 ) {
 
-    var pickedTime by remember {
-        mutableStateOf(LocalTime.NOON)
-    }
-
-    val formattedTime by remember {
-        derivedStateOf {
-            DateTimeFormatter
-                .ofPattern("hh:mm")
-                .format(pickedTime)
-        }
-    }
-
-
     var showTimerTimePickerDialog by remember {
         mutableStateOf(false)
     }
+
+    val minTimeField = overallGoalsFormState.getState<TextFieldState>(name = "time")
 
     if (showTimerTimePickerDialog) {
         TimerTimePickerDialog(
             onDismiss = {
                 showTimerTimePickerDialog = false
+            } ,
+            onSet = { selectedTime ->
+                minTimeField.change(selectedTime)
             }
         )
     }
+
+
+    var pickedTime by remember {
+        mutableStateOf(LocalTime.now())
+    }
+
+    val formattedTime by remember {
+        derivedStateOf {
+            DateTimeFormatter
+                .ofPattern("hh:mm a")
+                .format(pickedTime)
+        }
+    }
+
+    val timeDialogState = rememberMaterialDialogState()
+
+
+
+
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -113,7 +130,7 @@ fun OverallGoalsForm(
                 .fillMaxWidth()
         )
 
-        val minTimeField = overallGoalsFormState.getState<TextFieldState>(name = "time")
+
         Text(
             text = "In a day , I want to read for at least.",
             modifier = Modifier.fillMaxWidth(),
@@ -268,11 +285,35 @@ fun OverallGoalsForm(
                 noteText = noteFieldState.value,
                 onNoteFieldChange = { note ->
                     noteFieldState.change(note)
-                }
+                } ,
+                onTimeSelectorClicked = {
+                    timeDialogState.show()
+                } ,
+                timeSet = formattedTime
             )
 
         }
 
+
+    }
+
+    MaterialDialog(
+        dialogState = timeDialogState ,
+        buttons = {
+            positiveButton(text = "Set"){
+
+            }
+            negativeButton(text = "Close"){
+
+            }
+        }
+    ) {
+        timepicker(
+            initialTime =  LocalTime.now() ,
+            title = "Set your alert time" ,
+        ){ time ->
+            pickedTime = time
+        }
 
     }
 
@@ -281,6 +322,7 @@ fun OverallGoalsForm(
 
 @Composable
 fun TimerTimePickerDialog(
+    onSet : (String) -> Unit = {} ,
     onDismiss: () -> Unit = {}
 ) {
     val context  = LocalContext.current
@@ -294,9 +336,10 @@ fun TimerTimePickerDialog(
                 onDismiss()
             } ,
             onSet = { selectedTime ->
-                Toast.makeText(context, selectedTime, Toast.LENGTH_SHORT).show()
+                onSet(selectedTime)
             }
         )
     }
 }
+
 
