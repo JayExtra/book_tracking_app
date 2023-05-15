@@ -105,5 +105,10 @@ dependencies{
     //jetpack compose form builder
     implementation ("com.github.jkuatdsc:form-builder:1.0.6")
 
+    //datetime dialog
+    implementation ("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
+
+    coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.0.3")
+
 
 }

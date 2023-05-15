@@ -1,5 +1,9 @@
 package com.dev.james.booktracker.home.presentation.forms
 
+
+import android.os.Build
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.tween
@@ -23,10 +27,19 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.WeekDaySelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
@@ -34,12 +47,16 @@ import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.home.presentation.components.AlertSetupComponent
 import com.dev.james.booktracker.home.presentation.components.DropDownComponent
 import com.dev.james.booktracker.home.presentation.components.SwitchComponent
+import com.dev.james.booktracker.home.presentation.components.TimerSelectorComponent
 import com.dsc.form_builder.BaseState
 import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview(name = "OverallGoalsForm", showBackground = true)
@@ -51,6 +68,31 @@ fun OverallGoalsForm(
     startDialPickerDialog: () -> Unit = {},
     startAlarmPickerDialog: () -> Unit = {}
 ) {
+
+    var pickedTime by remember {
+        mutableStateOf(LocalTime.NOON)
+    }
+
+    val formattedTime by remember {
+        derivedStateOf {
+            DateTimeFormatter
+                .ofPattern("hh:mm")
+                .format(pickedTime)
+        }
+    }
+
+
+    var showTimerTimePickerDialog by remember {
+        mutableStateOf(false)
+    }
+
+    if (showTimerTimePickerDialog) {
+        TimerTimePickerDialog(
+            onDismiss = {
+                showTimerTimePickerDialog = false
+            }
+        )
+    }
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -87,9 +129,7 @@ fun OverallGoalsForm(
 
             OutlinedTextField(
                 value = minTimeField.value,
-                onValueChange = {
-                    minTimeField.change(it)
-                },
+                onValueChange = {},
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .border(
@@ -108,6 +148,7 @@ fun OverallGoalsForm(
                 shape = RoundedCornerShape(0.dp),
                 //adjust error depending if error is available
                 isError = minTimeField.hasError,
+                readOnly = true
             )
 
             Spacer(modifier = Modifier.width(20.dp))
@@ -117,6 +158,8 @@ fun OverallGoalsForm(
                 icon = R.drawable.baseline_access_alarm_24,
                 onClick = {
                     //launch alarm picker dialog
+                    showTimerTimePickerDialog = true
+
                 },
                 cornerRadius = 10.dp
             )
@@ -137,7 +180,7 @@ fun OverallGoalsForm(
 
         //will show whether or not if specific days are shown
         val supportedDays = listOf(
-            "Select specific days" ,  "Every day except"
+            "Select specific days", "Every day except"
         )
         val daysSelectorState = overallGoalsFormState.getState<SelectState>(name = "specific days")
 
@@ -149,7 +192,7 @@ fun OverallGoalsForm(
             canUserFill = false,
             dropDownItems = dropDownItems,
             onListItemSelected = {
-                if(!supportedDays.contains(it)){
+                if (!supportedDays.contains(it)) {
                     daysSelectorState.value.clear()
                 }
                 //show items
@@ -162,17 +205,17 @@ fun OverallGoalsForm(
         Spacer(modifier = Modifier.height(16.dp))
 
         AnimatedVisibility(
-            visible = supportedDays.contains(frequencyDropDownState.value) ,
+            visible = supportedDays.contains(frequencyDropDownState.value),
             exit = fadeOut(
-                animationSpec = tween(durationMillis = 200 , easing = FastOutLinearInEasing)
+                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
             ) + slideOutVertically(
-                animationSpec = tween(durationMillis = 500) ,
+                animationSpec = tween(durationMillis = 500),
                 targetOffsetY = { -it / 2 }
-            ) ,
+            ),
             enter = fadeIn(
-                animationSpec = tween(durationMillis = 200 , easing = FastOutLinearInEasing)
+                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
             ) + slideInVertically(
-                animationSpec = tween(durationMillis = 500) ,
+                animationSpec = tween(durationMillis = 500),
                 initialOffsetY = { -it / 2 }
             )
         ) {
@@ -206,17 +249,17 @@ fun OverallGoalsForm(
         val noteFieldState = overallGoalsFormState.getState<TextFieldState>("alert note")
 
         AnimatedVisibility(
-            visible = alertSwitchState ,
+            visible = alertSwitchState,
             exit = fadeOut(
-                animationSpec = tween(durationMillis = 200 , easing = FastOutLinearInEasing)
+                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
             ) + slideOutVertically(
-                animationSpec = tween(durationMillis = 500) ,
+                animationSpec = tween(durationMillis = 500),
                 targetOffsetY = { -it / 2 }
-            ) ,
+            ),
             enter = fadeIn(
-                animationSpec = tween(durationMillis = 200 , easing = FastOutLinearInEasing)
+                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
             ) + slideInVertically(
-                animationSpec = tween(durationMillis = 500) ,
+                animationSpec = tween(durationMillis = 500),
                 initialOffsetY = { -it / 2 }
             )
         ) {
@@ -231,8 +274,29 @@ fun OverallGoalsForm(
         }
 
 
-
     }
 
 
 }
+
+@Composable
+fun TimerTimePickerDialog(
+    onDismiss: () -> Unit = {}
+) {
+    val context  = LocalContext.current
+    Dialog(
+        onDismissRequest = {
+            onDismiss()
+        }
+    ) {
+        TimerSelectorComponent(
+            onDismiss = {
+                onDismiss()
+            } ,
+            onSet = { selectedTime ->
+                Toast.makeText(context, selectedTime, Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+}
+

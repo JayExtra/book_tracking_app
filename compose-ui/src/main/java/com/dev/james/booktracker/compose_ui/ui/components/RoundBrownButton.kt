@@ -26,6 +26,7 @@ fun RoundedBrownButton(
     modifier: Modifier = Modifier,
     label: String = "some text",
     cornerRadius: Dp = 15.dp,
+    textColor : Color = MaterialTheme.colorScheme.onPrimary,
     color: Color = MaterialTheme.colorScheme.secondary,
     icon: Int = 0,
     onClick: () -> Unit = {}
@@ -54,7 +55,7 @@ fun RoundedBrownButton(
         Text(
             text = label,
             style = BookAppTypography.labelLarge,
-            color = MaterialTheme.colorScheme.onPrimary
+            color = textColor
         )
     }
 }
