@@ -24,6 +24,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -39,8 +41,16 @@ import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.dev.james.booktracker.compose_ui.ui.components.CounterComponent
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 @Preview("SpecificGoalsForm", showBackground = true)
 fun SpecificGoalsForm(
@@ -70,6 +80,91 @@ fun SpecificGoalsForm(
     val selectedDaysState = specificGoalsFormState.getState<SelectState>(
         name = "period_days"
     )
+
+    var shouldShowCounterDialog  by remember {
+        mutableStateOf(false)
+    }
+
+    var shouldShowTimerPickerDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var isCalledByChapter by remember {
+        mutableStateOf(false)
+    }
+
+    //isCalledByChapter = chapterHrsFieldState.value == "By chapters"
+
+
+    /*
+    * counter dialog
+    * */
+    if(shouldShowCounterDialog){
+        Dialog(
+            properties = DialogProperties(
+                dismissOnBackPress = true ,
+                dismissOnClickOutside = false ,
+                usePlatformDefaultWidth = false
+            ) ,
+            onDismissRequest = { }
+        ) {
+            CounterComponent(
+                onSet = { count ->
+                    if (isCalledByChapter){
+                        if(count == 1){
+                            timeOrChapterFieldState.change("$count chapter")
+                        }else {
+                            timeOrChapterFieldState.change("$count chapters")
+                        }
+
+                    }else {
+                        booksFieldState.change(count.toString())
+                    }
+                } ,
+                onDismiss = {
+                    shouldShowCounterDialog = false
+                    isCalledByChapter = false
+                }
+            )
+        }
+    }
+
+    if (shouldShowTimerPickerDialog){
+       Dialog(
+            properties = DialogProperties(
+                dismissOnBackPress = true ,
+                dismissOnClickOutside = false ,
+                usePlatformDefaultWidth = false
+            ) ,
+            onDismissRequest = { }
+        ) {
+           TimerTimePickerDialog(
+               onSet = { selectedTime ->
+                   when {
+                       selectedTime.hours > 0 && selectedTime.minutes == 0 -> {
+                           timeOrChapterFieldState.change("${selectedTime.hours} hrs")
+                       }
+
+                       selectedTime.hours == 0 && selectedTime.minutes > 0 -> {
+                           timeOrChapterFieldState.change("${selectedTime.minutes} min")
+                       }
+
+                       selectedTime.hours > 0 && selectedTime.minutes > 0 -> {
+                           timeOrChapterFieldState.change("${selectedTime.hours} hrs ${selectedTime.minutes} min")
+                       }
+
+                       else -> {
+                           timeOrChapterFieldState.change("no time set")
+                       }
+                   }
+               } ,
+               onDismiss = {
+                   shouldShowTimerPickerDialog = false
+               }
+           )
+       }
+    }
+
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -126,9 +221,9 @@ fun SpecificGoalsForm(
 
             RoundedBrownButton(
                 label = "Set",
-                icon = R.drawable.baseline_access_alarm_24,
                 onClick = {
                     //launch book count dialog
+                          shouldShowCounterDialog = true
                 },
                 cornerRadius = 10.dp
             )
@@ -177,7 +272,15 @@ fun SpecificGoalsForm(
                 chapterHoursDropdownState = chapterHrsFieldState,
                 timeChapterFieldState = timeOrChapterFieldState ,
                 frequencyDropDownFieldState = frequencyDropDownState ,
-                daysSelectorState = selectedDaysState
+                daysSelectorState = selectedDaysState ,
+                showChapterDialog = { isChapter ->
+                        if(isChapter){
+                            shouldShowCounterDialog = true
+                            isCalledByChapter = true
+                        }else {
+                            shouldShowTimerPickerDialog = true
+                        }
+                }
             )
         }
 
@@ -189,7 +292,8 @@ fun BookGoalsSection(
     chapterHoursDropdownState: ChoiceState,
     timeChapterFieldState: TextFieldState ,
     frequencyDropDownFieldState : ChoiceState ,
-    daysSelectorState : SelectState
+    daysSelectorState : SelectState ,
+    showChapterDialog : (Boolean) -> Unit = {}
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
@@ -221,9 +325,17 @@ fun BookGoalsSection(
             color = MaterialTheme.colorScheme.secondary,
         )
 
+        val isChapter = if (chapterHoursDropdownState.value == "By chapters"){
+            true
+        } else chapterHoursDropdownState.value.isEmpty()
+
+
         BookTimeOrChapterSection(
-            isChapter = chapterHoursDropdownState.value == "By chapters",
-            timeChapterFieldState = timeChapterFieldState
+            isChapter = isChapter,
+            timeChapterFieldState = timeChapterFieldState ,
+            showDialog = { isChapterDialog ->
+                showChapterDialog(isChapterDialog)
+            }
         )
 
         val dropDownList = listOf<String>(
@@ -293,7 +405,8 @@ fun BookGoalsSection(
 fun BookTimeOrChapterSection(
     context : Context = LocalContext.current,
     isChapter: Boolean = false,
-    timeChapterFieldState: TextFieldState
+    timeChapterFieldState: TextFieldState ,
+    showDialog : (Boolean) -> Unit = {}
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -333,11 +446,13 @@ fun BookTimeOrChapterSection(
             onClick = {
                 //launch alarm picker dialog or dial picker
                       if(isChapter){
-                          Toast.makeText(context , "Chapter option" , Toast.LENGTH_SHORT)
-                              .show()
+                         /* Toast.makeText(context , "Chapter option" , Toast.LENGTH_SHORT)
+                              .show()*/
+                          showDialog(true)
                       }else{
-                          Toast.makeText(context , "Hours option" , Toast.LENGTH_SHORT)
-                              .show()
+                         /* Toast.makeText(context , "Hours option" , Toast.LENGTH_SHORT)
+                              .show()*/
+                          showDialog(false)
                       }
             },
             cornerRadius = 10.dp

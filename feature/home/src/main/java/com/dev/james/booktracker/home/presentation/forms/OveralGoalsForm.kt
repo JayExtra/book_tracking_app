@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +47,7 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.home.presentation.components.AlertSetupComponent
 import com.dev.james.booktracker.home.presentation.components.DropDownComponent
+import com.dev.james.booktracker.home.presentation.components.SelectedTime
 import com.dev.james.booktracker.home.presentation.components.SwitchComponent
 import com.dev.james.booktracker.home.presentation.components.TimerSelectorComponent
 import com.dsc.form_builder.BaseState
@@ -63,7 +65,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 @Preview(name = "OverallGoalsForm", showBackground = true)
 fun OverallGoalsForm(
@@ -85,9 +87,22 @@ fun OverallGoalsForm(
         TimerTimePickerDialog(
             onDismiss = {
                 showTimerTimePickerDialog = false
-            } ,
+            },
             onSet = { selectedTime ->
-                minTimeField.change(selectedTime)
+                when {
+                    selectedTime.hours > 0 && selectedTime.minutes == 0 -> {
+                        minTimeField.change("${selectedTime.hours} hrs")
+                    }
+                    selectedTime.hours == 0 && selectedTime.minutes > 0 -> {
+                        minTimeField.change("${selectedTime.minutes} min")
+                    }
+                    selectedTime.hours > 0 && selectedTime.minutes > 0 -> {
+                        minTimeField.change("${selectedTime.hours} hrs ${selectedTime.minutes} min")
+                    }
+                    else -> {
+                        minTimeField.change("no time set")
+                    }
+                }
             }
         )
     }
@@ -285,10 +300,10 @@ fun OverallGoalsForm(
                 noteText = noteFieldState.value,
                 onNoteFieldChange = { note ->
                     noteFieldState.change(note)
-                } ,
+                },
                 onTimeSelectorClicked = {
                     timeDialogState.show()
-                } ,
+                },
                 timeSet = formattedTime
             )
 
@@ -298,23 +313,31 @@ fun OverallGoalsForm(
     }
 
     MaterialDialog(
-        dialogState = timeDialogState ,
+        dialogState = timeDialogState,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        ),
         buttons = {
-            positiveButton(text = "Set"){
+            positiveButton(text = "Set") {
 
             }
-            negativeButton(text = "Close"){
+            negativeButton(text = "Close") {
 
             }
         }
     ) {
         timepicker(
-            initialTime =  LocalTime.now() ,
-            title = "Set your alert time" ,
-        ){ time ->
+            initialTime = LocalTime.NOON,
+            title = "Select time",
+            colors = TimePickerDefaults
+                .colors(
+                    activeBackgroundColor = MaterialTheme.colorScheme.secondary ,
+                    selectorColor = MaterialTheme.colorScheme.secondary ,
+                )
+
+        ) { time ->
             pickedTime = time
         }
-
     }
 
 
@@ -322,10 +345,16 @@ fun OverallGoalsForm(
 
 @Composable
 fun TimerTimePickerDialog(
-    onSet : (String) -> Unit = {} ,
+    onSet: (SelectedTime) -> Unit = {
+        SelectedTime(
+            hours = 0,
+            minutes = 0,
+        )
+    },
     onDismiss: () -> Unit = {}
 ) {
-    val context  = LocalContext.current
+    //val context  = LocalContext.current
+
     Dialog(
         onDismissRequest = {
             onDismiss()
@@ -334,7 +363,7 @@ fun TimerTimePickerDialog(
         TimerSelectorComponent(
             onDismiss = {
                 onDismiss()
-            } ,
+            },
             onSet = { selectedTime ->
                 onSet(selectedTime)
             }

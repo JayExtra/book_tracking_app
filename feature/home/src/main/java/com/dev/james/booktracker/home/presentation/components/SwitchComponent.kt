@@ -43,12 +43,12 @@ fun SwitchComponent(
             thumbContent = {
                 if (isChecked) {
                     Text(
-                        text = "On",
+                        text = "Yes",
                         style = BookAppTypography.labelSmall
                     )
                 } else {
                     Text(
-                        text = "Off",
+                        text = "No",
                         style = BookAppTypography.labelSmall
                     )
                 }

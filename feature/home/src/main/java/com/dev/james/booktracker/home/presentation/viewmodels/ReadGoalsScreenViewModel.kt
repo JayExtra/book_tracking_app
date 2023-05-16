@@ -90,6 +90,7 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
             ChoiceState(
                 name = "chapter_hours" ,
                 initial = "By Chapter" ,
+
                 validators = emptyList()
             ) ,
             TextFieldState(

@@ -1,7 +1,9 @@
 package com.dev.james.booktracker.home.presentation.screens
 
 import android.content.Context
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -54,6 +56,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 @Destination
 fun ReadGoalScreen(
@@ -163,6 +166,7 @@ fun ReadGoalScreen(
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 @Preview(name = "ReadGoalScreen", showBackground = true)
 fun StatelessReadGoalScreen(
