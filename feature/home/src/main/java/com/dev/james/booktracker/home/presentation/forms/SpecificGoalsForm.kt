@@ -250,7 +250,8 @@ fun SpecificGoalsForm(
                 //select book
                 availableBookFieldState.change(update = book)
             },
-            selectedText = availableBookFieldState.value
+            selectedText = availableBookFieldState.value ,
+            hasError = availableBookFieldState.hasError
         )
 
         AnimatedVisibility(
@@ -295,6 +296,8 @@ fun BookGoalsSection(
     daysSelectorState : SelectState ,
     showChapterDialog : (Boolean) -> Unit = {}
 ) {
+    val context = LocalContext.current
+
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
         val dropDownItems = listOf("By hours", "By chapters")
@@ -322,18 +325,17 @@ fun BookGoalsSection(
             text = chapterHrsTitleText ,
             modifier = Modifier.fillMaxWidth(),
             style = BookAppTypography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = if(timeChapterFieldState.hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
         )
-
-        val isChapter = if (chapterHoursDropdownState.value == "By chapters"){
-            true
-        } else chapterHoursDropdownState.value.isEmpty()
 
 
         BookTimeOrChapterSection(
-            isChapter = isChapter,
+            isChapter = chapterHoursDropdownState.value == "By chapters",
             timeChapterFieldState = timeChapterFieldState ,
             showDialog = { isChapterDialog ->
+                /*Toast.makeText(
+                    context, "chapter hours choice state => ${chapterHoursDropdownState.value} " +
+                            "chapter hours text field state => ${timeChapterFieldState.value}", Toast.LENGTH_SHORT).show()*/
                 showChapterDialog(isChapterDialog)
             }
         )
@@ -362,7 +364,8 @@ fun BookGoalsSection(
                 }
                 frequencyDropDownFieldState.change(update = frequency)
             } ,
-            selectedText = frequencyDropDownFieldState.value
+            selectedText = frequencyDropDownFieldState.value ,
+            hasError = frequencyDropDownFieldState.hasError
         )
 
         AnimatedVisibility(
@@ -383,6 +386,7 @@ fun BookGoalsSection(
 
             WeekDaySelectorComponent(
                 modifier = Modifier.fillMaxWidth(),
+                hasError = daysSelectorState.hasError ,
                 onDaySelected = {day ->
 
                     if(daysSelectorState.value.contains(day)){

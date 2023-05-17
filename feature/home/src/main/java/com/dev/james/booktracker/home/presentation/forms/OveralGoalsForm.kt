@@ -261,7 +261,8 @@ fun OverallGoalsForm(
                         daysSelectorState.select(day)
                     }
                 },
-                selectedDays = daysSelectorState.value
+                selectedDays = daysSelectorState.value ,
+                hasError = daysSelectorState.hasError
             )
         }
 

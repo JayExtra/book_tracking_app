@@ -50,7 +50,9 @@ import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenVie
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenState
 import com.dsc.form_builder.BaseState
+import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
+import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.delay
@@ -110,13 +112,25 @@ fun ReadGoalScreen(
             )
 
             if (formValidationResult && !imageSelectorState.value.isError) {
-                //start saving process to db
-                Toast.makeText(
-                    context,
-                    "Form is properly filled , saving data...",
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
+
+                val allChaptersState = currentReadFormState.getState<TextFieldState>("chapters")
+                val currentChaptersState = currentReadFormState.getState<TextFieldState>("current chapter")
+
+                if(currentChaptersState.value.toInt() > allChaptersState.value.toInt()){
+                    Toast.makeText(
+                        context,
+                        "The current chapter you are in exceeds the total chapters in this book",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }else {
+                    //start saving process to db
+                    Toast.makeText(
+                        context,
+                        "Form is properly filled , saving data...",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
             }
 
         },
@@ -150,11 +164,104 @@ fun ReadGoalScreen(
         },
 
         onNextClicked = {
-            readGoalsScreenViewModel.passMainScreenActions(
-                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
-                    currentPosition = readGoalsScreenUiState.value.currentPosition
-                )
+
+            val supportedDays = listOf(
+                "Select specific days", "Every day except"
             )
+
+            when(readGoalsScreenUiState.value.currentPosition){
+                0 -> {
+
+                    val allChaptersState = currentReadFormState.getState<TextFieldState>("chapters")
+                    val currentChaptersState = currentReadFormState.getState<TextFieldState>("current chapter")
+
+                    readGoalsScreenViewModel.validateImageSelected(
+                        imageSelectedUri = imageSelectorState.value.imageSelectedUri
+                    )
+
+                    if(currentReadFormState.validate() && !imageSelectorState.value.isError){
+                        if(currentChaptersState.value.toInt() > allChaptersState.value.toInt()){
+                            Toast.makeText(
+                                context,
+                                "The current chapter you are in exceeds the total chapters in this book",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }else {
+                            readGoalsScreenViewModel.passMainScreenActions(
+                                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
+                                    currentPosition = readGoalsScreenUiState.value.currentPosition
+                                )
+                            )
+                        }
+
+                    }
+                }
+                1 -> {
+                    val timeFieldState = overallGoalsFormState.getState<TextFieldState>("time")
+                    val freqFieldState = overallGoalsFormState.getState<ChoiceState>("frequency field")
+                    val daysSelectedState = overallGoalsFormState.getState<SelectState>("specific days")
+
+                    if(timeFieldState.validate() && freqFieldState.validate()){
+                        if(supportedDays.contains(freqFieldState.value)){
+                            if(daysSelectedState.validate()){
+                                readGoalsScreenViewModel.passMainScreenActions(
+                                    action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
+                                        currentPosition = readGoalsScreenUiState.value.currentPosition
+                                    )
+                                )
+                            }
+                        }else{
+                            readGoalsScreenViewModel.passMainScreenActions(
+                                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
+                                    currentPosition = readGoalsScreenUiState.value.currentPosition
+                                )
+                            )
+                        }
+                    }
+                }
+                2 -> {
+
+                    val bookMonthsFieldState = specificGoalsFormState.getState<TextFieldState>("books_month")
+                    val timeChapterFieldState = specificGoalsFormState.getState<TextFieldState>("time_chapter")
+                    val periodChoiceState = specificGoalsFormState.getState<ChoiceState>("period")
+                    val availableBooksState = specificGoalsFormState.getState<ChoiceState>("available_books")
+                    val periodDaysSelectState = specificGoalsFormState.getState<SelectState>("period_days")
+
+
+                    if(bookMonthsFieldState.validate() && availableBooksState.validate() ){
+                        if(timeChapterFieldState.validate() && periodChoiceState.validate()){
+                            if(supportedDays.contains(periodChoiceState.value)){
+                                if(periodDaysSelectState.validate()){
+                                    Toast.makeText(
+                                        context,
+                                        "saving with specific stated days",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    readGoalsScreenViewModel.passMainScreenActions(
+                                        action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
+                                            currentPosition = readGoalsScreenUiState.value.currentPosition
+                                        )
+                                    )
+                                }
+                            }else {
+                                Toast.makeText(
+                                    context,
+                                    "saving without specific days",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                readGoalsScreenViewModel.passMainScreenActions(
+                                    action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
+                                        currentPosition = readGoalsScreenUiState.value.currentPosition
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+                else -> {}
+            }
+
+
         },
         onPreviousClicked = {
             readGoalsScreenViewModel.passMainScreenActions(
@@ -290,12 +397,7 @@ fun StatelessReadGoalScreen(
             modifier = Modifier.padding(16.dp),
             currentPosition = uiState.currentPosition,
             onNextClicked = {
-                if(uiState.currentPosition == 2){
-                    Toast.makeText(context , "We are at the last input" , Toast.LENGTH_SHORT)
-                        .show()
-                }else {
-                    onNextClicked()
-                }
+                onNextClicked()
             },
             onPreviousClicked = {
                 onPreviousClicked()

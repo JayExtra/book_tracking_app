@@ -29,6 +29,7 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 @Preview(name = "RowDateSelectorComponent" , showBackground = true)
 fun WeekDaySelectorComponent(
     modifier : Modifier = Modifier ,
+    hasError : Boolean = false ,
     selectedDays : List<String> = listOf() ,
     onDaySelected : (String) -> Unit = {}
 ){
@@ -60,7 +61,8 @@ fun WeekDaySelectorComponent(
                     isSelected = selectedDays.contains(dayList[it]) ,
                     itemSelected = { day ->
                         onDaySelected(day)
-                    }
+                    } ,
+                    hasError = hasError
                 )
             }
         }
@@ -71,9 +73,15 @@ fun WeekDaySelectorComponent(
 @Composable
 fun DayItem(
     dayString : String = "" ,
+    hasError: Boolean = false ,
     isSelected : Boolean = false ,
     itemSelected : (String) -> Unit = {}
 ){
+    val color = if(!isSelected && hasError){
+        MaterialTheme.colorScheme.error
+    }else{
+        MaterialTheme.colorScheme.primary
+    }
     Box(
         contentAlignment = Alignment.Center ,
         modifier = Modifier
@@ -81,7 +89,7 @@ fun DayItem(
             .clip(shape = CircleShape)
             .border(
                 width = if (isSelected) 0.dp else 2.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
+                color = if (isSelected) MaterialTheme.colorScheme.secondary else color ,
                 shape = CircleShape
             )
             .background(
@@ -94,7 +102,7 @@ fun DayItem(
 
         Text(
             text = dayString ,
-            color = if(isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary ,
+            color = if(isSelected) MaterialTheme.colorScheme.onPrimary else color ,
             style = BookAppTypography.bodySmall
         )
         

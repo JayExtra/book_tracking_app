@@ -5,14 +5,20 @@ import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
+import com.dsc.form_builder.Transform
 import com.dsc.form_builder.Validators
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
+
+    companion object {
+        const val TAG = "ReadGoalsScreenViewModel"
+    }
 
     private val _imageSelectorState: MutableStateFlow<ImageSelectorUiState> = MutableStateFlow(
         ImageSelectorUiState()
@@ -37,6 +43,7 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
             ),
             TextFieldState(
                 name = "chapters",
+                transform =  { it.toInt() } ,
                 validators = listOf(Validators.Required(message = "Please specify the number of chapters."))
             ),
             TextFieldState(
@@ -45,6 +52,7 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
             ),
             TextFieldState(
                 name = "chapter title",
+                transform =  { it.toInt() } ,
                 validators = listOf(Validators.Required(message = "Please specify the current chapter title."))
             ),
         )
@@ -55,7 +63,9 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
         fields = listOf(
             TextFieldState(
                 name = "time",
-                validators = listOf(Validators.Required(message = "Please provide minimum times"))
+                validators = listOf(
+                    Validators.Required(message = "Please provide minimum times")
+                )
             ) ,
             ChoiceState(
                 name = "frequency field" ,
@@ -63,7 +73,11 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
             ) ,
             SelectState(
                 name = "specific days" ,
-                validators = listOf(Validators.Required( message = "You should provide specific days for alerts") , Validators.Min(limit = 1 , "Specified days should not be empty. "))
+                initial = mutableListOf() ,
+                validators = listOf(
+                    Validators.Required(message = "Please select the days you want") ,
+                    Validators.Min(limit = 1 , "Please select your days.")
+                )
             ) ,
             TextFieldState(
                 name = "alert note" ,
@@ -77,20 +91,19 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
         fields = listOf(
             TextFieldState(
                 name = "books_month" ,
+                transform = { it.toInt() } ,
                 validators = listOf(
-                    Validators.Required(message = "Please provide number of books.") ,
-                    Validators.MinValue(0 , "The minimum number of books required is 1.")
+                    Validators.Required(message = "Please provide number of books books") ,
+                    Validators.MinValue(limit = 1 , message = "")
                 ) ,
-                initial = "0"
             ) ,
             ChoiceState(
                 name = "available_books" ,
-                validators = emptyList()
+                validators = listOf(Validators.Required(message = "You need to set a goal for an added book."))
             ) ,
             ChoiceState(
                 name = "chapter_hours" ,
-                initial = "By Chapter" ,
-
+                initial = "By chapters" ,
                 validators = emptyList()
             ) ,
             TextFieldState(
@@ -101,7 +114,6 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
             ) ,
             ChoiceState(
                 name = "period" ,
-                initial = "select period" ,
                 validators = listOf(
                     Validators.Required(message = "Please select how long you want this goal to run.")
                 )
@@ -162,6 +174,9 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
                             currentPosition = currentPosition + 1,
                             previousPosition = currentPosition
                         )
+                }else {
+                    //save final goals set here
+                    Timber.tag(TAG).d("Saving user goals in db")
                 }
             }
             is ReadGoalsUiActions.MovePrevious -> {
