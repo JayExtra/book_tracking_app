@@ -67,12 +67,12 @@ fun MainTopBar(
             contentAlignment = Alignment.Center
         ){
             /* Will replace with coil when image uplaoding becomes possible */
-            Image(
+            /*Image(
                 painter = painterResource(id = avatarImage),
                 contentDescription = "avatar image" ,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
-            )
+            )*/
         }
     }
 

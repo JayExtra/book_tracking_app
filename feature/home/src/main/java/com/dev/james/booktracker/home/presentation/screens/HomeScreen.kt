@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.home.presentation.screens
 
+import android.widget.Toast
 import androidx.annotation.RawRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -17,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,16 +28,35 @@ import com.dev.james.booktracker.compose_ui.ui.components.EmptyAnimationWithMess
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.R
+import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
 @Destination
-@Preview("Home Screen")
-fun HomeScreen() {
+fun HomeScreen(
+    homeNavigator: HomeNavigator
+) {
+    val context = LocalContext.current
+    StatelessHomeScreen(
+        onAddButtonClick = {
+           // Toast.makeText(context , "add button clicked", Toast.LENGTH_SHORT).show()
+            homeNavigator.openReadGoalsScreen()
+        }
+    ){
+       // Toast.makeText(context , "add button FAB clicked", Toast.LENGTH_SHORT).show()
+       homeNavigator.openReadGoalsScreen()
+    }
+}
 
+@Composable
+@Preview("Home Screen" , showBackground = true)
+fun StatelessHomeScreen(
+    onAddButtonClick : () -> Unit = {} ,
+    onAddFabClick : () -> Unit = {}
+){
     Box(
-     modifier = Modifier.fillMaxSize() ,
-     contentAlignment = Alignment.TopCenter
+        modifier = Modifier.fillMaxSize() ,
+        contentAlignment = Alignment.TopCenter
     ){
 
         Column(
@@ -51,7 +72,7 @@ fun HomeScreen() {
             )
 
             ElevatedButton(
-                onClick = { /*Take user to goals addition*/ } ,
+                onClick = { onAddButtonClick() } ,
                 shape = BookAppShapes.medium ,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer
@@ -74,7 +95,8 @@ fun HomeScreen() {
 
             Spacer(modifier = Modifier
                 .height(100.dp)
-                .fillMaxWidth())
+                .fillMaxWidth()
+            )
         }
 
 
@@ -85,7 +107,8 @@ fun HomeScreen() {
             shape = BookAppShapes.medium ,
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             onClick = {
-            /*navigate or show goal addition bottom sheet*/
+                /*navigate or show goal addition bottom sheet*/
+                onAddFabClick()
             }
         ) {
             Icon(
@@ -95,7 +118,6 @@ fun HomeScreen() {
             )
         }
     }
-
 }
 
 
@@ -173,3 +195,4 @@ fun EmptyAnimationSection(
     }
 
 }
+
