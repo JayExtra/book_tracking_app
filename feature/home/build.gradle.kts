@@ -65,6 +65,11 @@ dependencies {
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
 
+/*
+    implementation ("com.google.accompanist-permissions:0.21.1-beta")
+*/
+
+
 }
 
 ksp{
