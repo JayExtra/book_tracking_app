@@ -119,21 +119,21 @@ fun ReadGoalScreen(
 
     val cameraPermissionRationalDialogState = rememberMaterialDialogState()
 
-    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()){
-        isGranted ->
-        if(isGranted){
-            Toast.makeText(context, "Permission has been granted", Toast.LENGTH_SHORT).show()
-            //launch camera picker screen here
-        }else {
-            cameraPermissionRationalDialogState.show()
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                Toast.makeText(context, "Permission has been granted", Toast.LENGTH_SHORT).show()
+                //launch camera picker screen here
+            } else {
+                cameraPermissionRationalDialogState.show()
+            }
         }
-    }
 
-    LaunchedEffect(key1 = !isCameraButtonClicked){
+    LaunchedEffect(key1 = !isCameraButtonClicked) {
         //check if user has granted permission
-        if(isCameraButtonClicked){
+        if (isCameraButtonClicked) {
             launcher.launch(Manifest.permission.CAMERA)
-        }else{
+        } else {
             isCameraButtonClicked = false
         }
     }
@@ -200,7 +200,11 @@ fun ReadGoalScreen(
             when {
                 cameraPermissionState.status.isGranted -> {
                     //if so launch image picker
-                    Toast.makeText(context, "Camera permission has been granted", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Camera permission has been granted",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     coroutineScope.launch {
                         delay(5000L)
 
@@ -210,16 +214,15 @@ fun ReadGoalScreen(
                         )
                     }
                 }
-                !cameraPermissionState.status.isGranted -> {
+
+                cameraPermissionState.status == PermissionStatus.Denied(shouldShowRationale = false) -> {
                     isCameraButtonClicked = true
                 }
+
                 cameraPermissionState.status.shouldShowRationale -> {
                     cameraPermissionRationalDialogState.show()
                 }
-                !cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale -> {
-                   //camera permission is full denied by user
-                    Toast.makeText(context, "Sending user to settings screen", Toast.LENGTH_SHORT).show()
-                }
+
             }
 
 
@@ -355,7 +358,8 @@ fun ReadGoalScreen(
 
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally ,
+            modifier = Modifier.padding(16.dp)
         ) {
 
             Icon(
@@ -367,17 +371,30 @@ fun ReadGoalScreen(
                     .height(100.dp)
             )
 
+            val rationalText = if(!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
+                //camera permission is fully denied by user
+                "Camera permission is required for you to be able to take book cover images. Redirecting you to the settings screen to grant this permission."
+            }else{
+                "Camera permission is required for you to be able to take book cover images.Please grant this permission then try again."
+            }
+
             Text(
-                text = "Camera permission is required for you to be able to take book cover images.Please grant this permission then try again.",
+                text = rationalText ,
                 style = BookAppTypography.bodyMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center ,
+                color = MaterialTheme.colorScheme.primary
             )
 
             RoundedBrownButton(
-                label = "Grant permission." ,
+                label = "Grant permission.",
                 onClick = {
-                    cameraPermissionState.launchPermissionRequest()
-                  cameraPermissionRationalDialogState.hide()
+                    if(!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
+                        //camera permission is fully denied by user
+                        Toast.makeText(context, "Sending user to settings screen", Toast.LENGTH_SHORT).show()
+                    }else{
+                        launcher.launch(Manifest.permission.CAMERA)
+                    }
+                    cameraPermissionRationalDialogState.hide()
                 }
             )
             Spacer(modifier = Modifier.height(20.dp))
