@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.home.presentation.viewmodels
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
@@ -129,8 +130,8 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
         )
     )
 
-    fun validateImageSelected(imageSelectedUri: String) {
-        if (imageSelectedUri.isBlank()) {
+    fun validateImageSelected(imageSelectedUri: Uri) {
+        if (imageSelectedUri == Uri.EMPTY) {
             _imageSelectorState.value = _imageSelectorState.value.copy(
                 showProgress = false,
                 isError = true
@@ -199,7 +200,7 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
     /*Add Read form ui actions*/
     sealed class AddReadFormUiActions {
         object LaunchImagePicker : AddReadFormUiActions()
-        data class ImageSelected(val imageUri: String) : AddReadFormUiActions()
+        data class ImageSelected(val imageUri: Uri) : AddReadFormUiActions()
     }
 
     /*General screen ui actions*/
@@ -217,7 +218,7 @@ data class ReadGoalsScreenState(
 
 data class ImageSelectorUiState(
     //image could be uri , subject to change
-    val imageSelectedUri: String = "",
+    val imageSelectedUri: Uri = Uri.EMPTY,
     val showProgress: Boolean = false,
     val isError: Boolean = false
 )

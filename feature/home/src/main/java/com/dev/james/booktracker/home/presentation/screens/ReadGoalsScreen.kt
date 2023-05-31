@@ -2,7 +2,12 @@ package com.dev.james.booktracker.home.presentation.screens
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
+import android.hardware.camera2.CameraManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
+import android.system.Os.mkdir
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,18 +49,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.home.presentation.components.BottomNextPreviousButtons
+import com.dev.james.booktracker.home.presentation.components.CameraView
 import com.dev.james.booktracker.home.presentation.forms.CurrentReadForm
 import com.dev.james.booktracker.home.presentation.forms.OverallGoalsForm
 import com.dev.james.booktracker.home.presentation.forms.SpecificGoalsForm
@@ -80,6 +89,13 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+
+
+private lateinit var outputDirectory: File
+private lateinit var cameraExecutor: ExecutorService
 
 @OptIn(ExperimentalPermissionsApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -89,15 +105,57 @@ fun ReadGoalScreen(
     homeNavigator: HomeNavigator,
     readGoalsScreenViewModel: ReadGoalsScreenViewModel = hiltViewModel()
 ) {
+
+
     val context = LocalContext.current
 
     val coroutineScope = rememberCoroutineScope()
+
+    /* val outputDirectory : File by lazy {
+         val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
+             File(
+                 it,
+                 context.resources.getString(R.string.app_name)
+             ).apply {
+                 mkdirs()
+             }
+         }
+         if(mediaDir != null && mediaDir.exists()) mediaDir else context.filesDir
+     }*/
+
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(key1 = lifecycleOwner) {
+        val eventObserver = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_DESTROY -> {
+                    cameraExecutor.shutdown()
+                }
+
+                Lifecycle.Event.ON_CREATE -> {
+                    outputDirectory = context.getDirectory()
+                    cameraExecutor = Executors.newSingleThreadExecutor()
+                }
+
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(eventObserver)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(eventObserver)
+        }
+    }
+
 
     val currentReadFormState by remember { mutableStateOf(readGoalsScreenViewModel.currentReadFormState) }
 
     val overallGoalsFormState by remember { mutableStateOf(readGoalsScreenViewModel.overallGoalFormState) }
 
     val specificGoalsFormState by remember { mutableStateOf(readGoalsScreenViewModel.specificGoalsFormState) }
+
+    var shouldShowCameraScreen by remember { mutableStateOf(false) }
+
 
     val imageSelectorState = readGoalsScreenViewModel.imageSelectorUiState
         .collectAsStateWithLifecycle(
@@ -124,6 +182,7 @@ fun ReadGoalScreen(
             if (isGranted) {
                 Toast.makeText(context, "Permission has been granted", Toast.LENGTH_SHORT).show()
                 //launch camera picker screen here
+                shouldShowCameraScreen = true
             } else {
                 cameraPermissionRationalDialogState.show()
             }
@@ -144,174 +203,213 @@ fun ReadGoalScreen(
     }*/
 
 
-    StatelessReadGoalScreen(
-        currentReadFormState = currentReadFormState,
-        uiState = readGoalsScreenUiState.value,
-        overallGoalsFormState = overallGoalsFormState,
-        specificGoalsFormState = specificGoalsFormState,
-        alertSwitchState = checkedState,
-        popBackStack = {
-            homeNavigator.openHomeScreen()
-        },
-        onGoogleIconClicked = {
 
-        },
-        imageSelectorState = imageSelectorState.value,
-        onSaveClicked = {
-
-            val formValidationResult = currentReadFormState.validate()
-
-            readGoalsScreenViewModel.validateImageSelected(
-                imageSelectedUri = imageSelectorState.value.imageSelectedUri
-            )
-
-            if (formValidationResult && !imageSelectorState.value.isError) {
-
-                val allChaptersState = currentReadFormState.getState<TextFieldState>("chapters")
-                val currentChaptersState =
-                    currentReadFormState.getState<TextFieldState>("current chapter")
-
-                if (currentChaptersState.value.toInt() > allChaptersState.value.toInt()) {
-                    Toast.makeText(
-                        context,
-                        "The current chapter you are in exceeds the total chapters in this book",
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    //start saving process to db
-                    Toast.makeText(
-                        context,
-                        "Form is properly filled , saving data...",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                }
-            }
-
-        },
-        onImageSelectorClicked = {
-
-
-            //update selector state to show circular progress
-            readGoalsScreenViewModel.passAddReadFormAction(
-                ReadGoalsScreenViewModel.AddReadFormUiActions.LaunchImagePicker
-            )
-
-            when {
-                cameraPermissionState.status.isGranted -> {
-                    //if so launch image picker
-                    Toast.makeText(
-                        context,
-                        "Camera permission has been granted",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    coroutineScope.launch {
-                        delay(5000L)
-
-                        readGoalsScreenViewModel.passAddReadFormAction(
-                            ReadGoalsScreenViewModel.AddReadFormUiActions
-                                .ImageSelected(imageUri = "some image uri")
+    if (shouldShowCameraScreen) {
+        CameraView(
+            outputDirectory = outputDirectory,
+            executor = cameraExecutor,
+            onImageCaptured = { uri ->
+                //update the image state in view model
+                readGoalsScreenViewModel.passAddReadFormAction(
+                    ReadGoalsScreenViewModel
+                        .AddReadFormUiActions.ImageSelected(
+                            imageUri = uri
                         )
-                    }
-                }
+                )
+                //hide camera
+                shouldShowCameraScreen = false
 
-                cameraPermissionState.status == PermissionStatus.Denied(shouldShowRationale = false) -> {
-                    isCameraButtonClicked = true
-                }
-
-                cameraPermissionState.status.shouldShowRationale -> {
-                    cameraPermissionRationalDialogState.show()
-                }
-
+            },
+            onError = { error ->
+                Toast.makeText(context, "${error.message}", Toast.LENGTH_SHORT).show()
             }
+        )
 
+    } else {
 
-        },
-        onAlertSwitchChecked = { status ->
-            checkedState = status
-        },
+        StatelessReadGoalScreen(
+            currentReadFormState = currentReadFormState,
+            uiState = readGoalsScreenUiState.value,
+            overallGoalsFormState = overallGoalsFormState,
+            specificGoalsFormState = specificGoalsFormState,
+            alertSwitchState = checkedState,
+            popBackStack = {
+                homeNavigator.openHomeScreen()
+            },
+            onGoogleIconClicked = {
 
-        onNextClicked = {
+            },
+            imageSelectorState = imageSelectorState.value,
+            onSaveClicked = {
 
-            val supportedDays = listOf(
-                "Select specific days", "Every day except"
-            )
+                val formValidationResult = currentReadFormState.validate()
 
-            when (readGoalsScreenUiState.value.currentPosition) {
-                0 -> {
+                readGoalsScreenViewModel.validateImageSelected(
+                    imageSelectedUri = imageSelectorState.value.imageSelectedUri
+                )
+
+                if (formValidationResult && !imageSelectorState.value.isError) {
 
                     val allChaptersState = currentReadFormState.getState<TextFieldState>("chapters")
                     val currentChaptersState =
                         currentReadFormState.getState<TextFieldState>("current chapter")
 
-                    readGoalsScreenViewModel.validateImageSelected(
-                        imageSelectedUri = imageSelectorState.value.imageSelectedUri
-                    )
-
-                    if (currentReadFormState.validate() && !imageSelectorState.value.isError) {
-                        if (currentChaptersState.value.toInt() > allChaptersState.value.toInt()) {
-                            Toast.makeText(
-                                context,
-                                "The current chapter you are in exceeds the total chapters in this book",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        } else {
-                            readGoalsScreenViewModel.passMainScreenActions(
-                                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
-                                    currentPosition = readGoalsScreenUiState.value.currentPosition
-                                )
-                            )
-                        }
-
+                    if (currentChaptersState.value.toInt() > allChaptersState.value.toInt()) {
+                        Toast.makeText(
+                            context,
+                            "The current chapter you are in exceeds the total chapters in this book",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        //start saving process to db
+                        Toast.makeText(
+                            context,
+                            "Form is properly filled , saving data...",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
                     }
                 }
 
-                1 -> {
-                    val timeFieldState = overallGoalsFormState.getState<TextFieldState>("time")
-                    val freqFieldState =
-                        overallGoalsFormState.getState<ChoiceState>("frequency field")
-                    val daysSelectedState =
-                        overallGoalsFormState.getState<SelectState>("specific days")
+            },
+            onImageSelectorClicked = {
 
-                    if (timeFieldState.validate() && freqFieldState.validate()) {
-                        if (supportedDays.contains(freqFieldState.value)) {
-                            if (daysSelectedState.validate()) {
+
+                //update selector state to show circular progress
+                readGoalsScreenViewModel.passAddReadFormAction(
+                    ReadGoalsScreenViewModel.AddReadFormUiActions.LaunchImagePicker
+                )
+
+                when {
+                    cameraPermissionState.status.isGranted -> {
+                        //if so launch image picker
+                        Toast.makeText(
+                            context,
+                            "Starting camera",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        shouldShowCameraScreen = true
+                        /*coroutineScope.launch {
+                            delay(5000L)
+
+                            readGoalsScreenViewModel.passAddReadFormAction(
+                                ReadGoalsScreenViewModel.AddReadFormUiActions
+                                    .ImageSelected(imageUri = "some image uri")
+                            )
+                        }*/
+                    }
+
+                    cameraPermissionState.status == PermissionStatus.Denied(shouldShowRationale = false) -> {
+                        isCameraButtonClicked = true
+                    }
+
+                    cameraPermissionState.status.shouldShowRationale -> {
+                        cameraPermissionRationalDialogState.show()
+                    }
+
+                }
+
+
+            },
+            onAlertSwitchChecked = { status ->
+                checkedState = status
+            },
+
+            onNextClicked = {
+
+                val supportedDays = listOf(
+                    "Select specific days", "Every day except"
+                )
+
+                when (readGoalsScreenUiState.value.currentPosition) {
+                    0 -> {
+
+                        val allChaptersState =
+                            currentReadFormState.getState<TextFieldState>("chapters")
+                        val currentChaptersState =
+                            currentReadFormState.getState<TextFieldState>("current chapter")
+
+                        readGoalsScreenViewModel.validateImageSelected(
+                            imageSelectedUri = imageSelectorState.value.imageSelectedUri
+                        )
+
+                        if (currentReadFormState.validate() && !imageSelectorState.value.isError) {
+                            if (currentChaptersState.value.toInt() > allChaptersState.value.toInt()) {
+                                Toast.makeText(
+                                    context,
+                                    "The current chapter you are in exceeds the total chapters in this book",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
                                 readGoalsScreenViewModel.passMainScreenActions(
                                     action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
                                         currentPosition = readGoalsScreenUiState.value.currentPosition
                                     )
                                 )
                             }
-                        } else {
-                            readGoalsScreenViewModel.passMainScreenActions(
-                                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
-                                    currentPosition = readGoalsScreenUiState.value.currentPosition
-                                )
-                            )
+
                         }
                     }
-                }
 
-                2 -> {
+                    1 -> {
+                        val timeFieldState = overallGoalsFormState.getState<TextFieldState>("time")
+                        val freqFieldState =
+                            overallGoalsFormState.getState<ChoiceState>("frequency field")
+                        val daysSelectedState =
+                            overallGoalsFormState.getState<SelectState>("specific days")
 
-                    val bookMonthsFieldState =
-                        specificGoalsFormState.getState<TextFieldState>("books_month")
-                    val timeChapterFieldState =
-                        specificGoalsFormState.getState<TextFieldState>("time_chapter")
-                    val periodChoiceState = specificGoalsFormState.getState<ChoiceState>("period")
-                    val availableBooksState =
-                        specificGoalsFormState.getState<ChoiceState>("available_books")
-                    val periodDaysSelectState =
-                        specificGoalsFormState.getState<SelectState>("period_days")
+                        if (timeFieldState.validate() && freqFieldState.validate()) {
+                            if (supportedDays.contains(freqFieldState.value)) {
+                                if (daysSelectedState.validate()) {
+                                    readGoalsScreenViewModel.passMainScreenActions(
+                                        action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
+                                            currentPosition = readGoalsScreenUiState.value.currentPosition
+                                        )
+                                    )
+                                }
+                            } else {
+                                readGoalsScreenViewModel.passMainScreenActions(
+                                    action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
+                                        currentPosition = readGoalsScreenUiState.value.currentPosition
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    2 -> {
+
+                        val bookMonthsFieldState =
+                            specificGoalsFormState.getState<TextFieldState>("books_month")
+                        val timeChapterFieldState =
+                            specificGoalsFormState.getState<TextFieldState>("time_chapter")
+                        val periodChoiceState =
+                            specificGoalsFormState.getState<ChoiceState>("period")
+                        val availableBooksState =
+                            specificGoalsFormState.getState<ChoiceState>("available_books")
+                        val periodDaysSelectState =
+                            specificGoalsFormState.getState<SelectState>("period_days")
 
 
-                    if (bookMonthsFieldState.validate() && availableBooksState.validate()) {
-                        if (timeChapterFieldState.validate() && periodChoiceState.validate()) {
-                            if (supportedDays.contains(periodChoiceState.value)) {
-                                if (periodDaysSelectState.validate()) {
+                        if (bookMonthsFieldState.validate() && availableBooksState.validate()) {
+                            if (timeChapterFieldState.validate() && periodChoiceState.validate()) {
+                                if (supportedDays.contains(periodChoiceState.value)) {
+                                    if (periodDaysSelectState.validate()) {
+                                        Toast.makeText(
+                                            context,
+                                            "saving with specific stated days",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        readGoalsScreenViewModel.passMainScreenActions(
+                                            action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
+                                                currentPosition = readGoalsScreenUiState.value.currentPosition
+                                            )
+                                        )
+                                    }
+                                } else {
                                     Toast.makeText(
                                         context,
-                                        "saving with specific stated days",
+                                        "saving without specific days",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                     readGoalsScreenViewModel.passMainScreenActions(
@@ -320,35 +418,30 @@ fun ReadGoalScreen(
                                         )
                                     )
                                 }
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    "saving without specific days",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                readGoalsScreenViewModel.passMainScreenActions(
-                                    action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
-                                        currentPosition = readGoalsScreenUiState.value.currentPosition
-                                    )
-                                )
                             }
                         }
                     }
+
+                    else -> {}
                 }
 
-                else -> {}
-            }
 
-
-        },
-        onPreviousClicked = {
-            readGoalsScreenViewModel.passMainScreenActions(
-                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MovePrevious(
-                    currentPosition = readGoalsScreenUiState.value.currentPosition
+            },
+            onPreviousClicked = {
+                readGoalsScreenViewModel.passMainScreenActions(
+                    action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MovePrevious(
+                        currentPosition = readGoalsScreenUiState.value.currentPosition
+                    )
                 )
-            )
-        }
-    )
+            }
+        )
+
+
+    }
+
+
+
+
 
     MaterialDialog(
         dialogState = cameraPermissionRationalDialogState,
@@ -358,7 +451,7 @@ fun ReadGoalScreen(
 
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally ,
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
 
@@ -371,27 +464,34 @@ fun ReadGoalScreen(
                     .height(100.dp)
             )
 
-            val rationalText = if(!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
-                //camera permission is fully denied by user
-                "Camera permission is required for you to be able to take book cover images. Redirecting you to the settings screen to grant this permission."
-            }else{
-                "Camera permission is required for you to be able to take book cover images.Please grant this permission then try again."
-            }
+            val rationalText =
+                if (!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
+                    //camera permission is fully denied by user
+                    "Camera permission is required for you to be able to take book cover images. Redirecting you to the settings screen to grant this permission."
+                } else {
+                    "Camera permission is required for you to be able to take book cover images.Please grant this permission then try again."
+                }
 
             Text(
-                text = rationalText ,
+                text = rationalText,
                 style = BookAppTypography.bodyMedium,
-                textAlign = TextAlign.Center ,
+                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary
             )
 
             RoundedBrownButton(
                 label = "Grant permission.",
                 onClick = {
-                    if(!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
+                    if (!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
                         //camera permission is fully denied by user
-                        Toast.makeText(context, "Sending user to settings screen", Toast.LENGTH_SHORT).show()
-                    }else{
+                        val intent = Intent(Settings.ACTION_APPLICATION_SETTINGS).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                        }
+                        context.startActivity(
+                            intent
+                        )
+
+                    } else {
                         launcher.launch(Manifest.permission.CAMERA)
                     }
                     cameraPermissionRationalDialogState.hide()
@@ -402,6 +502,8 @@ fun ReadGoalScreen(
         }
 
     }
+
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -537,7 +639,18 @@ fun StatelessReadGoalScreen(
 
     }
 
+}
 
+private fun Context.getDirectory(): File {
+    val mediaDir = this.externalMediaDirs.firstOrNull()?.let {
+        File(
+            it,
+            this.resources.getString(R.string.app_name)
+        ).apply {
+            mkdirs()
+        }
+    }
+    return if (mediaDir != null && mediaDir.exists()) mediaDir else this.filesDir
 }
 
 
