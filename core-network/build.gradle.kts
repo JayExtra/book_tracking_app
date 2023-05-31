@@ -41,4 +41,17 @@ android {
 
 dependencies {
 
+    //moshi dependency
+    implementation("com.squareup.moshi:moshi-kotlin:${Versions.moshi_version}")
+
+    //retrofit dependency
+    implementation("com.squareup.retrofit2:retrofit:${Versions.retrofit_version}")
+
+    //retrofit-moshi
+    implementation("com.squareup.retrofit2:converter-moshi:${Versions.retrofit_version}")
+
+    //okhttp logging interceptor
+    implementation ("com.squareup.okhttp3:logging-interceptor:${Versions.okhttp_version}")
+    implementation ("com.squareup.okhttp3:okhttp:${Versions.okhttp_version}")
+
 }

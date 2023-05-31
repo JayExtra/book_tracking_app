@@ -66,4 +66,9 @@ object Versions{
 
     const val camerx_version = "1.2.2"
 
+    const val retrofit_version = "2.9.0"
+    const val moshi_version = "1.14.0"
+    const val okhttp_version = "4.9.0"
+
+
 }

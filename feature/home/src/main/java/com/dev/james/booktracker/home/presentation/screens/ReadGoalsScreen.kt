@@ -106,23 +106,7 @@ fun ReadGoalScreen(
     readGoalsScreenViewModel: ReadGoalsScreenViewModel = hiltViewModel()
 ) {
 
-
     val context = LocalContext.current
-
-    val coroutineScope = rememberCoroutineScope()
-
-    /* val outputDirectory : File by lazy {
-         val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
-             File(
-                 it,
-                 context.resources.getString(R.string.app_name)
-             ).apply {
-                 mkdirs()
-             }
-         }
-         if(mediaDir != null && mediaDir.exists()) mediaDir else context.filesDir
-     }*/
-
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(key1 = lifecycleOwner) {
@@ -196,12 +180,6 @@ fun ReadGoalScreen(
             isCameraButtonClicked = false
         }
     }
-
-    /*if (cameraPermissionState.status.isGranted) {
-        Timber.d("Permission is granted")
-        //update camera state
-    }*/
-
 
 
     if (shouldShowCameraScreen) {
