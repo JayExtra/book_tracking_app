@@ -39,12 +39,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dev.james.booktracker.compose_ui.ui.components.HorizontalStepsProgressBarPreview
-import com.dev.james.booktracker.compose_ui.ui.components.RoundedInputText
-import com.dev.james.booktracker.compose_ui.ui.components.SelectableChip
-import com.dev.james.booktracker.compose_ui.ui.components.StatefulRoundOutlineButton
-import com.dev.james.booktracker.compose_ui.ui.components.StepsProgressBar
+import com.dev.james.booktracker.compose_ui.ui.theme.GrayHue
+import com.dev.james.booktracker.compose_ui.ui.theme.Orange40
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
+import com.dev.james.booktracker.on_boarding.ui.components.*
 import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNavigator
 import com.dev.james.booktracker.on_boarding.ui.states.ThemeItem
 import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupViewModel
@@ -187,7 +185,16 @@ fun UserPreferenceSetupScreen(
                 .padding(16.dp),
             onNextClicked = {
                 /* update the current position we are in during on boarding*/
-
+               /* if (currentPosition < 3) {
+                    previousPosition = currentPosition
+                    currentPosition += 1
+                } else {
+                    //save user data and navigate to home screen
+                    userPreferenceSetupViewModel.setUserPreference(
+                        UserPreferenceSetupViewModel
+                            .UserPreferenceSetupActions.SavePreferenceData
+                    )
+                }*/
                 userPreferenceSetupViewModel.setUserPreference(
                     UserPreferenceSetupViewModel
                         .UserPreferenceSetupUiActions.MoveNext(
@@ -205,7 +212,16 @@ fun UserPreferenceSetupScreen(
             },
             onPreviousClicked = {
                 /* update the current position we are in during on boarding*/
-
+              /*  if (currentPosition > 0) {
+                    previousPosition = currentPosition
+                    currentPosition -= 1
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Back at the beggining",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }*/
                 userPreferenceSetupViewModel.setUserPreference(
                    UserPreferenceSetupViewModel
                        .UserPreferenceSetupUiActions.MovePrevious(
@@ -213,6 +229,7 @@ fun UserPreferenceSetupScreen(
                        )
                 )
             },
+            previousPosition = previousPosition,
             currentPosition = currentPosition
         )
 
@@ -267,6 +284,7 @@ fun UserPreferenceSetupScreenPreview() {
                 .padding(16.dp),
             onNextClicked = {},
             onPreviousClicked = {},
+            previousPosition = 0,
             currentPosition = 0
         )
 
@@ -336,7 +354,8 @@ fun BottomNextPreviousButtons(
     modifier: Modifier = Modifier,
     onNextClicked: () -> Unit,
     onPreviousClicked: () -> Unit,
-    currentPosition: Int
+    currentPosition: Int,
+    previousPosition: Int,
 ) {
     Box(
         modifier = modifier,
@@ -706,12 +725,11 @@ fun GenreSelectionSection(
             }
 
         LazyHorizontalStaggeredGrid(
-
             modifier = Modifier.testTag("genre chips grid") ,
             rows = cellConfiguration,
             contentPadding = paddingValues,
             verticalArrangement = Arrangement.spacedBy(8.dp),
-          //  horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             flingBehavior = ScrollableDefaults.flingBehavior()
         ) {
             items(genreList) { genre ->

@@ -2,6 +2,7 @@ package com.dev.james.booktracker.core_database.di
 
 import android.content.Context
 import androidx.room.Room
+import com.dev.james.booktracker.core_database.room.dao.OnBoardingDao
 import com.dev.james.booktracker.core_database.room.database.BookTrackerDatabase
 import dagger.Module
 import dagger.Provides
@@ -27,5 +28,12 @@ object DatabaseModule {
             .build()
     }
 
+    @Provides
+    @Singleton
+    fun provideOnBoardingDao(
+        db : BookTrackerDatabase
+    ) : OnBoardingDao {
+       return  db.getOnBoardingDao()
+    }
 
 }

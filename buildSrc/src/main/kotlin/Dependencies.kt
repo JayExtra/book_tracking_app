@@ -64,6 +64,4 @@ object Versions{
     const val navDestinations = "1.7.32-beta"
     const val daggerHiltVersion = "2.44"
 
-    const val camerx_version = "1.2.2"
-
 }

@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.compose_ui.ui.components
+package com.dev.james.booktracker.on_boarding.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,7 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.compose_ui.R
+import com.dev.james.booktracker.compose_ui.ui.theme.Orange40
+import com.dev.james.on_boarding.R
 
 
 @Composable

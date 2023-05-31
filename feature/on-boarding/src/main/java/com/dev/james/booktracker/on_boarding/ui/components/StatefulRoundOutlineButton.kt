@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.compose_ui.ui.components
+package com.dev.james.booktracker.on_boarding.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

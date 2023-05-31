@@ -1,12 +1,15 @@
 package com.dev.james.booktracker.on_boarding.data.repository
 
-import com.dev.james.booktracker.core.user_preferences.data.mappers.toDomain
-import com.dev.james.booktracker.core.user_preferences.data.mappers.toEntity
-import com.dev.james.booktracker.on_boarding.data.datasource.local.OnBoardingLocalDataSource
+import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
+import com.dev.james.booktracker.core_datastore.local.datastore.DataStorePreferenceKeys
+import com.dev.james.booktracker.on_boarding.data.datasource.OnBoardingLocalDataSource
 import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
-import com.dev.james.booktracker.core.user_preferences.data.models.UserDetails
+import com.dev.james.booktracker.on_boarding.domain.mappers.toDomain
+import com.dev.james.booktracker.on_boarding.domain.mappers.toEntity
+import com.dev.james.booktracker.on_boarding.domain.models.UserDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
 import javax.inject.Inject
 
 class OnBoardingRepositoryImpl @Inject constructor(

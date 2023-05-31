@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.on_boarding.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -9,11 +10,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.*
-import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
+import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
+import com.dev.james.booktracker.on_boarding.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.on_boarding.ui.navigation.HelloMessageNavigator
 import com.dev.james.on_boarding.R
 import com.ramcosta.composedestinations.annotation.Destination
@@ -43,7 +47,7 @@ fun WelcomeHelloMessageScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        RoundedBrownButton(label = "Lets get started!" , cornerRadius = 25.dp) {
+        RoundedBrownButton(text = "Lets get started!") {
             //trigger navigation
             helloMessageNavigator.navigateToUserDetailsCaptureScreen()
         }

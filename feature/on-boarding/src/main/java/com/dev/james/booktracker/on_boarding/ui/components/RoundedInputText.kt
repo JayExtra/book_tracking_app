@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.compose_ui.ui.components
+package com.dev.james.booktracker.on_boarding.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +16,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.theme.*
-import com.dev.james.booktracker.compose_ui.R
+import com.dev.james.on_boarding.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

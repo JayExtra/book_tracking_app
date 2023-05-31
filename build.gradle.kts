@@ -1,5 +1,3 @@
-import java.net.URI
-
 buildscript {
     extra.apply{
         set("compose_ui_version" , "1.3.2")
@@ -7,7 +5,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven(url ="https://jitpack.io")
     }
 }// Top-level build file where you can add configuration options common to all sub-projects/modules.
 val composeUiVersion = rootProject.extra["compose_ui_version"] as String
