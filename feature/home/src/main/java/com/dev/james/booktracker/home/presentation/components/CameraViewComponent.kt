@@ -1,16 +1,23 @@
 package com.dev.james.booktracker.home.presentation.components
 
 import android.content.Context
+import android.hardware.camera2.CameraManager
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,8 +26,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.dev.james.booktracker.home.R
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
@@ -39,6 +53,7 @@ import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun CameraView(
     outputDirectory: File,
@@ -47,61 +62,133 @@ fun CameraView(
     onError: (ImageCaptureException) -> Unit
 ) {
     // setup
+    val coroutineScope = rememberCoroutineScope()
+
     val lensFacing = CameraSelector.LENS_FACING_BACK
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var isFlashTurnedOn by remember { mutableStateOf(false) }
 
     val preview = Preview.Builder().build()
-    val previewView = remember { PreviewView(context) }
+    val previewView = remember { PreviewView(context).apply { PreviewView.ImplementationMode.PERFORMANCE } }
     val imageCapture: ImageCapture = remember { ImageCapture.Builder().build() }
     val cameraSelector = CameraSelector.Builder()
         .requireLensFacing(lensFacing)
         .build()
 
+
     // using the camera provider method
-    LaunchedEffect(lensFacing) {
-        val cameraProvider = context.getCameraProvider()
-        cameraProvider.unbindAll()
-        cameraProvider.bindToLifecycle(
-            lifecycleOwner,
-            cameraSelector,
-            preview,
-            imageCapture
-        )
+    // used within disposable effect for handling the camera flash
+    // once the CameraComponent leaves composition.
+    DisposableEffect(key1 = lensFacing , key2 = isFlashTurnedOn) {
+
+        lateinit var camera: ProcessCameraProvider
+
+        coroutineScope.launch {
+            camera = context.getCameraProvider()
+            camera.unbindAll()
+            camera.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                preview,
+                imageCapture
+            ).apply {
+
+                val hasFlashLight = this.cameraInfo.hasFlashUnit()
+
+                if (isFlashTurnedOn){
+                    if(hasFlashLight){
+                        this.cameraControl.enableTorch(false)
+                    }
+                } else{
+                    if(hasFlashLight){
+                        this.cameraControl.enableTorch(true)
+                    }
+                }
+
+            }
+
+        }
 
         preview.setSurfaceProvider(previewView.surfaceProvider)
+
+        onDispose {
+            camera.unbindAll()
+            camera.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                preview,
+                imageCapture
+            ).apply {
+                this.cameraControl.enableTorch(false)
+            }
+        }
     }
 
 
     //the camera screen itself
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
+
         AndroidView({ previewView }, modifier = Modifier.fillMaxSize())
 
-        IconButton(
-            modifier = Modifier.padding(bottom = 20.dp),
-            onClick = {
-                Timber.i("camera view", "ON CLICK")
-                takePhoto(
-                    filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
-                    imageCapture = imageCapture,
-                    outputDirectory = outputDirectory,
-                    executor = executor,
-                    onImageCaptured = onImageCaptured,
-                    onError = onError
-                )
-            },
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_camera_24),
-                    contentDescription = "Take picture",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(100.dp)
-                        .padding(1.dp)
-                        .border(1.dp, Color.White, CircleShape)
-                )
-            }
-        )
+        Row(
+            modifier = Modifier.background(color = Color.Transparent) ,
+            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            val flashIcon = if (isFlashTurnedOn) R.drawable.baseline_flash_on_24 else R.drawable.baseline_flash_off_24
+
+            IconButton(
+                modifier = Modifier.padding(bottom = 20.dp),
+                onClick = {
+                    isFlashTurnedOn = !isFlashTurnedOn
+                },
+                content = {
+                    Icon(
+                        painter = painterResource(id = flashIcon),
+                        contentDescription = "Take picture",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(100.dp)
+                            .padding(1.dp)
+                            .border(1.dp, Color.White, CircleShape)
+                    )
+                }
+            )
+
+            IconButton(
+                modifier = Modifier
+                    .padding(bottom = 20.dp)
+                    .size(70.dp),
+                onClick = {
+                    Timber.i("camera view", "ON CLICK")
+                    takePhoto(
+                        filenameFormat = "yyyy-MM-dd-HH-mm-ss-SSS",
+                        imageCapture = imageCapture,
+                        outputDirectory = outputDirectory,
+                        executor = executor,
+                        onImageCaptured = onImageCaptured,
+                        onError = onError
+                    )
+                },
+                content = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_camera_24),
+                        contentDescription = "Take picture",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(120.dp)
+                            .padding(1.dp)
+                            .border(1.dp, Color.White, CircleShape)
+                    )
+                }
+            )
+
+        }
+
+        //Box(modifier = Modifier.fillMaxSize().padding(50.dp).border(width = 5.dp , color = Color.Green).background(color = Color.Transparent))
+
+
     }
 }
 

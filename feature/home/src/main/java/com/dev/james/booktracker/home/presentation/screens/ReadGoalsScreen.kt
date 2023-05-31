@@ -2,7 +2,11 @@ package com.dev.james.booktracker.home.presentation.screens
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
+import android.hardware.camera2.CameraManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.system.Os.mkdir
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -90,9 +94,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
+private lateinit var outputDirectory: File
+private lateinit var cameraExecutor: ExecutorService
 
-private lateinit var outputDirectory : File
-private lateinit var cameraExecutor : ExecutorService
 @OptIn(ExperimentalPermissionsApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -107,31 +111,32 @@ fun ReadGoalScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-   /* val outputDirectory : File by lazy {
-        val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
-            File(
-                it,
-                context.resources.getString(R.string.app_name)
-            ).apply {
-                mkdirs()
-            }
-        }
-        if(mediaDir != null && mediaDir.exists()) mediaDir else context.filesDir
-    }*/
-
+    /* val outputDirectory : File by lazy {
+         val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
+             File(
+                 it,
+                 context.resources.getString(R.string.app_name)
+             ).apply {
+                 mkdirs()
+             }
+         }
+         if(mediaDir != null && mediaDir.exists()) mediaDir else context.filesDir
+     }*/
 
 
     val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(key1 = lifecycleOwner){
-        val eventObserver = LifecycleEventObserver { _ , event ->
-            when(event){
-                Lifecycle.Event.ON_DESTROY ->{
+    DisposableEffect(key1 = lifecycleOwner) {
+        val eventObserver = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_DESTROY -> {
                     cameraExecutor.shutdown()
                 }
+
                 Lifecycle.Event.ON_CREATE -> {
                     outputDirectory = context.getDirectory()
                     cameraExecutor = Executors.newSingleThreadExecutor()
                 }
+
                 else -> {}
             }
         }
@@ -141,7 +146,6 @@ fun ReadGoalScreen(
             lifecycleOwner.lifecycle.removeObserver(eventObserver)
         }
     }
-
 
 
     val currentReadFormState by remember { mutableStateOf(readGoalsScreenViewModel.currentReadFormState) }
@@ -198,29 +202,30 @@ fun ReadGoalScreen(
         //update camera state
     }*/
 
-    if(shouldShowCameraScreen){
+
+
+    if (shouldShowCameraScreen) {
         CameraView(
             outputDirectory = outputDirectory,
-            executor = cameraExecutor ,
-            onImageCaptured = {uri ->
-                  //update the image state in view model
+            executor = cameraExecutor,
+            onImageCaptured = { uri ->
+                //update the image state in view model
                 readGoalsScreenViewModel.passAddReadFormAction(
                     ReadGoalsScreenViewModel
                         .AddReadFormUiActions.ImageSelected(
                             imageUri = uri
                         )
-
                 )
+                //hide camera
+                shouldShowCameraScreen = false
 
-                  //hide camera
-                  shouldShowCameraScreen = false
             },
             onError = { error ->
                 Toast.makeText(context, "${error.message}", Toast.LENGTH_SHORT).show()
             }
         )
 
-    }else{
+    } else {
 
         StatelessReadGoalScreen(
             currentReadFormState = currentReadFormState,
@@ -319,7 +324,8 @@ fun ReadGoalScreen(
                 when (readGoalsScreenUiState.value.currentPosition) {
                     0 -> {
 
-                        val allChaptersState = currentReadFormState.getState<TextFieldState>("chapters")
+                        val allChaptersState =
+                            currentReadFormState.getState<TextFieldState>("chapters")
                         val currentChaptersState =
                             currentReadFormState.getState<TextFieldState>("current chapter")
 
@@ -377,7 +383,8 @@ fun ReadGoalScreen(
                             specificGoalsFormState.getState<TextFieldState>("books_month")
                         val timeChapterFieldState =
                             specificGoalsFormState.getState<TextFieldState>("time_chapter")
-                        val periodChoiceState = specificGoalsFormState.getState<ChoiceState>("period")
+                        val periodChoiceState =
+                            specificGoalsFormState.getState<ChoiceState>("period")
                         val availableBooksState =
                             specificGoalsFormState.getState<ChoiceState>("available_books")
                         val periodDaysSelectState =
@@ -430,7 +437,6 @@ fun ReadGoalScreen(
         )
 
 
-
     }
 
 
@@ -445,7 +451,7 @@ fun ReadGoalScreen(
 
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally ,
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
 
@@ -458,27 +464,34 @@ fun ReadGoalScreen(
                     .height(100.dp)
             )
 
-            val rationalText = if(!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
-                //camera permission is fully denied by user
-                "Camera permission is required for you to be able to take book cover images. Redirecting you to the settings screen to grant this permission."
-            }else{
-                "Camera permission is required for you to be able to take book cover images.Please grant this permission then try again."
-            }
+            val rationalText =
+                if (!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
+                    //camera permission is fully denied by user
+                    "Camera permission is required for you to be able to take book cover images. Redirecting you to the settings screen to grant this permission."
+                } else {
+                    "Camera permission is required for you to be able to take book cover images.Please grant this permission then try again."
+                }
 
             Text(
-                text = rationalText ,
+                text = rationalText,
                 style = BookAppTypography.bodyMedium,
-                textAlign = TextAlign.Center ,
+                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary
             )
 
             RoundedBrownButton(
                 label = "Grant permission.",
                 onClick = {
-                    if(!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
+                    if (!cameraPermissionState.status.isGranted && !cameraPermissionState.status.shouldShowRationale) {
                         //camera permission is fully denied by user
-                        Toast.makeText(context, "Sending user to settings screen", Toast.LENGTH_SHORT).show()
-                    }else{
+                        val intent = Intent(Settings.ACTION_APPLICATION_SETTINGS).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                        }
+                        context.startActivity(
+                            intent
+                        )
+
+                    } else {
                         launcher.launch(Manifest.permission.CAMERA)
                     }
                     cameraPermissionRationalDialogState.hide()
@@ -628,7 +641,7 @@ fun StatelessReadGoalScreen(
 
 }
 
-private fun Context.getDirectory() : File {
+private fun Context.getDirectory(): File {
     val mediaDir = this.externalMediaDirs.firstOrNull()?.let {
         File(
             it,
@@ -637,10 +650,8 @@ private fun Context.getDirectory() : File {
             mkdirs()
         }
     }
-    return if(mediaDir != null && mediaDir.exists()) mediaDir else this.filesDir
+    return if (mediaDir != null && mediaDir.exists()) mediaDir else this.filesDir
 }
-
-
 
 
 //camera permissions
