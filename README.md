@@ -25,4 +25,35 @@ support for book trade in's that can cut cost for a lot of users and also reduce
 14. Mock Web Server - for simulating network calls and responses during unit tests.[read more here :point_right:](https://github.com/square/okhttp/tree/master/mockwebserver)
 15. Google truth library - for making assertions during unit and instrumented tests.[read more here :point_right:](https://truth.dev/)
 
+## Architecture
+The project has a multimodular setup and recommended MVVM design pattern. This is accordance to the latest Modern Application Development 
+paradigm recommended by Android Developers and Google.
+
+The project is structured as follows:
+
+### Data
+
+This layer will include;
+
+1. Network Calls
+2. Caching
+3. Storing and fetching Preferences.
+4. The repository implementation
+5. The relevant data models
+6. Relevant Mappers
+
+### Domain
+
+This layer will contain;
+
+1. The repository
+2. The relevant domain models.
+
+### Presentation
+
+1. View
+2. ViewModels
+3. Relevant Mappers
+4. Relevant Models.
+
 You can find the UI designs here. The UI is designed in Figma. [Book Tracker App wireframe](https://www.figma.com/file/JbuslEhcXYKXvKQK9GdIox/Book-app?node-id=0%3A1&t=kEAUB2nqbyU2TDSn-1)

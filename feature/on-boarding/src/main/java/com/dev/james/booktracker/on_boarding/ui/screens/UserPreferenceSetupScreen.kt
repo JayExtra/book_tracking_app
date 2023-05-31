@@ -706,11 +706,12 @@ fun GenreSelectionSection(
             }
 
         LazyHorizontalStaggeredGrid(
+
             modifier = Modifier.testTag("genre chips grid") ,
             rows = cellConfiguration,
             contentPadding = paddingValues,
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+          //  horizontalArrangement = Arrangement.spacedBy(8.dp),
             flingBehavior = ScrollableDefaults.flingBehavior()
         ) {
             items(genreList) { genre ->
