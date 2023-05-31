@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.compose_ui.ui.components
+package com.dev.james.booktracker.on_boarding.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.theme.GrayHue
+import com.dev.james.booktracker.compose_ui.ui.theme.Orange40
 
 @Composable
 fun StepsProgressBar(modifier: Modifier = Modifier, numberOfSteps: Int, currentStep: Int) {
