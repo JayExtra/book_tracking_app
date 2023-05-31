@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.on_boarding.domain.models
+package com.dev.james.booktracker.core.user_preferences.data.models
 
 data class UserDetails(
     val username : String ,

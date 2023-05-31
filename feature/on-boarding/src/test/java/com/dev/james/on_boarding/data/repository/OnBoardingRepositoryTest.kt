@@ -1,8 +1,8 @@
 package com.dev.james.on_boarding.data.repository
 
-import com.dev.james.booktracker.on_boarding.data.datasource.OnBoardingLocalDataSource
+import com.dev.james.booktracker.on_boarding.data.datasource.local.OnBoardingLocalDataSource
 import com.dev.james.booktracker.on_boarding.data.repository.OnBoardingRepositoryImpl
-import com.dev.james.booktracker.on_boarding.domain.models.UserDetails
+import com.dev.james.booktracker.core.user_preferences.data.models.UserDetails
 import com.dev.james.on_boarding.data.datasource.FakeOnBoardingLocalDataSource
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -4,7 +4,7 @@ import com.dev.james.booktracker.core_database.room.entities.UserDetailsEntity
 import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
 import com.dev.james.booktracker.on_boarding.domain.mappers.toDomain
 import com.dev.james.booktracker.on_boarding.domain.mappers.toEntity
-import com.dev.james.booktracker.on_boarding.domain.models.UserDetails
+import com.dev.james.booktracker.core.user_preferences.data.models.UserDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

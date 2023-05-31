@@ -41,4 +41,5 @@ android {
 
 dependencies {
   implementation(project(Modules.coreDataStore))
+  implementation(project(Modules.coreDatabase))
 }

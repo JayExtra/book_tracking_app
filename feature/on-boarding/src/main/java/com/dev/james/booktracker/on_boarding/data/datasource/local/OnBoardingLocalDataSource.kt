@@ -1,7 +1,6 @@
-package com.dev.james.booktracker.on_boarding.data.datasource
+package com.dev.james.booktracker.on_boarding.data.datasource.local
 
 import com.dev.james.booktracker.core_database.room.entities.UserDetailsEntity
-import com.dev.james.booktracker.on_boarding.domain.models.UserDetails
 import kotlinx.coroutines.flow.Flow
 
 interface OnBoardingLocalDataSource {
