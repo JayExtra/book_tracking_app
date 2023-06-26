@@ -44,6 +44,9 @@ dependencies {
     //moshi dependency
     implementation("com.squareup.moshi:moshi-kotlin:${Versions.moshi_version}")
 
+    //Gson converter factory
+    implementation ("com.squareup.retrofit2:converter-gson:${Versions.retrofit_version}")
+
     //retrofit dependency
     implementation("com.squareup.retrofit2:retrofit:${Versions.retrofit_version}")
 

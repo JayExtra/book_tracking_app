@@ -215,7 +215,8 @@ fun ReadGoalScreen(
                 homeNavigator.openHomeScreen()
             },
             onGoogleIconClicked = {
-
+                //open botton sheet with books info
+                readGoalsScreenViewModel.searchForBook()
             },
             imageSelectorState = imageSelectorState.value,
             onSaveClicked = {

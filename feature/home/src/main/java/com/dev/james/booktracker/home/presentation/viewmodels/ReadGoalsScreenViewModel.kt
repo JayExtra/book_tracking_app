@@ -2,6 +2,10 @@ package com.dev.james.booktracker.home.presentation.viewmodels
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.dev.james.booktracker.core.utilities.ConnectivityManager
+import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.home.data.repository.BooksRemoteRepository
 import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.SelectState
@@ -11,11 +15,15 @@ import com.dsc.form_builder.Validators
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
+class ReadGoalsScreenViewModel @Inject constructor(
+    private val booksRemoteRepository: BooksRemoteRepository,
+    private val connectivityManager: ConnectivityManager
+) : ViewModel() {
 
     companion object {
         const val TAG = "ReadGoalsScreenViewModel"
@@ -44,7 +52,7 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
             ),
             TextFieldState(
                 name = "chapters",
-                transform =  { it.toInt() } ,
+                transform = { it.toInt() },
                 validators = listOf(Validators.Required(message = "Please specify the number of chapters."))
             ),
             TextFieldState(
@@ -53,7 +61,7 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
             ),
             TextFieldState(
                 name = "chapter title",
-                transform =  { it.toInt() } ,
+                transform = { it.toInt() },
                 validators = listOf(Validators.Required(message = "Please specify the current chapter title."))
             ),
         )
@@ -67,21 +75,21 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
                 validators = listOf(
                     Validators.Required(message = "Please provide minimum times")
                 )
-            ) ,
+            ),
             ChoiceState(
-                name = "frequency field" ,
+                name = "frequency field",
                 validators = listOf(Validators.Required())
-            ) ,
+            ),
             SelectState(
-                name = "specific days" ,
-                initial = mutableListOf() ,
+                name = "specific days",
+                initial = mutableListOf(),
                 validators = listOf(
-                    Validators.Required(message = "Please select the days you want") ,
-                    Validators.Min(limit = 1 , "Please select your days.")
+                    Validators.Required(message = "Please select the days you want"),
+                    Validators.Min(limit = 1, "Please select your days.")
                 )
-            ) ,
+            ),
             TextFieldState(
-                name = "alert note" ,
+                name = "alert note",
             )
         )
 
@@ -91,40 +99,40 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
     val specificGoalsFormState = FormState(
         fields = listOf(
             TextFieldState(
-                name = "books_month" ,
-                transform = { it.toInt() } ,
+                name = "books_month",
+                transform = { it.toInt() },
                 validators = listOf(
-                    Validators.Required(message = "Please provide number of books books") ,
-                    Validators.MinValue(limit = 1 , message = "")
-                ) ,
-            ) ,
+                    Validators.Required(message = "Please provide number of books books"),
+                    Validators.MinValue(limit = 1, message = "")
+                ),
+            ),
             ChoiceState(
-                name = "available_books" ,
+                name = "available_books",
                 validators = listOf(Validators.Required(message = "You need to set a goal for an added book."))
-            ) ,
+            ),
             ChoiceState(
-                name = "chapter_hours" ,
-                initial = "By chapters" ,
+                name = "chapter_hours",
+                initial = "By chapters",
                 validators = emptyList()
-            ) ,
+            ),
             TextFieldState(
-                name = "time_chapter" ,
+                name = "time_chapter",
                 validators = listOf(
                     Validators.Required(message = "Time or chapter constraint needed for this goal.")
                 )
-            ) ,
+            ),
             ChoiceState(
-                name = "period" ,
+                name = "period",
                 validators = listOf(
                     Validators.Required(message = "Please select how long you want this goal to run.")
                 )
-            ) ,
+            ),
             SelectState(
-                name = "period_days" ,
-                initial = mutableListOf() ,
+                name = "period_days",
+                initial = mutableListOf(),
                 validators = listOf(
-                    Validators.Required(message = "Please select the days you want") ,
-                    Validators.Min(limit = 1 , "Please select your days.")
+                    Validators.Required(message = "Please select the days you want"),
+                    Validators.Min(limit = 1, "Please select your days.")
                 )
             )
         )
@@ -175,11 +183,12 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
                             currentPosition = currentPosition + 1,
                             previousPosition = currentPosition
                         )
-                }else {
+                } else {
                     //save final goals set here
                     Timber.tag(TAG).d("Saving user goals in db")
                 }
             }
+
             is ReadGoalsUiActions.MovePrevious -> {
                 val currentPosition = action.currentPosition
                 if (currentPosition > 0) {
@@ -190,6 +199,34 @@ class ReadGoalsScreenViewModel @Inject constructor() : ViewModel() {
                         )
                 }
             }
+        }
+    }
+
+    //google search action
+    fun searchForBook() {
+        viewModelScope.launch {
+            /*if(connectivityManager.getNetworkStatus()){
+            */
+            when (
+                val result = booksRemoteRepository.getBooksFromApi(
+                    bookTitle = "Think Big",
+                    bookAuthor = ""
+                )
+            ) {
+                is Resource.Success -> {
+                    Timber.tag(TAG).d("Books found => ${result.data}")
+                }
+
+                is Resource.Error -> {
+                    Timber.tag(TAG).d("Books found => ${result.message}")
+                }
+
+                else -> {}
+
+            }
+            /*}else {
+                Timber.tag(TAG).d("No network available currently")
+            }*/
         }
     }
 
