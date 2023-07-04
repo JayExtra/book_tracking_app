@@ -205,8 +205,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
     //google search action
     fun searchForBook() {
         viewModelScope.launch {
-            /*if(connectivityManager.getNetworkStatus()){
-            */
+            if(connectivityManager.getNetworkStatus()){
             when (
                 val result = booksRemoteRepository.getBooksFromApi(
                     bookTitle = "Think Big",
@@ -224,9 +223,11 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 else -> {}
 
             }
-            /*}else {
+            }else {
                 Timber.tag(TAG).d("No network available currently")
-            }*/
+                //show no network error dialog or message
+
+            }
         }
     }
 
