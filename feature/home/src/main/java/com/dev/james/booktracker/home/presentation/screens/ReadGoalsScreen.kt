@@ -75,6 +75,7 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.home.presentation.components.BottomNextPreviousButtons
 import com.dev.james.booktracker.home.presentation.components.CameraView
+import com.dev.james.booktracker.home.presentation.components.GoogleBooksSearchBottomSheet
 import com.dev.james.booktracker.home.presentation.forms.CurrentReadForm
 import com.dev.james.booktracker.home.presentation.forms.OverallGoalsForm
 import com.dev.james.booktracker.home.presentation.forms.SpecificGoalsForm
@@ -174,7 +175,7 @@ fun ReadGoalScreen(
     val cameraPermissionRationalDialogState = rememberMaterialDialogState()
 
     val sheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.Hidden ,
+        initialValue = SheetValue.Hidden,
         skipHiddenState = false
     )
 
@@ -229,23 +230,22 @@ fun ReadGoalScreen(
 
         BottomSheetScaffold(
             sheetShadowElevation = 3.dp,
-            sheetPeekHeight = 0.dp ,
+            sheetPeekHeight = 0.dp,
             scaffoldState = scaffoldState,
             sheetDragHandle = {
-                              BottomSheetDefaults.DragHandle(
-                                  height = 0.dp
-                              )
+                BottomSheetDefaults.DragHandle(
+                    height = 0.dp
+                )
             },
             sheetContent = {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp)
-                        .background(color = MaterialTheme.colorScheme.primary),
+                        .height(500.dp) ,
                     contentAlignment = Alignment.Center
                 ) {
                     //call our google bottom sheet here
-                    Text(text = "My bottom Sheet", color = MaterialTheme.colorScheme.onSecondary)
+                    GoogleBooksSearchBottomSheet()
                 }
             }
         ) {

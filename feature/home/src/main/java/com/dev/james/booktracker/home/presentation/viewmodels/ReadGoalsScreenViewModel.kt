@@ -3,6 +3,7 @@ package com.dev.james.booktracker.home.presentation.viewmodels
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.james.booktracker.core.common_models.mappers.mapToBookDomainObject
 import com.dev.james.booktracker.core.utilities.ConnectivityManager
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.home.data.repository.BooksRemoteRepository
@@ -214,6 +215,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
             ) {
                 is Resource.Success -> {
                     Timber.tag(TAG).d("Books found => ${result.data}")
+                    val book = result.data?.items?.map { bookDto -> bookDto.mapToBookDomainObject() }
                 }
 
                 is Resource.Error -> {
