@@ -33,13 +33,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
@@ -58,6 +62,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -229,19 +234,50 @@ fun ReadGoalScreen(
     } else {
 
         BottomSheetScaffold(
-            sheetShadowElevation = 3.dp,
+
             sheetPeekHeight = 0.dp,
             scaffoldState = scaffoldState,
             sheetDragHandle = {
-                BottomSheetDefaults.DragHandle(
-                    height = 0.dp
-                )
-            },
+
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 8.dp , start = 8.dp , bottom = 8.dp)){
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween ,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Search for book")
+
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    sheetState.hide()
+                                }
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color.Transparent
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close ,
+                                contentDescription = "text field trailing icon",
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                    }
+                    Divider(thickness = 1.dp , color = MaterialTheme.colorScheme.secondary , modifier = Modifier.padding(top = 4.dp))
+                }
+
+            } ,
+            sheetShape = RoundedCornerShape(0.dp) ,
+            sheetTonalElevation = 3.dp,
+            sheetSwipeEnabled = false,
             sheetContent = {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(500.dp) ,
+                        .height(600.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     //call our google bottom sheet here
@@ -257,7 +293,13 @@ fun ReadGoalScreen(
                 specificGoalsFormState = specificGoalsFormState,
                 alertSwitchState = checkedState,
                 popBackStack = {
-                    homeNavigator.openHomeScreen()
+                    if(sheetState.isVisible){
+                        coroutineScope.launch {
+                            sheetState.hide()
+                        }
+                    }else {
+                        homeNavigator.openHomeScreen()
+                    }
                 },
                 onGoogleIconClicked = {
                     //open botton sheet with books info

@@ -3,6 +3,7 @@ package com.dev.james.booktracker.home.presentation.viewmodels
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.mappers.mapToBookDomainObject
 import com.dev.james.booktracker.core.utilities.ConnectivityManager
 import com.dev.james.booktracker.core.utilities.Resource
@@ -14,16 +15,24 @@ import com.dsc.form_builder.TextFieldState
 import com.dsc.form_builder.Transform
 import com.dsc.form_builder.Validators
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class ReadGoalsScreenViewModel @Inject constructor(
-    private val booksRemoteRepository: BooksRemoteRepository,
-    private val connectivityManager: ConnectivityManager
+    private val booksRemoteRepository: BooksRemoteRepository
 ) : ViewModel() {
 
     companion object {
@@ -39,6 +48,11 @@ class ReadGoalsScreenViewModel @Inject constructor(
         ReadGoalsScreenState()
     )
     val readGoalsScreenUiState get() = _readGoalsScreenUiState
+
+    private val searchQueryMutableStateFlow : MutableStateFlow<String> = MutableStateFlow("Think Big")
+
+    private var _googleBottomSheetSearchState : MutableStateFlow<GoogleBottomSheetUiState> = MutableStateFlow(GoogleBottomSheetUiState.IsLoading)
+    val  googleBottomSheetSearchState get() = _googleBottomSheetSearchState
 
 
     val currentReadFormState = FormState(
@@ -139,6 +153,15 @@ class ReadGoalsScreenViewModel @Inject constructor(
         )
     )
 
+    val bottomSheetSearchFieldState = FormState(
+        fields = listOf(
+            TextFieldState(
+                name = "search_field" ,
+                initial = ""
+            )
+        )
+    )
+
     fun validateImageSelected(imageSelectedUri: Uri) {
         if (imageSelectedUri == Uri.EMPTY) {
             _imageSelectorState.value = _imageSelectorState.value.copy(
@@ -203,34 +226,43 @@ class ReadGoalsScreenViewModel @Inject constructor(
         }
     }
 
-    //google search action
-    fun searchForBook() {
-        viewModelScope.launch {
-            if(connectivityManager.getNetworkStatus()){
-            when (
-                val result = booksRemoteRepository.getBooksFromApi(
-                    bookTitle = "Think Big",
-                    bookAuthor = ""
-                )
-            ) {
-                is Resource.Success -> {
-                    Timber.tag(TAG).d("Books found => ${result.data}")
-                    val book = result.data?.items?.map { bookDto -> bookDto.mapToBookDomainObject() }
+    //google search functionality action
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    fun searchForBook(searchQuery : String)  = viewModelScope.launch {
+        searchQueryMutableStateFlow.value = searchQuery
+        searchQueryMutableStateFlow
+            .debounce(600)
+            .filter { query ->
+                if(query.isEmpty()){
+                    val searchFieldState = bottomSheetSearchFieldState.getState<TextFieldState>("search_field")
+                    searchFieldState.change("Think Big")
+                    return@filter false
+                }else{
+                    return@filter true
+                }
+            }
+            .distinctUntilChanged()
+            .flatMapLatest { query ->
+                booksRemoteRepository.getBooksFromApi(bookTitle = query , bookAuthor = "")
+            }
+            .flowOn(Dispatchers.Default)
+            .collect { resource ->
+                when(resource){
+                    is Resource.Success -> {
+                        val booksList = resource.data?.items?.map { booksDto -> booksDto.mapToBookDomainObject() }
+                        _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFetched(booksList = booksList ?: emptyList())
+                    }
+                    is Resource.Error -> {
+                        val errorMessage = resource.message ?: "Oops! Something went wrong"
+                        _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFailed(
+                            errorMessage = errorMessage
+                        )
+                    }
+                    else -> {}
                 }
 
-                is Resource.Error -> {
-                    Timber.tag(TAG).d("Books found => ${result.message}")
-                }
-
-                else -> {}
-
             }
-            }else {
-                Timber.tag(TAG).d("No network available currently")
-                //show no network error dialog or message
 
-            }
-        }
     }
 
     override fun onCleared() {
@@ -247,6 +279,15 @@ class ReadGoalsScreenViewModel @Inject constructor(
     sealed class ReadGoalsUiActions {
         data class MoveNext(val currentPosition: Int) : ReadGoalsUiActions()
         data class MovePrevious(val currentPosition: Int) : ReadGoalsUiActions()
+    }
+
+    sealed class GoogleBottomSheetUiState {
+        object IsLoading : GoogleBottomSheetUiState()
+
+        data class HasFetched(val booksList : List<Book>) : GoogleBottomSheetUiState()
+
+        data class HasFailed(val errorMessage : String ) : GoogleBottomSheetUiState()
+
     }
 
 }

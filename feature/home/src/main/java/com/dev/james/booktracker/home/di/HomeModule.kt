@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.home.di
 
+import com.dev.james.booktracker.core.utilities.ConnectivityManager
 import com.dev.james.booktracker.core_network.api_service.BooksApi
 import com.dev.james.booktracker.home.data.datasource.BooksApiDataSource
 import com.dev.james.booktracker.home.data.datasource.BooksApiDataSourceImpl
@@ -28,10 +29,12 @@ object HomeModule {
     @Provides
     @Singleton
     fun provideBooksRemoteRepository(
-        booksApiDataSource: BooksApiDataSource
+        booksApiDataSource: BooksApiDataSource ,
+        connectivityManager: ConnectivityManager
     ) : BooksRemoteRepository {
         return BooksRemoteRepositoryImpl(
-            booksApiDataSource
+            booksApiDataSource ,
+            connectivityManager
         )
     }
 }

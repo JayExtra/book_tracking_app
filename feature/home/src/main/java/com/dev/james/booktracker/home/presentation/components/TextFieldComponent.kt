@@ -34,10 +34,10 @@ fun TextFieldComponent(
     text: String = "",
     hasError: Boolean = false,
     label: String = "",
-    hint : String = "" ,
-    startingIcon : ImageVector? = null,
-    trailingIcon : ImageVector? = null,
-    onClearTextField : () -> Unit = {} ,
+    hint: String = "",
+    startingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null,
+    onClearTextField: () -> Unit = {},
     onTextChanged: (String) -> Unit = {}
 ) {
     //var currentText by remember { mutableStateOf("") }
@@ -68,8 +68,12 @@ fun TextFieldComponent(
                     color = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                 ),
             placeholder = {
-                if(hint.isNotBlank()){
-                    Text(text = hint , style = BookAppTypography.labelMedium , color = MaterialTheme.colorScheme.onSecondary)
+                if (hint.isNotBlank()) {
+                    Text(
+                        text = hint,
+                        style = BookAppTypography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSecondary
+                    )
                 }
             },
             colors = TextFieldDefaults.textFieldColors(
@@ -81,20 +85,30 @@ fun TextFieldComponent(
             //adjust error depending if error is available
             isError = hasError,
             leadingIcon = {
-                if (startingIcon != null){
-                    Icon(imageVector = startingIcon, contentDescription = "text field leading icon" , tint = MaterialTheme.colorScheme.secondary)
+                if (startingIcon != null) {
+                    Icon(
+                        imageVector = startingIcon,
+                        contentDescription = "text field leading icon",
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
                 }
-            } ,
+            },
             trailingIcon = {
-                if(text.isNotBlank()) {
-                    if(trailingIcon != null){
+                if (text.isNotBlank()) {
+                    if (trailingIcon != null) {
                         IconButton(
-                            onClick = { } ,
+                            onClick = {
+                                onClearTextField()
+                            },
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = Color.Transparent
                             )
                         ) {
-                            Icon(imageVector = trailingIcon, contentDescription = "text field trailing icon" , tint = MaterialTheme.colorScheme.secondary)
+                            Icon(
+                                imageVector = trailingIcon,
+                                contentDescription = "text field trailing icon",
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
                         }
                     }
                 }
