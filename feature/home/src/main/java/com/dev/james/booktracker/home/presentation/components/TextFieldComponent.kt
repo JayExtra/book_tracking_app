@@ -35,6 +35,7 @@ fun TextFieldComponent(
     hasError: Boolean = false,
     label: String = "",
     hint: String = "",
+    isSingleLine : Boolean = false ,
     startingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
     onClearTextField: () -> Unit = {},
@@ -59,6 +60,7 @@ fun TextFieldComponent(
             onValueChange = {
                 onTextChanged(it)
             },
+            singleLine = isSingleLine,
             modifier = modifier
                 .padding(top = 8.dp)
                 .border(

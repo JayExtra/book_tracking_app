@@ -32,7 +32,7 @@ val BookAppTypography = Typography(
     headlineSmall = TextStyle(
         fontFamily = Montserrat ,
         fontWeight = FontWeight.Medium ,
-        fontSize = 20.sp
+        fontSize = 18.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = Montserrat,

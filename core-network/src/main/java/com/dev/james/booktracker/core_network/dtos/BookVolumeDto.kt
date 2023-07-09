@@ -19,17 +19,17 @@ data class BookDto(
 
 @JsonClass(generateAdapter = true)
 data class VolumeInfo(
-    @Json(name = "title") val title: String,
-    @Json(name = "subtitle") val subtitle: String?,
-    @Json(name = "authors") val authors: List<String>,
-    @Json(name = "publisher") val publisher: String?,
-    @Json(name = "publishedDate") val publishedDate: String,
-    @Json(name = "description") val description: String,
-    @Json(name = "pageCount") val pageCount: Int,
-    @Json(name = "industryIdentifiers") val industryIdentifiers: List<Identifiers>,
-    @Json(name = "printType") val printType: String,
-    @Json(name = "categories") val categories: List<String>?,
-    @Json(name = "imageLinks") val imageLinks: ImageLinks?
+    @Json(name = "title") val title: String? = null,
+    @Json(name = "subtitle") val subtitle: String? = null,
+    @Json(name = "authors") val authors: List<String>? = null,
+    @Json(name = "publisher") val publisher: String? = null,
+    @Json(name = "publishedDate") val published_date: String? = null,
+    @Json(name = "description") val description: String? = null,
+    @Json(name = "pageCount") val pageCount: Int? = null,
+    @Json(name = "industryIdentifiers") val industry_identifiers: List<Identifiers>? = null,
+    @Json(name = "printType") val print_type: String? = null,
+    @Json(name = "categories") val categories: List<String>? = null,
+    @Json(name = "imageLinks") val image_links: ImageLinks? = null
 
 )
 
@@ -41,6 +41,6 @@ data class Identifiers(
 
 @JsonClass(generateAdapter = true)
 data class ImageLinks(
-    @Json(name = "smallThumbnail") val smallThumbnail: String,
+    @Json(name = "smallThumbnail") val small_thumbnail: String,
     @Json(name = "thumbnail") val thumbnail: String
 )

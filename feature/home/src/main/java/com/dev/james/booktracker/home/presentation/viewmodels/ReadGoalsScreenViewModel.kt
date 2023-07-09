@@ -233,13 +233,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
         searchQueryMutableStateFlow
             .debounce(600)
             .filter { query ->
-                if(query.isEmpty()){
-                    val searchFieldState = bottomSheetSearchFieldState.getState<TextFieldState>("search_field")
-                    searchFieldState.change("Think Big")
-                    return@filter false
-                }else{
-                    return@filter true
-                }
+                return@filter !query.isEmpty()
             }
             .distinctUntilChanged()
             .flatMapLatest { query ->
@@ -250,6 +244,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 when(resource){
                     is Resource.Success -> {
                         val booksList = resource.data?.items?.map { booksDto -> booksDto.mapToBookDomainObject() }
+                        Timber.tag(TAG).d(booksList.toString())
                         _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFetched(booksList = booksList ?: emptyList())
                     }
                     is Resource.Error -> {

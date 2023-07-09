@@ -5,6 +5,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,9 +50,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImagePainter
+import coil.compose.ImagePainter
 import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
+import coil.transform.RoundedCornersTransformation
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.Book
+import com.dev.james.booktracker.core.utilities.convertToAuthorsString
 import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenState
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
@@ -67,16 +74,16 @@ fun GoogleBooksSearchBottomSheet(
     val context = LocalContext.current
     val searchFieldState by remember { mutableStateOf(readGoalsScreenViewModel.bottomSheetSearchFieldState) }
 
-    val googleSearchBottomSheetUiState : ReadGoalsScreenViewModel.GoogleBottomSheetUiState by readGoalsScreenViewModel.googleBottomSheetSearchState
+    val googleSearchBottomSheetUiState: ReadGoalsScreenViewModel.GoogleBottomSheetUiState by readGoalsScreenViewModel.googleBottomSheetSearchState
         .collectAsStateWithLifecycle()
 
     StateLessGoogleBooksSearchBottomSheet(
         searchFieldState = searchFieldState,
-        googleSearchBottomSheetUiState = googleSearchBottomSheetUiState ,
-        context = context ,
+        googleSearchBottomSheetUiState = googleSearchBottomSheetUiState,
+        context = context,
         onBookSelected = { book ->
             // update the view model
-            Toast.makeText(context , "book seletced $book" , Toast.LENGTH_SHORT ).show()
+            Toast.makeText(context, "book seletced $book", Toast.LENGTH_SHORT).show()
         },
         onSearchTextChanged = { query ->
             // update the search query
@@ -89,7 +96,7 @@ fun GoogleBooksSearchBottomSheet(
 @Composable
 @Preview("GoogleSearchBottomSheet", showBackground = true)
 fun StateLessGoogleBooksSearchBottomSheet(
-    context : Context = LocalContext.current,
+    context: Context = LocalContext.current,
     searchFieldState: FormState<TextFieldState> = FormState(fields = listOf()),
     googleSearchBottomSheetUiState: ReadGoalsScreenViewModel.GoogleBottomSheetUiState = ReadGoalsScreenViewModel.GoogleBottomSheetUiState.IsLoading,
     onSearchTextChanged: (String) -> Unit = {},
@@ -108,6 +115,7 @@ fun StateLessGoogleBooksSearchBottomSheet(
             modifier = Modifier.fillMaxWidth(),
             text = searchState.value,
             hint = "Search for any book",
+            isSingleLine = true,
             startingIcon = Icons.Default.Search,
             trailingIcon = Icons.Default.Close,
             onClearTextField = {
@@ -142,7 +150,7 @@ fun StateLessGoogleBooksSearchBottomSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight(),
-                        contentPadding = PaddingValues(8.dp),
+                        // contentPadding = PaddingValues(8.dp),
                         content = {
                             val booksList = googleSearchBottomSheetUiState.booksList
                             if (booksList.isNotEmpty()) {
@@ -159,8 +167,10 @@ fun StateLessGoogleBooksSearchBottomSheet(
                         }
                     )
                 }
+
                 is ReadGoalsScreenViewModel.GoogleBottomSheetUiState.HasFailed -> {
-                    Timber.tag("GoogleBottomSheet").d("Failed to fetch books , reason: ${googleSearchBottomSheetUiState.errorMessage}")
+                    Timber.tag("GoogleBottomSheet")
+                        .d("Failed to fetch books , reason: ${googleSearchBottomSheetUiState.errorMessage}")
                 }
             }
 
@@ -169,7 +179,6 @@ fun StateLessGoogleBooksSearchBottomSheet(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookInformationCard(
     book: Book,
@@ -186,28 +195,55 @@ fun BookInformationCard(
                 onBookSelected()
             }
     ) {
-        Image(
-            rememberAsyncImagePainter(book.bookThumbnail),
-            contentDescription = "book thumbnail",
-            modifier = Modifier
-                .height(150.dp)
-                .width(120.dp)
-                .clip(shape = RoundedCornerShape(10.dp)),
-            contentScale = ContentScale.Crop
+        val painter = rememberAsyncImagePainter(
+            ImageRequest
+                .Builder(LocalContext.current)
+                .data(data = book.bookImage)
+                .apply(block = {
+                    //placeholder(R.drawable.image_placeholder_24)
+                    error(R.drawable.image_placeholder_24)
+                    crossfade(true)
+                    transformations(
+                        RoundedCornersTransformation(0f)
+                    )
+                }).build()
         )
+
+        val painterState = painter.state
+
+        Box(modifier = Modifier
+            .height(150.dp)
+            .width(110.dp)
+            .padding(8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painter,
+                contentDescription = "book thumbnail" ,
+                contentScale = ContentScale.Fit
+            )
+            if(painterState is AsyncImagePainter.State.Loading){
+                CircularProgressIndicator(
+                    strokeWidth = 3.dp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+        }
+
 
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.height(16.dp))
+
             Text(
-                text = book.bookTitle,
-                style = BookAppTypography.headlineMedium
+                text = book.bookTitle ?: "No title found",
+                style = BookAppTypography.headlineSmall
             )
 
             Text(
-                text = book.bookAuthors.toString(),
+                text = book.bookAuthors?.convertToAuthorsString() ?: "No authors found",
                 style = BookAppTypography.bodySmall
             )
         }
