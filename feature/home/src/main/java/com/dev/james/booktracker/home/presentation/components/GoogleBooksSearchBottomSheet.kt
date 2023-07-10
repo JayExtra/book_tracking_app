@@ -46,6 +46,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,10 +57,13 @@ import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.dev.james.booktracker.compose_ui.ui.components.AnimationWithMessageComponent
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.utilities.convertToAuthorsString
 import com.dev.james.booktracker.home.R
+import com.dev.james.booktracker.home.presentation.screens.EmptyAnimationSection
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenState
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
 import com.dsc.form_builder.FormState
@@ -131,11 +135,23 @@ fun StateLessGoogleBooksSearchBottomSheet(
 
 
         Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(top = 16.dp),
+            contentAlignment = Alignment.TopCenter
         ) {
 
             when (googleSearchBottomSheetUiState) {
+                is ReadGoalsScreenViewModel.GoogleBottomSheetUiState.StandbyState -> {
+
+                    AnimationWithMessageComponent(
+                        animation = LottieCompositionSpec.RawRes(R.raw.search_lottie) ,
+                        shouldShow = true ,
+                        message = "Search for any books online."
+                    )
+
+                }
                 is ReadGoalsScreenViewModel.GoogleBottomSheetUiState.IsLoading -> {
                     CircularProgressIndicator(
                         strokeWidth = 3.dp,
@@ -163,6 +179,14 @@ fun StateLessGoogleBooksSearchBottomSheet(
                                         }
                                     )
                                 }
+                            }else {
+                                item {
+                                    EmptyAnimationSection(
+                                        animation = LottieCompositionSpec.RawRes(R.raw.empty_search_lottie) ,
+                                        shouldShow = true,
+                                        message = "No results found."
+                                    )
+                                }
                             }
                         }
                     )
@@ -171,6 +195,27 @@ fun StateLessGoogleBooksSearchBottomSheet(
                 is ReadGoalsScreenViewModel.GoogleBottomSheetUiState.HasFailed -> {
                     Timber.tag("GoogleBottomSheet")
                         .d("Failed to fetch books , reason: ${googleSearchBottomSheetUiState.errorMessage}")
+                    val error = googleSearchBottomSheetUiState.errorMessage
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally ,
+                        verticalArrangement = Arrangement.Center ,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+
+                        Image(
+                            painter = painterResource(id = R.drawable.baseline_wifi_off_24),
+                            contentDescription = "No network icon" ,
+                            modifier = Modifier
+                                .height(100.dp)
+                                .width(100.dp) ,
+                            contentScale = ContentScale.Fit
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(text = error , style = BookAppTypography.bodyMedium , textAlign = TextAlign.Center)
+
+                    }
                 }
             }
 

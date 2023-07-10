@@ -6,11 +6,11 @@ import com.dev.james.booktracker.core_network.dtos.BookDto
 fun BookDto.mapToBookDomainObject() : Book {
     return Book(
         bookId = id ,
-        bookImage = volumeInfo.image_links?.thumbnail ,
-        bookAuthors = volumeInfo.authors ,
-        bookTitle = volumeInfo.title ,
-        bookSmallThumbnail = volumeInfo.image_links?.small_thumbnail ,
-        bookPagesCount = volumeInfo.pageCount ,
-        bookThumbnail = volumeInfo.image_links?.thumbnail
+        bookImage = volumeInfo?.image_links?.thumbnail ,
+        bookAuthors = volumeInfo?.authors ,
+        bookTitle = volumeInfo?.title ,
+        bookSmallThumbnail = volumeInfo?.image_links?.small_thumbnail ,
+        bookPagesCount = volumeInfo?.pageCount ,
+        bookThumbnail = volumeInfo?.image_links?.thumbnail
     )
 }

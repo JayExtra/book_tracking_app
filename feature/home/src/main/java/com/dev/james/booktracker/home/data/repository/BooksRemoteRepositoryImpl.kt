@@ -16,6 +16,7 @@ class BooksRemoteRepositoryImpl
     ): BooksRemoteRepository {
 
     override suspend fun getBooksFromApi(bookTitle: String, bookAuthor: String): Flow<Resource<BookVolumeDto>> = flow {
+        emit(Resource.Loading())
         if(connectivityManager.getNetworkStatus()){
             try{
                 val booksFromApi = booksApiDataSource.getQueriedBook(query = bookTitle , author = bookAuthor)

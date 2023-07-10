@@ -5,16 +5,16 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class BookVolumeDto(
-    @Json(name = "kind") val kind: String,
-    @Json(name = "totalItems") val totalItems: Int,
-    @Json(name = "items") val items: List<BookDto>
+    @Json(name = "kind") val kind: String? = null,
+    @Json(name = "totalItems") val totalItems: Int ?= null,
+    @Json(name = "items") val items: List<BookDto>? = null
 )
 @JsonClass(generateAdapter = true)
 data class BookDto(
-    @Json(name = "id") val id: String,
-    @Json(name = "etag") val etag: String,
-    @Json(name = "selfLink") val selfLink: String,
-    @Json(name = "volumeInfo") val volumeInfo: VolumeInfo
+    @Json(name = "id") val id: String? = null ,
+    @Json(name = "etag") val etag: String? = null,
+    @Json(name = "selfLink") val selfLink: String? = null,
+    @Json(name = "volumeInfo") val volumeInfo: VolumeInfo? = null
 )
 
 @JsonClass(generateAdapter = true)

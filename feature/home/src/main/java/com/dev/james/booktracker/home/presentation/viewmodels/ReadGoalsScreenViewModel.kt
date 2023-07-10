@@ -3,6 +3,7 @@ package com.dev.james.booktracker.home.presentation.viewmodels
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil.network.HttpException
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.mappers.mapToBookDomainObject
 import com.dev.james.booktracker.core.utilities.ConnectivityManager
@@ -21,12 +22,14 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import okhttp3.internal.filterList
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -51,7 +54,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
     private val searchQueryMutableStateFlow : MutableStateFlow<String> = MutableStateFlow("Think Big")
 
-    private var _googleBottomSheetSearchState : MutableStateFlow<GoogleBottomSheetUiState> = MutableStateFlow(GoogleBottomSheetUiState.IsLoading)
+    private var _googleBottomSheetSearchState : MutableStateFlow<GoogleBottomSheetUiState> = MutableStateFlow(GoogleBottomSheetUiState.StandbyState)
     val  googleBottomSheetSearchState get() = _googleBottomSheetSearchState
 
 
@@ -231,9 +234,15 @@ class ReadGoalsScreenViewModel @Inject constructor(
     fun searchForBook(searchQuery : String)  = viewModelScope.launch {
         searchQueryMutableStateFlow.value = searchQuery
         searchQueryMutableStateFlow
-            .debounce(600)
+            .debounce(300)
             .filter { query ->
-                return@filter !query.isEmpty()
+                if (query.isEmpty()) {
+                    val searchViewState = bottomSheetSearchFieldState.getState<TextFieldState>("search_field")
+                    searchViewState.change("")
+                    return@filter false
+                } else {
+                    return@filter true
+                }
             }
             .distinctUntilChanged()
             .flatMapLatest { query ->
@@ -243,9 +252,19 @@ class ReadGoalsScreenViewModel @Inject constructor(
             .collect { resource ->
                 when(resource){
                     is Resource.Success -> {
-                        val booksList = resource.data?.items?.map { booksDto -> booksDto.mapToBookDomainObject() }
+                        val booksList = resource.data?.items
+                        if(!booksList.isNullOrEmpty()){
+                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFetched(
+                                booksList =   booksList.map { bookDto -> bookDto.mapToBookDomainObject() }
+                            )
+                        }else {
+                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState
+                                .HasFetched(
+                                    booksList = emptyList()
+                                )
+                        }
                         Timber.tag(TAG).d(booksList.toString())
-                        _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFetched(booksList = booksList ?: emptyList())
+
                     }
                     is Resource.Error -> {
                         val errorMessage = resource.message ?: "Oops! Something went wrong"
@@ -253,7 +272,9 @@ class ReadGoalsScreenViewModel @Inject constructor(
                             errorMessage = errorMessage
                         )
                     }
-                    else -> {}
+                    is Resource.Loading -> {
+                        _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.IsLoading
+                    }
                 }
 
             }
@@ -278,6 +299,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
     sealed class GoogleBottomSheetUiState {
         object IsLoading : GoogleBottomSheetUiState()
+
+        object StandbyState : GoogleBottomSheetUiState()
 
         data class HasFetched(val booksList : List<Book>) : GoogleBottomSheetUiState()
 

@@ -181,7 +181,10 @@ fun ReadGoalScreen(
 
     val sheetState = rememberStandardBottomSheetState(
         initialValue = SheetValue.Hidden,
-        skipHiddenState = false
+        skipHiddenState = false ,
+        confirmValueChange = {
+            it != SheetValue.Hidden
+        }
     )
 
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -252,6 +255,7 @@ fun ReadGoalScreen(
                         IconButton(
                             onClick = {
                                 coroutineScope.launch {
+
                                     sheetState.hide()
                                 }
                             },
