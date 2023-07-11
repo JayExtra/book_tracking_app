@@ -11,6 +11,8 @@ fun BookDto.mapToBookDomainObject() : Book {
         bookTitle = volumeInfo?.title ,
         bookSmallThumbnail = volumeInfo?.image_links?.small_thumbnail ,
         bookPagesCount = volumeInfo?.pageCount ,
-        bookThumbnail = volumeInfo?.image_links?.thumbnail
+        bookThumbnail = volumeInfo?.image_links?.thumbnail,
+        publishedDate = volumeInfo?.published_date ,
+        publisher = volumeInfo?.publisher
     )
 }

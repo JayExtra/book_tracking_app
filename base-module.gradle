@@ -102,6 +102,9 @@ dependencies{
 
     implementation("com.google.code.gson:gson:2.9.0")
 
+    //retrofit dependency
+    implementation("com.squareup.retrofit2:retrofit:${Versions.retrofit_version}")
+
 
     //jetpack compose form builder
     implementation ("com.github.jkuatdsc:form-builder:1.0.6")

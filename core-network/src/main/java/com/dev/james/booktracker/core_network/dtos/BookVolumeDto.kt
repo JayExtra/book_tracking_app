@@ -35,12 +35,12 @@ data class VolumeInfo(
 
 @JsonClass(generateAdapter = true)
 data class Identifiers(
-    @Json(name = "type") val type: String,
-    @Json(name = "identifier") val identifier: String
+    @Json(name = "type") val type: String? = null,
+    @Json(name = "identifier") val identifier: String? = null
 )
 
 @JsonClass(generateAdapter = true)
 data class ImageLinks(
-    @Json(name = "smallThumbnail") val small_thumbnail: String,
-    @Json(name = "thumbnail") val thumbnail: String
+    @Json(name = "smallThumbnail") val small_thumbnail: String? = null,
+    @Json(name = "thumbnail") val thumbnail: String? = null
 )

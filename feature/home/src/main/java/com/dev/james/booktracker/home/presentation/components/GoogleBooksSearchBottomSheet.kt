@@ -1,16 +1,13 @@
 package com.dev.james.booktracker.home.presentation.components
 
 import android.content.Context
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,40 +18,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImagePainter
-import coil.compose.ImagePainter
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -64,11 +50,9 @@ import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.utilities.convertToAuthorsString
 import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.home.presentation.screens.EmptyAnimationSection
-import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenState
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
-import kotlinx.coroutines.CoroutineScope
 import timber.log.Timber
 
 @Composable
@@ -280,17 +264,42 @@ fun BookInformationCard(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = book.bookTitle ?: "No title found",
-                style = BookAppTypography.headlineSmall
+                style = BookAppTypography.headlineSmall ,
+                maxLines = 2
             )
 
             Text(
                 text = book.bookAuthors?.convertToAuthorsString() ?: "No authors found",
-                style = BookAppTypography.bodySmall
+                style = BookAppTypography.bodySmall ,
+                maxLines = 2
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            book.publisher?.let { publisher ->
+
+                Text(
+                    text = publisher,
+                    style = BookAppTypography.bodySmall ,
+                    maxLines = 2 ,
+                    fontSize = 10.sp
+                )
+            }
+
+            book.publishedDate?.let { date ->
+
+                Text(
+                    text = date,
+                    style = BookAppTypography.bodySmall ,
+                    maxLines = 2 ,
+                    fontSize = 10.sp
+                )
+            }
+
         }
     }
 

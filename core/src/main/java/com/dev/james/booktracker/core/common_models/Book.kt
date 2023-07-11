@@ -7,5 +7,7 @@ data class Book(
     val bookAuthors : List<String>?,
     val bookSmallThumbnail : String?,
     val bookThumbnail : String?,
-    val bookPagesCount : Int?
+    val bookPagesCount : Int? ,
+    val publisher : String? ,
+    val publishedDate : String?
 )

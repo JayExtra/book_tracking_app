@@ -24,9 +24,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -59,12 +61,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -115,7 +121,9 @@ import kotlin.coroutines.CoroutineContext
 private lateinit var outputDirectory: File
 private lateinit var cameraExecutor: ExecutorService
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalComposeUiApi::class
+)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 @Destination
@@ -203,6 +211,10 @@ fun ReadGoalScreen(
             }
         }
 
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+
     LaunchedEffect(key1 = !isCameraButtonClicked) {
         //check if user has granted permission
         if (isCameraButtonClicked) {
@@ -231,6 +243,9 @@ fun ReadGoalScreen(
             },
             onError = { error ->
                 Toast.makeText(context, "${error.message}", Toast.LENGTH_SHORT).show()
+            } ,
+            onCloseAction = {
+                shouldShowCameraScreen = false
             }
         )
 
@@ -244,7 +259,7 @@ fun ReadGoalScreen(
 
                 Column(modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 8.dp , start = 8.dp , bottom = 8.dp)){
+                    .padding(end = 8.dp, start = 8.dp, bottom = 8.dp)){
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween ,
@@ -254,8 +269,9 @@ fun ReadGoalScreen(
 
                         IconButton(
                             onClick = {
+                                keyboardController?.hide()
+                                readGoalsScreenViewModel.cancelQueryJob()
                                 coroutineScope.launch {
-
                                     sheetState.hide()
                                 }
                             },
@@ -265,7 +281,7 @@ fun ReadGoalScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close ,
-                                contentDescription = "text field trailing icon",
+                                contentDescription = "close bottom sheet ",
                                 tint = MaterialTheme.colorScheme.secondary
                             )
                         }

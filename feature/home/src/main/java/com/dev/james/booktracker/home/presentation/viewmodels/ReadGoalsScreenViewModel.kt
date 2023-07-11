@@ -19,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,6 +42,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
     companion object {
         const val TAG = "ReadGoalsScreenViewModel"
     }
+
+    private var queryJob : Job? = null
 
     private val _imageSelectorState: MutableStateFlow<ImageSelectorUiState> = MutableStateFlow(
         ImageSelectorUiState()
@@ -231,58 +234,64 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
     //google search functionality action
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    fun searchForBook(searchQuery : String)  = viewModelScope.launch {
-        searchQueryMutableStateFlow.value = searchQuery
-        searchQueryMutableStateFlow
-            .debounce(300)
-            .filter { query ->
-                if (query.isEmpty()) {
-                    val searchViewState = bottomSheetSearchFieldState.getState<TextFieldState>("search_field")
-                    searchViewState.change("")
-                    return@filter false
-                } else {
-                    return@filter true
+    fun searchForBook(searchQuery : String) {
+        queryJob = viewModelScope.launch {
+            searchQueryMutableStateFlow.value = searchQuery
+            searchQueryMutableStateFlow
+                .debounce(200)
+                .filter { query ->
+                    if (query.isEmpty()) {
+                        val searchViewState = bottomSheetSearchFieldState.getState<TextFieldState>("search_field")
+                        searchViewState.change("")
+                        return@filter false
+                    } else {
+                        return@filter true
+                    }
                 }
-            }
-            .distinctUntilChanged()
-            .flatMapLatest { query ->
-                booksRemoteRepository.getBooksFromApi(bookTitle = query , bookAuthor = "")
-            }
-            .flowOn(Dispatchers.Default)
-            .collect { resource ->
-                when(resource){
-                    is Resource.Success -> {
-                        val booksList = resource.data?.items
-                        if(!booksList.isNullOrEmpty()){
-                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFetched(
-                                booksList =   booksList.map { bookDto -> bookDto.mapToBookDomainObject() }
-                            )
-                        }else {
-                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState
-                                .HasFetched(
-                                    booksList = emptyList()
+                .distinctUntilChanged()
+                .flatMapLatest { query ->
+                    booksRemoteRepository.getBooksFromApi(bookTitle = query , bookAuthor = "")
+                }
+                .flowOn(Dispatchers.Default)
+                .collect { resource ->
+                    when(resource){
+                        is Resource.Success -> {
+                            val booksList = resource.data?.items
+                            if(!booksList.isNullOrEmpty()){
+                                _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFetched(
+                                    booksList =   booksList.map { bookDto -> bookDto.mapToBookDomainObject() }
                                 )
-                        }
-                        Timber.tag(TAG).d(booksList.toString())
+                            }else {
+                                _googleBottomSheetSearchState.value = GoogleBottomSheetUiState
+                                    .HasFetched(
+                                        booksList = emptyList()
+                                    )
+                            }
+                            Timber.tag(TAG).d(booksList.toString())
 
+                        }
+                        is Resource.Error -> {
+                            val errorMessage = resource.message ?: "Oops! Something went wrong"
+                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFailed(
+                                errorMessage = errorMessage
+                            )
+                        }
+                        is Resource.Loading -> {
+                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.IsLoading
+                        }
                     }
-                    is Resource.Error -> {
-                        val errorMessage = resource.message ?: "Oops! Something went wrong"
-                        _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFailed(
-                            errorMessage = errorMessage
-                        )
-                    }
-                    is Resource.Loading -> {
-                        _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.IsLoading
-                    }
+
                 }
 
-            }
-
+        }
+    }
+    fun cancelQueryJob() {
+        queryJob?.cancel()
     }
 
     override fun onCleared() {
         super.onCleared()
+        queryJob?.cancel()
     }
 
     /*Add Read form ui actions*/
