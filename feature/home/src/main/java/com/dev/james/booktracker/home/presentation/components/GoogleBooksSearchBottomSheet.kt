@@ -70,8 +70,9 @@ fun GoogleBooksSearchBottomSheet(
         googleSearchBottomSheetUiState = googleSearchBottomSheetUiState,
         context = context,
         onBookSelected = { book ->
-            // update the view model
-            Toast.makeText(context, "book seletced $book", Toast.LENGTH_SHORT).show()
+            // update the view model image state and also pass the book selected data to various required fields
+            readGoalsScreenViewModel.onBookSelected(book = book)
+
         },
         onSearchTextChanged = { query ->
             // update the search query

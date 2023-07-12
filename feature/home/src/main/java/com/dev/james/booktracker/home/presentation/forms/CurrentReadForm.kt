@@ -70,7 +70,8 @@ fun CurrentReadForm(
             hasError = titleFieldState.hasError,
             onTextChanged = { fieldValue ->
                 titleFieldState.change(fieldValue)
-            }
+            } ,
+            isSingleLine = true
         )
 
         Spacer(
@@ -87,7 +88,8 @@ fun CurrentReadForm(
             hasError = authorFieldState.hasError,
             onTextChanged = { fieldValue ->
                 authorFieldState.change(fieldValue)
-            }
+            } ,
+            isSingleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))

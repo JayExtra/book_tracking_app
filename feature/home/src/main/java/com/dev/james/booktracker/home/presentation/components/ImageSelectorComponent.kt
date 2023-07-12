@@ -62,10 +62,12 @@ fun ImageSelectorComponent(
             }
     ) {
 
-        if (imageSelectorState.imageSelectedUri != Uri.EMPTY) {
-            //will replace with coil
+        if (imageSelectorState.imageSelectedUri != Uri.EMPTY || imageSelectorState.imageUrl.isNotBlank() ) {
+
             Image(
-                painter = rememberAsyncImagePainter(model = imageSelectorState.imageSelectedUri),
+                painter = rememberAsyncImagePainter(
+                    model = if (imageSelectorState.imageSelectedUri != Uri.EMPTY) imageSelectorState.imageSelectedUri else imageSelectorState.imageUrl
+                ),
                 contentDescription = "taken book image",
                 modifier = Modifier
                     .fillMaxSize(),
@@ -89,7 +91,7 @@ fun ImageSelectorComponent(
             }
         }
 
-        if (imageSelectorState.imageSelectedUri == Uri.EMPTY && !imageSelectorState.showProgress) {
+        if (imageSelectorState.imageSelectedUri == Uri.EMPTY && !imageSelectorState.showProgress && imageSelectorState.imageUrl.isBlank()) {
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.mappers.mapToBookDomainObject
 import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.core.utilities.convertToAuthorsString
 import com.dev.james.booktracker.home.data.repository.BooksRemoteRepository
 import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
@@ -202,7 +203,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
             }
             is AddReadFormUiActions.ClearImage -> {
                 _imageSelectorState.value = _imageSelectorState.value.copy(
-                    imageSelectedUri = Uri.EMPTY
+                    imageSelectedUri = Uri.EMPTY ,
+                    imageUrl = ""
                 )
             }
         }
@@ -235,6 +237,20 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun onBookSelected(book : Book) {
+        //update various states
+        _imageSelectorState.value = imageSelectorUiState.value.copy(
+            imageUrl = book.bookImage!!
+        )
+
+        val currentReadFormTitleFieldState : TextFieldState = currentReadFormState.getState("title")
+        val currentReadFormAuthorFieldState : TextFieldState = currentReadFormState.getState("author")
+
+        currentReadFormTitleFieldState.change(book.bookTitle ?: "No title found")
+        currentReadFormAuthorFieldState.change(book.bookAuthors?.convertToAuthorsString() ?: "No author(s) found.")
+
     }
 
     //google search functionality action
@@ -308,6 +324,13 @@ class ReadGoalsScreenViewModel @Inject constructor(
         object ClearImage : AddReadFormUiActions()
     }
 
+    /*sealed class GoogleBottomSheetUiActions {
+        data class OnBookSelected(
+            val book: Book
+        ) : GoogleBottomSheetUiState()
+
+    }*/
+
     /*General screen ui actions*/
     sealed class ReadGoalsUiActions {
         data class MoveNext(val currentPosition: Int) : ReadGoalsUiActions()
@@ -335,6 +358,7 @@ data class ReadGoalsScreenState(
 data class ImageSelectorUiState(
     //image could be uri , subject to change
     val imageSelectedUri: Uri = Uri.EMPTY,
+    val imageUrl : String = "",
     val showProgress: Boolean = false,
     val isError: Boolean = false
 )
