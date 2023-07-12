@@ -36,7 +36,8 @@ fun CurrentReadForm(
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
     imageSelectorState: ImageSelectorUiState = ImageSelectorUiState(),
     onSaveBookClicked: () -> Unit = {},
-    imageSelectorClicked: () -> Unit = {}
+    imageSelectorClicked: () -> Unit = {} ,
+    onClearImage : () -> Unit = {}
 ) {
 
     Column(
@@ -50,7 +51,11 @@ fun CurrentReadForm(
                 //start the image picker
                 imageSelectorClicked()
             },
-            imageSelectorState = imageSelectorState
+            imageSelectorState = imageSelectorState ,
+            onClear = {
+                onClearImage()
+            }
+
         )
 
         Spacer(modifier = Modifier.height(24.dp))

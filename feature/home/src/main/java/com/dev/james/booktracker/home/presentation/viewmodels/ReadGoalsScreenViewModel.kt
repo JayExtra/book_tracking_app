@@ -3,17 +3,14 @@ package com.dev.james.booktracker.home.presentation.viewmodels
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil.network.HttpException
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.mappers.mapToBookDomainObject
-import com.dev.james.booktracker.core.utilities.ConnectivityManager
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.home.data.repository.BooksRemoteRepository
 import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
-import com.dsc.form_builder.Transform
 import com.dsc.form_builder.Validators
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,16 +18,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import okhttp3.internal.filterList
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -191,6 +185,12 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 )
             }
 
+            is AddReadFormUiActions.DismissImagePicker -> {
+                _imageSelectorState.value = _imageSelectorState.value.copy(
+                    showProgress = false
+                )
+            }
+
             is AddReadFormUiActions.ImageSelected -> {
 
                 _imageSelectorState.value = _imageSelectorState.value.copy(
@@ -199,6 +199,11 @@ class ReadGoalsScreenViewModel @Inject constructor(
                     imageSelectedUri = action.imageUri
                 )
 
+            }
+            is AddReadFormUiActions.ClearImage -> {
+                _imageSelectorState.value = _imageSelectorState.value.copy(
+                    imageSelectedUri = Uri.EMPTY
+                )
             }
         }
     }
@@ -298,6 +303,9 @@ class ReadGoalsScreenViewModel @Inject constructor(
     sealed class AddReadFormUiActions {
         object LaunchImagePicker : AddReadFormUiActions()
         data class ImageSelected(val imageUri: Uri) : AddReadFormUiActions()
+        object DismissImagePicker : AddReadFormUiActions()
+
+        object ClearImage : AddReadFormUiActions()
     }
 
     /*General screen ui actions*/

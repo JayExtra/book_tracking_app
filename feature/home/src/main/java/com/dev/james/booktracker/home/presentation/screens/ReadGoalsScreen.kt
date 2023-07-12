@@ -121,7 +121,8 @@ import kotlin.coroutines.CoroutineContext
 private lateinit var outputDirectory: File
 private lateinit var cameraExecutor: ExecutorService
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
+@OptIn(
+    ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
     ExperimentalComposeUiApi::class
 )
 @RequiresApi(Build.VERSION_CODES.O)
@@ -189,7 +190,7 @@ fun ReadGoalScreen(
 
     val sheetState = rememberStandardBottomSheetState(
         initialValue = SheetValue.Hidden,
-        skipHiddenState = false ,
+        skipHiddenState = false,
         confirmValueChange = {
             it != SheetValue.Hidden
         }
@@ -243,9 +244,13 @@ fun ReadGoalScreen(
             },
             onError = { error ->
                 Toast.makeText(context, "${error.message}", Toast.LENGTH_SHORT).show()
-            } ,
+            },
             onCloseAction = {
                 shouldShowCameraScreen = false
+                readGoalsScreenViewModel.passAddReadFormAction(
+                    ReadGoalsScreenViewModel.AddReadFormUiActions
+                        .DismissImagePicker
+                )
             }
         )
 
@@ -257,12 +262,14 @@ fun ReadGoalScreen(
             scaffoldState = scaffoldState,
             sheetDragHandle = {
 
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 8.dp, start = 8.dp, bottom = 8.dp)){
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 8.dp, start = 8.dp, bottom = 8.dp)
+                ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween ,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Search for book")
@@ -280,17 +287,21 @@ fun ReadGoalScreen(
                             )
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Close ,
+                                imageVector = Icons.Default.Close,
                                 contentDescription = "close bottom sheet ",
                                 tint = MaterialTheme.colorScheme.secondary
                             )
                         }
                     }
-                    Divider(thickness = 1.dp , color = MaterialTheme.colorScheme.secondary , modifier = Modifier.padding(top = 4.dp))
+                    Divider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
 
-            } ,
-            sheetShape = RoundedCornerShape(0.dp) ,
+            },
+            sheetShape = RoundedCornerShape(0.dp),
             sheetTonalElevation = 3.dp,
             sheetSwipeEnabled = false,
             sheetContent = {
@@ -313,11 +324,11 @@ fun ReadGoalScreen(
                 specificGoalsFormState = specificGoalsFormState,
                 alertSwitchState = checkedState,
                 popBackStack = {
-                    if(sheetState.isVisible){
+                    if (sheetState.isVisible) {
                         coroutineScope.launch {
                             sheetState.hide()
                         }
-                    }else {
+                    } else {
                         homeNavigator.openHomeScreen()
                     }
                 },
@@ -383,14 +394,7 @@ fun ReadGoalScreen(
                                 Toast.LENGTH_SHORT
                             ).show()
                             shouldShowCameraScreen = true
-                            /*coroutineScope.launch {
-                                delay(5000L)
 
-                                readGoalsScreenViewModel.passAddReadFormAction(
-                                    ReadGoalsScreenViewModel.AddReadFormUiActions
-                                        .ImageSelected(imageUri = "some image uri")
-                                )
-                            }*/
                         }
 
                         cameraPermissionState.status == PermissionStatus.Denied(shouldShowRationale = false) -> {
@@ -404,6 +408,12 @@ fun ReadGoalScreen(
                     }
 
 
+                },
+                onClearImage = {
+                    readGoalsScreenViewModel.passAddReadFormAction(
+                        ReadGoalsScreenViewModel.AddReadFormUiActions
+                            .ClearImage
+                    )
                 },
                 onAlertSwitchChecked = { status ->
                     checkedState = status
@@ -618,6 +628,7 @@ fun StatelessReadGoalScreen(
     onGoogleIconClicked: () -> Unit = {},
     onSaveClicked: () -> Unit = {},
     onImageSelectorClicked: () -> Unit = {},
+    onClearImage: () -> Unit = {},
     onNextClicked: () -> Unit = {},
     onPreviousClicked: () -> Unit = {},
     onAlertSwitchChecked: (Boolean) -> Unit = {}
@@ -692,6 +703,9 @@ fun StatelessReadGoalScreen(
                     imageSelectorState = imageSelectorState,
                     imageSelectorClicked = {
                         onImageSelectorClicked()
+                    },
+                    onClearImage = {
+                        onClearImage()
                     }
                 )
             }
