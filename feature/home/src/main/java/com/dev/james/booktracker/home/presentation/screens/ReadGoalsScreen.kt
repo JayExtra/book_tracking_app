@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -348,9 +349,7 @@ fun ReadGoalScreen(
 
                     val formValidationResult = currentReadFormState.validate()
 
-                    readGoalsScreenViewModel.validateImageSelected(
-                        imageSelectedUri = imageSelectorState.value.imageSelectedUri
-                    )
+                    readGoalsScreenViewModel.validateImageSelected()
 
                     if (formValidationResult && !imageSelectorState.value.isError) {
 
@@ -433,9 +432,7 @@ fun ReadGoalScreen(
                             val currentChaptersState =
                                 currentReadFormState.getState<TextFieldState>("current chapter")
 
-                            readGoalsScreenViewModel.validateImageSelected(
-                                imageSelectedUri = imageSelectorState.value.imageSelectedUri
-                            )
+                            readGoalsScreenViewModel.validateImageSelected()
 
                             if (currentReadFormState.validate() && !imageSelectorState.value.isError) {
                                 if (currentChaptersState.value.toInt() > allChaptersState.value.toInt()) {
@@ -696,6 +693,7 @@ fun StatelessReadGoalScreen(
                 exit = fadeOut() + slideOutHorizontally { if (uiState.currentPosition > uiState.previousPosition) -it else it }
             ) {
                 CurrentReadForm(
+                    modifier = Modifier.fillMaxHeight() ,
                     currentReadFormState = currentReadFormState,
                     onSaveBookClicked = {
                         onSaveClicked()

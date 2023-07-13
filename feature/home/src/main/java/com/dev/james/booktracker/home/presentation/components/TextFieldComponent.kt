@@ -1,14 +1,11 @@
 package com.dev.james.booktracker.home.presentation.components
 
-import android.graphics.drawable.VectorDrawable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,10 +32,10 @@ fun TextFieldComponent(
     hasError: Boolean = false,
     label: String = "",
     hint: String = "",
-    isSingleLine : Boolean = false ,
+    isSingleLine : Boolean = false,
     startingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
-    onClearTextField: () -> Unit = {},
+    onTrailingIconClicked: () -> Unit = {},
     onTextChanged: (String) -> Unit = {}
 ) {
     //var currentText by remember { mutableStateOf("") }
@@ -100,7 +97,7 @@ fun TextFieldComponent(
                     if (trailingIcon != null) {
                         IconButton(
                             onClick = {
-                                onClearTextField()
+                                onTrailingIconClicked()
                             },
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = Color.Transparent

@@ -5,14 +5,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,6 +39,7 @@ import timber.log.Timber
 @Preview("CurrentReadForm")
 fun CurrentReadForm(
     //will take in form state
+    modifier: Modifier = Modifier ,
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
     imageSelectorState: ImageSelectorUiState = ImageSelectorUiState(),
     onSaveBookClicked: () -> Unit = {},
@@ -43,7 +50,9 @@ fun CurrentReadForm(
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(16.dp)
+        modifier = modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
 
         ImageSelectorComponent(
@@ -71,6 +80,10 @@ fun CurrentReadForm(
             onTextChanged = { fieldValue ->
                 titleFieldState.change(fieldValue)
             } ,
+            trailingIcon = Icons.Default.Close,
+            onTrailingIconClicked = {
+                 titleFieldState.change("")
+            },
             isSingleLine = true
         )
 
@@ -89,10 +102,36 @@ fun CurrentReadForm(
             onTextChanged = { fieldValue ->
                 authorFieldState.change(fieldValue)
             } ,
+            trailingIcon = Icons.Default.Close,
+            onTrailingIconClicked = {
+                //clear the text field
+                authorFieldState.change("")
+            },
             isSingleLine = true
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        val pagesTextFieldState : TextFieldState = currentReadFormState.getState("pages_count")
+
+        TextFieldComponent(
+            modifier = Modifier.fillMaxWidth(),
+            label = "Pages count",
+            text = pagesTextFieldState.value,
+            hasError = pagesTextFieldState.hasError,
+            onTextChanged = { fieldValue ->
+                pagesTextFieldState.change(fieldValue)
+            } ,
+            trailingIcon = Icons.Default.Close,
+            onTrailingIconClicked = {
+                //clear the text field
+                pagesTextFieldState.change("")
+            },
+            isSingleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
 
         val chapterDropDownState: TextFieldState = currentReadFormState.getState("chapters")
         val currentChapterDropDownState: TextFieldState =
@@ -100,7 +139,8 @@ fun CurrentReadForm(
 
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically ,
+            modifier = Modifier.fillMaxWidth()
         ) {
 
             val chapterCount = mutableListOf<String>()
@@ -110,11 +150,9 @@ fun CurrentReadForm(
                 )
             }
 
-
-
             DropDownComponent(
                 modifier = Modifier.width(180.dp),
-                label = "Chapters",
+                label = "Chapters count",
                 selectedText = chapterDropDownState.value,
                 dropDownItems = chapterCount.toList(),
                 hasError = chapterDropDownState.hasError,
@@ -126,9 +164,7 @@ fun CurrentReadForm(
                 canUserFill = true
             )
 
-            Spacer(modifier = Modifier.width(30.dp))
-
-
+            Spacer(modifier = Modifier.width(20.dp))
 
             DropDownComponent(
                 modifier = Modifier.width(180.dp),
@@ -157,7 +193,12 @@ fun CurrentReadForm(
             hasError = chapterTitleState.hasError,
             onTextChanged = { text ->
                 chapterTitleState.change(text)
-            }
+            } ,
+            trailingIcon = Icons.Default.Close ,
+            onTrailingIconClicked = {
+                chapterTitleState.change("")
+            }  ,
+            isSingleLine = true
         )
 
         Spacer(modifier = Modifier.height(12.dp))

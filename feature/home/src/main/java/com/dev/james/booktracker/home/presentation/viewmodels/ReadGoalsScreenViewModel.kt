@@ -80,6 +80,10 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 transform = { it.toInt() },
                 validators = listOf(Validators.Required(message = "Please specify the current chapter title."))
             ),
+            TextFieldState(
+                name = "pages_count" ,
+                validators = listOf(Validators.Required(message = "Please specify the number of pages in the book."))
+            )
         )
     )
 
@@ -163,17 +167,16 @@ class ReadGoalsScreenViewModel @Inject constructor(
         )
     )
 
-    fun validateImageSelected(imageSelectedUri: Uri) {
-        if (imageSelectedUri == Uri.EMPTY) {
+    fun validateImageSelected() {
+        if (imageSelectorUiState.value.imageSelectedUri != Uri.EMPTY || imageSelectorUiState.value.imageUrl.isNotBlank()) {
             _imageSelectorState.value = _imageSelectorState.value.copy(
                 showProgress = false,
-                isError = true
+                isError = false
             )
         } else {
             _imageSelectorState.value = _imageSelectorState.value.copy(
                 showProgress = false,
-                isError = false,
-                imageSelectedUri = imageSelectedUri
+                isError = true
             )
         }
     }
@@ -206,6 +209,15 @@ class ReadGoalsScreenViewModel @Inject constructor(
                     imageSelectedUri = Uri.EMPTY ,
                     imageUrl = ""
                 )
+
+
+/*
+                val currentReadFormTitleFieldState : TextFieldState = currentReadFormState.getState("title")
+                val currentReadFormAuthorFieldState : TextFieldState = currentReadFormState.getState("author")
+
+                currentReadFormTitleFieldState.change("")
+                currentReadFormAuthorFieldState.change("")*/
+
             }
         }
     }
@@ -242,14 +254,17 @@ class ReadGoalsScreenViewModel @Inject constructor(
     fun onBookSelected(book : Book) {
         //update various states
         _imageSelectorState.value = imageSelectorUiState.value.copy(
-            imageUrl = book.bookImage!!
+            imageUrl = book.bookImage!! ,
+            imageSelectedUri = Uri.EMPTY
         )
 
         val currentReadFormTitleFieldState : TextFieldState = currentReadFormState.getState("title")
         val currentReadFormAuthorFieldState : TextFieldState = currentReadFormState.getState("author")
+        val currentReadFormPagesFieldState : TextFieldState = currentReadFormState.getState("pages_count")
 
         currentReadFormTitleFieldState.change(book.bookTitle ?: "No title found")
         currentReadFormAuthorFieldState.change(book.bookAuthors?.convertToAuthorsString() ?: "No author(s) found.")
+        currentReadFormPagesFieldState.change("${book.bookPagesCount} pages")
 
     }
 

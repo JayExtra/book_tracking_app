@@ -1,7 +1,6 @@
 package com.dev.james.booktracker.home.presentation.components
 
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.Image
 
 import androidx.compose.foundation.clickable
@@ -107,7 +106,7 @@ fun StateLessGoogleBooksSearchBottomSheet(
             isSingleLine = true,
             startingIcon = Icons.Default.Search,
             trailingIcon = Icons.Default.Close,
-            onClearTextField = {
+            onTrailingIconClicked = {
                 //update the text field state to empty
                 searchState.change("")
             },
