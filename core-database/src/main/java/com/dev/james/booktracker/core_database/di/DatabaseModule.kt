@@ -27,5 +27,4 @@ object DatabaseModule {
             .build()
     }
 
-
 }

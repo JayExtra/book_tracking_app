@@ -7,6 +7,7 @@ import com.dev.james.booktracker.core_database.room.converters.ListTypeConverter
 import com.dev.james.booktracker.core_database.room.dao.CoreDao
 import com.dev.james.booktracker.core_database.room.entities.UserDetailsEntity
 import com.dev.james.booktracker.core_database.room.dao.OnBoardingDao
+import com.dev.james.booktracker.core_database.room.dao.ReadAndGoalsDao
 
 @Database(
     entities = [UserDetailsEntity::class] ,
@@ -17,4 +18,6 @@ import com.dev.james.booktracker.core_database.room.dao.OnBoardingDao
 abstract class BookTrackerDatabase : RoomDatabase() {
     abstract fun getOnBoardingDao() : OnBoardingDao
     abstract fun getCoreDao() : CoreDao
+
+    abstract fun getReadAndGoalsDao() : ReadAndGoalsDao
 }

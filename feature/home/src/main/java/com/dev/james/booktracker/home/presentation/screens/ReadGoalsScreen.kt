@@ -526,8 +526,6 @@ fun ReadGoalScreen(
 
                         else -> {}
                     }
-
-
                 },
                 onPreviousClicked = {
                     readGoalsScreenViewModel.passMainScreenActions(
@@ -542,9 +540,6 @@ fun ReadGoalScreen(
         }
 
     }
-
-
-
 
 
     MaterialDialog(
