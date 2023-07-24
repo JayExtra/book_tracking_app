@@ -9,18 +9,26 @@ data class BookEntity(
     @ColumnInfo("id")
     @PrimaryKey(autoGenerate = false)
     val bookId : String,
-    @ColumnInfo("book_image")
+    @ColumnInfo("book_image_url")
     val bookImage : String,
+    @ColumnInfo("is_uri")
+    val isUri : Boolean ,
     @ColumnInfo("book_title")
     val bookTitle : String,
     @ColumnInfo("book_authors")
-    val bookAuthors : List<String>,
-    @ColumnInfo("book_thumbnail")
-    val bookThumbnail : String,
+    val bookAuthors : String,
+    @ColumnInfo("book_small_thumbnail")
+    val bookSmallThumbnail : String,
     @ColumnInfo("book_pages")
     val bookPagesCount : Int ,
     @ColumnInfo("publisher_name")
     val publisher : String ,
     @ColumnInfo("published_date")
-    val publishedDate : String
+    val publishedDate : String ,
+    @ColumnInfo("current_chapter")
+    val currentChapter : Int ,
+    @ColumnInfo("current_chapter_title")
+    val currentChapterTitle : String ,
+    @ColumnInfo("total_chapters")
+    val chapters : Int
 )

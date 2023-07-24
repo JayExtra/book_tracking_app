@@ -7,7 +7,7 @@ import androidx.room.Query
 import com.dev.james.booktracker.core_database.room.entities.BookEntity
 
 @Dao
-interface ReadAndGoalsDao {
+interface BooksDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addBook(bookEntity: BookEntity)
 

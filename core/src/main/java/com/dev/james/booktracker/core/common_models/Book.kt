@@ -6,7 +6,6 @@ data class Book(
     val bookTitle : String?,
     val bookAuthors : List<String>?,
     val bookSmallThumbnail : String?,
-    val bookThumbnail : String?,
     val bookPagesCount : Int? ,
     val publisher : String? ,
     val publishedDate : String?

@@ -368,10 +368,13 @@ fun ReadGoalScreen(
                             //start saving process to db
                             Toast.makeText(
                                 context,
-                                "Form is properly filled , saving data...",
+                                "saving data...",
                                 Toast.LENGTH_SHORT
                             )
                                 .show()
+                            readGoalsScreenViewModel.passAddReadFormAction(
+                                ReadGoalsScreenViewModel.AddReadFormUiActions.SaveBook
+                            )
                         }
                     }
 
