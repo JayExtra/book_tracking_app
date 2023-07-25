@@ -3,41 +3,77 @@ package com.dev.james.booktracker.home.presentation.viewmodels
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dev.james.booktracker.core.utilities.ConnectivityManager
+import com.dev.james.booktracker.core.common_models.Book
+import com.dev.james.booktracker.core.common_models.mappers.BookSave
 import com.dev.james.booktracker.core.utilities.Resource
-import com.dev.james.booktracker.home.data.repository.BooksRemoteRepository
+import com.dev.james.booktracker.core.utilities.convertToAuthorsString
+import com.dev.james.booktracker.core.utilities.generateSecureUUID
+import com.dev.james.booktracker.core_network.dtos.BookDto
+import com.dev.james.booktracker.home.data.repository.BooksRepository
 import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
-import com.dsc.form_builder.Transform
 import com.dsc.form_builder.Validators
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class ReadGoalsScreenViewModel @Inject constructor(
-    private val booksRemoteRepository: BooksRemoteRepository,
-    private val connectivityManager: ConnectivityManager
+    private val booksRepository: BooksRepository
 ) : ViewModel() {
 
     companion object {
         const val TAG = "ReadGoalsScreenViewModel"
     }
 
+    private var queryJob : Job? = null
+
     private val _imageSelectorState: MutableStateFlow<ImageSelectorUiState> = MutableStateFlow(
         ImageSelectorUiState()
     )
     val imageSelectorUiState get() = _imageSelectorState.asStateFlow()
 
+    private val selectedBookState : MutableStateFlow<Book> = MutableStateFlow(
+        Book(
+            null ,
+            null ,
+            null ,
+            null ,
+            null ,
+            null ,
+            null ,
+            null
+        )
+    )
+
+    private val _savedBookState : MutableStateFlow<BookSave> = MutableStateFlow(
+        BookSave("" , "" , "" , "" , "" , 0 , "" , "" , false , 0 , "" , 0)
+    )
+    private val savedBookState get() = _savedBookState
+
     private val _readGoalsScreenUiState: MutableStateFlow<ReadGoalsScreenState> = MutableStateFlow(
         ReadGoalsScreenState()
     )
     val readGoalsScreenUiState get() = _readGoalsScreenUiState
+
+    private val searchQueryMutableStateFlow : MutableStateFlow<String> = MutableStateFlow("Think Big")
+
+    private var _googleBottomSheetSearchState : MutableStateFlow<GoogleBottomSheetUiState> = MutableStateFlow(GoogleBottomSheetUiState.StandbyState)
+    val  googleBottomSheetSearchState get() = _googleBottomSheetSearchState
 
 
     val currentReadFormState = FormState(
@@ -64,6 +100,10 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 transform = { it.toInt() },
                 validators = listOf(Validators.Required(message = "Please specify the current chapter title."))
             ),
+            TextFieldState(
+                name = "pages_count" ,
+                validators = listOf(Validators.Required(message = "Please specify the number of pages in the book."))
+            )
         )
     )
 
@@ -138,17 +178,33 @@ class ReadGoalsScreenViewModel @Inject constructor(
         )
     )
 
-    fun validateImageSelected(imageSelectedUri: Uri) {
-        if (imageSelectedUri == Uri.EMPTY) {
+    val bottomSheetSearchFieldState = FormState(
+        fields = listOf(
+            TextFieldState(
+                name = "search_field" ,
+                initial = ""
+            )
+        )
+    )
+
+    private val currentReadFormTitleFieldState : TextFieldState = currentReadFormState.getState("title")
+    private val currentReadFormAuthorFieldState : TextFieldState = currentReadFormState.getState("author")
+    private val currentReadFormPagesFieldState : TextFieldState = currentReadFormState.getState("pages_count")
+    private val currentReadFormChaptersState : TextFieldState = currentReadFormState.getState("chapters")
+    private val currentReadFormCurrentChapter : TextFieldState = currentReadFormState.getState("current chapter")
+    private val currentReadFormCurChaptTitleState : TextFieldState = currentReadFormState.getState("chapter title")
+
+
+    fun validateImageSelected() {
+        if (imageSelectorUiState.value.imageSelectedUri != Uri.EMPTY || imageSelectorUiState.value.imageUrl.isNotBlank()) {
             _imageSelectorState.value = _imageSelectorState.value.copy(
                 showProgress = false,
-                isError = true
+                isError = false
             )
         } else {
             _imageSelectorState.value = _imageSelectorState.value.copy(
                 showProgress = false,
-                isError = false,
-                imageSelectedUri = imageSelectedUri
+                isError = true
             )
         }
     }
@@ -161,6 +217,12 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 )
             }
 
+            is AddReadFormUiActions.DismissImagePicker -> {
+                _imageSelectorState.value = _imageSelectorState.value.copy(
+                    showProgress = false
+                )
+            }
+
             is AddReadFormUiActions.ImageSelected -> {
 
                 _imageSelectorState.value = _imageSelectorState.value.copy(
@@ -169,6 +231,65 @@ class ReadGoalsScreenViewModel @Inject constructor(
                     imageSelectedUri = action.imageUri
                 )
 
+            }
+            is AddReadFormUiActions.ClearImage -> {
+                _imageSelectorState.value = _imageSelectorState.value.copy(
+                    imageSelectedUri = Uri.EMPTY ,
+                    imageUrl = ""
+                )
+
+            }
+
+            is AddReadFormUiActions.SaveBook -> {
+                //1.create the book save object , will be determined by whether the image is uri or url
+                val author = currentReadFormAuthorFieldState.value
+                val title = currentReadFormTitleFieldState.value
+                val pages = currentReadFormPagesFieldState.value
+                val chapters = currentReadFormChaptersState.value
+                val currentChapter = currentReadFormCurrentChapter.value
+                val chapterTitle = currentReadFormCurChaptTitleState.value
+
+                val bookId = if(imageSelectorUiState.value.imageSelectedUri != Uri.EMPTY)
+                    generateSecureUUID()
+                else
+                    selectedBookState.value.bookId ?: "n/a"
+
+                val isUri = imageSelectorUiState.value.imageSelectedUri != Uri.EMPTY
+
+                val bookImage = if(isUri) imageSelectorUiState.value.imageSelectedUri.toString() else imageSelectorUiState.value.imageUrl
+
+                val smallThumbnail = selectedBookState.value.bookSmallThumbnail
+                val publisher = selectedBookState.value.publisher
+                val publishedDate = selectedBookState.value.publishedDate
+
+                val bookSave = BookSave(
+                    bookId = bookId ,
+                    bookImage = bookImage ,
+                    bookTitle = title ,
+                    bookAuthors = author ,
+                    bookSmallThumbnail = smallThumbnail ?: "n/a" ,
+                    bookPagesCount = pages.toInt() ,
+                    publisher = publisher ?: "n/a" ,
+                    publishedDate = publishedDate ?: "n/a" ,
+                    isUri = isUri ,
+                    chapters = chapters.toInt() ,
+                    currentChapter = currentChapter.toInt() ,
+                    currentChapterTitle = chapterTitle
+
+                )
+
+                viewModelScope.launch {
+                    //2. save to db
+                    val result = booksRepository.saveBookToDatabase(bookSave)
+                    result.collect { status ->
+                        if(status){
+                            _savedBookState.value = bookSave
+                            Timber.tag(TAG).d("Book successfully added to database")
+                        }else {
+                            Timber.tag(TAG).d("Could not add any book to database")
+                        }
+                    }
+                }
             }
         }
     }
@@ -202,48 +323,119 @@ class ReadGoalsScreenViewModel @Inject constructor(
         }
     }
 
-    //google search action
-    fun searchForBook() {
-        viewModelScope.launch {
-            /*if(connectivityManager.getNetworkStatus()){
-            */
-            when (
-                val result = booksRemoteRepository.getBooksFromApi(
-                    bookTitle = "Think Big",
-                    bookAuthor = ""
-                )
-            ) {
-                is Resource.Success -> {
-                    Timber.tag(TAG).d("Books found => ${result.data}")
+    fun onBookSelected(book : Book) {
+        //update various states
+        _imageSelectorState.value = imageSelectorUiState.value.copy(
+            imageUrl = book.bookImage!! ,
+            imageSelectedUri = Uri.EMPTY
+        )
+
+        currentReadFormTitleFieldState.change(book.bookTitle ?: "No title found")
+        currentReadFormAuthorFieldState.change(book.bookAuthors?.convertToAuthorsString() ?: "No author(s) found.")
+        currentReadFormPagesFieldState.change(book.bookPagesCount.toString())
+
+        selectedBookState.value = book
+
+    }
+
+    //google search functionality action
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    fun searchForBook(searchQuery : String) {
+        queryJob = viewModelScope.launch {
+            searchQueryMutableStateFlow.value = searchQuery
+            searchQueryMutableStateFlow
+                .debounce(200)
+                .filter { query ->
+                    if (query.isEmpty()) {
+                        val searchViewState = bottomSheetSearchFieldState.getState<TextFieldState>("search_field")
+                        searchViewState.change("")
+                        return@filter false
+                    } else {
+                        return@filter true
+                    }
+                }
+                .distinctUntilChanged()
+                .flatMapLatest { query ->
+                    booksRepository.getBooksFromApi(bookTitle = query , bookAuthor = "")
+                }
+                .flowOn(Dispatchers.Default)
+                .collect { resource ->
+                    when(resource){
+                        is Resource.Success -> {
+
+                            val booksList = resource.data?.items
+
+                            if(!booksList.isNullOrEmpty()){
+                                _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFetched(
+                                    booksList =  booksList.map { bookDto -> bookDto.mapToBookUiObject() }
+                                )
+                            }else {
+                                _googleBottomSheetSearchState.value = GoogleBottomSheetUiState
+                                    .HasFetched(
+                                        booksList = emptyList()
+                                    )
+                            }
+                            Timber.tag(TAG).d(booksList.toString())
+
+                        }
+                        is Resource.Error -> {
+                            val errorMessage = resource.message ?: "Oops! Something went wrong"
+                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFailed(
+                                errorMessage = errorMessage
+                            )
+                        }
+                        is Resource.Loading -> {
+                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.IsLoading
+                        }
+                    }
+
                 }
 
-                is Resource.Error -> {
-                    Timber.tag(TAG).d("Books found => ${result.message}")
-                }
-
-                else -> {}
-
-            }
-            /*}else {
-                Timber.tag(TAG).d("No network available currently")
-            }*/
         }
+    }
+    fun cancelQueryJob() {
+        queryJob?.cancel()
     }
 
     override fun onCleared() {
         super.onCleared()
+        queryJob?.cancel()
     }
 
     /*Add Read form ui actions*/
     sealed class AddReadFormUiActions {
         object LaunchImagePicker : AddReadFormUiActions()
         data class ImageSelected(val imageUri: Uri) : AddReadFormUiActions()
+        object DismissImagePicker : AddReadFormUiActions()
+
+        object ClearImage : AddReadFormUiActions()
+
+        object SaveBook : AddReadFormUiActions()
+
     }
+
+    /*sealed class GoogleBottomSheetUiActions {
+        data class OnBookSelected(
+            val book: Book
+        ) : GoogleBottomSheetUiState()
+
+    }*/
 
     /*General screen ui actions*/
     sealed class ReadGoalsUiActions {
         data class MoveNext(val currentPosition: Int) : ReadGoalsUiActions()
         data class MovePrevious(val currentPosition: Int) : ReadGoalsUiActions()
+    }
+
+    sealed class GoogleBottomSheetUiState {
+        object IsLoading : GoogleBottomSheetUiState()
+
+        object StandbyState : GoogleBottomSheetUiState()
+
+        data class HasFetched(val booksList : List<Book>) : GoogleBottomSheetUiState()
+
+        data class HasFailed(val errorMessage : String ) : GoogleBottomSheetUiState()
+
     }
 
 }
@@ -256,6 +448,20 @@ data class ReadGoalsScreenState(
 data class ImageSelectorUiState(
     //image could be uri , subject to change
     val imageSelectedUri: Uri = Uri.EMPTY,
+    val imageUrl : String = "",
     val showProgress: Boolean = false,
     val isError: Boolean = false
 )
+
+fun BookDto.mapToBookUiObject() : Book {
+    return Book(
+        bookId = id ,
+        bookImage = volumeInfo?.image_links?.thumbnail ,
+        bookAuthors = volumeInfo?.authors ,
+        bookTitle = volumeInfo?.title ,
+        bookSmallThumbnail = volumeInfo?.image_links?.small_thumbnail ,
+        bookPagesCount = volumeInfo?.pageCount ,
+        publishedDate = volumeInfo?.published_date ,
+        publisher = volumeInfo?.publisher
+    )
+}

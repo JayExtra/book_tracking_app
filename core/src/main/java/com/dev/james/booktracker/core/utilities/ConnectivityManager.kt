@@ -1,5 +1,5 @@
 package com.dev.james.booktracker.core.utilities
 
 interface ConnectivityManager {
-    fun getNetworkStatus() : Boolean
+    suspend fun getNetworkStatus() : Boolean
 }

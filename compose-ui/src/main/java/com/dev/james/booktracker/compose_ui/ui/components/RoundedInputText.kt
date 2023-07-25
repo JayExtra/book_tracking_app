@@ -57,7 +57,7 @@ fun RoundedInputText(
             errorLabelColor = ErrorColor49 ,
             errorCursorColor = ErrorColor49 ,
             containerColor = MaterialTheme.colorScheme.onBackground ,
-            textColor = MaterialTheme.colorScheme.onPrimary
+           // textColor = MaterialTheme.colorScheme.onPrimary
         ) ,
         isError = isErrorEnabled
     )
