@@ -67,7 +67,6 @@ class BooksRepositoryImpl
     override suspend fun deleteBookInDatabase(bookId: String): Boolean {
        return booksLocalDataSource.deleteBookFromDataBase(bookId){ isDeleted -> isDeleted }
     }
-
 }
 
 fun BookSave.mapToBookEntity() : BookEntity {

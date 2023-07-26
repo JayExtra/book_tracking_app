@@ -7,7 +7,7 @@ import com.dev.james.booktracker.home.data.datasource.BooksApiDataSource
 import javax.inject.Inject
 
 class BooksApiDataSourceImpl @Inject constructor(
-    private val booksApi: BooksApi ,
+    private val booksApi: BooksApi 
 ) : BooksApiDataSource {
 
     override suspend fun getQueriedBook(query: String, author: String): BookVolumeDto {

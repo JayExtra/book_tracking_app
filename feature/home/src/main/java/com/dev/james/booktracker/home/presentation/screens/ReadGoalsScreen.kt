@@ -356,6 +356,7 @@ fun ReadGoalScreen(
                 }
                 else -> {}
             }
+            
             StatelessReadGoalScreen(
                 currentReadFormState = currentReadFormState,
                 uiState = readGoalsScreenUiState.value,
@@ -467,6 +468,7 @@ fun ReadGoalScreen(
 
                     when (readGoalsScreenUiState.value.currentPosition) {
                         0 -> {
+
 
                             val allChaptersState =
                                 currentReadFormState.getState<TextFieldState>("chapters")

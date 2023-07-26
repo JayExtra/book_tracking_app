@@ -11,7 +11,8 @@ interface BooksRepository {
         bookTitle : String ,
         bookAuthor : String
     ) : Flow<Resource<BookVolumeDto>>
-
+  
     suspend fun saveBookToDatabase(bookSave : BookSave) : Boolean
     suspend fun deleteBookInDatabase(bookId : String) : Boolean
+
 }
