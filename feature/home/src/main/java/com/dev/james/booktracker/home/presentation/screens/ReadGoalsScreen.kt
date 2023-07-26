@@ -50,6 +50,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -180,6 +181,9 @@ fun ReadGoalScreen(
             initialValue = ReadGoalsScreenState(),
             minActiveState = Lifecycle.State.STARTED
         )
+
+    val readGoalsScreenUiEvents = readGoalsScreenViewModel.readGoalsScreenUiEvents
+        .collectAsStateWithLifecycle(Lifecycle.State.STARTED)
 
     var checkedState by remember { mutableStateOf(false) }
 
@@ -315,9 +319,44 @@ fun ReadGoalScreen(
                     //call our google bottom sheet here
                     GoogleBooksSearchBottomSheet()
                 }
-            }
+            } ,
         ) {
-
+            when(val event = readGoalsScreenUiEvents.value){
+                is ReadGoalsScreenViewModel.ReadGoalsUiEvents.ShowSnackBar -> {
+                    if(event.isSaving){
+                        LaunchedEffect(key1 = Unit) {
+                            coroutineScope.launch {
+                               val snackbarResult =  scaffoldState.snackbarHostState.showSnackbar(
+                                    message = event.message ,
+                                    actionLabel = "Undo"
+                                )
+                                when(snackbarResult){
+                                     SnackbarResult.Dismissed -> {
+                                         //do nothing
+                                     }
+                                     SnackbarResult.ActionPerformed -> {
+                                        readGoalsScreenViewModel.passMainScreenActions(
+                                            ReadGoalsScreenViewModel.ReadGoalsUiActions
+                                                .UndoBookSave
+                                        )
+                                     }
+                                }
+                            }
+                        }
+                    }else {
+                        LaunchedEffect(key1 = Unit) {
+                            coroutineScope.launch {
+                                scaffoldState.snackbarHostState.showSnackbar(
+                                    message = event.message ,
+                                    withDismissAction = true
+                                )
+                            }
+                        }
+                    }
+                }
+                else -> {}
+            }
+            
             StatelessReadGoalScreen(
                 currentReadFormState = currentReadFormState,
                 uiState = readGoalsScreenUiState.value,
@@ -429,6 +468,7 @@ fun ReadGoalScreen(
 
                     when (readGoalsScreenUiState.value.currentPosition) {
                         0 -> {
+
 
                             val allChaptersState =
                                 currentReadFormState.getState<TextFieldState>("chapters")

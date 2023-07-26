@@ -36,8 +36,12 @@ class BooksRepositoryImpl
         emit(Resource.Loading())
         if(connectivityManager.getNetworkStatus()){
             try{
-                val booksFromApi = booksApiDataSource.getQueriedBook(query = bookTitle , author = bookAuthor)
+                val booksFromApi =
+                    withContext(dispatcher) {
+                        booksApiDataSource.getQueriedBook(query = bookTitle , author = bookAuthor)
+                    }
                 emit(Resource.Success(data = booksFromApi))
+
             }catch (e : HttpException){
                 if(e.code() == 429){
                    Timber.tag(TAG).e("${e.message()} : Too many requests")
@@ -54,10 +58,14 @@ class BooksRepositoryImpl
         }
     }
 
-    override fun saveBookToDatabase(bookSave: BookSave): Flow<Boolean> = flow {
-            booksLocalDataSource.addBookToDataBase( bookSave.mapToBookEntity() , onBookAdded = { isAdded ->
-                  emit(isAdded)
-            })
+    override suspend fun saveBookToDatabase(bookSave: BookSave): Boolean {
+           return  booksLocalDataSource.addBookToDataBase( bookSave.mapToBookEntity()){
+                   isAdded , _ -> isAdded
+           }
+    }
+
+    override suspend fun deleteBookInDatabase(bookId: String): Boolean {
+       return booksLocalDataSource.deleteBookFromDataBase(bookId){ isDeleted -> isDeleted }
     }
 }
 

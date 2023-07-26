@@ -18,19 +18,44 @@ class BooksLocalDataSourceImpl @Inject constructor(
     }
     override suspend fun addBookToDataBase(
         bookEntity: BookEntity,
-        onBookAdded: suspend (Boolean) -> Unit
-    ) {
-        try {
+        onBookAdded: (Boolean, String?) -> Boolean
+    ): Boolean {
+
+        return try {
+            withContext(dispatcher){
                 booksDao.addBook(bookEntity)
                 val addedBook = booksDao.getBook(bookEntity.bookId)
                 if(addedBook.bookId.isNotBlank()){
-                    onBookAdded(true)
+                    onBookAdded(true , null)
                 }else{
-                    onBookAdded(false)
+                    onBookAdded(false , null)
                 }
+            }
 
         }catch (e : IOException){
             Timber.tag(TAG).d(e.localizedMessage)
+            onBookAdded(false , e.localizedMessage?.toString())
         }
     }
+
+    override suspend fun deleteBookFromDataBase(
+        bookId: String,
+        onBookDeleted: (Boolean) -> Boolean
+    ): Boolean {
+        return try {
+            withContext(dispatcher){
+                booksDao.deleteBook(bookId)
+                val deletedBook = booksDao.getBook(bookId)
+                if(deletedBook.bookId.isBlank()){
+                    onBookDeleted(true)
+                }else{
+                    onBookDeleted(false)
+                }
+            }
+        }catch (e : IOException){
+            Timber.tag(TAG).d(e.localizedMessage)
+            false
+        }
+    }
+    
 }
