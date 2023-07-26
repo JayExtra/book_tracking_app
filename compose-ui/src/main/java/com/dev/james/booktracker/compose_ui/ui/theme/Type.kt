@@ -21,18 +21,18 @@ val BookAppTypography = Typography(
 
     headlineLarge = TextStyle(
         fontFamily = Montserrat,
-        fontWeight = FontWeight.Bold ,
+        fontWeight = FontWeight.Medium ,
         fontSize = 30.sp
     ),
     headlineMedium = TextStyle(
         fontFamily = Montserrat ,
-        fontWeight = FontWeight.Bold ,
+        fontWeight = FontWeight.Medium ,
         fontSize = 24.sp
     ),
     headlineSmall = TextStyle(
         fontFamily = Montserrat ,
-        fontWeight = FontWeight.Bold ,
-        fontSize = 20.sp
+        fontWeight = FontWeight.Medium ,
+        fontSize = 18.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = Montserrat,

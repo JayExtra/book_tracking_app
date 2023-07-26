@@ -61,9 +61,21 @@ dependencies {
     implementation(project(Modules.core))
     implementation(project(Modules.composeUi))
     implementation(project(Modules.coreDataStore))
+    implementation(project(Modules.coreNetwork))
+    implementation(project(Modules.coreDatabase))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
+
+    implementation("androidx.camera:camera-camera2:${Versions.camerx_version}")
+    implementation("androidx.camera:camera-lifecycle:${Versions.camerx_version}")
+    implementation("androidx.camera:camera-view:${Versions.camerx_version}")
+
+    
+/*
+    implementation ("com.google.accompanist-permissions:0.21.1-beta")
+*/
+
 
 }
 

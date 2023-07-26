@@ -2,6 +2,7 @@ package com.example.core_navigation.navigation
 
 import com.dev.james.achievements.presentation.ui.screens.destinations.AchievementsScreenDestination
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
+import com.dev.james.booktracker.home.presentation.screens.destinations.ReadGoalScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
@@ -40,7 +41,8 @@ object NavGraphs {
 
         override val destinationsByRoute = listOf<DestinationSpec<*>>(
             HomeScreenDestination ,
-            OnBoardingWelcomeScreenDestination
+            OnBoardingWelcomeScreenDestination ,
+            ReadGoalScreenDestination
         ).routedIn(this)
             .associateBy { it.route }
 

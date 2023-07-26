@@ -23,12 +23,15 @@ import androidx.navigation.compose.rememberNavController
 import com.dev.james.achievements.presentation.ui.screens.destinations.AchievementsScreenDestination
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
+import com.dev.james.booktracker.core.user_preferences.data.models.UserDetails
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.ui.components.StandardScaffold
 import com.dev.james.my_library.presentation.ui.destinations.MyLibraryScreenDestination
 import com.example.core_navigation.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import timber.log.Timber
+import java.io.File
 
 
 @AndroidEntryPoint
@@ -65,15 +68,13 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
-            val theme by mainViewModel.theme.collectAsStateWithLifecycle(
-                initialValue = Theme.FOLLOW_SYSTEM.themeValue ,
-                context = Dispatchers.Main.immediate
-            )
+            val theme by mainViewModel.theme.collectAsStateWithLifecycle()
 
-            val hasOnBoarded by mainViewModel.isOnBoarded.collectAsStateWithLifecycle(
-                initialValue = false ,
-                context = Dispatchers.Main.immediate
-            )
+            val hasOnBoarded by mainViewModel.isOnBoarded.collectAsStateWithLifecycle()
+
+            val user by mainViewModel.user.collectAsStateWithLifecycle()
+
+            Timber.tag("MainActivity").d("user => $user")
 
             BookTrackerTheme(
                 theme = theme
@@ -95,7 +96,13 @@ class MainActivity : ComponentActivity() {
                             "my-library/${MyLibraryScreenDestination.route}" ,
                             "achievements/${AchievementsScreenDestination.route}"
                         ) ,
-                        hasOnBoarded = hasOnBoarded
+                        hasOnBoarded = hasOnBoarded ,
+                        showTopBar = route in listOf(
+                            "home/${HomeScreenDestination.route}" ,
+                            "my-library/${MyLibraryScreenDestination.route}" ,
+                            "achievements/${AchievementsScreenDestination.route}"
+                        ) ,
+                        userDetails = user
                     ) { innerPadding ->
 
                         Box(modifier = Modifier.padding(innerPadding)){
