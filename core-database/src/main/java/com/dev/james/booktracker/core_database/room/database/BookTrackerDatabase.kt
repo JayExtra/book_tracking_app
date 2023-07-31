@@ -9,9 +9,15 @@ import com.dev.james.booktracker.core_database.room.entities.UserDetailsEntity
 import com.dev.james.booktracker.core_database.room.dao.OnBoardingDao
 import com.dev.james.booktracker.core_database.room.dao.BooksDao
 import com.dev.james.booktracker.core_database.room.entities.BookEntity
+import com.dev.james.booktracker.core_database.room.entities.BookGoalLogsEntity
+import com.dev.james.booktracker.core_database.room.entities.BookGoalsEntity
+import com.dev.james.booktracker.core_database.room.entities.OverallGoalEntity
+import com.dev.james.booktracker.core_database.room.entities.OverallGoalLogsEntity
+import com.dev.james.booktracker.core_database.room.entities.SpecificGoalsEntity
 
 @Database(
-    entities = [UserDetailsEntity::class , BookEntity::class] ,
+    entities = [UserDetailsEntity::class , BookEntity::class , BookGoalsEntity::class , BookGoalLogsEntity::class ,
+    OverallGoalEntity::class , OverallGoalLogsEntity::class , SpecificGoalsEntity::class] ,
     version = 2 ,
     exportSchema = false
 )
