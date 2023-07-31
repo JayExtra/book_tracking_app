@@ -45,12 +45,9 @@ class BooksLocalDataSourceImpl @Inject constructor(
         return try {
             withContext(dispatcher){
                 booksDao.deleteBook(bookId)
-                val deletedBook = booksDao.getBook(bookId)
-                if(deletedBook.bookId.isBlank()){
-                    onBookDeleted(true)
-                }else{
-                    onBookDeleted(false)
-                }
+                booksDao.getBook(bookId)
+                onBookDeleted(true)
+
             }
         }catch (e : IOException){
             Timber.tag(TAG).d(e.localizedMessage)
