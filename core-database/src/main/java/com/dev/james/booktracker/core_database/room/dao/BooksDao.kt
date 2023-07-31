@@ -23,6 +23,6 @@ interface BooksDao {
     suspend fun deleteBook(id: String)
 
     @Query("SELECT * FROM books_table")
-    suspend fun getAllBooks() : Flow<BookEntity>
+    fun getAllBooks() : Flow<List<BookEntity>>
 
 }

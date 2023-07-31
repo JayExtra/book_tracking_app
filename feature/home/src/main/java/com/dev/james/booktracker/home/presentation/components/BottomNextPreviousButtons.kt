@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
@@ -22,7 +24,8 @@ fun BottomNextPreviousButtons(
     modifier: Modifier = Modifier,
     onNextClicked: () -> Unit = {},
     onPreviousClicked: () -> Unit = {},
-    currentPosition: Int = 0
+    currentPosition: Int = 0 ,
+    disableNext : Boolean = false
 ) {
     Box(
         modifier = modifier,
@@ -61,9 +64,13 @@ fun BottomNextPreviousButtons(
 
             RoundedBrownButton(
                 label = if (currentPosition == 2) "Finish" else "Next",
-                cornerRadius = 8.dp
+                cornerRadius = 8.dp ,
+                color = if (disableNext) Color.LightGray else MaterialTheme.colorScheme.secondary,
+                textColor = if(disableNext) Color.White else MaterialTheme.colorScheme.onPrimary
             ) {
-                onNextClicked()
+                if (!disableNext){
+                    onNextClicked()
+                }
             }
 
         }

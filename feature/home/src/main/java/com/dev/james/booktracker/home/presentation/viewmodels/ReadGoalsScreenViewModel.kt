@@ -20,15 +20,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -67,9 +67,9 @@ class ReadGoalsScreenViewModel @Inject constructor(
     private var _googleBottomSheetSearchState : MutableStateFlow<GoogleBottomSheetUiState> = MutableStateFlow(GoogleBottomSheetUiState.StandbyState)
     val  googleBottomSheetSearchState get() = _googleBottomSheetSearchState
 
-    private var _readGoalsScreenUiEvents : MutableSharedFlow<ReadGoalsUiEvents> = MutableSharedFlow()
-    val readGoalsScreenUiEvents get() = _readGoalsScreenUiEvents.asSharedFlow()
-    
+    private var _readGoalsScreenUiEvents : Channel<ReadGoalsUiEvents> = Channel()
+    val readGoalsScreenUiEvents get() = _readGoalsScreenUiEvents.receiveAsFlow()
+
 
     val currentReadFormState = FormState(
         fields = listOf(
@@ -249,6 +249,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 else
                     selectedBookState.value.bookId ?: "n/a"
 
+
                 val isUri = imageSelectorUiState.value.imageSelectedUri != Uri.EMPTY
 
                 val bookImage = if(isUri) imageSelectorUiState.value.imageSelectedUri.toString() else imageSelectorUiState.value.imageUrl
@@ -275,27 +276,23 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
                 viewModelScope.launch {
                     //2. save to db
-                    val result = booksRepository.saveBookToDatabase(bookSave)
-                        if(result){
+                    Timber.tag(TAG).d("Save action triggered")
+                        if(booksRepository.saveBookToDatabase(bookSave)){
                             savedBookState.value = bookSave
                             //show snackbar
-                            _readGoalsScreenUiEvents.emit(
+                            _readGoalsScreenUiEvents.send(
                                 ReadGoalsUiEvents.ShowSnackBar(
                                     message = "${bookSave.bookTitle} added to library." ,
                                     isSaving = true
                                 )
                             )
-                            _readGoalsScreenUiEvents.emit(
-                                ReadGoalsUiEvents.ShowNextButton(
-                                    shouldShow = true
-                                )
+                            _readGoalsScreenUiState.value = _readGoalsScreenUiState.value.copy(
+                                shouldDisableNextButton = false
                             )
-
                             Timber.tag(TAG).d("Book successfully added to database")
                         }else {
                             Timber.tag(TAG).d("Could not add any book to database")
                         }
-                    }
                 }
             }
         }
@@ -329,11 +326,18 @@ class ReadGoalsScreenViewModel @Inject constructor(
             }
 
             is ReadGoalsUiActions.UndoBookSave -> {
+                Timber.tag(TAG).d("Undo action triggered")
+
                 viewModelScope.launch {
                     val result = booksRepository.deleteBookInDatabase(savedBookState.value.bookId)
+                    Timber.tag(TAG).d("Book id = ${savedBookState.value.bookId}")
+
                     if(result){
                         //dismiss snackbar
-                        _readGoalsScreenUiEvents.emit(
+
+                        Timber.tag(TAG).d("Book removed from db successfully.")
+
+                        _readGoalsScreenUiEvents.send(
                             ReadGoalsUiEvents.ShowSnackBar(
                                 message = "${savedBookState.value.bookTitle} removed from library." ,
                                 isSaving = false
@@ -343,89 +347,13 @@ class ReadGoalsScreenViewModel @Inject constructor(
                         savedBookState.value = BookSave()
 
                         //hide the next button
-                        _readGoalsScreenUiEvents.emit(
-                            ReadGoalsUiEvents.ShowNextButton(
-                                shouldShow = false
-                            )
+                        _readGoalsScreenUiState.value = _readGoalsScreenUiState.value.copy(
+                            shouldDisableNextButton = true
                         )
                     }
                 }
             }
         }
-    }
-
-    fun onBookSelected(book : Book) {
-        //update various states
-        _imageSelectorState.value = imageSelectorUiState.value.copy(
-            imageUrl = book.bookImage!! ,
-            imageSelectedUri = Uri.EMPTY
-        )
-
-        currentReadFormTitleFieldState.change(book.bookTitle ?: "No title found")
-        currentReadFormAuthorFieldState.change(book.bookAuthors?.convertToAuthorsString() ?: "No author(s) found.")
-        currentReadFormPagesFieldState.change(book.bookPagesCount.toString())
-
-        selectedBookState.value = book
-
-    }
-
-    //google search functionality action
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    fun searchForBook(searchQuery : String) {
-        queryJob = viewModelScope.launch {
-            searchQueryMutableStateFlow.value = searchQuery
-            searchQueryMutableStateFlow
-                .debounce(200)
-                .filter { query ->
-                    if (query.isEmpty()) {
-                        val searchViewState = bottomSheetSearchFieldState.getState<TextFieldState>("search_field")
-                        searchViewState.change("")
-                        return@filter false
-                    } else {
-                        return@filter true
-                    }
-                }
-                .distinctUntilChanged()
-                .flatMapLatest { query ->
-                    booksRepository.getBooksFromApi(bookTitle = query , bookAuthor = "")
-                }
-                .flowOn(Dispatchers.Default)
-                .collect { resource ->
-                    when(resource){
-                        is Resource.Success -> {
-
-                            val booksList = resource.data?.items
-
-                            if(!booksList.isNullOrEmpty()){
-                                _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFetched(
-                                    booksList =  booksList.map { bookDto -> bookDto.mapToBookUiObject() }
-                                )
-                            }else {
-                                _googleBottomSheetSearchState.value = GoogleBottomSheetUiState
-                                    .HasFetched(
-                                        booksList = emptyList()
-                                    )
-                            }
-                            Timber.tag(TAG).d(booksList.toString())
-
-                        }
-                        is Resource.Error -> {
-                            val errorMessage = resource.message ?: "Oops! Something went wrong"
-                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.HasFailed(
-                                errorMessage = errorMessage
-                            )
-                        }
-                        is Resource.Loading -> {
-                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.IsLoading
-                        }
-                    }
-
-                }
-
-        }
-    }
-    fun cancelQueryJob() {
-        queryJob?.cancel()
     }
 
     fun onBookSelected(book : Book) {
@@ -535,17 +463,6 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
     sealed class ReadGoalsUiEvents {
         data class ShowSnackBar (val message : String , val isSaving : Boolean) : ReadGoalsUiEvents()
-        data class ShowNextButton (val shouldShow : Boolean) : ReadGoalsUiEvents()
-    }
-
-    sealed class GoogleBottomSheetUiState {
-        object IsLoading : GoogleBottomSheetUiState()
-
-        object StandbyState : GoogleBottomSheetUiState()
-
-        data class HasFetched(val booksList : List<Book>) : GoogleBottomSheetUiState()
-
-        data class HasFailed(val errorMessage : String ) : GoogleBottomSheetUiState()
 
     }
 
@@ -564,7 +481,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
 data class ReadGoalsScreenState(
     val currentPosition: Int = 0,
-    val previousPosition: Int = 0
+    val previousPosition: Int = 0 ,
+    val shouldDisableNextButton : Boolean = true
 )
 
 data class ImageSelectorUiState(
