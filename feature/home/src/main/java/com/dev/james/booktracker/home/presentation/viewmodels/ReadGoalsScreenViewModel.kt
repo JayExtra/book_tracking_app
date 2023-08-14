@@ -4,8 +4,11 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
+import com.dev.james.booktracker.core.common_models.BookGoal
 import com.dev.james.booktracker.core.common_models.OverallGoal
-import com.dev.james.booktracker.core.common_models.mappers.BookSave
+import com.dev.james.booktracker.core.common_models.SpecificGoal
+import com.dev.james.booktracker.core.common_models.BookSave
+import com.dev.james.booktracker.core.common_models.mappers.mapToPresentation
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core.utilities.calculateTimeToLong
 import com.dev.james.booktracker.core.utilities.convertToAuthorsString
@@ -24,16 +27,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -55,6 +60,16 @@ class ReadGoalsScreenViewModel @Inject constructor(
     )
     val imageSelectorUiState get() = _imageSelectorState.asStateFlow()
 
+    val savedBookList = booksRepository.getSavedBooks()
+        .map { booksSaveList ->
+            booksSaveList.map {
+                it.mapToPresentation()
+            }
+        }
+        .stateIn(scope = viewModelScope , started = SharingStarted.WhileSubscribed() , initialValue = emptyList<Book>())
+
+
+
     private val selectedBookState : MutableStateFlow<Book> = MutableStateFlow(
         Book()
     )
@@ -75,6 +90,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
     private var _readGoalsScreenUiEvents : Channel<ReadGoalsUiEvents> = Channel()
     val readGoalsScreenUiEvents get() = _readGoalsScreenUiEvents.receiveAsFlow()
+
 
 
     val currentReadFormState = FormState(
@@ -152,7 +168,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 name = "books_month",
                 transform = { it.toInt() },
                 validators = listOf(
-                    Validators.Required(message = "Please provide number of books books"),
+                    Validators.Required(message = "Please provide number of books"),
                     Validators.MinValue(limit = 1, message = "")
                 ),
             ),
@@ -210,6 +226,13 @@ class ReadGoalsScreenViewModel @Inject constructor(
     private val overallGoalAlertNoteFieldState : TextFieldState = overallGoalFormState.getState("alert note")
     private val overallGoalAlertSwitchFieldState : ChoiceState = overallGoalFormState.getState("alert_switch")
     private val overallGoalSelectedDialogTime : ChoiceState = overallGoalFormState.getState("alert_dialog_time")
+
+    private val specificGoalsBookCountState : TextFieldState = specificGoalsFormState.getState("books_month")
+    private val availableBooksCountState : ChoiceState = specificGoalsFormState.getState("available_books")
+    private val chapterOrHoursState : ChoiceState = specificGoalsFormState.getState("chapter_hours")
+    private val timeOrChapterState : TextFieldState = specificGoalsFormState.getState("time_chapter")
+    private val specificGoalPeriodState : ChoiceState = specificGoalsFormState.getState("period")
+    private val periodDaysState : SelectState = specificGoalsFormState.getState("period_days")
 
 
     fun validateImageSelected() {
@@ -317,6 +340,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
                         }
                 }
             }
+
+            else -> {}
         }
     }
 
@@ -335,8 +360,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
                     Timber.tag(TAG).d("Saving user goals in db")
                     //save user details
                     viewModelScope.launch {
-                        val overallGoalSaveResult =  goalsRepository.addOverallGoal(
-                            OverallGoal(
+
+                           val overallGoal =  OverallGoal(
                                 goalId = generateRandomId(10) ,
                                 goalInfo = "Read for ${overallGoalTimeFieldState.value} a day" ,
                                 goalTime = overallGoalTimeFieldState.value.calculateTimeToLong() ,
@@ -346,17 +371,35 @@ class ReadGoalsScreenViewModel @Inject constructor(
                                 alertNote = overallGoalAlertNoteFieldState.value ,
                                 alertTime = overallGoalSelectedDialogTime.value
                             )
-                        )
 
-                        when(overallGoalSaveResult){
+                            val specificGoal = SpecificGoal(
+                                goalId = generateRandomId(10) ,
+                                bookCount = specificGoalsBookCountState.value.toInt() ,
+                                booksReadCount = 0
+                            )
+
+                            val bookGoal = BookGoal(
+                                bookId = savedBookState.value.bookId ,
+                                isChapterGoal = chapterOrHoursState.value == "By chapters" ,
+                                goalInfo = "Reading ${savedBookState.value.bookTitle}" ,
+                                isTimeGoal = chapterOrHoursState.value == "By hours" ,
+                                goalSet = timeOrChapterState.value ,
+                                goalPeriod = specificGoalPeriodState.value ,
+                                specificDays = periodDaysState.value
+                            )
+
+                        when(val result = goalsRepository.saveGoals(overallGoal , specificGoal , bookGoal)){
                             is Resource.Success -> {
-                                Timber.d("Overall goal added to db successfully! xD")
+                                if(result.data == true){
+                                    Timber.tag(TAG).d("goals successfully added to database")
+                                }
                             }
                             is Resource.Error -> {
-                                Timber.d("Overall goal could not be added to db! :(")
+                                Timber.tag(TAG).d("could not save goals to db. REASON: ${result.message}")
                             }
-                            else -> { Timber.d(" Cannot tell what happened here! :o")}
+                            else -> {}
                         }
+
 
                     }
 
@@ -402,6 +445,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
                     }
                 }
             }
+
+            else -> {}
         }
     }
 
@@ -469,6 +514,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
                         is Resource.Loading -> {
                             _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.IsLoading
                         }
+
+                        else -> {}
                     }
 
                 }

@@ -2,8 +2,11 @@ package com.dev.james.booktracker.home.data.datasource
 
 import com.dev.james.booktracker.core_database.room.dao.BooksDao
 import com.dev.james.booktracker.core_database.room.entities.BookEntity
+import com.dev.james.booktracker.home.domain.datasources.BooksLocalDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.IOException
@@ -54,5 +57,9 @@ class BooksLocalDataSourceImpl @Inject constructor(
             false
         }
     }
-    
+
+    override fun getAllBooks(): Flow<List<BookEntity>> {
+        return booksDao.getAllBooks()
+    }
+
 }

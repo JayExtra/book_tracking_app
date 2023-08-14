@@ -1,20 +1,23 @@
 package com.dev.james.booktracker.home.data.repository
 
-import com.dev.james.booktracker.core.common_models.mappers.BookSave
+import android.database.sqlite.SQLiteException
+import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.utilities.ConnectivityManager
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core_database.room.entities.BookEntity
 import com.dev.james.booktracker.core_network.dtos.BookVolumeDto
 import com.dev.james.booktracker.home.domain.datasources.BooksApiDataSource
-import com.dev.james.booktracker.home.data.datasource.BooksLocalDataSource
+import com.dev.james.booktracker.home.domain.datasources.BooksLocalDataSource
 import com.dev.james.booktracker.home.domain.repositories.BooksRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import timber.log.Timber
+import java.io.IOException
 import javax.inject.Inject
 
 class BooksRepositoryImpl
@@ -64,10 +67,41 @@ class BooksRepositoryImpl
     override suspend fun deleteBookInDatabase(bookId: String): Boolean {
        return booksLocalDataSource.deleteBookFromDataBase(bookId){ isDeleted -> isDeleted }
     }
+
+    override fun getSavedBooks(): Flow<List<BookSave>> = flow {
+         try {
+          booksLocalDataSource.getAllBooks().map { booksEntityList ->
+                booksEntityList.map { bookEntity ->
+                    bookEntity.mapToBookDomainObject()
+                }
+          }
+        }catch (e : IOException){
+            emit(emptyList<BookSave>())
+        }catch (e : SQLiteException){
+            emit(emptyList<BookSave>())
+        }
+    }
 }
 
 fun BookSave.mapToBookEntity() : BookEntity {
     return BookEntity(
+        bookId = bookId,
+        bookImage = bookImage ,
+        isUri = isUri,
+        bookAuthors = bookAuthors ,
+        bookTitle = bookTitle,
+        bookSmallThumbnail = bookSmallThumbnail ,
+        bookPagesCount = bookPagesCount ,
+        publisher = publisher ,
+        publishedDate = publishedDate ,
+        currentChapterTitle = currentChapterTitle ,
+        chapters = chapters ,
+        currentChapter = currentChapter
+    )
+}
+
+fun BookEntity.mapToBookDomainObject() : BookSave {
+    return BookSave(
         bookId = bookId,
         bookImage = bookImage ,
         isUri = isUri,

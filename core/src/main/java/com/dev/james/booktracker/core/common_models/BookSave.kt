@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.core.common_models.mappers
+package com.dev.james.booktracker.core.common_models
 
 data class BookSave(
     val bookId : String = "",

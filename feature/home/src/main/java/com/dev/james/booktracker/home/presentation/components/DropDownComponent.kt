@@ -41,7 +41,7 @@ fun DropDownComponent(
     hasError: Boolean = false,
     label: String = "",
     placeHolderText: String = "",
-    dropDownItems: List<String> = listOf(),
+    dropDownItems: List<String?> = listOf(),
     onListItemSelected: (String) -> Unit = {},
     canUserFill: Boolean = false
 ) {
@@ -119,11 +119,15 @@ fun DropDownComponent(
                 dropDownItems.forEach { item ->
                     DropdownMenuItem(
                         onClick = {
-                            onListItemSelected(item)
+                            if (item != null) {
+                                onListItemSelected(item)
+                            }
                             isExpanded = false
                         },
                         text = {
-                            Text(text = item, style = BookAppTypography.bodySmall)
+                            if (item != null) {
+                                Text(text = item, style = BookAppTypography.bodySmall)
+                            }
                         }
                     )
                 }

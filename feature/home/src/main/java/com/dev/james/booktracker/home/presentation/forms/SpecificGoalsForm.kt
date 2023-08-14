@@ -46,16 +46,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.components.CounterComponent
+import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import kotlinx.coroutines.flow.drop
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 @Preview("SpecificGoalsForm", showBackground = true)
 fun SpecificGoalsForm(
-    specificGoalsFormState: FormState<BaseState<out Any>> = FormState(emptyList())
+    specificGoalsFormState: FormState<BaseState<out Any>> = FormState(emptyList()) ,
+    //hoist this state to main screen
+    readGoalsScreenViewmodel : ReadGoalsScreenViewModel = hiltViewModel()
 ) {
+    val savedBooksList = readGoalsScreenViewmodel.savedBookList
+        .collectAsStateWithLifecycle(initialValue = emptyList())
 
     val booksFieldState = specificGoalsFormState.getState<TextFieldState>(
         name = "books_month"
@@ -245,7 +253,7 @@ fun SpecificGoalsForm(
             label = "Available books",
             canUserFill = false,
             placeHolderText = "please select a book" ,
-            dropDownItems = dropDownItems,
+            dropDownItems = savedBooksList.value.map { it.bookTitle },
             onListItemSelected = { book ->
                 //select book
                 availableBookFieldState.change(update = book)

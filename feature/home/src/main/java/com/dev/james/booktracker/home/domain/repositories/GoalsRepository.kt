@@ -6,7 +6,11 @@ import com.dev.james.booktracker.core.common_models.SpecificGoal
 import com.dev.james.booktracker.core.utilities.Resource
 
 interface GoalsRepository {
-    suspend fun addOverallGoal( overallGoal: OverallGoal) : Resource<Boolean>
-    suspend fun addSpecificGoal( specificGoal: SpecificGoal) : Resource<Boolean>
-    suspend fun addBookGoal( bookGoal: BookGoal) : Resource<Boolean>
+
+    suspend fun saveGoals(
+        overallGoal: OverallGoal ,
+        specificGoal: SpecificGoal ,
+        bookGoal: BookGoal
+    ) : Resource<Boolean>
+
 }

@@ -9,7 +9,12 @@ import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.home.domain.datasources.GoalsLocalDataSource
 import com.dev.james.booktracker.home.domain.repositories.GoalsRepository
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
@@ -18,36 +23,27 @@ class GoalsRepositoryImpl @Inject constructor(
     private val goalsLocalDataSource: GoalsLocalDataSource ,
     private val defaultDispatcher : CoroutineDispatcher = Dispatchers.IO
 ) : GoalsRepository {
-    override suspend fun addOverallGoal(overallGoal: OverallGoal): Resource<Boolean> {
+    override suspend fun saveGoals(
+        overallGoal: OverallGoal,
+        specificGoal: SpecificGoal,
+        bookGoal: BookGoal
+    ): Resource<Boolean> {
         return try {
-            goalsLocalDataSource.addOverallGoalToDatabase(overallGoal.mapToEntityObject())
-            Resource.Success(true)
+            coroutineScope {
+                val overallGoalJob = launch { goalsLocalDataSource.addOverallGoalToDatabase(overallGoal.mapToEntityObject()) }
+                val specificGoalJob = launch { goalsLocalDataSource.addSpecificGoalToDatabase(specificGoal.mapToEntityObject()) }
+                val bookGoalJob = launch { goalsLocalDataSource.addBookGoalToDatabase(bookGoal.mapToEntityObject()) }
+
+                joinAll(overallGoalJob , specificGoalJob , bookGoalJob)
+            }
+             Resource.Success(data = true)
+
         }catch (e : IOException){
-            Resource.Error(e.localizedMessage as String)
-        }catch (e : SQLiteException){
-            Resource.Error(e.message.toString())
+             Resource.Error("Could not save goal to the database.Issue : ${e.message}")
+        }catch ( e : SQLiteException){
+            Resource.Error("Could not save goals to the database.Issue : ${e.message}")
         }
     }
 
-    override suspend fun addSpecificGoal(specificGoal: SpecificGoal): Resource<Boolean> {
-       return try {
-           goalsLocalDataSource.addSpecificGoalToDatabase(specificGoal.mapToEntityObject())
-           Resource.Success(true)
-       }catch (e : IOException){
-           Resource.Error(e.localizedMessage as String)
-       }catch (e : SQLiteException){
-           Resource.Error(e.localizedMessage as String)
-       }
-    }
 
-    override suspend fun addBookGoal(bookGoal: BookGoal): Resource<Boolean> {
-        return try {
-            goalsLocalDataSource.addBookGoalToDatabase(bookGoal.mapToEntityObject())
-            Resource.Success(true)
-        }catch (e : IOException){
-            Resource.Error(e.localizedMessage as String)
-        }catch (e : SQLiteException){
-            Resource.Error(e.localizedMessage as String)
-        }
-    }
 }

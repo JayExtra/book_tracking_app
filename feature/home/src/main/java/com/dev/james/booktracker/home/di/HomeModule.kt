@@ -6,7 +6,7 @@ import com.dev.james.booktracker.core_database.room.dao.GoalsDao
 import com.dev.james.booktracker.core_network.api_service.BooksApi
 import com.dev.james.booktracker.home.domain.datasources.BooksApiDataSource
 import com.dev.james.booktracker.home.data.datasource.BooksApiDataSourceImpl
-import com.dev.james.booktracker.home.data.datasource.BooksLocalDataSource
+import com.dev.james.booktracker.home.domain.datasources.BooksLocalDataSource
 import com.dev.james.booktracker.home.data.datasource.BooksLocalDataSourceImpl
 import com.dev.james.booktracker.home.data.datasource.GoalsLocalDataSourceImpl
 import com.dev.james.booktracker.home.domain.repositories.BooksRepository
