@@ -2,10 +2,12 @@ package com.dev.james.booktracker.core_database.room.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "overall_goals_table")
 data class OverallGoalEntity(
     @ColumnInfo("id")
+    @PrimaryKey(autoGenerate = false)
     val goalId : String ,
     @ColumnInfo("goal_info")
     val goalInfo : String ,
@@ -20,5 +22,7 @@ data class OverallGoalEntity(
     @ColumnInfo("alert_note")
     val alertNote : String ,
     @ColumnInfo("alert_time")
-    val alertTime : String
+    val alertTime : String ,
+    @ColumnInfo("is_goal_active" , defaultValue = "true")
+    val isActive : Boolean = true
 )

@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.home.data.repository
+package com.dev.james.booktracker.home.domain.repositories
 
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.mappers.BookSave

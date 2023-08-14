@@ -4,12 +4,16 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
+import com.dev.james.booktracker.core.common_models.OverallGoal
 import com.dev.james.booktracker.core.common_models.mappers.BookSave
 import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.core.utilities.calculateTimeToLong
 import com.dev.james.booktracker.core.utilities.convertToAuthorsString
+import com.dev.james.booktracker.core.utilities.generateRandomId
 import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.dev.james.booktracker.core_network.dtos.BookDto
-import com.dev.james.booktracker.home.data.repository.BooksRepository
+import com.dev.james.booktracker.home.domain.repositories.BooksRepository
+import com.dev.james.booktracker.home.domain.repositories.GoalsRepository
 import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.SelectState
@@ -20,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,7 +40,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReadGoalsScreenViewModel @Inject constructor(
-    private val booksRepository: BooksRepository
+    private val booksRepository: BooksRepository ,
+    private val goalsRepository: GoalsRepository
 ) : ViewModel() {
 
     companion object {
@@ -115,6 +121,11 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 name = "frequency field",
                 validators = listOf(Validators.Required())
             ),
+            ChoiceState(
+                name = "alert_switch" ,
+                initial = "No" ,
+                validators = listOf()
+            ),
             SelectState(
                 name = "specific days",
                 initial = mutableListOf(),
@@ -125,6 +136,10 @@ class ReadGoalsScreenViewModel @Inject constructor(
             ),
             TextFieldState(
                 name = "alert note",
+            ) ,
+            ChoiceState(
+                name = "alert_dialog_time" ,
+                validators = listOf()
             )
         )
 
@@ -188,6 +203,13 @@ class ReadGoalsScreenViewModel @Inject constructor(
     private val currentReadFormChaptersState : TextFieldState = currentReadFormState.getState("chapters")
     private val currentReadFormCurrentChapter : TextFieldState = currentReadFormState.getState("current chapter")
     private val currentReadFormCurChaptTitleState : TextFieldState = currentReadFormState.getState("chapter title")
+
+    private val overallGoalTimeFieldState : TextFieldState = overallGoalFormState.getState("time")
+    private val overallGoalFrequencyFieldState : ChoiceState = overallGoalFormState.getState("frequency field")
+    private val overallGoalSpecificFieldState : SelectState = overallGoalFormState.getState("specific days")
+    private val overallGoalAlertNoteFieldState : TextFieldState = overallGoalFormState.getState("alert note")
+    private val overallGoalAlertSwitchFieldState : ChoiceState = overallGoalFormState.getState("alert_switch")
+    private val overallGoalSelectedDialogTime : ChoiceState = overallGoalFormState.getState("alert_dialog_time")
 
 
     fun validateImageSelected() {
@@ -311,6 +333,33 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 } else {
                     //save final goals set here
                     Timber.tag(TAG).d("Saving user goals in db")
+                    //save user details
+                    viewModelScope.launch {
+                        val overallGoalSaveResult =  goalsRepository.addOverallGoal(
+                            OverallGoal(
+                                goalId = generateRandomId(10) ,
+                                goalInfo = "Read for ${overallGoalTimeFieldState.value} a day" ,
+                                goalTime = overallGoalTimeFieldState.value.calculateTimeToLong() ,
+                                goalPeriod = overallGoalFrequencyFieldState.value ,
+                                specificDays = if(overallGoalSpecificFieldState.value.isEmpty()) emptyList() else overallGoalSpecificFieldState.value ,
+                                shouldShowAlert = overallGoalAlertSwitchFieldState.value == "Yes" ,
+                                alertNote = overallGoalAlertNoteFieldState.value ,
+                                alertTime = overallGoalSelectedDialogTime.value
+                            )
+                        )
+
+                        when(overallGoalSaveResult){
+                            is Resource.Success -> {
+                                Timber.d("Overall goal added to db successfully! xD")
+                            }
+                            is Resource.Error -> {
+                                Timber.d("Overall goal could not be added to db! :(")
+                            }
+                            else -> { Timber.d(" Cannot tell what happened here! :o")}
+                        }
+
+                    }
+
                 }
             }
 

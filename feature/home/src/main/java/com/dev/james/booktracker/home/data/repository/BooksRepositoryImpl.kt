@@ -1,30 +1,27 @@
 package com.dev.james.booktracker.home.data.repository
 
-import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.mappers.BookSave
 import com.dev.james.booktracker.core.utilities.ConnectivityManager
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core_database.room.entities.BookEntity
 import com.dev.james.booktracker.core_network.dtos.BookVolumeDto
-import com.dev.james.booktracker.home.data.datasource.BooksApiDataSource
+import com.dev.james.booktracker.home.domain.datasources.BooksApiDataSource
 import com.dev.james.booktracker.home.data.datasource.BooksLocalDataSource
+import com.dev.james.booktracker.home.domain.repositories.BooksRepository
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import timber.log.Timber
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 class BooksRepositoryImpl
     @Inject constructor(
-        private val booksApiDataSource: BooksApiDataSource ,
-        private val booksLocalDataSource : BooksLocalDataSource ,
-        private val connectivityManager: ConnectivityManager ,
+        private val booksApiDataSource: BooksApiDataSource,
+        private val booksLocalDataSource : BooksLocalDataSource,
+        private val connectivityManager: ConnectivityManager,
         private val dispatcher : CoroutineDispatcher = Dispatchers.IO
     ): BooksRepository {
 
