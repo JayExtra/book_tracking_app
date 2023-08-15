@@ -10,10 +10,13 @@ import com.dev.james.booktracker.home.domain.datasources.BooksApiDataSource
 import com.dev.james.booktracker.home.domain.datasources.BooksLocalDataSource
 import com.dev.james.booktracker.home.domain.repositories.BooksRepository
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import timber.log.Timber
@@ -68,17 +71,27 @@ class BooksRepositoryImpl
        return booksLocalDataSource.deleteBookFromDataBase(bookId){ isDeleted -> isDeleted }
     }
 
-    override fun getSavedBooks(): Flow<List<BookSave>> = flow {
-         try {
-          booksLocalDataSource.getAllBooks().map { booksEntityList ->
+    override fun getSavedBooks(): Flow<List<BookSave>> {
+         return try {
+
+         val booksFlow = booksLocalDataSource.getAllBooks().map { booksEntityList ->
                 booksEntityList.map { bookEntity ->
                     bookEntity.mapToBookDomainObject()
                 }
           }
+             CoroutineScope(dispatcher).launch {
+                 booksFlow.collect{
+                     Timber.tag(TAG).d(it.toString())
+                 }
+             }
+
+             booksFlow
         }catch (e : IOException){
-            emit(emptyList<BookSave>())
+            Timber.tag(TAG).d(e.localizedMessage as String)
+            flow {emit(emptyList<BookSave>()) }
         }catch (e : SQLiteException){
-            emit(emptyList<BookSave>())
+             Timber.tag(TAG).d(e.localizedMessage as String)
+             flow { emit(emptyList<BookSave>())}
         }
     }
 }

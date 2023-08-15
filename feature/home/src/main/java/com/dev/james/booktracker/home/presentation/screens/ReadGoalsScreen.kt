@@ -351,6 +351,7 @@ fun ReadGoalScreen(
             }
         ) {
 
+
             StatelessReadGoalScreen(
                 currentReadFormState = currentReadFormState,
                 uiState = readGoalsScreenUiState.value,
@@ -569,9 +570,11 @@ fun ReadGoalScreen(
                             currentPosition = readGoalsScreenUiState.value.currentPosition
                         )
                     )
+                } ,
+                callSavedBooks = {
+                    readGoalsScreenViewModel.getCachedBooks()
                 }
             )
-
 
         }
 
@@ -659,7 +662,8 @@ fun StatelessReadGoalScreen(
     onClearImage: () -> Unit = {},
     onNextClicked: () -> Unit = {},
     onPreviousClicked: () -> Unit = {},
-    onAlertSwitchChecked: (Boolean) -> Unit = {}
+    onAlertSwitchChecked: (Boolean) -> Unit = {} ,
+    callSavedBooks : () -> Unit = {}
 ) {
     Column(
         verticalArrangement = Arrangement.Top,
@@ -718,6 +722,10 @@ fun StatelessReadGoalScreen(
             modifier = Modifier.weight(1f)
         ) {
 
+            if(uiState.currentPosition == 2){
+               callSavedBooks()
+            }
+
             androidx.compose.animation.AnimatedVisibility(
                 visible = uiState.currentPosition == 0,
                 enter = fadeIn() + slideInHorizontally { if (uiState.currentPosition > uiState.previousPosition) it else -it },
@@ -760,8 +768,10 @@ fun StatelessReadGoalScreen(
                 exit = fadeOut() + slideOutHorizontally { if (uiState.currentPosition > uiState.previousPosition) -it else it }
 
             ) {
+
                 SpecificGoalsForm(
-                    specificGoalsFormState = specificGoalsFormState
+                    specificGoalsFormState = specificGoalsFormState ,
+                    readGoalsScreenUiState = uiState
                 )
             }
         }

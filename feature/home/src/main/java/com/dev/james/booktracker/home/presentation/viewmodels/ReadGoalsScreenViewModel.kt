@@ -22,6 +22,7 @@ import com.dsc.form_builder.FormState
 import com.dsc.form_builder.SelectState
 import com.dsc.form_builder.TextFieldState
 import com.dsc.form_builder.Validators
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -59,16 +60,6 @@ class ReadGoalsScreenViewModel @Inject constructor(
         ImageSelectorUiState()
     )
     val imageSelectorUiState get() = _imageSelectorState.asStateFlow()
-
-    val savedBookList = booksRepository.getSavedBooks()
-        .map { booksSaveList ->
-            booksSaveList.map {
-                it.mapToPresentation()
-            }
-        }
-        .stateIn(scope = viewModelScope , started = SharingStarted.WhileSubscribed() , initialValue = emptyList<Book>())
-
-
 
     private val selectedBookState : MutableStateFlow<Book> = MutableStateFlow(
         Book()
@@ -450,6 +441,22 @@ class ReadGoalsScreenViewModel @Inject constructor(
         }
     }
 
+    fun getCachedBooks(){
+        viewModelScope.launch {
+            booksRepository.getSavedBooks()
+                .map { booksSaveList ->
+                    booksSaveList.map {
+                        it.mapToPresentation()
+                    }
+                }.collect { booksList ->
+                    _readGoalsScreenUiState.value = _readGoalsScreenUiState.value.copy(
+                        savedBooksList = booksList
+                    )
+                }
+        }
+
+    }
+
     fun onBookSelected(book : Book) {
         //update various states
         _imageSelectorState.value = imageSelectorUiState.value.copy(
@@ -578,7 +585,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
 data class ReadGoalsScreenState(
     val currentPosition: Int = 0,
     val previousPosition: Int = 0 ,
-    val shouldDisableNextButton : Boolean = true
+    val shouldDisableNextButton : Boolean = true ,
+    val savedBooksList : List<Book> = listOf<Book>()
 )
 
 data class ImageSelectorUiState(
