@@ -28,19 +28,19 @@ fun String.calculateTimeToLong() : Long {
 fun prepareGoalString(goalTime : String, condition : String , daysList : List<String>) : String {
     return when(condition){
         "Every day except" -> {
-            "Read for $goalTime every day except ${daysList.joinWithAnd()}."
+            "Read $goalTime every day except ${daysList.joinWithAnd()}."
         }
         "Select specific days" -> {
-            "Read for $goalTime on ${daysList.joinWithAnd()}."
+            "Read $goalTime on ${daysList.joinWithAnd()}."
         }
         "Weekend only" -> {
-            "Read for $goalTime on Saturday and Sunday only."
+            "Read $goalTime on Saturday and Sunday only."
         }
         "Weekdays" -> {
-            "Read for $goalTime from Monday until Friday only."
+            "Read $goalTime from Monday until Friday only."
         }
         "Every day" -> {
-            "Read for $goalTime every day."
+            "Read $goalTime every day."
         }
         else -> {
             ""
