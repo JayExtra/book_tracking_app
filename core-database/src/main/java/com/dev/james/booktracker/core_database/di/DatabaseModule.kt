@@ -27,4 +27,18 @@ object DatabaseModule {
             .build()
     }
 
+
+    @Provides
+    @Singleton
+    fun provideBooksDAO(
+        db : BookTrackerDatabase
+    ) = db.getBooksDao()
+
+    @Provides
+    @Singleton
+    fun provideGoalsDAO(
+        db : BookTrackerDatabase
+    ) = db.getGoalsDao()
+
+
 }

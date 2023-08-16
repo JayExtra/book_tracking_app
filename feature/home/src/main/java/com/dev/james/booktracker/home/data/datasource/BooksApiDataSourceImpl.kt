@@ -3,7 +3,7 @@ package com.dev.james.booktracker.home.data.datasource
 
 import com.dev.james.booktracker.core_network.api_service.BooksApi
 import com.dev.james.booktracker.core_network.dtos.BookVolumeDto
-import com.dev.james.booktracker.home.data.datasource.BooksApiDataSource
+import com.dev.james.booktracker.home.domain.datasources.BooksApiDataSource
 import javax.inject.Inject
 
 class BooksApiDataSourceImpl @Inject constructor(

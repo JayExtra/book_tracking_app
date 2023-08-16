@@ -77,6 +77,9 @@ fun OverallGoalsForm(
     startAlarmPickerDialog: () -> Unit = {}
 ) {
 
+    val context = LocalContext.current
+
+
     var showTimerTimePickerDialog by remember {
         mutableStateOf(false)
     }
@@ -91,13 +94,16 @@ fun OverallGoalsForm(
             onSet = { selectedTime ->
                 when {
                     selectedTime.hours > 0 && selectedTime.minutes == 0 -> {
-                        minTimeField.change("${selectedTime.hours} hrs")
+                        minTimeField.change("${selectedTime.hours}hrs")
+                        Toast.makeText(context , minTimeField.value , Toast.LENGTH_SHORT ).show()
                     }
                     selectedTime.hours == 0 && selectedTime.minutes > 0 -> {
-                        minTimeField.change("${selectedTime.minutes} min")
+                        minTimeField.change("${selectedTime.minutes}min")
+                        Toast.makeText(context , minTimeField.value , Toast.LENGTH_SHORT ).show()
                     }
                     selectedTime.hours > 0 && selectedTime.minutes > 0 -> {
-                        minTimeField.change("${selectedTime.hours} hrs ${selectedTime.minutes} min")
+                        minTimeField.change("${selectedTime.hours}hrs ${selectedTime.minutes}min")
+                        Toast.makeText(context , minTimeField.value , Toast.LENGTH_SHORT ).show()
                     }
                     else -> {
                         minTimeField.change("no time set")
@@ -121,8 +127,6 @@ fun OverallGoalsForm(
     }
 
     val timeDialogState = rememberMaterialDialogState()
-
-
 
 
 
@@ -270,11 +274,19 @@ fun OverallGoalsForm(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        val alertSwitchFieldState : ChoiceState = overallGoalsFormState.getState<ChoiceState>("alert_switch")
+
         SwitchComponent(
-            isChecked = alertSwitchState,
+            isChecked = alertSwitchFieldState.value == "Yes",
             onCheckChanged = { status ->
                 //update checked state
-                onAlertSwitchChecked(status)
+               // onAlertSwitchChecked(status)
+                if(status){
+                    alertSwitchFieldState.change("Yes")
+                }else {
+                    alertSwitchFieldState.change("No")
+                }
+
             }
         )
 
@@ -282,7 +294,7 @@ fun OverallGoalsForm(
         val noteFieldState = overallGoalsFormState.getState<TextFieldState>("alert note")
 
         AnimatedVisibility(
-            visible = alertSwitchState,
+            visible = alertSwitchFieldState.value == "Yes",
             exit = fadeOut(
                 animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
             ) + slideOutVertically(
@@ -313,6 +325,8 @@ fun OverallGoalsForm(
 
     }
 
+    val timePickedState = overallGoalsFormState.getState<ChoiceState>("alert_dialog_time")
+
     MaterialDialog(
         dialogState = timeDialogState,
         properties = DialogProperties(
@@ -320,7 +334,8 @@ fun OverallGoalsForm(
         ),
         buttons = {
             positiveButton(text = "Set") {
-
+                timePickedState.change(formattedTime)
+                Toast.makeText(context , formattedTime , Toast.LENGTH_SHORT).show()
             }
             negativeButton(text = "Close") {
 

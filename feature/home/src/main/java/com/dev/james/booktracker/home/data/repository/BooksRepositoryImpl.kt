@@ -1,30 +1,33 @@
 package com.dev.james.booktracker.home.data.repository
 
-import com.dev.james.booktracker.core.common_models.Book
-import com.dev.james.booktracker.core.common_models.mappers.BookSave
+import android.database.sqlite.SQLiteException
+import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.utilities.ConnectivityManager
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core_database.room.entities.BookEntity
 import com.dev.james.booktracker.core_network.dtos.BookVolumeDto
-import com.dev.james.booktracker.home.data.datasource.BooksApiDataSource
-import com.dev.james.booktracker.home.data.datasource.BooksLocalDataSource
+import com.dev.james.booktracker.home.domain.datasources.BooksApiDataSource
+import com.dev.james.booktracker.home.domain.datasources.BooksLocalDataSource
+import com.dev.james.booktracker.home.domain.repositories.BooksRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import timber.log.Timber
+import java.io.IOException
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 class BooksRepositoryImpl
     @Inject constructor(
-        private val booksApiDataSource: BooksApiDataSource ,
-        private val booksLocalDataSource : BooksLocalDataSource ,
-        private val connectivityManager: ConnectivityManager ,
+        private val booksApiDataSource: BooksApiDataSource,
+        private val booksLocalDataSource : BooksLocalDataSource,
+        private val connectivityManager: ConnectivityManager,
         private val dispatcher : CoroutineDispatcher = Dispatchers.IO
     ): BooksRepository {
 
@@ -67,10 +70,51 @@ class BooksRepositoryImpl
     override suspend fun deleteBookInDatabase(bookId: String): Boolean {
        return booksLocalDataSource.deleteBookFromDataBase(bookId){ isDeleted -> isDeleted }
     }
+
+    override fun getSavedBooks(): Flow<List<BookSave>> {
+         return try {
+
+         val booksFlow = booksLocalDataSource.getAllBooks().map { booksEntityList ->
+                booksEntityList.map { bookEntity ->
+                    bookEntity.mapToBookDomainObject()
+                }
+          }
+             CoroutineScope(dispatcher).launch {
+                 booksFlow.collect{
+                     Timber.tag(TAG).d(it.toString())
+                 }
+             }
+
+             booksFlow
+        }catch (e : IOException){
+            Timber.tag(TAG).d(e.localizedMessage as String)
+            flow {emit(emptyList<BookSave>()) }
+        }catch (e : SQLiteException){
+             Timber.tag(TAG).d(e.localizedMessage as String)
+             flow { emit(emptyList<BookSave>())}
+        }
+    }
 }
 
 fun BookSave.mapToBookEntity() : BookEntity {
     return BookEntity(
+        bookId = bookId,
+        bookImage = bookImage ,
+        isUri = isUri,
+        bookAuthors = bookAuthors ,
+        bookTitle = bookTitle,
+        bookSmallThumbnail = bookSmallThumbnail ,
+        bookPagesCount = bookPagesCount ,
+        publisher = publisher ,
+        publishedDate = publishedDate ,
+        currentChapterTitle = currentChapterTitle ,
+        chapters = chapters ,
+        currentChapter = currentChapter
+    )
+}
+
+fun BookEntity.mapToBookDomainObject() : BookSave {
+    return BookSave(
         bookId = bookId,
         bookImage = bookImage ,
         isUri = isUri,
