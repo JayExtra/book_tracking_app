@@ -1,5 +1,7 @@
 package com.dev.james.booktracker.core.utilities
 
+import android.content.Context
+import com.dev.james.booktracker.core.R
 import java.security.SecureRandom
 import java.util.UUID
 
@@ -20,6 +22,38 @@ fun String.calculateTimeToLong() : Long {
         }else{
             timeString.filter { it.isDigit() }.toLong() * 60000L
         }
+    }
+}
+
+fun prepareGoalString(goalTime : String, condition : String , daysList : List<String>) : String {
+    return when(condition){
+        "Every day except" -> {
+            "Read for $goalTime every day except ${daysList.joinWithAnd()}."
+        }
+        "Select specific days" -> {
+            "Read for $goalTime on ${daysList.joinWithAnd()}."
+        }
+        "Weekend only" -> {
+            "Read for $goalTime on Saturday and Sunday only."
+        }
+        "Weekdays" -> {
+            "Read for $goalTime from Monday until Friday only."
+        }
+        "Every day" -> {
+            "Read for $goalTime every day."
+        }
+        else -> {
+            ""
+        }
+
+    }
+}
+
+fun  List<String>.joinWithAnd(): String {
+    return when (this.size) {
+        0 -> ""
+        1 -> this[0]
+        else -> "${this.dropLast(1).joinToString(", ")} and ${this.last()}"
     }
 }
 

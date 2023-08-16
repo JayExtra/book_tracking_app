@@ -467,7 +467,6 @@ class ReadGoalsScreenViewModel @Inject constructor(
         currentReadFormTitleFieldState.change(book.bookTitle ?: "No title found")
         currentReadFormAuthorFieldState.change(book.bookAuthors?.convertToAuthorsString() ?: "No author(s) found.")
         currentReadFormPagesFieldState.change(book.bookPagesCount.toString())
-
         selectedBookState.value = book
 
     }
