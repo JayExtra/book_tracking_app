@@ -1,0 +1,732 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 468,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "GGMmnL4VeOoC",
+      "etag": "FoBs6doFx44",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/GGMmnL4VeOoC",
+      "volumeInfo": {
+        "title": "Think Big",
+        "subtitle": "Unleashing Your Potential for Excellence",
+        "authors": [
+          "Ben Carson",
+          "Cecil Murphey"
+        ],
+        "publisher": "Zondervan",
+        "publishedDate": "2005",
+        "description": "A pediatric neurosurgeon offers his philosophy on life and success.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9780310269007"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "0310269008"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 274,
+        "printType": "BOOK",
+        "categories": [
+          "Religion"
+        ],
+        "averageRating": 4,
+        "ratingsCount": 23,
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "0.1.2.0.preview.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=GGMmnL4VeOoC&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=GGMmnL4VeOoC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=GGMmnL4VeOoC&printsec=frontcover&dq=ThinkBig&hl=&cd=1&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=GGMmnL4VeOoC&dq=ThinkBig&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Think_Big.html?hl=&id=GGMmnL4VeOoC"
+      },
+      "saleInfo": {
+        "country": "KE",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "KE",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=GGMmnL4VeOoC&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "A pediatric neurosurgeon offers his philosophy on life and success."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "fBntjwEACAAJ",
+      "etag": "kKqiwI7+hGM",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/fBntjwEACAAJ",
+      "volumeInfo": {
+        "title": "You Have a Brain",
+        "subtitle": "A Teen's Guide to T. H. I. N. K. B. I. G.",
+        "authors": [
+          "Ben Carson"
+        ],
+        "publishedDate": "2016-08-09",
+        "description": "After telling the story of how he overcame an inner-city background to become a world-renowned neurosurgeon (Gifted Hands), Dr. Ben Carson now gives students an inspirational look at the philosophy of life that helped him meet life's obstacles and leap over them, using his lessons to help students learn to T.H.I.N.K. B.I.G. as well.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "031074945X"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9780310749455"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "categories": [
+          "Academic achievement"
+        ],
+        "averageRating": 5,
+        "ratingsCount": 1,
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=fBntjwEACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=fBntjwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=fBntjwEACAAJ&dq=ThinkBig&hl=&cd=2&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=fBntjwEACAAJ&dq=ThinkBig&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/You_Have_a_Brain.html?hl=&id=fBntjwEACAAJ"
+      },
+      "saleInfo": {
+        "country": "KE",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "KE",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=fBntjwEACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "After telling the story of how he overcame an inner-city background to become a world-renowned neurosurgeon (Gifted Hands), Dr. Ben Carson now gives students an inspirational look at the philosophy of life that helped him meet life&#39;s ..."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "2sKMEAAAQBAJ",
+      "etag": "53aRael+Oiw",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/2sKMEAAAQBAJ",
+      "volumeInfo": {
+        "title": "Think Big",
+        "subtitle": "Take Small Steps and Build the Future You Want",
+        "authors": [
+          "Grace Lordan"
+        ],
+        "publisher": "National Geographic Books",
+        "publishedDate": "2021-09-28",
+        "description": "What are you doing today to make your dream future come true? 'A rare self-help book that's actually informed by evidence. A host of perceptive, practical tips for getting out of your own way and making progress toward your career goals.' Adam Grant, bestselling author of Think Again and Originals 'A practical and accessible guide to using behavioural science in your career.' Caroline Criado Perez, author of Invisible Women ________________­­­­­­­­­­­­­­­­­­­­­­­ We all have big ambitions for the future but those dreams only become reality if we do something towards them regularly. To achieve audacious goals, we need to take action and make small changes every day. We need to think big and act small. Drawing on cutting-edge research from behavioural science, Dr Grace Lordan offers immediate actionable solutions and tips that will help you get closer to your dream future, every day. Focusing on six key areas - your time, goal planning, self-narratives, other people, your environment, and resilience - Dr Lordan reveals practical, science-backed hacks that will help you get ahead. Each chapter introduces us to behavioural science concepts like the 'halo effect', 'confirmation bias', 'affect heuristic' and the 'ostrich effect', to help you better understand yourself and others, so that you can get the most out of your career. Whether you fantasise about changing industry, landing that big promotion, writing a screenplay or setting up your own company, Think Big creates a clear pathway to the future you want now. Some of the things you'll learn include how to: · Overcome a fear of failure and throw yourself at opportunity · Craft the optimum environment for work and give yourself ample time for tasks · Rewrite self-narratives and tackle imposter syndrome · Watch out for other people's biases and stop them from holding you back Think Big provides a practical framework to keep you moving in the right direction towards any goal. It will help you get out of your own way and propel you on the path to success, transforming you from dreamer to doer!",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9780241420164"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "0241420164"
+          }
+        ],
+        "readingModes": {
+          "text": true,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "categories": [
+          "Business & Economics"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=2sKMEAAAQBAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=2sKMEAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=2sKMEAAAQBAJ&dq=ThinkBig&hl=&cd=3&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=2sKMEAAAQBAJ&dq=ThinkBig&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Think_Big.html?hl=&id=2sKMEAAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "KE",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "KE",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=2sKMEAAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "We need to think big and act small. Drawing on cutting-edge research from behavioural science, Dr Grace Lordan offers immediate actionable solutions and tips that will help you get closer to your dream future, every day."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "Pa5ySAAACAAJ",
+      "etag": "O5uP1iFwusc",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/Pa5ySAAACAAJ",
+      "volumeInfo": {
+        "title": "Think Big",
+        "subtitle": "Make It Happen In Business and Life",
+        "authors": [
+          "Donald J. Trump",
+          "Bill Zanker"
+        ],
+        "publisher": "Harper",
+        "publishedDate": "2010-07-27",
+        "description": "Donald J. Trump is an icon: the very definition of the American success story. President-elect, reality-television star, and developer of some of the planet's most prestigious real estate, he's also become one of the world's wealthiest men. Trump is a living example of how thinking BIG and knowing when to back up your opinions aggressively—regardless of what your critics or opponents might say—can help you maximize your personal and professional achievements. In his first political campaign, Trump defeated his opponents by rallying voters nationwide to \"Make America Great Again.\" For the first time ever, you too can learn Trump’s secrets to thinking BIG and kicking ass! Learn: Momentum: the Big Mo. How to get it and how to get it back. Revenge: how and when to get it (and why it's so sweet). \"I love you, now sign this!\" Why contracts in business and personal life are so important. Real-life stories from people who've applied the think BIG formula in their own lives. These strategies are proven and attested to by those who've learned to think BIG from Donald Trump and found success in their own lives even when the world seems to be against them. Co-authored with Bill Zanker, an entrepreneur who learned these tactics firsthand from Trump, Think BIG and Kick Ass shows you how to bring a winning attitude to everything you do.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "0062022393"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9780062022394"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "categories": [
+          "Business & Economics"
+        ],
+        "averageRating": 2,
+        "ratingsCount": 2,
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=Pa5ySAAACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=Pa5ySAAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=Pa5ySAAACAAJ&dq=ThinkBig&hl=&cd=4&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=Pa5ySAAACAAJ&dq=ThinkBig&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Think_Big.html?hl=&id=Pa5ySAAACAAJ"
+      },
+      "saleInfo": {
+        "country": "KE",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "KE",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=Pa5ySAAACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Donald J. Trump is an icon: the very definition of the American success story."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "3XxWuQEACAAJ",
+      "etag": "O1O6jDyv5jk",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/3XxWuQEACAAJ",
+      "volumeInfo": {
+        "title": "Think Big",
+        "authors": [
+          "Kes Gray"
+        ],
+        "publisher": "Hodder Children's Books",
+        "publishedDate": "2018-06-25",
+        "description": "A brand new story about Humpty Dumpty and his nursery rhyme friends, from the bestselling Kes Gray, creator of Oi Frog!. Humpty Dumpty and his nursery rhyme friends are discussing what they want to be when they grow up. Humpty wants to be a boiled egg, but his friends are encouraging him to think bigger! \"You could be an artist!\" said Little Boy Blue. \"Look for clues and become a detective!\" said Little Bo Peep. \"Buy a pair of football boots and become a footballer,\" said Wee Willy Winky. Will Humpty think big and reach for the stars?",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "1444942131"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9781444942132"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 32,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=3XxWuQEACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=3XxWuQEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=3XxWuQEACAAJ&dq=ThinkBig&hl=&cd=5&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=3XxWuQEACAAJ&dq=ThinkBig&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Think_Big.html?hl=&id=3XxWuQEACAAJ"
+      },
+      "saleInfo": {
+        "country": "KE",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "KE",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=3XxWuQEACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Humpty Dumpty and his nursery rhyme friends discuss what they want to be when they grow up."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "bbJhIgAACAAJ",
+      "etag": "e6GE+fffI3c",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/bbJhIgAACAAJ",
+      "volumeInfo": {
+        "title": "Think Big and Kick Ass in Business and Life",
+        "authors": [
+          "Donald Trump",
+          "Bill Zanker"
+        ],
+        "publishedDate": "2007",
+        "description": "He's got the biggest personality in business. His trademark line \"You're fired\" from The Apprentice is one of America's most instantly recognizable catchphrases. He's survived the biggest real estate bankruptcy in history and climbed his way back to the top. He's Donald J. Trump, and he's going to show readers the Secret to succeed like he has in THINK BIG AND KICK ASS... IN BUSINESS AND LIFE. His co-author is Bill Zanker, CEO of the Learning Annex, which he started with $5,000 in Bar Mitzvah money. It's now one of Inc's 500 Fastest Growing Companies for the second straight year, with over $100 million in sales. Together, they think BIG! And now, readers around the globe will learn how they too can Kick Ass and achieve the success they've always dreamed of--in business and in their personal life as well. The book is filled with the authors' incredible personal stories from their rough-and-tumble rise to the top of their fields, plus the experiences of other top achievers, including Russell Simmons, Mark Burnett, and Vince McMahon. Readers will get the inside story on Trump's recent clash with Rosie O'Donnell, how not to crack under pressure, the secrets to staying focused, how Trump himself stumbled and recovered multiple times on his way to the top, and much more. The book will feature the Trump IT test, created for this book, that will drive readers to see if they have what IT takes and in what areas they need to kick it up, plus a selection of the best Q&A's from Trump's incredibly popular Learning Annex Wealth Expos and true stories of success from students who are already practicing his \"Think BIG\" strategies.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "0061554553"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9780061554551"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 368,
+        "printType": "BOOK",
+        "categories": [
+          "Risk-taking (Psychology)"
+        ],
+        "averageRating": 4,
+        "ratingsCount": 1,
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=bbJhIgAACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=bbJhIgAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=bbJhIgAACAAJ&dq=ThinkBig&hl=&cd=6&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=bbJhIgAACAAJ&dq=ThinkBig&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Think_Big_and_Kick_Ass_in_Business_and_L.html?hl=&id=bbJhIgAACAAJ"
+      },
+      "saleInfo": {
+        "country": "KE",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "KE",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=bbJhIgAACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "The book will feature the Trump IT test, created for this book, that will drive readers to see if they have what IT takes and in what areas they need to kick it up, plus a selection of the best Q&amp;A&#39;s from Trump&#39;s incredibly popular Learning ..."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "aizEAQAACAAJ",
+      "etag": "BXWRwJdGOXE",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/aizEAQAACAAJ",
+      "volumeInfo": {
+        "title": "Think Big",
+        "subtitle": "Discover How To Expand Your Thinking In Order To Make Big Things Happen In Your Life",
+        "authors": [
+          "Ace Mccloud"
+        ],
+        "publishedDate": "2017-03-22",
+        "description": "Are you settling for a mediocre life? Do you ever wonder what you are truly capable of? Whether you want to (1) free your mind from limited thinking, (2) start turning your big ideas and dreams into reality, or (3) discover elite strategies and habits for creating big things in your life, then this is the book for you. You were made for more than this. There is a much better way to succeed in life! The reality is that many of us don't dream enough! Our performance-laden culture has left us afraid to try anything that we can't execute flawlessly and efficiently the very first time. So many shrink back from experimenting, exploring, and imagining, the very things that have fueled the big thinkers of our age. This book was written for the purpose of reversing that trend and unleashing the big thinker inside of you. Yes you! It's time that you truly discover the power of thinking big! Unleash your inner power. You won't have to go far to learn this skill because what you need is already right there, inside of you. All I will do is help you unleash the Big Idea that's hiding deep within you and show you how to ride it to fruition in your life. I have included time tested strategies from some of the greatest people and minds that have ever existed. Everything I show you is practical, and when done over time, can show incredible results. Let nothing hold you back. Most of your fears are only in your own head. They have nothing to do with reality. So, turn your negative thoughts around. Walk with me through this book and I will show you how to address the fears that hold you back from confidently pursuing your big idea. I will help you turn your fears into creative energy, exchanging them for confidence that yes, you can live life to the fullest and execute some big plans! You can let yourself think big and begin pursuing your own big ideas. Turn your big dreams into reality. Discover the incredibly powerful magic of thinking big. In this book you will learn how to brainstorm great ideas and then discover how to make that big idea into a reality. Included is step-by-step guidance on how to turn your big idea into something that exists in the real world. Stop aiming for average goals, start thinking of big things that will really make a BIG difference in your life! The ability to think big is a common trait of many of the greatest people who have ever lived and it has been proven over the centuries to have incredible results! What Will You Learn About Thinking Big? The magic that happens when you Think Big. How to overcome fears and gain the confidence you need to realize your big idea. Powerful ways for training your mind for automatic success. How to work smarter, stay motivated and transform every obstacle in your path. How to develop a powerful work ethic based upon world class good habits. You Will Also Discover: Instructions for creating your own 30-day strategy plan to turn your big idea into a reality. The inspiring true life story of a poverty-stricken girl who refused to close the door on big thinking. How to get others to help you accomplish your big goals. How to use powerful morning rituals to start the day off right. You only live once! This is your chance. Unleash your true potential: Buy It Now!",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "1640483292"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9781640483293"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 50,
+        "printType": "BOOK",
+        "categories": [
+          "Business & Economics"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=aizEAQAACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=aizEAQAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=aizEAQAACAAJ&dq=ThinkBig&hl=&cd=7&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=aizEAQAACAAJ&dq=ThinkBig&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Think_Big.html?hl=&id=aizEAQAACAAJ"
+      },
+      "saleInfo": {
+        "country": "KE",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "KE",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=aizEAQAACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "So many shrink back from experimenting, exploring, and imagining, the very things that have fueled the big thinkers of our age. This book was written for the purpose of reversing that trend and unleashing the big thinker inside of you."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "7Nf5DQAAQBAJ",
+      "etag": "KHqspfaIuQs",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/7Nf5DQAAQBAJ",
+      "volumeInfo": {
+        "title": "Think Big",
+        "subtitle": "Overcoming Obstacles with Optimism",
+        "authors": [
+          "Jennifer Arnold",
+          "Bill Klein"
+        ],
+        "publisher": "Simon and Schuster",
+        "publishedDate": "2017-01-31",
+        "description": "Bestselling authors of Life Is Short (No Pun Intended) and stars of TLC’s The Little Couple return with an inspirational book that encourages us to reach for our dreams, no matter what obstacles we may face. Jennifer Arnold and Bill Klein have faced some big challenges in their lives. On the way to becoming a preeminent neonatologist and a successful entrepreneur—as well as parents and television stars—these two have faced prejudice, medical scares, and the uncertainty and daily pressures of life with special needs children. And even though they have dealt with fear, depression, hopelessness, and the urge to give up, they have found a way to persevere. Now they share their wisdom and encouragement with everyone who is facing their own challenges. Drawn from their most popular speaking presentation, Think Big is the inspirational guide for dreaming big, setting goals, and taking the steps to get there. Each section includes heartwarming anecdotes full of grace, humor, and wit plus a never-before-seen look inside their personal and professional lives. They have plenty of stories to tell and their unique approach to encountering life’s greatest difficulties will inspire a call to action in all of us.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9781501139390"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "1501139398"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 256,
+        "printType": "BOOK",
+        "categories": [
+          "Biography & Autobiography"
+        ],
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "0.2.2.0.preview.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=7Nf5DQAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=7Nf5DQAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=7Nf5DQAAQBAJ&printsec=frontcover&dq=ThinkBig&hl=&cd=8&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=7Nf5DQAAQBAJ&dq=ThinkBig&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Think_Big.html?hl=&id=7Nf5DQAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "KE",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "KE",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED_FOR_ACCESSIBILITY",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=7Nf5DQAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "Drawn from their most popular speaking presentation, Think Big is the inspirational guide for dreaming big, setting goals, and taking the steps to get there."
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "f_vuwQEACAAJ",
+      "etag": "KWPF5QiNANI",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/f_vuwQEACAAJ",
+      "volumeInfo": {
+        "title": "Think Big",
+        "subtitle": "How to Conquer the World with a Great Idea",
+        "authors": [
+          "Harald Seiz"
+        ],
+        "publishedDate": "2019-03-20",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "3959721501"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9783959721509"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 160,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=f_vuwQEACAAJ&dq=ThinkBig&hl=&cd=9&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=f_vuwQEACAAJ&dq=ThinkBig&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Think_Big.html?hl=&id=f_vuwQEACAAJ"
+      },
+      "saleInfo": {
+        "country": "KE",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "KE",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=f_vuwQEACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "sBNazwEACAAJ",
+      "etag": "7210KODgnPg",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/sBNazwEACAAJ",
+      "volumeInfo": {
+        "title": "Think Big--Shop Small",
+        "subtitle": "Unique Stores and Contemporary Retail Design",
+        "authors": [
+          "gestalten",
+          "Marianna Julia Strauss"
+        ],
+        "publisher": "Gestalten",
+        "publishedDate": "2023-06-06",
+        "description": "What's in store today? The most engaging retail experiences, created with taste and care. Think Big--Shop Small looks at stores with unique retail concepts that offer products and immersive interiors, introducing a new culture of customer experiences. Highlighting the value of social contact and personal experiences, independent shops bring quality, aesthetic, and passion for service, design, and atmosphere. This book shows highly unique concept stores and beautifully designed flagship stores, as well as independently run shops that have found new ways to broaden the scope of their offerings and new ways of interaction with their customers.",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_10",
+            "identifier": "3967040941"
+          },
+          {
+            "type": "ISBN_13",
+            "identifier": "9783967040944"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 0,
+        "printType": "BOOK",
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "preview-1.0.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=sBNazwEACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=sBNazwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=sBNazwEACAAJ&dq=ThinkBig&hl=&cd=10&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=sBNazwEACAAJ&dq=ThinkBig&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/Think_Big_Shop_Small.html?hl=&id=sBNazwEACAAJ"
+      },
+      "saleInfo": {
+        "country": "KE",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "KE",
+        "viewability": "NO_PAGES",
+        "embeddable": false,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=sBNazwEACAAJ&hl=&source=gbs_api",
+        "accessViewStatus": "NONE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "This book shows highly unique concept stores and beautifully designed flagship stores, as well as independently run shops that have found new ways to broaden the scope of their offerings and new ways of interaction with their customers."
+      }
+    }
+  ]
+}
