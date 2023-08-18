@@ -2,12 +2,15 @@ package com.dev.james.booktracker.home.data.datasource
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import com.dev.james.booktracker.core.test_commons.getTestBookEntity
 import com.dev.james.booktracker.core_database.room.dao.BooksDao
 import com.dev.james.booktracker.core_database.room.database.BookTrackerDatabase
 import com.dev.james.booktracker.core_database.room.entities.BookEntity
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -18,21 +21,8 @@ class BooksLocalDataSourceTest {
     private lateinit var bookTrackerDatabase: BookTrackerDatabase
     private lateinit var booksDao: BooksDao
     private lateinit var booksLocalDataSourceImpl: BooksLocalDataSourceImpl
+    private lateinit var testScope : TestScope
 
-    val bookEntity = BookEntity(
-        bookId = "abab12345",
-        bookImage = "somebookimageurl",
-        bookTitle = "Some book title" ,
-        isUri = false ,
-        bookAuthors = "Author1 , Author2" ,
-        bookSmallThumbnail = "Somesmallthumbnail",
-        bookPagesCount = 122 ,
-        publisher = "somepublisher",
-        publishedDate = "12/10/2023",
-        currentChapter = 11 ,
-        chapters = 22 ,
-        currentChapterTitle = "Some chapter title"
-    )
     @Before
     fun setUp(){
         bookTrackerDatabase = Room.inMemoryDatabaseBuilder(
@@ -42,8 +32,10 @@ class BooksLocalDataSourceTest {
 
         booksDao = bookTrackerDatabase.getBooksDao()
         val dispatcher = StandardTestDispatcher(
-            name = "my_test_dispatcher"
+            name = "book_tracker_test_dispatcher"
         )
+        testScope = TestScope(dispatcher)
+
         booksLocalDataSourceImpl = BooksLocalDataSourceImpl(
             booksDao = booksDao ,
             dispatcher = dispatcher
@@ -51,20 +43,27 @@ class BooksLocalDataSourceTest {
     }
 
     @Test
-    fun insertBook_expectedSingleBookInserted() = runTest{
+    fun insertBook_expectedSingleBookInserted() = testScope.runTest {
+        //given
+        val bookEntity = getTestBookEntity()
         //when
-       val bookAdded =  booksLocalDataSourceImpl.addBookToDataBase(
+        booksLocalDataSourceImpl.addBookToDataBase(
             bookEntity = bookEntity,
             onBookAdded = { status , _ ->
                 status
             }
         )
+        val addedBook = booksDao.getBook(bookEntity.bookId)
         //then
-        assertThat(bookAdded).isTrue()
+        assertThat(addedBook.bookId).isEqualTo(bookEntity.bookId)
     }
 
     @Test
-    fun deleteBook_expectedNoBookInDatabase() = runTest {
+    fun deleteBook_expectedNoBookInDatabase() = testScope.runTest {
+        //given
+        val bookEntity = getTestBookEntity()
+
+        //when
         booksLocalDataSourceImpl.addBookToDataBase(
             bookEntity = bookEntity ,
             onBookAdded = { status , _ ->
@@ -72,25 +71,35 @@ class BooksLocalDataSourceTest {
             }
         )
 
-        val bookDeleted = booksLocalDataSourceImpl.deleteBookFromDataBase(
+        booksLocalDataSourceImpl.deleteBookFromDataBase(
             bookEntity.bookId ,
             onBookDeleted = { status ->
                 status
             }
         )
 
-        assertThat(bookDeleted).isTrue()
+        val findDeletedBookResult = booksDao.getBook(bookEntity.bookId)
+
+        assertThat(findDeletedBookResult).isNull()
+
     }
 
     @Test
-    fun getCachedBook_returnsListOfBookEntity() = runTest {
+    fun getCachedBook_returnsListOfBookEntity() = testScope.runTest {
+        //given
+        val bookEntity = getTestBookEntity()
+
+        //when
          booksLocalDataSourceImpl.addBookToDataBase(
             bookEntity = bookEntity,
             onBookAdded = { status , _ ->
                 status
             }
         )
+
         val addedBooks = booksLocalDataSourceImpl.getAllBooks().first()
+
+        //then
         assertThat(addedBooks).isNotEmpty()
     }
 
