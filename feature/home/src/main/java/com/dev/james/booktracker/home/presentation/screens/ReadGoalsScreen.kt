@@ -73,6 +73,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.core.common_models.BookSave
+import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.home.presentation.components.BottomNextPreviousButtons
 import com.dev.james.booktracker.home.presentation.components.CameraView
@@ -165,6 +167,8 @@ fun ReadGoalScreen(
             initialValue = ReadGoalsScreenState(),
             minActiveState = Lifecycle.State.STARTED
         )
+    val selectedBookState = readGoalsScreenViewModel.selectedBookState
+        .collectAsStateWithLifecycle()
 
 
     var checkedState by remember { mutableStateOf(false) }
@@ -381,18 +385,29 @@ fun ReadGoalScreen(
                 imageSelectorState = imageSelectorState.value,
                 onSaveClicked = {
 
+                    val currentReadFormTitleFieldState: TextFieldState =
+                        currentReadFormState.getState("title")
+                    val currentReadFormAuthorFieldState: TextFieldState =
+                        currentReadFormState.getState("author")
+                    val currentReadFormPagesFieldState: TextFieldState =
+                        currentReadFormState.getState("pages_count")
+                    val currentReadFormChaptersState: TextFieldState =
+                        currentReadFormState.getState("chapters")
+                    val currentReadFormCurrentChapter: TextFieldState =
+                        currentReadFormState.getState("current chapter")
+                    val currentReadFormCurChaptTitleState: TextFieldState =
+                        currentReadFormState.getState("chapter title")
+
                     val formValidationResult = currentReadFormState.validate()
 
-                    readGoalsScreenViewModel.validateImageSelected()
+                    readGoalsScreenViewModel.validateImageSelected(
+                        imageUri = imageSelectorState.value.imageSelectedUri ,
+                        imageUrl = imageSelectorState.value.imageUrl
+                    )
 
                     if (formValidationResult && !imageSelectorState.value.isError) {
 
-                        val allChaptersState =
-                            currentReadFormState.getState<TextFieldState>("chapters")
-                        val currentChaptersState =
-                            currentReadFormState.getState<TextFieldState>("current chapter")
-
-                        if (currentChaptersState.value.toInt() > allChaptersState.value.toInt()) {
+                        if (currentReadFormCurrentChapter.value.toInt() > currentReadFormChaptersState.value.toInt()) {
                             Toast.makeText(
                                 context,
                                 "The current chapter you are in exceeds the total chapters in this book",
@@ -406,8 +421,50 @@ fun ReadGoalScreen(
                                 Toast.LENGTH_SHORT
                             )
                                 .show()
+
+
+
+                            val author = currentReadFormAuthorFieldState.value
+                            val title = currentReadFormTitleFieldState.value
+                            val pages = currentReadFormPagesFieldState.value
+                            val chapters = currentReadFormChaptersState.value
+                            val currentChapter = currentReadFormCurrentChapter.value
+                            val chapterTitle = currentReadFormCurChaptTitleState.value
+
+                            val bookId = if (imageSelectorState.value.imageSelectedUri != Uri.EMPTY)
+                                generateSecureUUID()
+                            else
+                                selectedBookState.value.bookId ?: "n/a"
+
+
+                            val isUri = imageSelectorState.value.imageSelectedUri != Uri.EMPTY
+
+                            val bookImage =
+                                if (isUri) imageSelectorState.value.imageSelectedUri.toString() else imageSelectorState.value.imageUrl
+
+                            val smallThumbnail = selectedBookState.value.bookSmallThumbnail
+                            val publisher = selectedBookState.value.publisher
+                            val publishedDate = selectedBookState.value.publishedDate
+
+                            val bookSave = BookSave(
+                                bookId = bookId,
+                                bookImage = bookImage,
+                                bookTitle = title,
+                                bookAuthors = author,
+                                bookSmallThumbnail = smallThumbnail ?: "n/a",
+                                bookPagesCount = pages.toInt(),
+                                publisher = publisher ?: "n/a",
+                                publishedDate = publishedDate ?: "n/a",
+                                isUri = isUri,
+                                chapters = chapters.toInt(),
+                                currentChapter = currentChapter.toInt(),
+                                currentChapterTitle = chapterTitle
+                            )
+
                             readGoalsScreenViewModel.passAddReadFormAction(
-                                ReadGoalsScreenViewModel.AddReadFormUiActions.SaveBook
+                                ReadGoalsScreenViewModel.AddReadFormUiActions.SaveBook(
+                                    bookSave = bookSave
+                                )
                             )
                         }
                     }
@@ -469,7 +526,10 @@ fun ReadGoalScreen(
                             val currentChaptersState =
                                 currentReadFormState.getState<TextFieldState>("current chapter")
 
-                            readGoalsScreenViewModel.validateImageSelected()
+                            readGoalsScreenViewModel.validateImageSelected(
+                                imageUri = imageSelectorState.value.imageSelectedUri ,
+                                imageUrl = imageSelectorState.value.imageUrl
+                            )
 
                             if (currentReadFormState.validate() && !imageSelectorState.value.isError) {
                                 if (currentChaptersState.value.toInt() > allChaptersState.value.toInt()) {

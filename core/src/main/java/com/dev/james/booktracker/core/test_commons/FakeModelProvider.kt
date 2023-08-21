@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.core.test_commons
 
+import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core_database.room.entities.BookEntity
 import com.dev.james.booktracker.core_database.room.entities.BookGoalsEntity
 import com.dev.james.booktracker.core_database.room.entities.OverallGoalEntity
@@ -91,4 +92,34 @@ fun getIdentifiers() = Identifiers(
 fun getImageLinks() =  ImageLinks(
     small_thumbnail =  "http://books.google.com/books/content?id=sBNazwEACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api" ,
     thumbnail = "http://books.google.com/books/content?id=sBNazwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+)
+
+fun getFakeBookSaveWithUri() = BookSave(
+    bookId = "74298ucwreovfjoifw11" ,
+    bookImage = "app:booktracker/home/place/someimage.jpg" ,
+    bookTitle = "some book title" ,
+    bookAuthors = "smith , wesson" ,
+    bookSmallThumbnail = "n/a",
+    bookPagesCount = 122 ,
+    publisher = "n/a" ,
+    publishedDate = "n/a" ,
+    isUri = true ,
+    currentChapter = 14 ,
+    currentChapterTitle = "some title" ,
+    chapters = 22
+)
+
+fun getFakeBookSaveWithUrl() = BookSave(
+    bookId = "33434343weffsdvsdvsdfjoifw11" ,
+    bookImage = "https://booktracker.com/collections/images/someimages_2015.jpg" ,
+    bookTitle = "some book title" ,
+    bookAuthors = "smith , wesson" ,
+    bookSmallThumbnail = "https://booktracker.com/collections/thumbnails/sometumbnail_2015.jpg",
+    bookPagesCount = 122 ,
+    publisher = "McMillan Publishers" ,
+    publishedDate = "14/02/2005" ,
+    isUri = false ,
+    currentChapter = 12 ,
+    currentChapterTitle = "some title 2" ,
+    chapters = 3
 )
