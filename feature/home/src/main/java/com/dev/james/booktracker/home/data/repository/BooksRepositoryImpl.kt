@@ -1,6 +1,7 @@
 package com.dev.james.booktracker.home.data.repository
 
 import android.database.sqlite.SQLiteException
+import com.dev.james.booktracker.core.common_models.BookGoal
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.utilities.ConnectivityManager
 import com.dev.james.booktracker.core.utilities.Resource
@@ -79,12 +80,6 @@ class BooksRepositoryImpl
                     bookEntity.mapToBookDomainObject()
                 }
           }
-             CoroutineScope(dispatcher).launch {
-                 booksFlow.collect{
-                     Timber.tag(TAG).d(it.toString())
-                 }
-             }
-
              booksFlow
         }catch (e : IOException){
             Timber.tag(TAG).d(e.localizedMessage as String)
@@ -92,6 +87,19 @@ class BooksRepositoryImpl
         }catch (e : SQLiteException){
              Timber.tag(TAG).d(e.localizedMessage as String)
              flow { emit(emptyList<BookSave>())}
+        }
+    }
+
+    override suspend fun getSingleSavedBook(id: String): BookSave {
+        return try {
+            booksLocalDataSource.getCachedBook(id)
+                .mapToBookDomainObject()
+        }catch (e : IOException){
+            Timber.e("Could not fetch book from the database.Issue : ${e.message}")
+            BookSave()
+        }catch ( e : SQLiteException){
+            Timber.e("Could not fetch book from the database.Issue : ${e.message}")
+            BookSave()
         }
     }
 }

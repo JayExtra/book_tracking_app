@@ -18,5 +18,11 @@ data class BookGoalLogsEntity(
     @ColumnInfo("end_time")
     val endTime : LocalDate,
     @ColumnInfo("period_taken")
-    val period : Long
+    val period : Long ,
+    @ColumnInfo("pages_read")
+    val pagesRead : Int ,
+    @ColumnInfo("current_chapter_title")
+    val currentChapterTitle : String ,
+    @ColumnInfo("current_chapter")
+    val currentChapter: Int
 )

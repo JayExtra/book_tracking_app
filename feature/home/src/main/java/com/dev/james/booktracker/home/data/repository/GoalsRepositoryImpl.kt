@@ -2,9 +2,11 @@ package com.dev.james.booktracker.home.data.repository
 
 import android.database.sqlite.SQLiteException
 import com.dev.james.booktracker.core.common_models.BookGoal
+import com.dev.james.booktracker.core.common_models.BookGoalLog
 import com.dev.james.booktracker.core.common_models.OverallGoal
 import com.dev.james.booktracker.core.common_models.SpecificGoal
 import com.dev.james.booktracker.core.common_models.mappers.mapToEntityObject
+import com.dev.james.booktracker.core.common_models.mappers.toDomain
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.home.domain.datasources.GoalsLocalDataSource
 import com.dev.james.booktracker.home.domain.repositories.GoalsRepository
@@ -13,9 +15,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
 
@@ -45,5 +49,14 @@ class GoalsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getAllActiveBookGoals(): List<BookGoal> =
+            goalsLocalDataSource
+                .getAllBookGoals()
+                .filter { bookGoalsEntity ->
+                    bookGoalsEntity.isActive
+                }
+                .map { bookGoalsEntity ->
+                    bookGoalsEntity.toDomain()
+                }
 
 }
