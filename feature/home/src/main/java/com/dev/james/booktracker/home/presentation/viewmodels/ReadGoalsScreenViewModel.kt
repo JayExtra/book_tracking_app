@@ -71,14 +71,14 @@ class ReadGoalsScreenViewModel @Inject constructor(
     private val _readGoalsScreenUiState: MutableStateFlow<ReadGoalsScreenState> = MutableStateFlow(
         ReadGoalsScreenState()
     )
-    val readGoalsScreenUiState get() = _readGoalsScreenUiState
+    val readGoalsScreenUiState get() = _readGoalsScreenUiState.asStateFlow()
 
     private val searchQueryMutableStateFlow: MutableStateFlow<String> =
         MutableStateFlow("Think Big")
 
     private var _googleBottomSheetSearchState: MutableStateFlow<GoogleBottomSheetUiState> =
         MutableStateFlow(GoogleBottomSheetUiState.StandbyState)
-    val googleBottomSheetSearchState get() = _googleBottomSheetSearchState
+    val googleBottomSheetSearchState get() = _googleBottomSheetSearchState.asStateFlow()
 
     private var _readGoalsScreenUiEvents: Channel<ReadGoalsUiEvents> = Channel()
     val readGoalsScreenUiEvents get() = _readGoalsScreenUiEvents.receiveAsFlow()
@@ -419,6 +419,9 @@ class ReadGoalsScreenViewModel @Inject constructor(
             is Resource.Success -> {
                 if (result.data == true) {
                     Timber.tag(TAG).d("goals successfully added to database")
+                    _readGoalsScreenUiEvents.send(
+                        ReadGoalsUiEvents.navigateToHome
+                    )
                 }
             }
 
@@ -563,6 +566,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
     sealed class ReadGoalsUiEvents {
         data class ShowSnackBar(val message: String, val isSaving: Boolean) : ReadGoalsUiEvents()
+        object navigateToHome : ReadGoalsUiEvents()
 
     }
 

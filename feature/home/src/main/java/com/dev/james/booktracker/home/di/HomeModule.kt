@@ -1,19 +1,24 @@
 package com.dev.james.booktracker.home.di
 
+import com.dev.james.booktracker.home.domain.datasources.BooksLocalDataSource
 import com.dev.james.booktracker.core.utilities.ConnectivityManager
 import com.dev.james.booktracker.core_database.room.dao.BooksDao
 import com.dev.james.booktracker.core_database.room.dao.GoalsDao
+import com.dev.james.booktracker.core_database.room.dao.LogsDao
 import com.dev.james.booktracker.core_network.api_service.BooksApi
 import com.dev.james.booktracker.home.domain.datasources.BooksApiDataSource
 import com.dev.james.booktracker.home.data.datasource.BooksApiDataSourceImpl
-import com.dev.james.booktracker.home.domain.datasources.BooksLocalDataSource
 import com.dev.james.booktracker.home.data.datasource.BooksLocalDataSourceImpl
 import com.dev.james.booktracker.home.data.datasource.GoalsLocalDataSourceImpl
+import com.dev.james.booktracker.home.data.datasource.LogsLocalDataSourceImpl
 import com.dev.james.booktracker.home.domain.repositories.BooksRepository
 import com.dev.james.booktracker.home.data.repository.BooksRepositoryImpl
 import com.dev.james.booktracker.home.data.repository.GoalsRepositoryImpl
+import com.dev.james.booktracker.home.data.repository.LogsRepositoryImpl
 import com.dev.james.booktracker.home.domain.datasources.GoalsLocalDataSource
+import com.dev.james.booktracker.home.domain.datasources.LogsLocalDataSource
 import com.dev.james.booktracker.home.domain.repositories.GoalsRepository
+import com.dev.james.booktracker.home.domain.repositories.LogsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,6 +59,16 @@ object HomeModule {
         )
     }
 
+    @Provides
+    @Singleton
+    fun provideLogsLocalDataSource(
+        logsDao: LogsDao
+    ) : LogsLocalDataSource {
+        return LogsLocalDataSourceImpl(
+            logsDao
+        )
+    }
+
 
     @Provides
     @Singleton
@@ -79,7 +94,13 @@ object HomeModule {
         )
     }
 
-
-
-
+    @Provides
+    @Singleton
+    fun provideLogsRepository(
+        logsLocalDataSource: LogsLocalDataSource
+    ) : LogsRepository {
+        return LogsRepositoryImpl(
+            logsLocalDataSource
+        )
+    }
 }

@@ -62,6 +62,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -255,6 +256,9 @@ fun ReadGoalScreen(
 
                         }
                     }
+                    is ReadGoalsScreenViewModel.ReadGoalsUiEvents.navigateToHome -> {
+                        homeNavigator.openHomeScreen()
+                    }
 
                     else -> {}
                 }
@@ -295,7 +299,7 @@ fun ReadGoalScreen(
     } else {
 
         BottomSheetScaffold(
-
+            modifier = Modifier.testTag("read_goals_screen_scaffold"),
             sheetPeekHeight = 0.dp,
             scaffoldState = scaffoldState,
             sheetDragHandle = {

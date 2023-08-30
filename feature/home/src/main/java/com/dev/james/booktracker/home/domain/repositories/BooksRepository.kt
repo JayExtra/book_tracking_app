@@ -16,4 +16,6 @@ interface BooksRepository {
 
     fun getSavedBooks() : Flow<List<BookSave>>
 
+    suspend fun getSingleSavedBook(id : String) : BookSave
+
 }

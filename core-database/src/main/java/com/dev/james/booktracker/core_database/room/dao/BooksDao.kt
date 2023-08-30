@@ -25,4 +25,8 @@ interface BooksDao {
     @Query("SELECT * FROM books_table")
     fun getAllBooks() : Flow<List<BookEntity>>
 
+
+    @Query("SELECT * FROM books_table WHERE id =:id")
+    suspend fun getSavedBook(id : String) : BookEntity
+
 }
