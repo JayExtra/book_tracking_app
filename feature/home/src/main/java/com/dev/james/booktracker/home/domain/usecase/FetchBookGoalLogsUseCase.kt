@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 class FetchBookGoalLogsUseCase @Inject constructor(
     private val goalsRepository: GoalsRepository ,
@@ -27,18 +28,39 @@ class FetchBookGoalLogsUseCase @Inject constructor(
             val bookId = activeGoal[0].bookId
             val bookGoalLogs = getBookGoalLogs(bookId)
             val cachedBook = getCachedBook(bookId)
+            val totalPagesRead = bookGoalLogs.calculateTotalPagesRead()
+            val totalTimeSpent = bookGoalLogs.calculateTotalTimeSpent()
+            val totalPages = cachedBook.bookPagesCount
+
             BookGoalData(
                 bookId = bookId ,
                 bookImage = cachedBook.bookImage ,
+                bookTitle = cachedBook.bookTitle,
                 isUri = cachedBook.isUri ,
-                totalPages = cachedBook.bookPagesCount,
-                totalTimeSpent = bookGoalLogs.calculateTotalTimeSpent() ,
-                totalPagesRead = bookGoalLogs.calculateTotalPagesRead() ,
-                logs = bookGoalLogs
+                totalPages = totalPages,
+                totalTimeSpent = totalTimeSpent ,
+                totalPagesRead = totalPagesRead ,
+                logs = bookGoalLogs ,
+                progress = calculateProgress(
+                    totalPagesRead = totalPagesRead ,
+                    totalPages = totalPages
+                )
             )
         }else{
             BookGoalData()
         }
+    }
+
+    //repair here//
+    /*private fun List<BookGoalLog>.getMostRecentLog() : BookGoalLog {
+        return this.filter { log -> log.startedTime. }
+    }*/
+
+    private fun calculateProgress(
+        totalPages : Int ,
+        totalPagesRead : Int
+    ) : Float {
+        return (totalPagesRead.toFloat() / totalPages.toFloat()).roundToInt().toFloat()
     }
 
     private fun List<BookGoalLog>.calculateTotalPagesRead() : Int {
