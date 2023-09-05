@@ -78,3 +78,20 @@ fun generateRandomId(length: Int): String {
 
     return sb.toString()
 }
+
+fun Long.formatTimeToDHMS() : String {
+
+        val units = arrayOf("d", "h", "m", "s")
+        val values = longArrayOf(this / 86400, (this % 86400) / 3600, (this % 3600) / 60, this % 60)
+
+        val timeStringBuilder = StringBuilder()
+
+        for (i in units.indices) {
+            if (values[i] > 0) {
+                timeStringBuilder.append("${values[i]}${units[i]} ")
+            }
+        }
+        val formattedTime = timeStringBuilder.toString()
+
+        return formattedTime.ifBlank { "0s" }
+}

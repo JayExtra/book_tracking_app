@@ -30,9 +30,11 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.R
 import com.dev.james.booktracker.core.common_models.BookGoalData
+import com.dev.james.booktracker.home.presentation.components.BookGoalInfoComponent
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.viewmodels.HomeScreenViewModel
 import com.ramcosta.composedestinations.annotation.Destination
+import timber.log.Timber
 
 @Composable
 @Destination
@@ -70,9 +72,9 @@ fun StatelessHomeScreen(
     ){
 
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(start = 16.dp , end = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
 
             when(homeScreenState){
@@ -107,11 +109,17 @@ fun StatelessHomeScreen(
                         }
                     }else {
 
-                        Toast.makeText(
+                        /*Toast.makeText(
                             context ,
                             homeScreenState.bookGoalData.toString() ,
                             Toast.LENGTH_SHORT
-                        ).show()
+                        ).show()*/
+
+                        Timber.tag("HomeScreen").d("data => ${homeScreenState.bookGoalData}")
+
+                        BookGoalInfoComponent(
+                            bookGoalData = homeScreenState.bookGoalData
+                        )
                     }
                 }
                 else -> {}

@@ -7,12 +7,7 @@ import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.home.domain.repositories.BooksRepository
 import com.dev.james.booktracker.home.domain.repositories.GoalsRepository
 import com.dev.james.booktracker.home.domain.repositories.LogsRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -31,6 +26,7 @@ class FetchBookGoalLogsUseCase @Inject constructor(
             val totalPagesRead = bookGoalLogs.calculateTotalPagesRead()
             val totalTimeSpent = bookGoalLogs.calculateTotalTimeSpent()
             val totalPages = cachedBook.bookPagesCount
+            val mostRecentLog = bookGoalLogs.getMostRecentLog()
 
             BookGoalData(
                 bookId = bookId ,
@@ -40,6 +36,8 @@ class FetchBookGoalLogsUseCase @Inject constructor(
                 totalPages = totalPages,
                 totalTimeSpent = totalTimeSpent ,
                 totalPagesRead = totalPagesRead ,
+                currentChapterTitle = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapterTitle else cachedBook.currentChapterTitle ,
+                currentChapter = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapter else cachedBook.currentChapter,
                 logs = bookGoalLogs ,
                 progress = calculateProgress(
                     totalPagesRead = totalPagesRead ,
@@ -52,9 +50,17 @@ class FetchBookGoalLogsUseCase @Inject constructor(
     }
 
     //repair here//
-    /*private fun List<BookGoalLog>.getMostRecentLog() : BookGoalLog {
-        return this.filter { log -> log.startedTime. }
-    }*/
+    private fun List<BookGoalLog>.getMostRecentLog() : BookGoalLog {
+        return if(this.isNotEmpty()){
+            val latest = this.sortedBy { log ->
+                log.startedTime
+            }
+            latest[0]
+        }else {
+            BookGoalLog()
+        }
+
+    }
 
     private fun calculateProgress(
         totalPages : Int ,

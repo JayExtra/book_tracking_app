@@ -5,13 +5,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -38,12 +42,14 @@ import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.BookGoalData
+import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 import com.dev.james.booktracker.home.R
 
 @Composable
 @Preview(showBackground = true)
 fun BookGoalInfoComponent(
-    bookGoalData: BookGoalData = BookGoalData()
+    bookGoalData: BookGoalData = BookGoalData() ,
+    //onContinueClicked : () -> Unit = {}
 ) {
 
     Column(
@@ -54,10 +60,36 @@ fun BookGoalInfoComponent(
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.current_read),
-            style = BookAppTypography.labelLarge ,
+            style = BookAppTypography.labelLarge,
             textAlign = TextAlign.Start
         )
-        GoalDataComponent()
+        GoalDataComponent(
+            bookGoalData = bookGoalData
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier.fillMaxWidth(fraction = 0.5f).padding(start = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            ElevatedButton(
+                modifier = Modifier
+                    .width(250.dp)
+                ,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                onClick = {
+                    //open book lo screen
+                }) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(R.string.continue_reading) ,
+                    style = BookAppTypography.labelMedium ,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
     }
 }
 
@@ -71,43 +103,49 @@ fun GoalDataComponent(bookGoalData: BookGoalData = BookGoalData()) {
         val chapterSection = createRefFor("chapter_section")
         val bestTimeSection = createRefFor("best_time_section")
 
-        constrain(imageSection){
+        constrain(imageSection) {
             start.linkTo(parent.start)
             top.linkTo(parent.top)
         }
-        constrain(progressSection){
-            start.linkTo(imageSection.end , 8.dp)
+        constrain(progressSection) {
+            start.linkTo(imageSection.end, 8.dp)
             top.linkTo(imageSection.top)
         }
-        constrain(chapterSection){
+        constrain(chapterSection) {
             start.linkTo(progressSection.start)
-            top.linkTo(progressSection.bottom , 6.dp)
+            top.linkTo(progressSection.bottom, 9.dp)
         }
-        constrain(bestTimeSection){
+        constrain(bestTimeSection) {
             start.linkTo(chapterSection.start)
-            top.linkTo(chapterSection.bottom , 6.dp)
+            top.linkTo(chapterSection.bottom, 9.dp)
         }
     }
     ConstraintLayout(
-        constraints ,
+        constraints,
         Modifier.fillMaxWidth()
     ) {
         BookImageComponent(
-            modifier = Modifier.layoutId("image_section")
+            modifier = Modifier.layoutId("image_section"),
+            image = bookGoalData.bookImage,
+            isUri = bookGoalData.isUri
         )
         ProgressComponent(
-              modifier = Modifier.layoutId("progress_section")
-          )
+            modifier = Modifier.layoutId("progress_section"),
+            progress = bookGoalData.progress
+        )
 
         ReadProgressComponent(
-            modifier = Modifier.layoutId("chapter_section") ,
-            icon = R.drawable.ic_bookmark_24 ,
-            title = bookGoalData.bookTitle ,
-            currentChapter = bookGoalData.currentChapter
-       )
-       ReadProgressComponent(
-           modifier = Modifier.layoutId("best_time_section")
-       )
+            modifier = Modifier.layoutId("chapter_section"),
+            icon = R.drawable.ic_bookmark_24,
+            title = "Chapter ${bookGoalData.currentChapter}",
+            subTitle = bookGoalData.currentChapterTitle
+        )
+        ReadProgressComponent(
+            modifier = Modifier.layoutId("best_time_section"),
+            icon = R.drawable.ic_clock_24,
+            title = "Total time",
+            subTitle = bookGoalData.totalTimeSpent.formatTimeToDHMS()
+        )
 
     }
 
@@ -116,7 +154,7 @@ fun GoalDataComponent(bookGoalData: BookGoalData = BookGoalData()) {
 @Composable
 @Preview(showBackground = true)
 fun ProgressComponent(
-    modifier: Modifier = Modifier ,
+    modifier: Modifier = Modifier,
     progress: Float = 0f
 ) {
 
@@ -127,23 +165,23 @@ fun ProgressComponent(
 
         constrain(progressLabel) {
             top.linkTo(parent.top)
-            start.linkTo(parent.start , 8.dp)
+            start.linkTo(parent.start, 8.dp)
         }
 
         constrain(progressBar) {
             start.linkTo(progressLabel.start)
-            top.linkTo(progressLabel.bottom , margin = 8.dp)
+            top.linkTo(progressLabel.bottom, margin = 8.dp)
         }
 
         constrain(progressCircle) {
-            start.linkTo(progressBar.end , margin = 8.dp)
+            start.linkTo(progressBar.end, margin = 8.dp)
             top.linkTo(progressBar.top)
             bottom.linkTo(progressBar.bottom)
         }
     }
 
     ConstraintLayout(
-        constraintSet = constraints ,
+        constraintSet = constraints,
         modifier = modifier
     ) {
         Text(
@@ -152,11 +190,12 @@ fun ProgressComponent(
             style = BookAppTypography.labelLarge
         )
         LinearProgressIndicator(
-            modifier = Modifier.layoutId("progress_bar")
+            modifier = Modifier
+                .layoutId("progress_bar")
                 .width(200.dp)
                 .height(5.dp),
             color = MaterialTheme.colorScheme.primary,
-            progress =progress
+            progress = progress
         )
         Box(
             contentAlignment = Alignment.Center, modifier =
@@ -167,7 +206,12 @@ fun ProgressComponent(
                 .background(color = MaterialTheme.colorScheme.primary)
 
         ) {
-            Text(text = "$progress%", color = Color.White, style = BookAppTypography.bodySmall , fontSize = 9.sp)
+            Text(
+                text = "${progress.toInt()}%",
+                color = Color.White,
+                style = BookAppTypography.bodySmall,
+                fontSize = 9.sp
+            )
         }
 
     }
@@ -178,41 +222,52 @@ fun ProgressComponent(
 @Preview(showBackground = true)
 fun ReadProgressComponent(
     modifier: Modifier = Modifier,
-    title : String = "Some title",
-    currentChapter : String = "Some chapter",
-    icon : Int = R.drawable.ic_clock_24
-){
+    title: String = "Some title",
+    subTitle: String = "Some chapter",
+    icon: Int = R.drawable.ic_clock_24
+) {
     val constraints = ConstraintSet {
-        
+
         val titleComponent = createRefFor("title_label")
         val messageComponent = createRefFor("message_label")
         val iconComponent = createRefFor("icon_label")
 
-        constrain(iconComponent){
-            start.linkTo(parent.start  )
+        constrain(iconComponent) {
+            start.linkTo(parent.start)
             top.linkTo(parent.top)
         }
-        constrain(titleComponent){
-            start.linkTo(iconComponent.end , 4.dp)
-            top.linkTo(iconComponent.top , 6.dp)
+        constrain(titleComponent) {
+            start.linkTo(iconComponent.end, 4.dp)
+            top.linkTo(iconComponent.top)
         }
-        constrain(messageComponent){
+        constrain(messageComponent) {
             start.linkTo(titleComponent.start)
             top.linkTo(titleComponent.bottom)
         }
     }
 
     ConstraintLayout(
-        constraints ,
+        constraints,
         modifier = modifier
     ) {
-        Text(modifier = Modifier.layoutId("title_label") , text = title , style = BookAppTypography.headlineSmall , fontSize = 11.sp)
-        Text(modifier = Modifier.layoutId("message_label"),text = currentChapter , style = BookAppTypography.bodySmall , fontSize = 14.sp)
+        Text(
+            modifier = Modifier.layoutId("title_label"),
+            text = title,
+            style = BookAppTypography.headlineSmall,
+            fontSize = 12.sp
+        )
+        Text(
+            modifier = Modifier.layoutId("message_label"),
+            text = subTitle,
+            style = BookAppTypography.bodySmall,
+            fontSize = 16.sp
+        )
         Icon(
             modifier = Modifier
                 .layoutId("icon_label")
-                .size(40.dp),
-            painter = painterResource(id = icon), contentDescription = "")
+                .size(30.dp),
+            painter = painterResource(id = icon), contentDescription = ""
+        )
     }
 
 
@@ -221,7 +276,7 @@ fun ReadProgressComponent(
 
 @Composable
 fun BookImageComponent(
-    modifier : Modifier = Modifier ,
+    modifier: Modifier = Modifier,
     image: String = "",
     isUri: Boolean = false
 ) {
@@ -244,15 +299,15 @@ fun BookImageComponent(
 
     Box(
         modifier = modifier
-            .height(120.dp)
-            .width(90.dp)
+            .height(150.dp)
+            .width(100.dp)
             .padding(8.dp),
         contentAlignment = Alignment.Center
     ) {
         Image(
             painter = painter,
             contentDescription = "book thumbnail",
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Crop
         )
         if (painterState is AsyncImagePainter.State.Loading) {
             CircularProgressIndicator(
