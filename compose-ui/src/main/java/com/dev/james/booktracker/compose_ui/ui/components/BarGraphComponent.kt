@@ -1,7 +1,5 @@
 package com.dev.james.booktracker.compose_ui.ui.components
 import android.graphics.Paint
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -32,18 +30,14 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
 import com.dev.james.booktracker.compose_ui.ui.enums.BarType
-import kotlin.math.round
+
 @Composable
 @Preview(showBackground = true)
 fun BarGraph(
-    graphBarData2 : Map<String , Float> = mapOf(
-        "Sun" to 0.33333f , "Mon" to 0.55879f , "Tue" to 0.6666667f , "Wen" to 0.555556f
-        , "Thur" to 0.777778f , "Fri" to 0.445678f , "Sat" to 0.3221567f
-    ),
-    graphBarData: List<Float> = listOf(0.33333334f, 0.6666667f, 0.55879f, 0.5555556f, 0.7777778f),
-    xAxisScaleData: List<Int> = listOf( 2 , 3 ,4 ,5, 6),
-    targetTime : Int = 2 ,
-    barData_:List<Int> = listOf(0 , 1 , 2),
+    modifier: Modifier = Modifier,
+    graphBarData : Map<String , Float> = mapOf(),
+    xAxisScaleData: List<Int> = listOf(),
+    _targetTime : Int = 0,
     height: Dp = 380.dp,
     roundType: BarType = BarType.CIRCULAR_TYPE,
     barWidth: Dp = 38.dp,
@@ -51,11 +45,8 @@ fun BarGraph(
     barArrangement: Arrangement.Horizontal = Arrangement.SpaceEvenly
 ) {
 
-    val barData by remember {
-        mutableStateOf(barData_+0)
-    }
-    val _targetTime by remember {
-        mutableStateOf(targetTime + 0)
+    var targetTime by remember {
+        mutableStateOf(_targetTime + 0)
     }
 
     // for getting screen width and height you can use LocalConfiguration
@@ -101,7 +92,7 @@ fun BarGraph(
     // height of vertical line over x-axis scale connecting x-axis horizontal line
     val lineHeightXAxis = 10.dp
     // height of horizontal line over x-axis scale
-    val horizontalLineHeight = 5.dp
+    val horizontalLineHeight = 20.dp
 
     //main box that stacks both the dotted y axis and the graph itself
     Box(
@@ -125,7 +116,7 @@ fun BarGraph(
                     drawContext.canvas.nativeCanvas.apply {
                         drawText(
                             "${targetTime * i / 2} h",
-                            50f,
+                            30f,
                             size.height - yAxisScaleSpacing - i * size.height / 3f,
                             textPaint
                         )
@@ -138,7 +129,7 @@ fun BarGraph(
                     drawLine(
                         start = Offset(x = yAxisScaleSpacing +30f, y = yCoordinates[it]),
                         end = Offset(x= size.width, y = yCoordinates[it]),
-                        color = Color.Gray,
+                        color = if(it == 2) Color.Green else Color.Gray,
                         strokeWidth = 5f,
                         pathEffect = pathEffect
                     )
@@ -147,7 +138,6 @@ fun BarGraph(
             }
 
         }
-
         // Graph with Bar Graph and X-Axis Scale
         // main graph
         Box(
@@ -161,11 +151,26 @@ fun BarGraph(
             //row to show each graph bar
             Row(
                 modifier = Modifier
-                    .width(width - yAxisTextWidth),
+                    .width(width - yAxisTextWidth)
+                    .padding(start = 10.dp),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = barArrangement
             ) {
-                for((key , value) in graphBarData2){
+                for((key , value) in graphBarData){
+
+                   /* var animationTriggered by remember {
+                        mutableStateOf(false)
+                    }
+                    val graphBarHeight by animateFloatAsState(
+                        targetValue = if (animationTriggered) value else 0f,
+                        animationSpec = tween(
+                            durationMillis = 1000,
+                            delayMillis = 0
+                        ), label = ""
+                    )
+                    LaunchedEffect(key1 = true) {
+                        animationTriggered = true
+                    }*/
 
                     Column(
                         modifier = Modifier.fillMaxHeight(),
