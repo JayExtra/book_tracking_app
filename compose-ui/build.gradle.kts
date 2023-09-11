@@ -63,7 +63,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(Modules.core))
+    //implementation(project(Modules.core))
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     implementation("androidx.appcompat:appcompat:1.6.1")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")

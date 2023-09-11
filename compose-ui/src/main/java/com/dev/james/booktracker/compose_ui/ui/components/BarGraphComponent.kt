@@ -32,7 +32,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
 import com.dev.james.booktracker.compose_ui.ui.enums.BarType
-import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
+import com.dev.james.booktracker.compose_ui.ui.utils.formatTimeToDHMS
 
 @Composable
 @Preview(showBackground = true)
