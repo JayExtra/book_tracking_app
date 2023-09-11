@@ -1,5 +1,7 @@
 package com.dev.james.booktracker.compose_ui.ui.components
 import android.graphics.Paint
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -30,14 +32,17 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
 import com.dev.james.booktracker.compose_ui.ui.enums.BarType
+import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 
 @Composable
 @Preview(showBackground = true)
 fun BarGraph(
     modifier: Modifier = Modifier,
-    graphBarData : Map<String , Float> = mapOf(),
+    graphBarData : Map<String , Long> = mapOf("Sun" to 7200000L , "Mon" to 3600000L , "Teu" to 1800000L , "Wen" to 1200000L , "Thur" to 3600000L , "Fri" to 2400000L , "Sat" to 600000L
+    ),
     xAxisScaleData: List<Int> = listOf(),
-    _targetTime : Int = 0,
+    _targetTime : Int = 2,
+    hrsMin : String = "h" ,
     height: Dp = 380.dp,
     roundType: BarType = BarType.CIRCULAR_TYPE,
     barWidth: Dp = 38.dp,
@@ -56,7 +61,7 @@ fun BarGraph(
 
     // bottom height of the X-Axis Scale
     //controls generally the height of the dotted x-axis
-    val xAxisScaleHeight = 80.dp
+    val xAxisScaleHeight = 60.dp
 
     //this moves the entire dotted line x-axis value either up or down
     val yAxisScaleSpacing by remember {
@@ -77,9 +82,9 @@ fun BarGraph(
 
     val density = LocalDensity.current
     // y-axis scale text paint
+
     val textPaint = remember(density) {
         Paint().apply {
-            color = Color.Black.hashCode()
             textAlign = Paint.Align.CENTER
             textSize = density.run { 12.sp.toPx() }
         }
@@ -90,7 +95,7 @@ fun BarGraph(
     // for dotted line effect
     val pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
     // height of vertical line over x-axis scale connecting x-axis horizontal line
-    val lineHeightXAxis = 10.dp
+    val lineHeightXAxis = 30.dp
     // height of horizontal line over x-axis scale
     val horizontalLineHeight = 20.dp
 
@@ -109,16 +114,18 @@ fun BarGraph(
             horizontalAlignment = CenterHorizontally
         ) {
 
-            Canvas(modifier = Modifier.padding(bottom = 26.dp).fillMaxSize()) {
 
+            Canvas(modifier = Modifier.padding(bottom = 26.dp).fillMaxSize()) {
                 // Y-Axis Scale Text
                 (0..2).forEach { i ->
+                    val officialTarget = (targetTime * i) / 2
+                    val labelColor = if(_targetTime == officialTarget) Color.Green else Color.Black
                     drawContext.canvas.nativeCanvas.apply {
                         drawText(
-                            "${targetTime * i / 2} h",
+                            "$officialTarget $hrsMin",
                             30f,
                             size.height - yAxisScaleSpacing - i * size.height / 3f,
-                            textPaint
+                            textPaint.apply { color = labelColor.hashCode() }
                         )
                     }
                     yCoordinates.add(size.height - yAxisScaleSpacing - i * size.height / 3f)
@@ -140,6 +147,10 @@ fun BarGraph(
         }
         // Graph with Bar Graph and X-Axis Scale
         // main graph
+
+        //Get maximum value in graph for normalization later
+        val maxDuration = graphBarData.maxByOrNull { it.value }?.value ?: 1L
+
         Box(
             modifier = Modifier
                 .padding(start = 50.dp)
@@ -156,13 +167,18 @@ fun BarGraph(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = barArrangement
             ) {
-                for((key , value) in graphBarData){
+                graphBarData.entries.toList().forEach { entry ->
 
-                   /* var animationTriggered by remember {
+                    val (dayOfWeek , duration) = entry
+
+                    val normalizedGraphHeight = duration.toFloat() / maxDuration.toFloat()
+
+                    /*var animationTriggered by remember {
                         mutableStateOf(false)
                     }
+
                     val graphBarHeight by animateFloatAsState(
-                        targetValue = if (animationTriggered) value else 0f,
+                        targetValue = if (animationTriggered) normalizedGraphHeight else 0f,
                         animationSpec = tween(
                             durationMillis = 1000,
                             delayMillis = 0
@@ -210,7 +226,110 @@ fun BarGraph(
                                         .layoutId("graph_bar")
                                         .clip(barShape)
                                         .fillMaxWidth()
-                                        .fillMaxHeight(value)
+                                        .fillMaxHeight(normalizedGraphHeight)
+                                        .background(barColor)
+                                )
+                                Text(
+                                    text = duration.formatTimeToDHMS() ,
+                                    modifier = Modifier.layoutId("graph_value")
+                                )
+                            }
+
+                        }
+
+                        // scale x-axis and bottom part of graph
+                        Column(
+                            modifier = Modifier
+                                .height(xAxisScaleHeight),
+                            verticalArrangement = Top,
+                            horizontalAlignment = CenterHorizontally
+                        ) {
+
+                            /*    // small vertical line joining the horizontal x-axis line
+                                Box(
+                                    modifier = Modifier
+                                        .clip(
+                                            RoundedCornerShape(
+                                                bottomStart = 2.dp,
+                                                bottomEnd = 2.dp
+                                            )
+                                        )
+                                        .width(horizontalLineHeight)
+                                        .height(lineHeightXAxis)
+                                        .background(color = Color.Transparent)
+                                )*/
+                            // scale x-axis
+                            Text(
+                                modifier = Modifier.padding(bottom = 3.dp),
+                                text = dayOfWeek,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center,
+                                color = Color.Black
+                            )
+
+                        }
+
+                    }
+
+                }
+
+              /*  for((key , value) in graphBarData){
+
+                    var animationTriggered by remember {
+                        mutableStateOf(false)
+                    }
+
+                    val graphBarHeight by animateFloatAsState(
+                        targetValue = if (animationTriggered) value else 0f,
+                        animationSpec = tween(
+                            durationMillis = 1000,
+                            delayMillis = 0
+                        ), label = ""
+                    )
+                    LaunchedEffect(key1 = true) {
+                        animationTriggered = true
+                    }
+
+                    Column(
+                        modifier = Modifier.fillMaxHeight(),
+                        verticalArrangement = Top,
+                        horizontalAlignment = CenterHorizontally
+                    ) {
+
+                        // Each Graph
+                        Box(
+                            modifier = Modifier
+                                .padding(bottom = 5.dp)
+                                .clip(barShape)
+                                .width(barWidth)
+                                .height(height - 10.dp)
+                                .background(Color.Transparent),
+                            contentAlignment = BottomCenter
+                        ) {
+
+                            val constraints = ConstraintSet {
+                                val graphBar = createRefFor("graph_bar")
+                                val graphValue = createRefFor("graph_value")
+                                constrain(graphBar){
+                                    bottom.linkTo(parent.bottom)
+                                    end.linkTo(parent.end)
+                                    start.linkTo(parent.start)
+                                }
+                                constrain(graphValue){
+                                    bottom.linkTo(graphBar.top)
+                                    end.linkTo(graphBar.end)
+                                    start.linkTo(graphBar.start)
+                                }
+                            }
+
+                            ConstraintLayout(constraints) {
+                                Box(
+                                    modifier = Modifier
+                                        .layoutId("graph_bar")
+                                        .clip(barShape)
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(graphBarHeight)
                                         .background(barColor)
                                 )
                                 Text(
@@ -229,7 +348,7 @@ fun BarGraph(
                             horizontalAlignment = CenterHorizontally
                         ) {
 
-                            // small vertical line joining the horizontal x-axis line
+                        *//*    // small vertical line joining the horizontal x-axis line
                             Box(
                                 modifier = Modifier
                                     .clip(
@@ -241,7 +360,7 @@ fun BarGraph(
                                     .width(horizontalLineHeight)
                                     .height(lineHeightXAxis)
                                     .background(color = Color.Transparent)
-                            )
+                            )*//*
                             // scale x-axis
                             Text(
                                 modifier = Modifier.padding(bottom = 3.dp),
@@ -255,7 +374,7 @@ fun BarGraph(
                         }
 
                     }
-                }
+                }*/
 
                 /*// Graph
                 graphBarData.forEachIndexed { index, value ->

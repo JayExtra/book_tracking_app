@@ -58,17 +58,18 @@ fun MyGoalsCardComponent() {
             Text(
                 text = "Read 3 hrs a day accept Saturday and Sunday" ,
                 style = BookAppTypography.bodySmall ,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp , top = 2.dp)
             )
 
         }
 
         BarGraph(
             graphBarData = mapOf(
-                "Sun" to 0.55f , "Mon" to 0.33f , "Teu" to 0.667f , "Wen" to 0.222f , "Thur" to 0.345f , "Fri" to 0.256f , "Sat" to 0.1234f
+                "Sun" to 7200000L , "Mon" to 3600000L , "Teu" to 1800000L , "Wen" to 1200000L , "Thur" to 3600000L , "Fri" to 2400000L , "Sat" to 600000L
             ) ,
             height = 270.dp ,
-            _targetTime = 3
+            _targetTime = 20 ,
+            hrsMin = "m"
         )
 
     }

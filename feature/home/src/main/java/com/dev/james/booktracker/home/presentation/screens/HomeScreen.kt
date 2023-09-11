@@ -31,6 +31,7 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.R
 import com.dev.james.booktracker.core.common_models.BookGoalData
 import com.dev.james.booktracker.home.presentation.components.BookGoalInfoComponent
+import com.dev.james.booktracker.home.presentation.components.MyGoalsCardComponent
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.viewmodels.HomeScreenViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -72,7 +73,9 @@ fun StatelessHomeScreen(
     ){
 
         Column(
-            modifier = Modifier.fillMaxSize().padding(start = 16.dp , end = 16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -120,6 +123,8 @@ fun StatelessHomeScreen(
                         BookGoalInfoComponent(
                             bookGoalData = homeScreenState.bookGoalData
                         )
+
+                        MyGoalsCardComponent()
                     }
                 }
                 else -> {}
