@@ -2,13 +2,16 @@ package com.dev.james.booktracker.home.presentation.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,16 +30,21 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
 
 @Composable
-@Preview(showBackground = true)
+@Preview(showBackground = false)
 fun MyGoalsCardComponent() {
     Card(
-        modifier = Modifier.fillMaxWidth() ,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp) ,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background
         ) ,
         shape = RoundedCornerShape(15.dp) ,
+        elevation = CardDefaults.cardElevation(5.dp)
 
     ) {
+        Spacer(modifier = Modifier.height(6.dp))
+
         TitleAndEditButtonSection()
         Text(
             text = "overall" ,
@@ -47,7 +55,7 @@ fun MyGoalsCardComponent() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp)
+                .padding(6.dp)
         ){
             Icon(
                 painter = painterResource(id = R.drawable.ic_lightning_24) ,
@@ -63,13 +71,14 @@ fun MyGoalsCardComponent() {
 
         }
 
+        Spacer(modifier = Modifier.height(6.dp))
+
         BarGraph(
             graphBarData = mapOf(
                 "Sun" to 7200000L , "Mon" to 3600000L , "Teu" to 1800000L , "Wen" to 1200000L , "Thur" to 3600000L , "Fri" to 2400000L , "Sat" to 600000L
             ) ,
             height = 270.dp ,
-            _targetTime = 20 ,
-            hrsMin = "m"
+            targetDuration = 7200000L
         )
 
     }
@@ -98,7 +107,7 @@ fun TitleAndEditButtonSection(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 4.dp, end = 4.dp),
+            .padding(start = 6.dp, end = 6.dp),
         constraintSet = constraints
     ) {
         Text(

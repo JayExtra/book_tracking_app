@@ -41,8 +41,7 @@ fun BarGraph(
     graphBarData : Map<String , Long> = mapOf("Sun" to 7200000L , "Mon" to 3600000L , "Teu" to 1800000L , "Wen" to 1200000L , "Thur" to 3600000L , "Fri" to 2400000L , "Sat" to 600000L
     ),
     xAxisScaleData: List<Int> = listOf(),
-    _targetTime : Int = 2,
-    hrsMin : String = "h" ,
+    targetDuration : Long = 7200000L,
     height: Dp = 380.dp,
     roundType: BarType = BarType.CIRCULAR_TYPE,
     barWidth: Dp = 38.dp,
@@ -50,9 +49,9 @@ fun BarGraph(
     barArrangement: Arrangement.Horizontal = Arrangement.SpaceEvenly
 ) {
 
-    var targetTime by remember {
+    /*var targetTime by remember {
         mutableStateOf(_targetTime + 0)
-    }
+    }*/
 
     // for getting screen width and height you can use LocalConfiguration
     val configuration = LocalConfiguration.current
@@ -61,7 +60,7 @@ fun BarGraph(
 
     // bottom height of the X-Axis Scale
     //controls generally the height of the dotted x-axis
-    val xAxisScaleHeight = 60.dp
+    val xAxisScaleHeight = 20.dp
 
     //this moves the entire dotted line x-axis value either up or down
     val yAxisScaleSpacing by remember {
@@ -70,7 +69,7 @@ fun BarGraph(
 
     //controls the space between the bar lines especially the y-axis values
     val yAxisTextWidth by remember {
-        mutableStateOf(80.dp)
+        mutableStateOf(10.dp)
     }
 
     // bar shape
@@ -102,49 +101,49 @@ fun BarGraph(
     //main box that stacks both the dotted y axis and the graph itself
     Box(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.TopStart
+        contentAlignment = Alignment.Center
     ) {
         // y-axis scale and horizontal dotted lines on graph indicating y-axis scale
         //the dotted line y-axis values
-        Column(
-            modifier = Modifier
-                .padding(top = xAxisScaleHeight, end = 3.dp)
-                .height(height)
-                .fillMaxWidth(),
-            horizontalAlignment = CenterHorizontally
-        ) {
+        /*    Column(
+                modifier = Modifier
+                    .padding(top = xAxisScaleHeight, end = 3.dp)
+                    .height(height)
+                    .fillMaxWidth(),
+                horizontalAlignment = CenterHorizontally
+            ) {
 
 
-            Canvas(modifier = Modifier.padding(bottom = 26.dp).fillMaxSize()) {
-                // Y-Axis Scale Text
-                (0..2).forEach { i ->
-                    val officialTarget = (targetTime * i) / 2
-                    val labelColor = if(_targetTime == officialTarget) Color.Green else Color.Black
-                    drawContext.canvas.nativeCanvas.apply {
-                        drawText(
-                            "$officialTarget $hrsMin",
-                            30f,
-                            size.height - yAxisScaleSpacing - i * size.height / 3f,
-                            textPaint.apply { color = labelColor.hashCode() }
+                Canvas(modifier = Modifier.padding(bottom = 26.dp).fillMaxSize()) {
+                    // Y-Axis Scale Text
+                    (0..2).forEach { i ->
+                        val officialTarget = (targetTime * i) / 2
+                        val labelColor = if(_targetTime == officialTarget) Color.Green else Color.Black
+                        drawContext.canvas.nativeCanvas.apply {
+                            drawText(
+                                "$officialTarget $hrsMin",
+                                30f,
+                                size.height - yAxisScaleSpacing - i * size.height / 3f,
+                                textPaint.apply { color = labelColor.hashCode() }
+                            )
+                        }
+                        yCoordinates.add(size.height - yAxisScaleSpacing - i * size.height / 3f)
+                    }
+
+                    // horizontal dotted lines on graph indicating y-axis scale
+                    (1..2).forEach {
+                        drawLine(
+                            start = Offset(x = yAxisScaleSpacing +30f, y = yCoordinates[it]),
+                            end = Offset(x= size.width, y = yCoordinates[it]),
+                            color = if(it == 2) Color.Green else Color.Gray,
+                            strokeWidth = 5f,
+                            pathEffect = pathEffect
                         )
                     }
-                    yCoordinates.add(size.height - yAxisScaleSpacing - i * size.height / 3f)
+
                 }
 
-                // horizontal dotted lines on graph indicating y-axis scale
-                (1..2).forEach {
-                    drawLine(
-                        start = Offset(x = yAxisScaleSpacing +30f, y = yCoordinates[it]),
-                        end = Offset(x= size.width, y = yCoordinates[it]),
-                        color = if(it == 2) Color.Green else Color.Gray,
-                        strokeWidth = 5f,
-                        pathEffect = pathEffect
-                    )
-                }
-
-            }
-
-        }
+            }*/
         // Graph with Bar Graph and X-Axis Scale
         // main graph
 
@@ -153,17 +152,15 @@ fun BarGraph(
 
         Box(
             modifier = Modifier
-                .padding(start = 50.dp)
-                .width(width - yAxisTextWidth)
+                .fillMaxWidth()
                 .height(height + xAxisScaleHeight),
-            contentAlignment = Alignment.BottomCenter
+            contentAlignment = Alignment.Center
         ) {
 
             //row to show each graph bar
             Row(
                 modifier = Modifier
-                    .width(width - yAxisTextWidth)
-                    .padding(start = 10.dp),
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = barArrangement
             ) {
@@ -173,7 +170,9 @@ fun BarGraph(
 
                     val normalizedGraphHeight = duration.toFloat() / maxDuration.toFloat()
 
-                    /*var animationTriggered by remember {
+                    val finalBarColor = if(duration >= targetDuration ) Color.Green else barColor
+
+                    var animationTriggered by remember {
                         mutableStateOf(false)
                     }
 
@@ -186,7 +185,7 @@ fun BarGraph(
                     )
                     LaunchedEffect(key1 = true) {
                         animationTriggered = true
-                    }*/
+                    }
 
                     Column(
                         modifier = Modifier.fillMaxHeight(),
@@ -212,26 +211,31 @@ fun BarGraph(
                                     bottom.linkTo(parent.bottom)
                                     end.linkTo(parent.end)
                                     start.linkTo(parent.start)
+                                    top.linkTo(graphValue.bottom , 4.dp)
                                 }
                                 constrain(graphValue){
                                     bottom.linkTo(graphBar.top)
                                     end.linkTo(graphBar.end)
                                     start.linkTo(graphBar.start)
+                                    top.linkTo(parent.top , 20.dp)
                                 }
                             }
 
-                            ConstraintLayout(constraints) {
+                            ConstraintLayout(
+                               constraintSet =  constraints ,
+                            ) {
                                 Box(
                                     modifier = Modifier
                                         .layoutId("graph_bar")
                                         .clip(barShape)
                                         .fillMaxWidth()
-                                        .fillMaxHeight(normalizedGraphHeight)
-                                        .background(barColor)
+                                        .fillMaxHeight(graphBarHeight)
+                                        .background(finalBarColor)
                                 )
                                 Text(
                                     text = duration.formatTimeToDHMS() ,
-                                    modifier = Modifier.layoutId("graph_value")
+                                    modifier = Modifier.layoutId("graph_value"),
+                                    fontSize = 12.sp
                                 )
                             }
 
@@ -264,8 +268,7 @@ fun BarGraph(
                                 text = dayOfWeek,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Center,
-                                color = Color.Black
+                                textAlign = TextAlign.Center
                             )
 
                         }

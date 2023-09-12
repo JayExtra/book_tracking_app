@@ -66,7 +66,7 @@ fun BookGoalInfoComponent(
         GoalDataComponent(
             bookGoalData = bookGoalData
         )
-        Spacer(modifier = Modifier.height(8.dp))
+
         Box(
             modifier = Modifier.fillMaxWidth(fraction = 0.5f).padding(start = 12.dp),
             contentAlignment = Alignment.Center
