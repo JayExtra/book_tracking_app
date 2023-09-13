@@ -6,14 +6,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -25,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -52,42 +57,26 @@ fun BookGoalInfoComponent(
     //onContinueClicked : () -> Unit = {}
 ) {
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth() ,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        ) ,
+        elevation = CardDefaults.cardElevation(5.dp),
+        shape = RoundedCornerShape(10.dp)
     ) {
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = stringResource(R.string.current_read),
-            style = BookAppTypography.labelLarge,
-            textAlign = TextAlign.Start
-        )
-        GoalDataComponent(
-            bookGoalData = bookGoalData
-        )
-
-        Box(
-            modifier = Modifier.fillMaxWidth(fraction = 0.5f).padding(start = 12.dp),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.padding(8.dp)
         ) {
-            ElevatedButton(
-                modifier = Modifier
-                    .width(250.dp)
-                ,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                onClick = {
-                    //open book lo screen
-                }) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.continue_reading) ,
-                    style = BookAppTypography.labelMedium ,
-                    textAlign = TextAlign.Center
-                )
-            }
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.current_read),
+                style = BookAppTypography.labelLarge,
+                textAlign = TextAlign.Start
+            )
+            GoalDataComponent(
+                bookGoalData = bookGoalData
+            )
         }
 
     }
@@ -102,6 +91,7 @@ fun GoalDataComponent(bookGoalData: BookGoalData = BookGoalData()) {
         val progressSection = createRefFor("progress_section")
         val chapterSection = createRefFor("chapter_section")
         val bestTimeSection = createRefFor("best_time_section")
+        val continueBtn = createRefFor("continue_button")
 
         constrain(imageSection) {
             start.linkTo(parent.start)
@@ -110,6 +100,7 @@ fun GoalDataComponent(bookGoalData: BookGoalData = BookGoalData()) {
         constrain(progressSection) {
             start.linkTo(imageSection.end, 8.dp)
             top.linkTo(imageSection.top)
+            end.linkTo(parent.end)
         }
         constrain(chapterSection) {
             start.linkTo(progressSection.start)
@@ -118,6 +109,11 @@ fun GoalDataComponent(bookGoalData: BookGoalData = BookGoalData()) {
         constrain(bestTimeSection) {
             start.linkTo(chapterSection.start)
             top.linkTo(chapterSection.bottom, 9.dp)
+        }
+        constrain(continueBtn){
+            start.linkTo(bestTimeSection.start)
+            top.linkTo(bestTimeSection.bottom , 15.dp)
+           // end.linkTo(parent.end)
         }
     }
     ConstraintLayout(
@@ -146,6 +142,25 @@ fun GoalDataComponent(bookGoalData: BookGoalData = BookGoalData()) {
             title = "Total time",
             subTitle = bookGoalData.totalTimeSpent.formatTimeToDHMS()
         )
+
+        ElevatedButton(
+            modifier = Modifier
+                .layoutId("continue_button")
+                .width(250.dp)
+            ,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
+            onClick = {
+                //open book lo screen
+            }) {
+            Text(
+               // modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.continue_reading) ,
+                style = BookAppTypography.labelMedium ,
+                textAlign = TextAlign.Center
+            )
+        }
 
     }
 
@@ -195,7 +210,8 @@ fun ProgressComponent(
                 .width(200.dp)
                 .height(5.dp),
             color = MaterialTheme.colorScheme.primary,
-            progress = progress
+            progress = progress ,
+            strokeCap = StrokeCap.Round
         )
         Box(
             contentAlignment = Alignment.Center, modifier =

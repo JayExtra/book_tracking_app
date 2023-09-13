@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -233,9 +234,10 @@ fun BookCounterComponent(){
 
             CircularProgressIndicator(
                 progress = progressValue ,
-                strokeWidth = 4.dp ,
+                strokeWidth = 6.dp ,
                 color = MaterialTheme.colorScheme.primary ,
-                modifier = Modifier.size(70.dp)
+                modifier = Modifier.size(70.dp) ,
+                strokeCap = StrokeCap.Round
             )
 
             Text(
