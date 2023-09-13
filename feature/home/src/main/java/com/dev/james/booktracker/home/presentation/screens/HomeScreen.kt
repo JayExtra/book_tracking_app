@@ -10,6 +10,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -32,6 +34,7 @@ import com.dev.james.booktracker.core.R
 import com.dev.james.booktracker.core.common_models.BookGoalData
 import com.dev.james.booktracker.home.presentation.components.BookGoalInfoComponent
 import com.dev.james.booktracker.home.presentation.components.MyGoalsCardComponent
+import com.dev.james.booktracker.home.presentation.components.StreakComponent
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.viewmodels.HomeScreenViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -75,7 +78,8 @@ fun StatelessHomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 8.dp, end = 8.dp),
+                .padding(start = 8.dp, end = 8.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -123,6 +127,12 @@ fun StatelessHomeScreen(
                         BookGoalInfoComponent(
                             bookGoalData = homeScreenState.bookGoalData
                         )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        StreakComponent()
+
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         MyGoalsCardComponent()
                     }
