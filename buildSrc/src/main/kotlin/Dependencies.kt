@@ -32,6 +32,7 @@ object Modules {
     const val home = ":feature:home"
     const val myLibrary = ":feature:my-library"
     const val achievements = ":feature:achievements"
+    const val bookTracking = ":feature:book-tracking"
 }
 
 //plugins
