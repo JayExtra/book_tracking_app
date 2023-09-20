@@ -2,16 +2,23 @@
 
 package com.dev.james.book_tracking.presentation.ui.screens
 
+import android.view.View
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -21,13 +28,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
@@ -35,6 +46,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.book_tracking.R
+import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 
 @Composable
@@ -43,7 +55,11 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
     device = Devices.NEXUS_6
 )
 fun TrackBookScreen() {
-    BookProgressSection()
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        BookProgressSection()
+        ProgressGraphSection()
+    }
+
 }
 
 @Composable
@@ -143,6 +159,43 @@ fun BookProgressSection(){
             Text(text = "start" , style = BookAppTypography.labelLarge)
         }
 
+    }
+}
+@Composable
+@Preview(showBackground = true)
+fun ProgressGraphSection(){
+    Card(
+        shape = RoundedCornerShape(10.dp) ,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        ) ,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp) ,
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+    ) {
+        Row(modifier = Modifier.padding(8.dp)) {
+            HoursWithEmojiComponent()
+            BarGraph(
+                height = 150.dp ,
+                graphBarData = mapOf("Sun" to 7200000L , "Mon" to 3600000L , "Teu" to 1800000L , "Wen" to 1200000L , "Thur" to 3600000L , "Fri" to 2400000L , "Sat" to 600000L
+                )
+            )
+
+        }
+    }
+    
+}
+
+@Composable
+@Preview(showBackground = true)
+fun HoursWithEmojiComponent(){
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp) , modifier = Modifier.width(100.dp)) {
+        Text(text = "This week" , style = BookAppTypography.bodyMedium , modifier = Modifier.fillMaxWidth() , textAlign = TextAlign.Center , fontSize = 14.sp)
+        Text(text = "25 hours" , style = BookAppTypography.labelLarge , modifier = Modifier.fillMaxWidth() , textAlign = TextAlign.Center , fontSize = 20.sp , color = MaterialTheme.colorScheme.secondary)
+        Box(contentAlignment = Alignment.Center , modifier = Modifier.size(100.dp)) {
+            Image(painter = painterResource(id = R.drawable.ic_error_24), contentDescription ="", Modifier.size(70.dp) )
+        }
     }
 }
 
