@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -23,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -39,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
@@ -161,6 +166,65 @@ fun BookProgressSection(){
 
     }
 }
+
+@Composable
+@Preview(showBackground = true)
+fun CounterSection(title : String = "Title"){
+   Row(modifier = Modifier.fillMaxWidth() , horizontalArrangement = Arrangement.SpaceBetween , verticalAlignment = Alignment.CenterVertically) {
+    Text(text = title , style = BookAppTypography.labelLarge , fontSize = 20.sp )
+    CounterButtonsComponent()
+   }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun CounterButtonsComponent(){
+    val constraintSet = ConstraintSet {
+
+        val decreaseBtn = createRefFor("decrease_btn")
+        val countText = createRefFor("count_text")
+        val increaseBtn = createRefFor("increase_text")
+
+        constrain(increaseBtn){
+            end.linkTo(parent.end , 4.dp)
+            top.linkTo(countText.top)
+            bottom.linkTo(countText.bottom)
+        }
+        constrain(countText){
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+        }
+        constrain(decreaseBtn){
+            top.linkTo(countText.top)
+            bottom.linkTo(countText.bottom)
+            start.linkTo(parent.start , 4.dp)
+        }
+        createHorizontalChain(decreaseBtn , countText , increaseBtn , chainStyle = ChainStyle.Spread)
+    }
+    ConstraintLayout(constraintSet) {
+        OutlinedButton(
+            modifier = Modifier.layoutId("decrease_btn"),
+            onClick = { } ,
+            shape = RoundedCornerShape(10.dp) ,
+            contentPadding = PaddingValues(2.dp)
+        ) {
+            Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = "" , modifier = Modifier.size(35.dp) )
+        }
+        Text(modifier = Modifier
+            .layoutId("count_text")
+            .padding(start = 6.dp, end = 6.dp), text = "0" , style = BookAppTypography.labelMedium , fontSize = 24.sp)
+
+        OutlinedButton(
+            modifier = Modifier.layoutId("increase_text"),
+            onClick = { } ,
+            shape = RoundedCornerShape(10.dp) ,
+            contentPadding = PaddingValues(2.dp)
+        ) {
+            Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = "" , modifier = Modifier.size(35.dp) )
+        }
+    }
+}
+
 @Composable
 @Preview(showBackground = true)
 fun ProgressGraphSection(){
@@ -198,6 +262,7 @@ fun HoursWithEmojiComponent(){
         }
     }
 }
+
 
 @Composable
 @Preview(showBackground = true)
