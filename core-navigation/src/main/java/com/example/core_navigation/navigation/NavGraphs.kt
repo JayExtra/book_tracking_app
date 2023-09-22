@@ -1,6 +1,7 @@
 package com.example.core_navigation.navigation
 
 import com.dev.james.achievements.presentation.ui.screens.destinations.AchievementsScreenDestination
+import com.dev.james.book_tracking.presentation.ui.screens.destinations.TrackBookScreenDestination
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.home.presentation.screens.destinations.ReadGoalScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
@@ -42,7 +43,8 @@ object NavGraphs {
         override val destinationsByRoute = listOf<DestinationSpec<*>>(
             HomeScreenDestination ,
             OnBoardingWelcomeScreenDestination ,
-            ReadGoalScreenDestination
+            ReadGoalScreenDestination ,
+            TrackBookScreenDestination
         ).routedIn(this)
             .associateBy { it.route }
 
@@ -80,6 +82,19 @@ object NavGraphs {
 
     }
 
+    val bookTracking = object : NavGraphSpec {
+
+        override val route: String
+            = "book-tracking"
+        override val startRoute: Route
+            = TrackBookScreenDestination routedIn this
+        override val destinationsByRoute = listOf<DestinationSpec<*>>(
+            AchievementsScreenDestination ,
+            HomeScreenDestination
+        ).routedIn(this)
+            .associateBy { it.route }
+    }
+
     val rootWithOnBoarding = object : NavGraphSpec {
         override val route: String = "rootWithOnBoarding"
         override val startRoute: Route
@@ -90,7 +105,8 @@ object NavGraphs {
             onBoarding ,
             home ,
             myLibrary ,
-            achievements
+            achievements ,
+            bookTracking
         )
     }
 
@@ -104,7 +120,8 @@ object NavGraphs {
             onBoarding,
             home ,
             myLibrary ,
-            achievements
+            achievements ,
+            bookTracking
         )
     }
 }

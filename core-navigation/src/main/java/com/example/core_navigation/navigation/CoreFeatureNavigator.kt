@@ -1,7 +1,10 @@
 package com.example.core_navigation.navigation
 
 import androidx.navigation.NavController
+import androidx.navigation.navOptions
 import com.dev.james.achievements.presentation.navigation.AchievementsScreenNavigator
+import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
+import com.dev.james.book_tracking.presentation.ui.screens.destinations.TrackBookScreenDestination
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.home.presentation.screens.destinations.ReadGoalScreenDestination
@@ -26,7 +29,8 @@ class CoreFeatureNavigator(
     HelloMessageNavigator ,
     UserSetupScreenNavigator ,
         AchievementsScreenNavigator ,
-        MyLibraryScreenNavigator
+        MyLibraryScreenNavigator ,
+        BookTrackNavigation
 {
 
     override fun openOnBoardingWelcomeScreen() {
@@ -64,6 +68,12 @@ class CoreFeatureNavigator(
         )
     }
 
+    override fun openTrackingScreen() {
+        navController.navigate(
+            TrackBookScreenDestination within navGraph
+        )
+    }
+
     override fun navigateToUserDetailsCaptureScreen() {
         navController.navigate(
             UserPreferenceSetupScreenDestination within navGraph
@@ -89,6 +99,16 @@ class CoreFeatureNavigator(
 
     override fun openHomeScreenDestination() {
         navController.navigate(HomeScreenDestination within navGraph)
+    }
+
+    override fun backToHomeScreen() {
+        navController.navigate(
+            HomeScreenDestination within navGraph ,
+        )
+    }
+
+    override fun openPdfScreen() {
+        //will open pdf screen
     }
 
 }

@@ -5,16 +5,23 @@ package com.dev.james.book_tracking.presentation.ui.screens
 import android.view.View
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -27,8 +34,13 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,18 +63,71 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.book_tracking.R
+import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
+import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
+import com.dev.james.booktracker.compose_ui.ui.components.RoundedInputText
+import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
-@Preview(
+/*@Preview(
     showBackground = true,
-    device = Devices.NEXUS_6
-)
-fun TrackBookScreen() {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        BookProgressSection()
-        ProgressGraphSection()
+    widthDp = 405 ,
+    heightDp = 1060
+)*/
+@Destination
+fun TrackBookScreen(
+    navigation : BookTrackNavigation
+) {
+    Column(modifier = Modifier.fillMaxSize() , verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        StandardToolBar(
+            showBackArrow = true ,
+            title = {
+                Text(text = "Progress", style = BookAppTypography.headlineSmall)
+            } ,
+            navigate = {
+                navigation.backToHomeScreen()
+            }
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp) , modifier = Modifier.verticalScroll(
+            state =  rememberScrollState())
+        ) {
+            BookProgressSection()
+            ProgressGraphSection()
+            TrackSection()
+        }
+    }
+
+}
+
+@Composable
+@Preview(showBackground = true)
+fun ProgressGraphSection(){
+    Card(
+        shape = RoundedCornerShape(10.dp) ,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        ) ,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp) ,
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+    ) {
+        Text("History" , style = BookAppTypography.headlineSmall, modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp))
+        Row(modifier = Modifier.padding(8.dp)) {
+            HoursWithEmojiComponent()
+            BarGraph(
+                height = 150.dp ,
+                graphBarData = mapOf("Sun" to 7200000L , "Mon" to 3600000L , "Teu" to 1800000L , "Wen" to 1200000L , "Thur" to 3600000L , "Fri" to 2400000L , "Sat" to 600000L
+                )
+            )
+
+        }
     }
 
 }
@@ -135,7 +200,7 @@ fun BookProgressSection(){
 
         Row(modifier = Modifier.layoutId("chapter_title")) {
 
-            Icon(imageVector = Icons.Rounded.Info, contentDescription ="" )
+            Icon(painter = painterResource(id = R.drawable.ic_bookmark_24), contentDescription ="" )
             Text(
                 text = "chapter 4: Some chapter title" ,
                 style = BookAppTypography.bodySmall ,
@@ -169,9 +234,51 @@ fun BookProgressSection(){
 
 @Composable
 @Preview(showBackground = true)
+fun TrackSection(){
+    Card(
+        modifier = Modifier.padding(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        ) ,
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp) ,
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        var text by remember {
+            mutableStateOf("")
+        }
+        Column(modifier = Modifier.padding(8.dp) , verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(modifier = Modifier.fillMaxWidth() , text = "Track" , style = BookAppTypography.headlineSmall)
+            CounterSection(title = "Page")
+            CounterSection(title = "Chapter")
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextFieldComponent(
+                modifier = Modifier.fillMaxWidth() ,
+                text = text ,
+                onTextChanged = {
+                    text = it
+                }
+            )
+
+            ElevatedButton(onClick = {  } , colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            ) ,
+                modifier = Modifier.fillMaxWidth() ,
+                shape = RoundedCornerShape(5.dp)
+            ) {
+                Text("finish session" , style = BookAppTypography.labelSmall)
+            }
+
+        }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
 fun CounterSection(title : String = "Title"){
    Row(modifier = Modifier.fillMaxWidth() , horizontalArrangement = Arrangement.SpaceBetween , verticalAlignment = Alignment.CenterVertically) {
-    Text(text = title , style = BookAppTypography.labelLarge , fontSize = 20.sp )
+    Text(text = title , style = BookAppTypography.labelMedium)
     CounterButtonsComponent()
    }
 }
@@ -227,38 +334,12 @@ fun CounterButtonsComponent(){
 
 @Composable
 @Preview(showBackground = true)
-fun ProgressGraphSection(){
-    Card(
-        shape = RoundedCornerShape(10.dp) ,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background
-        ) ,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp) ,
-        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
-    ) {
-        Row(modifier = Modifier.padding(8.dp)) {
-            HoursWithEmojiComponent()
-            BarGraph(
-                height = 150.dp ,
-                graphBarData = mapOf("Sun" to 7200000L , "Mon" to 3600000L , "Teu" to 1800000L , "Wen" to 1200000L , "Thur" to 3600000L , "Fri" to 2400000L , "Sat" to 600000L
-                )
-            )
-
-        }
-    }
-    
-}
-
-@Composable
-@Preview(showBackground = true)
 fun HoursWithEmojiComponent(){
     Column(verticalArrangement = Arrangement.spacedBy(5.dp) , modifier = Modifier.width(100.dp)) {
         Text(text = "This week" , style = BookAppTypography.bodyMedium , modifier = Modifier.fillMaxWidth() , textAlign = TextAlign.Center , fontSize = 14.sp)
         Text(text = "25 hours" , style = BookAppTypography.labelLarge , modifier = Modifier.fillMaxWidth() , textAlign = TextAlign.Center , fontSize = 20.sp , color = MaterialTheme.colorScheme.secondary)
         Box(contentAlignment = Alignment.Center , modifier = Modifier.size(100.dp)) {
-            Image(painter = painterResource(id = R.drawable.ic_error_24), contentDescription ="", Modifier.size(70.dp) )
+            Image(painter = painterResource(id = R.drawable.happy_emoji), contentDescription ="", Modifier.size(70.dp) )
         }
     }
 }

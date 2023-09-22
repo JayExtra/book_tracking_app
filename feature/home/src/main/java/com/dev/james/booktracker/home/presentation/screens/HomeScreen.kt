@@ -53,11 +53,11 @@ fun HomeScreen(
         onAddButtonClick = {
            // Toast.makeText(context , "add button clicked", Toast.LENGTH_SHORT).show()
             homeNavigator.openReadGoalsScreen()
+        } ,
+        onContinueBtnClicked = {
+            homeNavigator.openTrackingScreen()
         }
-    ){
-       // Toast.makeText(context , "add button FAB clicked", Toast.LENGTH_SHORT).show()
-       homeNavigator.openReadGoalsScreen()
-    }
+    )
 }
 
 @Composable
@@ -68,7 +68,8 @@ fun StatelessHomeScreen(
     ),
     context : Context = LocalContext.current,
     onAddButtonClick : () -> Unit = {},
-    onAddFabClick : () -> Unit = {}
+    onAddFabClick : () -> Unit = {} ,
+    onContinueBtnClicked : () -> Unit = {}
 ){
     Box(
         modifier = Modifier.fillMaxSize() ,
@@ -125,7 +126,10 @@ fun StatelessHomeScreen(
                         Timber.tag("HomeScreen").d("data => ${homeScreenState.bookGoalData}")
 
                         BookGoalInfoComponent(
-                            bookGoalData = homeScreenState.bookGoalData
+                            bookGoalData = homeScreenState.bookGoalData ,
+                            onContinueClicked = {
+                                onContinueBtnClicked()
+                            }
                         )
 
                         Spacer(modifier = Modifier.height(10.dp))

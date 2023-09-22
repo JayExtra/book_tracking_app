@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.home.presentation.components
+package com.dev.james.booktracker.compose_ui.ui.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +26,7 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview(name = "TextFieldComponent")
-fun TextFieldComponent(
+fun OutlinedTextFieldComponent(
     modifier: Modifier = Modifier,
     text: String = "",
     hasError: Boolean = false,
@@ -42,7 +42,7 @@ fun TextFieldComponent(
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         if (label.isNotBlank()) {
             Text(

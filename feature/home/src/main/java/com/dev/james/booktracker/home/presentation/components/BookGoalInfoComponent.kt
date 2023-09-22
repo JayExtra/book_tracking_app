@@ -54,7 +54,7 @@ import com.dev.james.booktracker.home.R
 @Preview(showBackground = true)
 fun BookGoalInfoComponent(
     bookGoalData: BookGoalData = BookGoalData() ,
-    //onContinueClicked : () -> Unit = {}
+    onContinueClicked : () -> Unit = {}
 ) {
 
     Card(
@@ -75,7 +75,10 @@ fun BookGoalInfoComponent(
                 textAlign = TextAlign.Start
             )
             GoalDataComponent(
-                bookGoalData = bookGoalData
+                bookGoalData = bookGoalData ,
+                onContinue = {
+                    onContinueClicked()
+                }
             )
         }
 
@@ -84,7 +87,10 @@ fun BookGoalInfoComponent(
 
 @Composable
 @Preview(showBackground = true)
-fun GoalDataComponent(bookGoalData: BookGoalData = BookGoalData()) {
+fun GoalDataComponent(
+    bookGoalData: BookGoalData = BookGoalData() ,
+    onContinue : () -> Unit = {}
+) {
     //use constraint layout
     val constraints = ConstraintSet {
         val imageSection = createRefFor("image_section")
@@ -153,6 +159,7 @@ fun GoalDataComponent(bookGoalData: BookGoalData = BookGoalData()) {
             ),
             onClick = {
                 //open book lo screen
+                onContinue()
             }) {
             Text(
                // modifier = Modifier.fillMaxWidth(),

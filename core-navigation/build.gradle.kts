@@ -63,6 +63,7 @@ dependencies {
     implementation(project(Modules.onBoarding))
     implementation(project(Modules.myLibrary))
     implementation(project(Modules.achievements))
+    implementation(project(Modules.bookTracking))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
