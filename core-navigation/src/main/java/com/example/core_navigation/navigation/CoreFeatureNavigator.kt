@@ -104,7 +104,11 @@ class CoreFeatureNavigator(
     override fun backToHomeScreen() {
         navController.navigate(
             HomeScreenDestination within navGraph ,
-        )
+        ){
+            popUpTo(NavGraphs.root){
+                inclusive = true
+            }
+        }
     }
 
     override fun openPdfScreen() {

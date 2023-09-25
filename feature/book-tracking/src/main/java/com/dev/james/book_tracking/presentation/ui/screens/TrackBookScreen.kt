@@ -2,11 +2,17 @@
 
 package com.dev.james.book_tracking.presentation.ui.screens
 
-import android.view.View
-import androidx.appcompat.widget.AppCompatTextView
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +31,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,9 +39,9 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,17 +49,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
@@ -63,14 +64,15 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.book_tracking.R
+import com.dev.james.book_tracking.presentation.domain.StopWatch
 import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
-import com.dev.james.booktracker.compose_ui.ui.components.RoundedInputText
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.ramcosta.composedestinations.annotation.Destination
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 /*@Preview(
     showBackground = true,
@@ -81,6 +83,16 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun TrackBookScreen(
     navigation : BookTrackNavigation
 ) {
+
+    val stopWatch = remember {
+        StopWatch()
+    }
+
+    var isStopWatchRunning by remember {
+        mutableStateOf(false)
+    }
+
+
     Column(modifier = Modifier.fillMaxSize() , verticalArrangement = Arrangement.spacedBy(8.dp)) {
         StandardToolBar(
             showBackArrow = true ,
@@ -95,9 +107,63 @@ fun TrackBookScreen(
         Column(verticalArrangement = Arrangement.spacedBy(8.dp) , modifier = Modifier.verticalScroll(
             state =  rememberScrollState())
         ) {
-            BookProgressSection()
+
+            var showTimerAndTrackCard by remember {
+                mutableStateOf(false)
+            }
+
+            BookProgressSection(
+                showTimerText = showTimerAndTrackCard ,
+                timerValue = stopWatch.formattedTime,
+                timerRunning = isStopWatchRunning,
+                onShowTimerText = { show ->
+                    showTimerAndTrackCard = show
+                    if(isStopWatchRunning){
+                        isStopWatchRunning = false
+                        stopWatch.pause()
+                    }else{
+                        isStopWatchRunning = true
+                        stopWatch.start()
+                    }
+                }
+            )
+
             ProgressGraphSection()
-            TrackSection()
+
+            AnimatedVisibility(
+                visible = showTimerAndTrackCard ,
+                exit = fadeOut(
+                    animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+                ) + slideOutVertically(
+                    animationSpec = tween(durationMillis = 500),
+                    targetOffsetY = { -it / 2 }
+                ),
+                enter = fadeIn(
+                    animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+                ) + slideInVertically(
+                    animationSpec = tween(durationMillis = 500),
+                    initialOffsetY = { -it / 2 }
+                )
+            ){
+                var chapterFieldErrorState by remember {
+                    mutableStateOf(false)
+                }
+                TrackSection(
+                    canFinishSession = isStopWatchRunning,
+                    errorInChapterField = chapterFieldErrorState,
+                    onFinishSession = { chapterTitle , chapterCount ->
+                        showTimerAndTrackCard = false
+                        isStopWatchRunning = false
+                        if(chapterTitle.isEmpty()){
+                            chapterFieldErrorState = true
+                        }else {
+                            chapterFieldErrorState = false
+                            stopWatch.reset()
+                        }
+
+                    }
+                )
+            }
         }
     }
 
@@ -120,7 +186,9 @@ fun ProgressGraphSection(){
             .fillMaxWidth()
             .padding(8.dp))
         Row(modifier = Modifier.padding(8.dp)) {
-            HoursWithEmojiComponent()
+            HoursWithEmojiComponent(
+                modifier = Modifier.size(90.dp)
+            )
             BarGraph(
                 height = 150.dp ,
                 graphBarData = mapOf("Sun" to 7200000L , "Mon" to 3600000L , "Teu" to 1800000L , "Wen" to 1200000L , "Thur" to 3600000L , "Fri" to 2400000L , "Sat" to 600000L
@@ -134,7 +202,12 @@ fun ProgressGraphSection(){
 
 @Composable
 @Preview(showBackground = true)
-fun BookProgressSection(){
+fun BookProgressSection(
+    timerValue : String = "00:00:00" ,
+    showTimerText : Boolean = false ,
+    timerRunning : Boolean = false ,
+    onShowTimerText : (Boolean) -> Unit = {}
+){
     val constraints = ConstraintSet {
         val imageSet = createRefFor("progress_image")
         val titleSet = createRefFor("book_title")
@@ -164,15 +237,18 @@ fun BookProgressSection(){
             start.linkTo(authorSet.start)
             end.linkTo(authorSet.end)
         }
+
         constrain(timerSet){
-            top.linkTo(chapterSet.bottom , 16.dp)
-            start.linkTo(chapterSet.start)
-            end.linkTo(chapterSet.end)
+                top.linkTo(chapterSet.bottom , 8.dp)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
         }
+
+
         constrain(startBtnSet){
-            top.linkTo(timerSet.bottom , 6.dp)
-            start.linkTo(timerSet.start)
-            end.linkTo(timerSet.end)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+            if(showTimerText) top.linkTo(timerSet.bottom , 8.dp) else top.linkTo(chapterSet.bottom , 8.dp)
         }
     }
 
@@ -209,24 +285,48 @@ fun BookProgressSection(){
                 )
         }
 
-        Text(
-            text = "00:00:00" ,
-            style = BookAppTypography.headlineMedium ,
-            modifier = Modifier.layoutId("timer") ,
-            fontSize = 36.sp
+        AnimatedVisibility(
+            visible = showTimerText ,
+            exit = fadeOut(
+                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+            ) + slideOutVertically(
+                animationSpec = tween(durationMillis = 200),
+                targetOffsetY = { -it / 2 }
+            ),
+            enter = fadeIn(
+                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+            ) + slideInVertically(
+                animationSpec = tween(durationMillis = 200),
+                initialOffsetY = { -it / 2 }
+            ) ,
+            modifier = Modifier
+                .layoutId("timer")
+                .fillMaxWidth()
+        )
+        {
+            Text(
+                text = timerValue,
+                style = BookAppTypography.headlineMedium ,
+                fontSize = 36.sp ,
+                textAlign = TextAlign.Center ,
+                modifier = Modifier.fillMaxWidth()
             )
+        }
+
 
         ElevatedButton(
             modifier = Modifier.layoutId("start_button"),
             onClick = {
             //will start timer
+                onShowTimerText(true)
              } ,
             shape = RoundedCornerShape(10.dp) ,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary
             )
         ) {
-            Text(text = "start" , style = BookAppTypography.labelLarge)
+            val buttonText = if(timerRunning) "pause" else "start"
+            Text(text = buttonText , style = BookAppTypography.labelLarge)
         }
 
     }
@@ -234,7 +334,17 @@ fun BookProgressSection(){
 
 @Composable
 @Preview(showBackground = true)
-fun TrackSection(){
+fun TrackSection(
+    canFinishSession : Boolean = false,
+    errorInChapterField : Boolean = false,
+    onFinishSession : (String , Int) -> Unit = { _ , _  ->  }
+){
+    var chapterTitle by remember {
+        mutableStateOf("")
+    }
+    var finalChapterCount by remember {
+        mutableStateOf(0)
+    }
     Card(
         modifier = Modifier.padding(8.dp),
         colors = CardDefaults.cardColors(
@@ -243,31 +353,65 @@ fun TrackSection(){
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp) ,
         shape = RoundedCornerShape(10.dp)
     ) {
-        var text by remember {
-            mutableStateOf("")
-        }
+
         Column(modifier = Modifier.padding(8.dp) , verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(modifier = Modifier.fillMaxWidth() , text = "Track" , style = BookAppTypography.headlineSmall)
-            CounterSection(title = "Page")
-            CounterSection(title = "Chapter")
+           // CounterSection(title = "Page")
 
-            Spacer(modifier = Modifier.height(10.dp))
+            CounterSection(
+                title = "Chapter" ,
+                chapterCount = finalChapterCount ,
+                increaseValue = {
+                    finalChapterCount += 1
+                } ,
+                decreaseValue = {
+                    if(finalChapterCount > 0){
+                        finalChapterCount -= 1
+                    }
 
-            OutlinedTextFieldComponent(
-                modifier = Modifier.fillMaxWidth() ,
-                text = text ,
-                onTextChanged = {
-                    text = it
                 }
             )
 
-            ElevatedButton(onClick = {  } , colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            ) ,
-                modifier = Modifier.fillMaxWidth() ,
-                shape = RoundedCornerShape(5.dp)
-            ) {
-                Text("finish session" , style = BookAppTypography.labelSmall)
+            Spacer(modifier = Modifier.height(10.dp))
+
+            AnimatedVisibility(
+                visible = !canFinishSession ,
+                exit = fadeOut(
+                    animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+                ),
+                enter = fadeIn(
+                    animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+                ) ,
+                modifier = Modifier
+                    .layoutId("timer")
+                    .fillMaxWidth()
+            ){
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextFieldComponent(
+                        modifier = Modifier.fillMaxWidth() ,
+                        label = "Please indicate your current chapter",
+                        text = chapterTitle ,
+                        onTextChanged = {
+                            chapterTitle = it
+                        } ,
+                        hasError = errorInChapterField ,
+                        isSingleLine = true
+                    )
+
+                    ElevatedButton(
+                        onClick = {
+                            onFinishSession(chapterTitle , finalChapterCount)
+                        } , colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        ) ,
+                        modifier = Modifier.fillMaxWidth() ,
+                        shape = RoundedCornerShape(5.dp)
+                    ) {
+                        Text("finish session" , style = BookAppTypography.labelMedium)
+                    }
+                }
+
             }
 
         }
@@ -276,16 +420,33 @@ fun TrackSection(){
 
 @Composable
 @Preview(showBackground = true)
-fun CounterSection(title : String = "Title"){
+fun CounterSection(
+    title : String = "Title" ,
+    chapterCount : Int = 0,
+    increaseValue: () -> Unit = {} ,
+    decreaseValue: () -> Unit = {}
+){
    Row(modifier = Modifier.fillMaxWidth() , horizontalArrangement = Arrangement.SpaceBetween , verticalAlignment = Alignment.CenterVertically) {
     Text(text = title , style = BookAppTypography.labelMedium)
-    CounterButtonsComponent()
+    CounterButtonsComponent(
+        countValue = chapterCount ,
+        increaseValue =  {
+            increaseValue()
+        } ,
+        decreaseValue = {
+            decreaseValue()
+        }
+    )
    }
 }
 
 @Composable
 @Preview(showBackground = true)
-fun CounterButtonsComponent(){
+fun CounterButtonsComponent(
+    countValue : Int = 0 ,
+    increaseValue : () -> Unit = {} ,
+    decreaseValue : () -> Unit = {}
+){
     val constraintSet = ConstraintSet {
 
         val decreaseBtn = createRefFor("decrease_btn")
@@ -311,7 +472,9 @@ fun CounterButtonsComponent(){
     ConstraintLayout(constraintSet) {
         OutlinedButton(
             modifier = Modifier.layoutId("decrease_btn"),
-            onClick = { } ,
+            onClick = {
+                decreaseValue()
+            } ,
             shape = RoundedCornerShape(10.dp) ,
             contentPadding = PaddingValues(2.dp)
         ) {
@@ -319,11 +482,13 @@ fun CounterButtonsComponent(){
         }
         Text(modifier = Modifier
             .layoutId("count_text")
-            .padding(start = 6.dp, end = 6.dp), text = "0" , style = BookAppTypography.labelMedium , fontSize = 24.sp)
+            .padding(start = 6.dp, end = 6.dp), text = countValue.toString() , style = BookAppTypography.labelMedium , fontSize = 24.sp)
 
         OutlinedButton(
             modifier = Modifier.layoutId("increase_text"),
-            onClick = { } ,
+            onClick = {
+                      increaseValue()
+            } ,
             shape = RoundedCornerShape(10.dp) ,
             contentPadding = PaddingValues(2.dp)
         ) {
@@ -334,12 +499,14 @@ fun CounterButtonsComponent(){
 
 @Composable
 @Preview(showBackground = true)
-fun HoursWithEmojiComponent(){
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp) , modifier = Modifier.width(100.dp)) {
+fun HoursWithEmojiComponent(modifier : Modifier = Modifier){
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp) , modifier = modifier) {
         Text(text = "This week" , style = BookAppTypography.bodyMedium , modifier = Modifier.fillMaxWidth() , textAlign = TextAlign.Center , fontSize = 14.sp)
         Text(text = "25 hours" , style = BookAppTypography.labelLarge , modifier = Modifier.fillMaxWidth() , textAlign = TextAlign.Center , fontSize = 20.sp , color = MaterialTheme.colorScheme.secondary)
-        Box(contentAlignment = Alignment.Center , modifier = Modifier.size(100.dp)) {
-            Image(painter = painterResource(id = R.drawable.happy_emoji), contentDescription ="", Modifier.size(70.dp) )
+        Box(contentAlignment = Alignment.Center , modifier = Modifier
+            .width(70.dp)
+            .height(70.dp)) {
+            Image(painter = painterResource(id = R.drawable.happy_emoji), contentDescription ="", modifier = Modifier.size(60.dp) )
         }
     }
 }
@@ -351,6 +518,20 @@ fun BookProgressImageSection(
     modifier: Modifier = Modifier ,
     image : String = "" ,
 ) {
+    var animationTriggered by remember{
+        mutableStateOf(false)
+    }
+    LaunchedEffect(true) {
+        animationTriggered = true
+    }
+    val finalProgress = animateFloatAsState(
+        targetValue = if (animationTriggered) 0.8f else 0f,
+        label = "book_final_progress" ,
+        animationSpec = tween(delayMillis = 500)
+    )
+
+
+
     Box(
         contentAlignment = Alignment.Center ,
         modifier = modifier.padding(8.dp)
@@ -381,7 +562,7 @@ fun BookProgressImageSection(
         )
 
         CircularProgressIndicator(
-            progress = 0.8f,
+            progress = finalProgress.value ,
             strokeCap = StrokeCap.Round,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.size(width = 161.dp, height = 170.dp),

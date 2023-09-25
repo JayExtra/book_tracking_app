@@ -1,8 +1,15 @@
 package com.dev.james.booktracker.core.utilities
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.dev.james.booktracker.core.R
 import java.security.SecureRandom
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.UUID
 
 fun <T> List<T>.convertToAuthorsString() : String {
@@ -96,4 +103,17 @@ fun Long.formatTimeToDHMS() : String {
     val formattedTime = timeStringBuilder.toString()
 
     return formattedTime.ifBlank { "0s" }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun formatTime(timeMillis: Long): String {
+    val localDateTime = LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(timeMillis),
+        ZoneId.systemDefault()
+    )
+    val formatter = DateTimeFormatter.ofPattern(
+        "hh:mm:ss",
+        Locale.getDefault()
+    )
+    return localDateTime.format(formatter)
 }
