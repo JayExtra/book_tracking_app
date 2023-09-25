@@ -75,6 +75,7 @@ dependencies {
     implementation(project(Modules.coreDataStore))
     implementation(project(Modules.coreDatabase))
     implementation(project(Modules.coreNavigation))
+    implementation(project(Modules.bookTracking))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")

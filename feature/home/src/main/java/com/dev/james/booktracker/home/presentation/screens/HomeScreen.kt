@@ -10,6 +10,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -30,9 +32,13 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.R
 import com.dev.james.booktracker.core.common_models.BookGoalData
+import com.dev.james.booktracker.home.presentation.components.BookGoalInfoComponent
+import com.dev.james.booktracker.home.presentation.components.MyGoalsCardComponent
+import com.dev.james.booktracker.home.presentation.components.StreakComponent
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.viewmodels.HomeScreenViewModel
 import com.ramcosta.composedestinations.annotation.Destination
+import timber.log.Timber
 
 @Composable
 @Destination
@@ -47,11 +53,11 @@ fun HomeScreen(
         onAddButtonClick = {
            // Toast.makeText(context , "add button clicked", Toast.LENGTH_SHORT).show()
             homeNavigator.openReadGoalsScreen()
+        } ,
+        onContinueBtnClicked = {
+            homeNavigator.openTrackingScreen()
         }
-    ){
-       // Toast.makeText(context , "add button FAB clicked", Toast.LENGTH_SHORT).show()
-       homeNavigator.openReadGoalsScreen()
-    }
+    )
 }
 
 @Composable
@@ -62,7 +68,8 @@ fun StatelessHomeScreen(
     ),
     context : Context = LocalContext.current,
     onAddButtonClick : () -> Unit = {},
-    onAddFabClick : () -> Unit = {}
+    onAddFabClick : () -> Unit = {} ,
+    onContinueBtnClicked : () -> Unit = {}
 ){
     Box(
         modifier = Modifier.fillMaxSize() ,
@@ -70,9 +77,12 @@ fun StatelessHomeScreen(
     ){
 
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 8.dp, end = 8.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
 
             when(homeScreenState){
@@ -107,11 +117,28 @@ fun StatelessHomeScreen(
                         }
                     }else {
 
-                        Toast.makeText(
+                        /*Toast.makeText(
                             context ,
                             homeScreenState.bookGoalData.toString() ,
                             Toast.LENGTH_SHORT
-                        ).show()
+                        ).show()*/
+
+                        Timber.tag("HomeScreen").d("data => ${homeScreenState.bookGoalData}")
+
+                        BookGoalInfoComponent(
+                            bookGoalData = homeScreenState.bookGoalData ,
+                            onContinueClicked = {
+                                onContinueBtnClicked()
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        StreakComponent()
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        MyGoalsCardComponent()
                     }
                 }
                 else -> {}

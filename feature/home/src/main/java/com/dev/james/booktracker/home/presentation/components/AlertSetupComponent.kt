@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
@@ -33,7 +34,7 @@ fun AlertSetupComponent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextFieldComponent(
+        OutlinedTextFieldComponent(
             modifier = Modifier.fillMaxWidth(),
             label = "Add note",
             onTextChanged = { note ->

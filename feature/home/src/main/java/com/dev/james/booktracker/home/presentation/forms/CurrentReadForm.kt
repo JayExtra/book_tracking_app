@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,7 +17,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.presentation.components.DropDownComponent
 import com.dev.james.booktracker.home.presentation.components.ImageSelectorComponent
-import com.dev.james.booktracker.home.presentation.components.TextFieldComponent
+import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
@@ -72,7 +70,7 @@ fun CurrentReadForm(
 
         val titleFieldState: TextFieldState = currentReadFormState.getState(name = "title")
 
-        TextFieldComponent(
+        OutlinedTextFieldComponent(
             modifier = Modifier.fillMaxWidth(),
             label = "Title",
             text = titleFieldState.value,
@@ -94,7 +92,7 @@ fun CurrentReadForm(
         )
 
         val authorFieldState: TextFieldState = currentReadFormState.getState("author")
-        TextFieldComponent(
+        OutlinedTextFieldComponent(
             modifier = Modifier.fillMaxWidth(),
             label = "Author",
             text = authorFieldState.value,
@@ -114,7 +112,7 @@ fun CurrentReadForm(
 
         val pagesTextFieldState : TextFieldState = currentReadFormState.getState("pages_count")
 
-        TextFieldComponent(
+        OutlinedTextFieldComponent(
             modifier = Modifier.fillMaxWidth(),
             label = "Pages count",
             text = pagesTextFieldState.value,
@@ -186,7 +184,7 @@ fun CurrentReadForm(
 
         val chapterTitleState: TextFieldState = currentReadFormState.getState("chapter title")
 
-        TextFieldComponent(
+        OutlinedTextFieldComponent(
             modifier = Modifier.fillMaxWidth(),
             text = chapterTitleState.value,
             label = "Current chapter title",

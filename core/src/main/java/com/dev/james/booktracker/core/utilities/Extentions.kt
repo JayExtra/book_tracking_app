@@ -1,8 +1,15 @@
 package com.dev.james.booktracker.core.utilities
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.dev.james.booktracker.core.R
 import java.security.SecureRandom
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.UUID
 
 fun <T> List<T>.convertToAuthorsString() : String {
@@ -77,4 +84,36 @@ fun generateRandomId(length: Int): String {
     }
 
     return sb.toString()
+}
+
+fun Long.formatTimeToDHMS() : String {
+
+    val units = arrayOf("d", "h", "m", "s")
+    val values = longArrayOf(this / 86400000L,
+        this % 86400000L / 3600000L, this % 86400000 % 3600000 / 60000,
+        this % 86400000L % 3600000L % 60000L / 1000L)
+
+    val timeStringBuilder = StringBuilder()
+
+    for (i in units.indices) {
+        if (values[i] > 0) {
+            timeStringBuilder.append("${values[i]}${units[i]} ")
+        }
+    }
+    val formattedTime = timeStringBuilder.toString()
+
+    return formattedTime.ifBlank { "0s" }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun formatTime(timeMillis: Long): String {
+    val localDateTime = LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(timeMillis),
+        ZoneId.systemDefault()
+    )
+    val formatter = DateTimeFormatter.ofPattern(
+        "hh:mm:ss",
+        Locale.getDefault()
+    )
+    return localDateTime.format(formatter)
 }

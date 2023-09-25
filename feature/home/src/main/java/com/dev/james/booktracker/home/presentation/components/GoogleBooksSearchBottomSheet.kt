@@ -44,6 +44,7 @@ import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.dev.james.booktracker.compose_ui.ui.components.AnimationWithMessageComponent
+import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.utilities.convertToAuthorsString
@@ -99,7 +100,7 @@ fun StateLessGoogleBooksSearchBottomSheet(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TextFieldComponent(
+        OutlinedTextFieldComponent(
             modifier = Modifier.fillMaxWidth(),
             text = searchState.value,
             hint = "Search for any book",

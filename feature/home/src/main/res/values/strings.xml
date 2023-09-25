@@ -2,4 +2,6 @@
 <resources>
     <string name="app_name">Book Tracker</string>
     <string name="overall_form_heading">In day , I want to read for at least</string>
+    <string name="current_read">Current Read</string>
+    <string name="continue_reading">continue reading</string>
 </resources>
