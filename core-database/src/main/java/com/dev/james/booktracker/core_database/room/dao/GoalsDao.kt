@@ -4,9 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dev.james.booktracker.core_database.room.entities.BookGoalsEntity
-import com.dev.james.booktracker.core_database.room.entities.OverallGoalEntity
-import com.dev.james.booktracker.core_database.room.entities.SpecificGoalsEntity
+import com.dev.james.booktracker.core.entities.BookGoalsEntity
+import com.dev.james.booktracker.core.entities.OverallGoalEntity
+import com.dev.james.booktracker.core.entities.SpecificGoalsEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -27,7 +27,7 @@ interface GoalsDao {
     suspend fun deleteOverallGoal(goalId : String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addSpecificGoal(specificGoalsEntity: SpecificGoalsEntity)
+    suspend fun addSpecificGoal(specificGoalsEntity: com.dev.james.booktracker.core.entities.SpecificGoalsEntity)
 
     @Query("SELECT * FROM specific_goals_table WHERE goal_id =:goalId")
     suspend fun getSingleSpecificGoal(goalId : String) : SpecificGoalsEntity

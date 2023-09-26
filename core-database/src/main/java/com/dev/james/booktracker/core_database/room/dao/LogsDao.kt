@@ -2,8 +2,8 @@ package com.dev.james.booktracker.core_database.room.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.dev.james.booktracker.core_database.room.entities.BookGoalLogsEntity
-import com.dev.james.booktracker.core_database.room.entities.OverallGoalLogsEntity
+import com.dev.james.booktracker.core.entities.BookGoalLogsEntity
+import com.dev.james.booktracker.core.entities.OverallGoalLogsEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -3,7 +3,7 @@ package com.dev.james.booktracker.home.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.BookGoalData
-import com.dev.james.booktracker.home.domain.usecase.FetchBookGoalLogsUseCase
+import com.dev.james.domain.usecases.home.FetchBookGoalLogsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

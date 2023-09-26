@@ -75,6 +75,9 @@ dependencies {
     implementation(project(Modules.coreDataStore))
     implementation(project(Modules.coreDatabase))
     implementation(project(Modules.coreNavigation))
+    implementation(project(Modules.data))
+    implementation(project(Modules.domain))
+    implementation(project(Modules.coreDi))
     implementation(project(Modules.bookTracking))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")

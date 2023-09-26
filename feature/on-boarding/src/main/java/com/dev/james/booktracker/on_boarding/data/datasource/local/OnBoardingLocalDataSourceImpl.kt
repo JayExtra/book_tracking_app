@@ -1,7 +1,7 @@
 package com.dev.james.booktracker.on_boarding.data.datasource.local
 
 import com.dev.james.booktracker.core_database.room.dao.OnBoardingDao
-import com.dev.james.booktracker.core_database.room.entities.UserDetailsEntity
+import com.dev.james.booktracker.core.entities.UserDetailsEntity
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStorePreferenceKeys
 import kotlinx.coroutines.flow.Flow

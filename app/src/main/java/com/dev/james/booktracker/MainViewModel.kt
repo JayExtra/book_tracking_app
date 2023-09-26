@@ -3,9 +3,9 @@ package com.dev.james.booktracker
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
-import com.dev.james.booktracker.core.user_preferences.data.models.UserDetails
-import com.dev.james.booktracker.core.user_preferences.domain.repo.UserPreferencesRepository
+import com.dev.james.booktracker.core.common_models.UserDetails
 import com.dev.james.booktracker.domain.MainRepository
+import com.dev.james.domain.repository.main.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

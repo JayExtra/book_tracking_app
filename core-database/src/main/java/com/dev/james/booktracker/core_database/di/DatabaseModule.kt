@@ -2,6 +2,7 @@ package com.dev.james.booktracker.core_database.di
 
 import android.content.Context
 import androidx.room.Room
+import com.dev.james.booktracker.core_database.room.dao.CoreDao
 import com.dev.james.booktracker.core_database.room.database.BookTrackerDatabase
 import dagger.Module
 import dagger.Provides
@@ -26,6 +27,15 @@ object DatabaseModule {
         ).fallbackToDestructiveMigration()
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideCoreDao(
+        db : BookTrackerDatabase
+    ) : CoreDao {
+        return db.getCoreDao()
+    }
+
 
 
     @Provides

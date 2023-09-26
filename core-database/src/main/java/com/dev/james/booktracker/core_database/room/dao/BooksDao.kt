@@ -1,11 +1,10 @@
 package com.dev.james.booktracker.core_database.room.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dev.james.booktracker.core_database.room.entities.BookEntity
+import com.dev.james.booktracker.core.entities.BookEntity
 import kotlinx.coroutines.flow.Flow
 
 

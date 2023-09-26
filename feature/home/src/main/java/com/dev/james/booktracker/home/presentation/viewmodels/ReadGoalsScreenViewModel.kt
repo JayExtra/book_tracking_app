@@ -14,9 +14,9 @@ import com.dev.james.booktracker.core.utilities.calculateTimeToLong
 import com.dev.james.booktracker.core.utilities.convertToAuthorsString
 import com.dev.james.booktracker.core.utilities.generateRandomId
 import com.dev.james.booktracker.core.utilities.prepareGoalString
-import com.dev.james.booktracker.core_network.dtos.BookDto
-import com.dev.james.booktracker.home.domain.repositories.BooksRepository
-import com.dev.james.booktracker.home.domain.repositories.GoalsRepository
+import com.dev.james.booktracker.core.dto.BookDto
+import com.dev.james.domain.repository.home.BooksRepository
+import com.dev.james.domain.repository.home.GoalsRepository
 import com.dsc.form_builder.ChoiceState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.SelectState

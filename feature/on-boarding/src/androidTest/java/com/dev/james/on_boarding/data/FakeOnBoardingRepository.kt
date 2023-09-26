@@ -1,10 +1,10 @@
 package com.dev.james.on_boarding.data
 
-import com.dev.james.booktracker.core.user_preferences.data.mappers.toDomain
-import com.dev.james.booktracker.core.user_preferences.data.mappers.toEntity
-import com.dev.james.booktracker.core_database.room.entities.UserDetailsEntity
+import com.dev.james.booktracker.core.user_preferences.mappers.toDomain
+import com.dev.james.booktracker.core.user_preferences.mappers.toEntity
+import com.dev.james.booktracker.core.entities.UserDetailsEntity
 import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
-import com.dev.james.booktracker.core.user_preferences.data.models.UserDetails
+import com.dev.james.booktracker.core.common_models.UserDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

@@ -8,8 +8,6 @@ import com.dev.james.booktracker.core.test_commons.getTestSpecificGoalEntity
 import com.dev.james.booktracker.core_database.room.dao.GoalsDao
 import com.dev.james.booktracker.core_database.room.database.BookTrackerDatabase
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -18,7 +16,7 @@ import org.junit.Test
 class GoalsLocalDataSourceTest {
     private lateinit var bookTrackerDatabase: BookTrackerDatabase
     private lateinit var goalsDao: GoalsDao
-    private lateinit var goalsLocalDataSourceImpl: GoalsLocalDataSourceImpl
+    private lateinit var goalsLocalDataSourceImpl: com.dev.james.data.datasources.home.GoalsLocalDataSourceImpl
 
 
 
@@ -31,7 +29,7 @@ class GoalsLocalDataSourceTest {
 
         goalsDao = bookTrackerDatabase.getGoalsDao()
 
-        goalsLocalDataSourceImpl = GoalsLocalDataSourceImpl(
+        goalsLocalDataSourceImpl = com.dev.james.data.datasources.home.GoalsLocalDataSourceImpl(
             goalsDao = goalsDao
         )
 

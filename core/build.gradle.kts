@@ -40,7 +40,5 @@ android {
 }
 
 dependencies {
-    implementation(project(Modules.coreNetwork))
-    implementation(project(Modules.coreDataStore))
-    implementation(project(Modules.coreDatabase))
+   implementation(project(Modules.coreDataStore))
 }

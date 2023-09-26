@@ -26,3 +26,7 @@ include ':core-navigation'
 include ':feature:my-library'
 include ':feature:achievements'
 include ':feature:book-tracking'
+
+include ':data'
+include ':domain'
+include ':core-di'

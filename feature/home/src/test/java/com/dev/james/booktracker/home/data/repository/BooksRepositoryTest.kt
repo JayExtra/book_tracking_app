@@ -2,10 +2,10 @@ package com.dev.james.booktracker.home.data.repository
 
 import com.dev.james.booktracker.core.test_commons.getTestBookEntity
 import com.dev.james.booktracker.core.test_commons.getTestBookVolumeDto
-import com.dev.james.booktracker.core.utilities.ConnectivityManager
+import com.dev.james.domain.utilities.ConnectivityManager
 import com.dev.james.booktracker.core.utilities.Resource
-import com.dev.james.booktracker.home.domain.datasources.BooksApiDataSource
-import com.dev.james.booktracker.home.domain.datasources.BooksLocalDataSource
+import com.dev.james.data.local.abst.datasources.BooksApiDataSource
+import com.dev.james.data.local.abst.datasources.BooksLocalDataSource
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -24,10 +24,10 @@ import retrofit2.Response
 class BooksRepositoryTest {
 
     private lateinit var testScope : TestScope
-    private lateinit var booksApiDataSource: BooksApiDataSource
-    private lateinit var booksLocalDataSource: BooksLocalDataSource
+    private lateinit var booksApiDataSource: com.dev.james.data.local.abst.datasources.BooksApiDataSource
+    private lateinit var booksLocalDataSource: com.dev.james.data.local.abst.datasources.BooksLocalDataSource
     private lateinit var connectivityManager: ConnectivityManager
-    private lateinit var booksRepositoryImpl: BooksRepositoryImpl
+    private lateinit var booksRepositoryImpl: com.dev.james.data.repositories.home.BooksRepositoryImpl
 
     @Before
     fun setUp(){
@@ -35,14 +35,14 @@ class BooksRepositoryTest {
             name = "book_tracker_test_dispatcher"
         )
         testScope = TestScope(dispatcher)
-        booksApiDataSource = Mockito.mock(BooksApiDataSource::class.java)
-        booksLocalDataSource = Mockito.mock(BooksLocalDataSource::class.java)
+        booksApiDataSource = Mockito.mock(com.dev.james.data.local.abst.datasources.BooksApiDataSource::class.java)
+        booksLocalDataSource = Mockito.mock(com.dev.james.data.local.abst.datasources.BooksLocalDataSource::class.java)
         connectivityManager = Mockito.mock(ConnectivityManager::class.java)
 
-        booksRepositoryImpl = BooksRepositoryImpl(
-            booksApiDataSource = booksApiDataSource ,
-            booksLocalDataSource = booksLocalDataSource ,
-            connectivityManager = connectivityManager ,
+        booksRepositoryImpl = com.dev.james.data.repositories.home.BooksRepositoryImpl(
+            booksApiDataSource = booksApiDataSource,
+            booksLocalDataSource = booksLocalDataSource,
+            connectivityManager = connectivityManager,
             dispatcher = dispatcher
         )
     }

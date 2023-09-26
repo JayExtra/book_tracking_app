@@ -10,7 +10,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptionsBuilder
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.core.user_preferences.data.models.UserDetails
+import com.dev.james.booktracker.core.common_models.UserDetails
 import com.example.core_navigation.navigation.BottomNavItem
 import com.example.core_navigation.navigation.NavGraphs
 import com.example.core_navigation.navigation.navGraph
