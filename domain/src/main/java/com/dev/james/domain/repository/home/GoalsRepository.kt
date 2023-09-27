@@ -17,4 +17,5 @@ interface GoalsRepository {
 
     suspend fun getAllActiveBookGoals() : List<BookGoal>
 
+
 }

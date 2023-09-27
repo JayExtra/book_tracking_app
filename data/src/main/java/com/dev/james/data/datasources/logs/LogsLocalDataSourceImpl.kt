@@ -1,4 +1,4 @@
-package com.dev.james.data.datasources.home
+package com.dev.james.data.datasources.logs
 
 import com.dev.james.booktracker.core_database.room.dao.LogsDao
 import com.dev.james.booktracker.core.entities.BookGoalLogsEntity

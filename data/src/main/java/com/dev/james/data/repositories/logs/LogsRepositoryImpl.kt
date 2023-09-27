@@ -1,4 +1,4 @@
-package com.dev.james.data.repositories.home
+package com.dev.james.data.repositories.logs
 
 import com.dev.james.booktracker.core.common_models.BookGoalLog
 import com.dev.james.booktracker.core.common_models.mappers.toDomain
@@ -18,7 +18,7 @@ class LogsRepositoryImpl @Inject constructor(
                 bookGoalLogsEntityList.map { bookGoalLogsEntity ->
                     bookGoalLogsEntity.toDomain()
                 }
-            }.catch { throwable ->
+            }.catch {
                 emit(emptyList<BookGoalLog>())
             }
 

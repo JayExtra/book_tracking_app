@@ -4,7 +4,7 @@ import com.dev.james.booktracker.core.test_commons.getTestBookEntity
 import com.dev.james.booktracker.core.test_commons.getTestBookVolumeDto
 import com.dev.james.domain.utilities.ConnectivityManager
 import com.dev.james.booktracker.core.utilities.Resource
-import com.dev.james.data.repositories.home.BooksRepositoryImpl
+import com.dev.james.data.repositories.books.BooksRepositoryImpl
 import com.dev.james.domain.datasources.home.BooksApiDataSource
 import com.dev.james.domain.datasources.home.BooksLocalDataSource
 import com.google.common.truth.Truth.assertThat
@@ -40,7 +40,7 @@ class BooksRepositoryTest {
         booksLocalDataSource = Mockito.mock(BooksLocalDataSource::class.java)
         connectivityManager = Mockito.mock(ConnectivityManager::class.java)
 
-        booksRepositoryImpl = com.dev.james.data.repositories.home.BooksRepositoryImpl(
+        booksRepositoryImpl = BooksRepositoryImpl(
             booksApiDataSource = booksApiDataSource,
             booksLocalDataSource = booksLocalDataSource,
             connectivityManager = connectivityManager,

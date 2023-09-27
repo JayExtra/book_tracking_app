@@ -5,7 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.dev.james.booktracker.core.test_commons.getTestBookEntity
 import com.dev.james.booktracker.core_database.room.dao.BooksDao
 import com.dev.james.booktracker.core_database.room.database.BookTrackerDatabase
-import com.dev.james.data.datasources.home.BooksLocalDataSourceImpl
+import com.dev.james.data.datasources.books.BooksLocalDataSourceImpl
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -35,7 +35,7 @@ class BooksLocalDataSourceTest {
         )
         testScope = TestScope(dispatcher)
 
-        booksLocalDataSourceImpl = com.dev.james.data.datasources.home.BooksLocalDataSourceImpl(
+        booksLocalDataSourceImpl = BooksLocalDataSourceImpl(
             booksDao = booksDao,
             dispatcher = dispatcher
         )

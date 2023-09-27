@@ -6,7 +6,13 @@ import com.dev.james.booktracker.core_database.room.dao.GoalsDao
 import com.dev.james.booktracker.core_database.room.dao.LogsDao
 import com.dev.james.booktracker.core_network.api_service.BooksApi
 import com.dev.james.domain.utilities.ConnectivityManager
-import com.dev.james.data.datasources.home.BooksApiDataSourceImpl
+import com.dev.james.data.datasources.books.BooksApiDataSourceImpl
+import com.dev.james.data.datasources.books.BooksLocalDataSourceImpl
+import com.dev.james.data.datasources.goals.GoalsLocalDataSourceImpl
+import com.dev.james.data.datasources.logs.LogsLocalDataSourceImpl
+import com.dev.james.data.repositories.books.BooksRepositoryImpl
+import com.dev.james.data.repositories.goals.GoalsRepositoryImpl
+import com.dev.james.data.repositories.logs.LogsRepositoryImpl
 import com.dev.james.domain.datasources.home.BooksApiDataSource
 import com.dev.james.domain.datasources.home.BooksLocalDataSource
 import com.dev.james.domain.datasources.home.GoalsLocalDataSource
@@ -40,7 +46,7 @@ object HomeModule {
     fun provideBooksLocalDataSource(
         booksDao: BooksDao
     ) : BooksLocalDataSource {
-        return com.dev.james.data.datasources.home.BooksLocalDataSourceImpl(
+        return BooksLocalDataSourceImpl(
             booksDao = booksDao
         )
     }
@@ -50,7 +56,7 @@ object HomeModule {
     fun provideGoalsLocalDataSource(
         goalsDao: GoalsDao
     ) : GoalsLocalDataSource {
-        return com.dev.james.data.datasources.home.GoalsLocalDataSourceImpl(
+        return GoalsLocalDataSourceImpl(
             goalsDao
         )
     }
@@ -60,7 +66,7 @@ object HomeModule {
     fun provideLogsLocalDataSource(
         logsDao: LogsDao
     ) : LogsLocalDataSource {
-        return com.dev.james.data.datasources.home.LogsLocalDataSourceImpl(
+        return LogsLocalDataSourceImpl(
             logsDao
         )
     }
@@ -73,7 +79,7 @@ object HomeModule {
         booksLocalDataSource: BooksLocalDataSource,
         connectivityManager: ConnectivityManager
     ) : BooksRepository {
-        return com.dev.james.data.repositories.home.BooksRepositoryImpl(
+        return BooksRepositoryImpl(
             booksApiDataSource,
             booksLocalDataSource,
             connectivityManager
@@ -85,7 +91,7 @@ object HomeModule {
     fun provideGoalsRepository(
         goalsLocalDataSource : GoalsLocalDataSource
     ) : GoalsRepository {
-        return com.dev.james.data.repositories.home.GoalsRepositoryImpl(
+        return GoalsRepositoryImpl(
             goalsLocalDataSource
         )
     }
@@ -95,7 +101,7 @@ object HomeModule {
     fun provideLogsRepository(
         logsLocalDataSource: LogsLocalDataSource
     ) : LogsRepository {
-        return com.dev.james.data.repositories.home.LogsRepositoryImpl(
+        return LogsRepositoryImpl(
             logsLocalDataSource
         )
     }

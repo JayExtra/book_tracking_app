@@ -1,4 +1,4 @@
-package com.dev.james.data.repositories.main
+package com.dev.james.data.repositories.preferences
 
 import com.dev.james.booktracker.core.user_preferences.mappers.toDomain
 import com.dev.james.booktracker.core.common_models.UserDetails

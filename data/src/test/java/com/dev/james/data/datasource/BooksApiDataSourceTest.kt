@@ -1,7 +1,7 @@
 package com.dev.james.data.datasource
 
 import com.dev.james.booktracker.core_network.api_service.BooksApi
-import com.dev.james.data.datasources.home.BooksApiDataSourceImpl
+import com.dev.james.data.datasources.books.BooksApiDataSourceImpl
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -48,7 +48,7 @@ class BooksApiDataSourceTest {
             .create(BooksApi::class.java)
 
         booksApiDataSourceImpl =
-            com.dev.james.data.datasources.home.BooksApiDataSourceImpl(booksApi = googleBooksApiService)
+            BooksApiDataSourceImpl(booksApi = googleBooksApiService)
     }
 
     private fun enqueueMockResponse(fileName : String){

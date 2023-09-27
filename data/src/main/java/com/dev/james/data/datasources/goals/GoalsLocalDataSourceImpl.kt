@@ -1,5 +1,6 @@
-package com.dev.james.data.datasources.home
+package com.dev.james.data.datasources.goals
 
+import com.dev.james.booktracker.core.entities.BookGoalLogsEntity
 import com.dev.james.booktracker.core_database.room.dao.GoalsDao
 import com.dev.james.booktracker.core.entities.BookGoalsEntity
 import com.dev.james.booktracker.core.entities.OverallGoalEntity

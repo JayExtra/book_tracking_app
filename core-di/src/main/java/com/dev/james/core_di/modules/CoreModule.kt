@@ -1,7 +1,7 @@
 package com.dev.james.core_di.modules
 
 import android.content.Context
-import com.dev.james.data.repositories.main.UserPreferencesRepositoryImpl
+import com.dev.james.data.repositories.preferences.UserPreferencesRepositoryImpl
 import com.dev.james.domain.repository.main.UserPreferencesRepository
 import com.dev.james.domain.utilities.ConnectivityManager
 import com.dev.james.data.utilities.ConnectivityManagerImpl

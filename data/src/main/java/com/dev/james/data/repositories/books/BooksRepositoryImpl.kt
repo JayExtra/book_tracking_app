@@ -1,4 +1,4 @@
-package com.dev.james.data.repositories.home
+package com.dev.james.data.repositories.books
 
 import android.database.sqlite.SQLiteException
 import com.dev.james.booktracker.core.common_models.BookSave

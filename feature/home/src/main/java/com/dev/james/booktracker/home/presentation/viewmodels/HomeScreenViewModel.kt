@@ -3,7 +3,7 @@ package com.dev.james.booktracker.home.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.BookGoalData
-import com.dev.james.domain.usecases.home.FetchBookGoalLogsUseCase
+import com.dev.james.domain.usecases.home.FetchActiveBookGoalLogsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
-  private val fetchBookGoalLogsUseCase: FetchBookGoalLogsUseCase
+  private val fetchActiveBookGoalLogsUseCase: FetchActiveBookGoalLogsUseCase
 ) : ViewModel() {
 
   private var _homeScreenUiState : MutableStateFlow<HomeScreenUiState>  = MutableStateFlow(
@@ -25,7 +25,7 @@ class HomeScreenViewModel @Inject constructor(
 
   init {
     viewModelScope.launch {
-      val bookGoal = fetchBookGoalLogsUseCase.invoke()
+      val bookGoal = fetchActiveBookGoalLogsUseCase.invoke()
       _homeScreenUiState.value = HomeScreenUiState.HasFetchedScreenData(
         bookGoalData = bookGoal
       )

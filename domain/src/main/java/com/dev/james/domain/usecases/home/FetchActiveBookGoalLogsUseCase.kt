@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-class FetchBookGoalLogsUseCase @Inject constructor(
+class FetchActiveBookGoalLogsUseCase @Inject constructor(
     private val goalsRepository: GoalsRepository,
     private val booksRepository: BooksRepository,
     private val logsRepository: LogsRepository
