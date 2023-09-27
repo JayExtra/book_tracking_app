@@ -1,6 +1,7 @@
-package com.dev.james.booktracker.home.data.datasource
+package com.dev.james.data.datasource
 
 import com.dev.james.booktracker.core_network.api_service.BooksApi
+import com.dev.james.data.datasources.home.BooksApiDataSourceImpl
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit
 class BooksApiDataSourceTest {
     private lateinit var googleBooksApiService : BooksApi
     private lateinit var server : MockWebServer
-    private lateinit var booksApiDataSourceImpl: com.dev.james.data.datasources.home.BooksApiDataSourceImpl
+    private lateinit var booksApiDataSourceImpl: BooksApiDataSourceImpl
     @Before
     fun setUp(){
         val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()

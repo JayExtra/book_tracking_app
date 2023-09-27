@@ -1,11 +1,10 @@
 package com.dev.james.on_boarding.ui.viewmodel
 
 import com.dev.james.booktracker.core.test_commons.MainCoroutineRule
-import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
+import com.dev.james.domain.repository.onboarding.OnBoardingRepository
 import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupViewModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule

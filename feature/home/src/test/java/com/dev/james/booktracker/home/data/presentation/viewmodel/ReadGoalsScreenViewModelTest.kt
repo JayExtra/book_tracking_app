@@ -6,9 +6,9 @@ import com.dev.james.booktracker.core.test_commons.MainCoroutineRule
 import com.dev.james.booktracker.core.test_commons.getFakeBookSaveWithUrl
 import com.dev.james.booktracker.core.test_commons.getTestBookVolumeDto
 import com.dev.james.booktracker.core.utilities.Resource
-import com.dev.james.data.local.abst.repositories.BooksRepository
-import com.dev.james.data.local.abst.repositories.GoalsRepository
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
+import com.dev.james.domain.repository.home.BooksRepository
+import com.dev.james.domain.repository.home.GoalsRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -32,8 +32,8 @@ import kotlin.time.ExperimentalTime
 @RunWith(RobolectricTestRunner::class)
 class ReadGoalsScreenViewModelTest {
 
-    private lateinit var goalsRepository: com.dev.james.data.local.abst.repositories.GoalsRepository
-    private lateinit var booksRepository: com.dev.james.data.local.abst.repositories.BooksRepository
+    private lateinit var goalsRepository: GoalsRepository
+    private lateinit var booksRepository: BooksRepository
 
     private lateinit var readGoalsScreenViewModel: ReadGoalsScreenViewModel
     private val testUrl = "https://someprovidedurl.com/image/djoad4u250-594tc-dvlsdvnsdvc0r9.jpg"
@@ -50,8 +50,8 @@ class ReadGoalsScreenViewModelTest {
         )
 
         testScope = TestScope(dispatcher)
-        goalsRepository = Mockito.mock(com.dev.james.data.local.abst.repositories.GoalsRepository::class.java)
-        booksRepository = Mockito.mock(com.dev.james.data.local.abst.repositories.BooksRepository::class.java)
+        goalsRepository = Mockito.mock(GoalsRepository::class.java)
+        booksRepository = Mockito.mock(BooksRepository::class.java)
 
         readGoalsScreenViewModel = ReadGoalsScreenViewModel(
             booksRepository = booksRepository,

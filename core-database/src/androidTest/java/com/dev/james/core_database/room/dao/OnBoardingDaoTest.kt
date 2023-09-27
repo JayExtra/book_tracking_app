@@ -4,9 +4,9 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.dev.james.booktracker.on_boarding.data.datasource.local.room.OnBoardingDao
 import com.dev.james.booktracker.core_database.room.database.BookTrackerDatabase
 import com.dev.james.booktracker.core.entities.UserDetailsEntity
+import com.dev.james.booktracker.core_database.room.dao.OnBoardingDao
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
 class OnBoardingDaoTest {
 
     private lateinit var db : BookTrackerDatabase
-    private lateinit var dao: com.dev.james.booktracker.on_boarding.data.datasource.local.room.OnBoardingDao
+    private lateinit var dao: OnBoardingDao
 
     @Before
     fun setup(){
@@ -44,7 +44,7 @@ class OnBoardingDaoTest {
     @Test
     fun insertUserDetails() = runTest {
         //given
-        val userDetailsEntity = com.dev.james.booktracker.core.entities.UserDetailsEntity(
+        val userDetailsEntity = UserDetailsEntity(
             username = "Test Name",
             favouriteGenres = listOf("Genre1", "Genre2", "Genre 3"),
             selectedAvatar = 1

@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.home.data.datasource
+package com.dev.james.data.datasource
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -7,6 +7,7 @@ import com.dev.james.booktracker.core.test_commons.getTestOverallGoalEntity
 import com.dev.james.booktracker.core.test_commons.getTestSpecificGoalEntity
 import com.dev.james.booktracker.core_database.room.dao.GoalsDao
 import com.dev.james.booktracker.core_database.room.database.BookTrackerDatabase
+import com.dev.james.data.datasources.home.GoalsLocalDataSourceImpl
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -16,7 +17,7 @@ import org.junit.Test
 class GoalsLocalDataSourceTest {
     private lateinit var bookTrackerDatabase: BookTrackerDatabase
     private lateinit var goalsDao: GoalsDao
-    private lateinit var goalsLocalDataSourceImpl: com.dev.james.data.datasources.home.GoalsLocalDataSourceImpl
+    private lateinit var goalsLocalDataSourceImpl: GoalsLocalDataSourceImpl
 
 
 

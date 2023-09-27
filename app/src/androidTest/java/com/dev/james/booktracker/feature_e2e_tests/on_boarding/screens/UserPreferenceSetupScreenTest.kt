@@ -8,7 +8,7 @@ import com.dev.james.booktracker.MainActivity
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.core_database.di.DatabaseModule
 import com.dev.james.booktracker.core_datastore.di.DataStoreModule
-import com.dev.james.booktracker.on_boarding.di.OnBoardingModule
+import com.dev.james.core_di.modules.OnBoardingModule
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.example.core_navigation.navigation.NavGraphs
 import com.ramcosta.composedestinations.DestinationsNavHost

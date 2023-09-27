@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
-import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
+import com.dev.james.domain.repository.onboarding.OnBoardingRepository
 import com.dev.james.booktracker.core.common_models.UserDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel

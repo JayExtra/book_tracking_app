@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.on_boarding.data.datasource.local
+package com.dev.james.domain.datasources.onboarding
 
 import com.dev.james.booktracker.core.entities.UserDetailsEntity
 import kotlinx.coroutines.flow.Flow

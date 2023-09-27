@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.on_boarding.domain
+package com.dev.james.domain.repository.onboarding
 
 import com.dev.james.booktracker.core.common_models.UserDetails
 import kotlinx.coroutines.flow.Flow

@@ -1,9 +1,9 @@
-package com.dev.james.booktracker.on_boarding.data.repository
+package com.dev.james.data.repositories.onboarding
 
 import com.dev.james.booktracker.core.user_preferences.mappers.toDomain
 import com.dev.james.booktracker.core.user_preferences.mappers.toEntity
-import com.dev.james.booktracker.on_boarding.data.datasource.local.OnBoardingLocalDataSource
-import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
+import com.dev.james.domain.datasources.onboarding.OnBoardingLocalDataSource
+import com.dev.james.domain.repository.onboarding.OnBoardingRepository
 import com.dev.james.booktracker.core.common_models.UserDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

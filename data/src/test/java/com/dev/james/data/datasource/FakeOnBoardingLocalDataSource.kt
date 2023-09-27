@@ -1,11 +1,12 @@
-package com.dev.james.on_boarding.data.datasource
+package com.dev.james.data.datasource
 
 import com.dev.james.booktracker.core.entities.UserDetailsEntity
-import com.dev.james.booktracker.on_boarding.data.datasource.local.OnBoardingLocalDataSource
+import com.dev.james.domain.datasources.onboarding.OnBoardingLocalDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class FakeOnBoardingLocalDataSource : OnBoardingLocalDataSource {
+class FakeOnBoardingLocalDataSource :
+    OnBoardingLocalDataSource {
 
     private var onBoardingStatus : Boolean = false
     private var selectedTheme : Int = 0

@@ -1,9 +1,8 @@
-package com.dev.james.on_boarding.data.repository
+package com.dev.james.data.repository
 
-import com.dev.james.booktracker.on_boarding.data.datasource.local.OnBoardingLocalDataSource
-import com.dev.james.booktracker.on_boarding.data.repository.OnBoardingRepositoryImpl
+import com.dev.james.data.repositories.onboarding.OnBoardingRepositoryImpl
 import com.dev.james.booktracker.core.common_models.UserDetails
-import com.dev.james.on_boarding.data.datasource.FakeOnBoardingLocalDataSource
+import com.dev.james.domain.datasources.onboarding.OnBoardingLocalDataSource
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -18,7 +17,7 @@ class OnBoardingRepositoryTest {
 
     @Before
     fun setUp(){
-        onBoardingLocalDataSource = FakeOnBoardingLocalDataSource()
+        onBoardingLocalDataSource = com.dev.james.data.datasource.FakeOnBoardingLocalDataSource()
         repository = OnBoardingRepositoryImpl(
             onBoardingLocalDataSource = onBoardingLocalDataSource
         )

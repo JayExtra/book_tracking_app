@@ -1,10 +1,11 @@
-package com.dev.james.booktracker.home.data.datasource
+package com.dev.james.data.datasource
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.dev.james.booktracker.core.test_commons.getTestBookEntity
 import com.dev.james.booktracker.core_database.room.dao.BooksDao
 import com.dev.james.booktracker.core_database.room.database.BookTrackerDatabase
+import com.dev.james.data.datasources.home.BooksLocalDataSourceImpl
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -18,7 +19,7 @@ import org.junit.Test
 class BooksLocalDataSourceTest {
     private lateinit var bookTrackerDatabase: BookTrackerDatabase
     private lateinit var booksDao: BooksDao
-    private lateinit var booksLocalDataSourceImpl: com.dev.james.data.datasources.home.BooksLocalDataSourceImpl
+    private lateinit var booksLocalDataSourceImpl: BooksLocalDataSourceImpl
     private lateinit var testScope : TestScope
 
     @Before

@@ -3,7 +3,7 @@ package com.dev.james.on_boarding.ui.screens
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
-import com.dev.james.booktracker.on_boarding.domain.OnBoardingRepository
+import com.dev.james.domain.repository.onboarding.OnBoardingRepository
 import com.dev.james.booktracker.on_boarding.ui.screens.UserPreferenceSetupScreen
 import com.dev.james.booktracker.on_boarding.ui.viewmodel.UserPreferenceSetupViewModel
 import com.dev.james.on_boarding.data.FakeOnBoardingRepository
