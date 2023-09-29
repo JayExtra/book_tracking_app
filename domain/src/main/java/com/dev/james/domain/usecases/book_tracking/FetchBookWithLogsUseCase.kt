@@ -20,21 +20,23 @@ class FetchBookWithLogsUseCase @Inject constructor(
         val totalTimeSpent = logs.calculateTotalTimeSpent()
         val currentChapter = logs.getMostRecentLog().currentChapter
         val chapterTitle = logs.getMostRecentLog().currentChapterTitle
+        val progress = calculateProgress(
+            totalPages = book.bookPagesCount,
+            totalPagesRead = totalPagesRead
+        )
 
         return BookStatsData(
             bookId = bookId,
             bookImage = book.bookImage,
             bookTitle = book.bookTitle,
+            author = book.bookAuthors,
             isUri = book.isUri,
             totalPages = book.bookPagesCount,
             totalTimeSpent = totalTimeSpent,
             totalPagesRead = totalPagesRead,
-            progress = calculateProgress(
-                totalPages = book.bookPagesCount,
-                totalPagesRead = totalPagesRead
-            ) ,
-            currentChapter = currentChapter ,
-            currentChapterTitle = chapterTitle
+             progress = if(progress.toInt() == 0) 0.05f else progress ,
+            currentChapter = if(currentChapter == 0) book.currentChapter else currentChapter ,
+            currentChapterTitle = chapterTitle.ifBlank { book.currentChapterTitle }
         )
     }
 

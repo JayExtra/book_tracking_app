@@ -4,6 +4,7 @@ data class BookStatsData(
     val bookId : String = "",
     val bookImage : String = "",
     val bookTitle : String = "",
+    val author : String = "" ,
     val isUri : Boolean = false,
     val totalPages : Int = 0,
     val totalTimeSpent : Long = 0L,

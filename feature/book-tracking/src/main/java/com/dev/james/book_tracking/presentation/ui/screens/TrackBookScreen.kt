@@ -50,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -60,16 +61,21 @@ import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import coil.size.Scale
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.book_tracking.R
-import com.dev.james.book_tracking.presentation.domain.StopWatch
+import com.dev.james.domain.utilities.StopWatch
 import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
+import com.dev.james.book_tracking.presentation.viewmodel.BookTrackingViewModel
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.core.common_models.BookStatsData
 import com.ramcosta.composedestinations.annotation.Destination
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -81,8 +87,16 @@ import com.ramcosta.composedestinations.annotation.Destination
 )*/
 @Destination
 fun TrackBookScreen(
-    navigation : BookTrackNavigation
+    navigation : BookTrackNavigation ,
+    bookTrackingViewModel: BookTrackingViewModel = hiltViewModel(),
+    bookId : String?
 ) {
+
+    LaunchedEffect(key1 = true){
+        bookId?.let {
+            bookTrackingViewModel.getBookStatistics(bookId)
+        }
+    }
 
     val stopWatch = remember {
         StopWatch()
@@ -91,6 +105,8 @@ fun TrackBookScreen(
     var isStopWatchRunning by remember {
         mutableStateOf(false)
     }
+
+    val bookData = bookTrackingViewModel.bookStatsState.collectAsStateWithLifecycle()
 
 
     Column(modifier = Modifier.fillMaxSize() , verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -113,7 +129,8 @@ fun TrackBookScreen(
             }
 
             BookProgressSection(
-                showTimerText = showTimerAndTrackCard ,
+                showTimerText = showTimerAndTrackCard,
+                bookData = bookData.value,
                 timerValue = stopWatch.formattedTime,
                 timerRunning = isStopWatchRunning,
                 onShowTimerText = { show ->
@@ -203,6 +220,7 @@ fun ProgressGraphSection(){
 @Composable
 @Preview(showBackground = true)
 fun BookProgressSection(
+    bookData: BookStatsData = BookStatsData() ,
     timerValue : String = "00:00:00" ,
     showTimerText : Boolean = false ,
     timerRunning : Boolean = false ,
@@ -258,17 +276,18 @@ fun BookProgressSection(
     ) {
 
         BookProgressImageSection(
-            modifier = Modifier.layoutId("progress_image")
+            modifier = Modifier.layoutId("progress_image") ,
+            bookData = bookData
         )
 
         Text(
-            text = "Some title" ,
+            text = bookData.bookTitle ,
             style = BookAppTypography.labelLarge ,
             modifier = Modifier.layoutId("book_title") ,
             fontSize = 20.sp
             )
         Text(
-            text = "Some author" ,
+            text = bookData.author ,
             style = BookAppTypography.bodyMedium ,
             modifier = Modifier.layoutId("author_title") ,
             fontSize = 15.sp
@@ -278,7 +297,7 @@ fun BookProgressSection(
 
             Icon(painter = painterResource(id = R.drawable.ic_bookmark_24), contentDescription ="" )
             Text(
-                text = "chapter 4: Some chapter title" ,
+                text = "chapter ${bookData.currentChapter}: ${bookData.currentChapterTitle}" ,
                 style = BookAppTypography.bodySmall ,
                 fontSize = 13.sp ,
                 modifier = Modifier.padding(top = 2.dp , start = 2.dp)
@@ -516,7 +535,7 @@ fun HoursWithEmojiComponent(modifier : Modifier = Modifier){
 @Preview(showBackground = true)
 fun BookProgressImageSection(
     modifier: Modifier = Modifier ,
-    image : String = "" ,
+    bookData : BookStatsData = BookStatsData(),
 ) {
     var animationTriggered by remember{
         mutableStateOf(false)
@@ -525,7 +544,7 @@ fun BookProgressImageSection(
         animationTriggered = true
     }
     val finalProgress = animateFloatAsState(
-        targetValue = if (animationTriggered) 0.8f else 0f,
+        targetValue = if (animationTriggered) bookData.progress else 0f,
         label = "book_final_progress" ,
         animationSpec = tween(delayMillis = 500)
     )
@@ -540,10 +559,11 @@ fun BookProgressImageSection(
         val coilImage = rememberAsyncImagePainter(
             ImageRequest
                 .Builder(LocalContext.current)
-                .data(data = image)
+                .data(data = bookData.bookImage)
                 .apply(block = {
                     //placeholder(R.drawable.image_placeholder_24)
                     error(R.drawable.ic_error_24)
+                    scale(Scale.FIT)
                     crossfade(true)
                     transformations(
                         RoundedCornersTransformation(0f)
@@ -557,8 +577,9 @@ fun BookProgressImageSection(
             painter =  coilImage ,
             contentDescription = "",
             modifier = Modifier
-                .size(width = 65.dp, height = 100.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .size(width = 75.dp, height = 110.dp) ,
+               // .clip(RoundedCornerShape(5.dp)) ,
+            contentScale = ContentScale.Crop
         )
 
         CircularProgressIndicator(

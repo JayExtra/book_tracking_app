@@ -64,4 +64,5 @@ kotlin {
 
 dependencies {
     implementation(project(Modules.core))
+
 }

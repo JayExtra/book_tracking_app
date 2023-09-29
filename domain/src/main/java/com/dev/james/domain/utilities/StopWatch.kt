@@ -1,13 +1,11 @@
-package com.dev.james.book_tracking.presentation.domain
+package com.dev.james.domain.utilities
 
-import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.util.Timer
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
