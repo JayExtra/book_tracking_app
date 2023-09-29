@@ -41,6 +41,7 @@ android {
 
 dependencies {
 
+    implementation(project(Modules.core))
     //moshi dependency
     implementation("com.squareup.moshi:moshi-kotlin:${Versions.moshi_version}")
 

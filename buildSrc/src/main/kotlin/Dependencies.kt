@@ -33,6 +33,9 @@ object Modules {
     const val myLibrary = ":feature:my-library"
     const val achievements = ":feature:achievements"
     const val bookTracking = ":feature:book-tracking"
+    const val data = ":data"
+    const val domain = ":domain"
+    const val coreDi = ":core-di"
 }
 
 //plugins

@@ -54,8 +54,8 @@ fun HomeScreen(
            // Toast.makeText(context , "add button clicked", Toast.LENGTH_SHORT).show()
             homeNavigator.openReadGoalsScreen()
         } ,
-        onContinueBtnClicked = {
-            homeNavigator.openTrackingScreen()
+        onContinueBtnClicked = { bookId ->
+            homeNavigator.openTrackingScreen(bookId)
         }
     )
 }
@@ -69,7 +69,7 @@ fun StatelessHomeScreen(
     context : Context = LocalContext.current,
     onAddButtonClick : () -> Unit = {},
     onAddFabClick : () -> Unit = {} ,
-    onContinueBtnClicked : () -> Unit = {}
+    onContinueBtnClicked : (String) -> Unit = {}
 ){
     Box(
         modifier = Modifier.fillMaxSize() ,
@@ -128,7 +128,9 @@ fun StatelessHomeScreen(
                         BookGoalInfoComponent(
                             bookGoalData = homeScreenState.bookGoalData ,
                             onContinueClicked = {
-                                onContinueBtnClicked()
+                                onContinueBtnClicked(
+                                    homeScreenState.bookGoalData.bookId
+                                )
                             }
                         )
 

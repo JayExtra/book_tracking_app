@@ -3,15 +3,12 @@ package com.dev.james.booktracker.home.data.presentation.viewmodel
 import android.net.Uri
 import androidx.core.net.toUri
 import com.dev.james.booktracker.core.test_commons.MainCoroutineRule
-import com.dev.james.booktracker.core.test_commons.getFakeBookSaveWithUri
 import com.dev.james.booktracker.core.test_commons.getFakeBookSaveWithUrl
 import com.dev.james.booktracker.core.test_commons.getTestBookVolumeDto
 import com.dev.james.booktracker.core.utilities.Resource
-import com.dev.james.booktracker.home.domain.repositories.BooksRepository
-import com.dev.james.booktracker.home.domain.repositories.GoalsRepository
-import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiState
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
-import com.dsc.form_builder.TextFieldState
+import com.dev.james.domain.repository.home.BooksRepository
+import com.dev.james.domain.repository.home.GoalsRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -29,7 +26,6 @@ import org.mockito.kotlin.given
 import org.robolectric.RobolectricTestRunner
 import retrofit2.HttpException
 import retrofit2.Response
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 

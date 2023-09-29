@@ -1,16 +1,15 @@
 package com.dev.james.booktracker.core.test_commons
 
 import com.dev.james.booktracker.core.common_models.BookSave
-import com.dev.james.booktracker.core_database.room.entities.BookEntity
-import com.dev.james.booktracker.core_database.room.entities.BookGoalsEntity
-import com.dev.james.booktracker.core_database.room.entities.OverallGoalEntity
-import com.dev.james.booktracker.core_database.room.entities.SpecificGoalsEntity
-import com.dev.james.booktracker.core_network.dtos.BookDto
-import com.dev.james.booktracker.core_network.dtos.BookVolumeDto
-import com.dev.james.booktracker.core_network.dtos.Identifiers
-import com.dev.james.booktracker.core_network.dtos.ImageLinks
-import com.dev.james.booktracker.core_network.dtos.VolumeInfo
-import com.squareup.moshi.Json
+import com.dev.james.booktracker.core.entities.BookEntity
+import com.dev.james.booktracker.core.entities.BookGoalsEntity
+import com.dev.james.booktracker.core.entities.OverallGoalEntity
+import com.dev.james.booktracker.core.entities.SpecificGoalsEntity
+import com.dev.james.booktracker.core.dto.BookDto
+import com.dev.james.booktracker.core.dto.BookVolumeDto
+import com.dev.james.booktracker.core.dto.Identifiers
+import com.dev.james.booktracker.core.dto.ImageLinks
+import com.dev.james.booktracker.core.dto.VolumeInfo
 
 fun getTestBookEntity() = BookEntity(
     bookId = "abab12345",

@@ -68,9 +68,9 @@ class CoreFeatureNavigator(
         )
     }
 
-    override fun openTrackingScreen() {
+    override fun openTrackingScreen(id : String) {
         navController.navigate(
-            TrackBookScreenDestination within navGraph
+            TrackBookScreenDestination(bookId = id) within navGraph
         )
     }
 
@@ -105,7 +105,10 @@ class CoreFeatureNavigator(
         navController.navigate(
             HomeScreenDestination within navGraph ,
         ){
-            popUpTo(NavGraphs.root){
+            popUpTo(
+               route =  NavGraphs.root ,
+
+            ){
                 inclusive = true
             }
         }

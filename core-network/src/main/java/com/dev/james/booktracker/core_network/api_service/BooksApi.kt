@@ -1,6 +1,6 @@
 package com.dev.james.booktracker.core_network.api_service
 
-import com.dev.james.booktracker.core_network.dtos.BookVolumeDto
+import com.dev.james.booktracker.core.dto.BookVolumeDto
 import com.dev.james.booktracker.core_network.utilities.Endpoints.VOLUME_ENDPOINT
 import retrofit2.http.GET
 import retrofit2.http.Query
