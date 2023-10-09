@@ -3,7 +3,7 @@ package com.dev.james.booktracker.core.test_commons
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.entities.BookEntity
 import com.dev.james.booktracker.core.entities.BookGoalsEntity
-import com.dev.james.booktracker.core.entities.OverallGoalEntity
+import com.dev.james.booktracker.core.entities.GoalEntity
 import com.dev.james.booktracker.core.entities.SpecificGoalsEntity
 import com.dev.james.booktracker.core.dto.BookDto
 import com.dev.james.booktracker.core.dto.BookVolumeDto
@@ -26,12 +26,12 @@ fun getTestBookEntity() = BookEntity(
     currentChapterTitle = "Some chapter title"
 )
 
-fun getTestOverallGoalEntity() = OverallGoalEntity(
-    goalId = "test1234GOAL",
-    goalInfo = "Read for 10 minutes every day",
-    goalTime = 1600000L,
-    goalPeriod = "Every day",
-    specificDays = listOf(),
+fun getTestOverallGoalEntity() = GoalEntity(
+    id = "test1234GOAL",
+    information = "Read for 10 minutes every day",
+    time = 1600000L,
+    period = "Every day",
+    selectedDays = listOf(),
     shouldShowAlert = true,
     alertNote = "Some test note",
     isActive = true,

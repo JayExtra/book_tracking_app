@@ -1,7 +1,7 @@
 package com.dev.james.data.repository
 
 import com.dev.james.booktracker.core.common_models.BookGoal
-import com.dev.james.booktracker.core.common_models.OverallGoal
+import com.dev.james.booktracker.core.common_models.Goal
 import com.dev.james.booktracker.core.common_models.SpecificGoal
 import com.dev.james.booktracker.core.common_models.mappers.toDomain
 import com.dev.james.booktracker.core.test_commons.getTestBookGoalEntity
@@ -10,7 +10,7 @@ import com.dev.james.domain.repository.home.GoalsRepository
 
 class FakeGoalsRepository : GoalsRepository {
     override suspend fun saveGoals(
-        overallGoal: OverallGoal,
+        goal: Goal,
         specificGoal: SpecificGoal,
         bookGoal: BookGoal
     ): Resource<Boolean> {

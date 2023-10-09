@@ -12,4 +12,7 @@ object DataStorePreferenceKeys {
 
     val CURRENT_THEME_SELECTED : Preferences.Key<Int> =
         intPreferencesKey("current_selected_theme")
+
+    val CURRENT_ACTIVE_BOOK_ID : Preferences.Key<String> =
+        stringPreferencesKey("current_active_book_id")
 }

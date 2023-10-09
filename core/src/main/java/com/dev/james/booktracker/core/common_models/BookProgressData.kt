@@ -1,6 +1,6 @@
 package com.dev.james.booktracker.core.common_models
 
-data class BookGoalData(
+data class BookProgressData(
     val bookId : String = "",
     val bookImage : String = "",
     val bookTitle : String = "",
@@ -11,5 +11,5 @@ data class BookGoalData(
     val progress : Float = 0f,
     val currentChapter : Int = 0 ,
     val currentChapterTitle : String = "",
-    val logs : List<BookGoalLog> = emptyList()
+    val logs : List<BookLog> = emptyList()
 )

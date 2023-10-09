@@ -47,9 +47,9 @@ class GoalsLocalDataSourceTest {
         val overallGoalEntity = getTestOverallGoalEntity()
         //when
         goalsLocalDataSourceImpl.addOverallGoalToDatabase(overallGoalEntity)
-        val addedOverallGoal = goalsDao.getOverallGoal(overallGoalEntity.goalId)
+        val addedOverallGoal = goalsDao.getGoalById(overallGoalEntity.id)
         //then
-        assertThat(addedOverallGoal.goalId).isEqualTo(overallGoalEntity.goalId)
+        assertThat(addedOverallGoal.id).isEqualTo(overallGoalEntity.id)
 
     }
 

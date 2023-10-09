@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookGoal
-import com.dev.james.booktracker.core.common_models.OverallGoal
+import com.dev.james.booktracker.core.common_models.Goal
 import com.dev.james.booktracker.core.common_models.SpecificGoal
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.mappers.mapToPresentation
@@ -299,7 +299,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
                         )
                 } else {
                     //save final goals set here
-                    val overallGoal = OverallGoal(
+                    val goal = Goal(
                         goalId = generateRandomId(10),
                         goalInfo = prepareGoalString(
                             goalTime = overallGoalTimeFieldState.value,
@@ -334,7 +334,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
                         specificDays = periodDaysState.value
                     )
                     saveUserGoals(
-                        overallGoal ,
+                        goal ,
                         specificGoal ,
                         bookGoal
                     )
@@ -408,14 +408,14 @@ class ReadGoalsScreenViewModel @Inject constructor(
     }
 
     private fun saveUserGoals(
-        overallGoal: OverallGoal,
+        goal: Goal,
         specificGoal: SpecificGoal,
         bookGoal: BookGoal
     ) = viewModelScope.launch {
         Timber.tag(TAG).d("Saving user goals in db")
         //save user goals
 
-        when (val result = goalsRepository.saveGoals(overallGoal, specificGoal, bookGoal)) {
+        when (val result = goalsRepository.saveGoals(goal, specificGoal, bookGoal)) {
             is Resource.Success -> {
                 if (result.data == true) {
                     Timber.tag(TAG).d("goals successfully added to database")

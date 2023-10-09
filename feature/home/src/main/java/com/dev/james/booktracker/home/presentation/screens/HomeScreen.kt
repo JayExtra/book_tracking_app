@@ -1,8 +1,6 @@
 package com.dev.james.booktracker.home.presentation.screens
 
 import android.content.Context
-import android.widget.Toast
-import androidx.annotation.RawRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Spring
@@ -31,7 +29,7 @@ import com.airbnb.lottie.compose.*
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.R
-import com.dev.james.booktracker.core.common_models.BookGoalData
+import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.home.presentation.components.BookGoalInfoComponent
 import com.dev.james.booktracker.home.presentation.components.MyGoalsCardComponent
 import com.dev.james.booktracker.home.presentation.components.StreakComponent
@@ -64,7 +62,7 @@ fun HomeScreen(
 @Preview("Home Screen" , showBackground = true)
 fun StatelessHomeScreen(
     homeScreenState : HomeScreenViewModel.HomeScreenUiState = HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData(
-        BookGoalData()
+        BookProgressData()
     ),
     context : Context = LocalContext.current,
     onAddButtonClick : () -> Unit = {},
@@ -87,7 +85,7 @@ fun StatelessHomeScreen(
 
             when(homeScreenState){
                 is HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData -> {
-                    if(homeScreenState.bookGoalData.bookId.isBlank()) {
+                    if(homeScreenState.bookProgressData.bookId.isBlank()) {
                         EmptyAnimationSection(
                             animation = LottieCompositionSpec.RawRes(R.raw.shake_a_empty_box) ,
                             shouldShow = true ,
@@ -123,13 +121,13 @@ fun StatelessHomeScreen(
                             Toast.LENGTH_SHORT
                         ).show()*/
 
-                        Timber.tag("HomeScreen").d("data => ${homeScreenState.bookGoalData}")
+                        Timber.tag("HomeScreen").d("data => ${homeScreenState.bookProgressData}")
 
                         BookGoalInfoComponent(
-                            bookGoalData = homeScreenState.bookGoalData ,
+                            bookProgressData = homeScreenState.bookProgressData ,
                             onContinueClicked = {
                                 onContinueBtnClicked(
-                                    homeScreenState.bookGoalData.bookId
+                                    homeScreenState.bookProgressData.bookId
                                 )
                             }
                         )

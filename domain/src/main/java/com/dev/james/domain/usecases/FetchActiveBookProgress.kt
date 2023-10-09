@@ -1,35 +1,36 @@
-package com.dev.james.domain.usecases.home
+package com.dev.james.domain.usecases
 
-import com.dev.james.booktracker.core.common_models.BookGoal
-import com.dev.james.booktracker.core.common_models.BookGoalData
-import com.dev.james.booktracker.core.common_models.BookGoalLog
+import com.dev.james.booktracker.core.common_models.BookProgressData
+import com.dev.james.booktracker.core.common_models.BookLog
 import com.dev.james.booktracker.core.common_models.BookSave
+import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
+import com.dev.james.booktracker.core_datastore.local.datastore.DataStorePreferenceKeys
 import com.dev.james.domain.repository.home.BooksRepository
-import com.dev.james.domain.repository.home.GoalsRepository
 import com.dev.james.domain.repository.home.LogsRepository
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-class FetchActiveBookGoalLogsUseCase @Inject constructor(
-    private val goalsRepository: GoalsRepository,
+class FetchActiveBookProgress @Inject constructor(
     private val booksRepository: BooksRepository,
-    private val logsRepository: LogsRepository
+    private val logsRepository: LogsRepository ,
+    private val dataSoreManager : DataStoreManager
 ) {
 
-    suspend operator fun invoke() : BookGoalData {
-        val activeGoal = getActiveBookGoal()
-        return if(activeGoal.isNotEmpty()){
-            val bookId = activeGoal[0].bookId
-            val bookGoalLogs = getBookGoalLogs(bookId)
-            val cachedBook = getCachedBook(bookId)
-            val totalPagesRead = bookGoalLogs.calculateTotalPagesRead()
-            val totalTimeSpent = bookGoalLogs.calculateTotalTimeSpent()
+    suspend operator fun invoke() : BookProgressData {
+            val activeBookId = dataSoreManager.readStringValueOnce(DataStorePreferenceKeys.CURRENT_ACTIVE_BOOK_ID)
+            val cachedBook = getCachedBook(activeBookId)
+            val bookLogs = getBookGoalLogs(activeBookId)
             val totalPages = cachedBook.bookPagesCount
-            val mostRecentLog = bookGoalLogs.getMostRecentLog()
 
-            BookGoalData(
-                bookId = bookId ,
+        return if (bookLogs.isNotEmpty()){
+
+            val totalPagesRead = bookLogs.calculateTotalPagesRead()
+            val totalTimeSpent = bookLogs.calculateTotalTimeSpent()
+            val mostRecentLog = bookLogs.getMostRecentLog()
+
+            BookProgressData(
+                bookId = activeBookId ,
                 bookImage = cachedBook.bookImage ,
                 bookTitle = cachedBook.bookTitle,
                 isUri = cachedBook.isUri ,
@@ -38,26 +39,35 @@ class FetchActiveBookGoalLogsUseCase @Inject constructor(
                 totalPagesRead = totalPagesRead ,
                 currentChapterTitle = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapterTitle else cachedBook.currentChapterTitle ,
                 currentChapter = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapter else cachedBook.currentChapter,
-                logs = bookGoalLogs ,
+                logs = bookLogs ,
                 progress = calculateProgress(
                     totalPagesRead = totalPagesRead ,
                     totalPages = totalPages
                 )
             )
-        }else{
-            BookGoalData()
+        }else {
+            BookProgressData(
+                bookId = activeBookId ,
+                bookImage = cachedBook.bookImage ,
+                bookTitle = cachedBook.bookTitle,
+                isUri = cachedBook.isUri ,
+                totalPages = totalPages,
+                currentChapterTitle = cachedBook.currentChapterTitle ,
+                currentChapter = cachedBook.currentChapter
+            )
         }
+
     }
 
     //repair here//
-    private fun List<BookGoalLog>.getMostRecentLog() : BookGoalLog {
+    private fun List<BookLog>.getMostRecentLog() : BookLog {
         return if(this.isNotEmpty()){
             val latest = this.sortedBy { log ->
                 log.startedTime
             }
             latest[0]
         }else {
-            BookGoalLog()
+            BookLog()
         }
 
     }
@@ -69,7 +79,7 @@ class FetchActiveBookGoalLogsUseCase @Inject constructor(
         return (totalPagesRead.toFloat() / totalPages.toFloat()).roundToInt().toFloat()
     }
 
-    private fun List<BookGoalLog>.calculateTotalPagesRead() : Int {
+    private fun List<BookLog>.calculateTotalPagesRead() : Int {
         return if(this.isEmpty()){
             0
         }else {
@@ -77,7 +87,7 @@ class FetchActiveBookGoalLogsUseCase @Inject constructor(
         }
     }
 
-    private fun List<BookGoalLog>.calculateTotalTimeSpent() : Long {
+    private fun List<BookLog>.calculateTotalTimeSpent() : Long {
         return if(this.isEmpty()){
             0L
         }else {
@@ -85,12 +95,8 @@ class FetchActiveBookGoalLogsUseCase @Inject constructor(
         }
     }
 
-    private suspend fun getBookGoalLogs(id : String) : List<BookGoalLog>{
-        return logsRepository.getBookGoalLogs(id = id).first()
-    }
-
-    private suspend fun getActiveBookGoal() : List<BookGoal> {
-        return goalsRepository.getAllActiveBookGoals()
+    private suspend fun getBookGoalLogs(id : String) : List<BookLog>{
+        return logsRepository.getBookLogs(bookId = id).first()
     }
 
     private suspend fun getCachedBook(id : String) : BookSave =

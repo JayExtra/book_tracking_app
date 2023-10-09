@@ -2,11 +2,8 @@ package com.dev.james.booktracker.home.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,14 +42,14 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.core.common_models.BookGoalData
+import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 import com.dev.james.booktracker.home.R
 
 @Composable
 @Preview(showBackground = true)
 fun BookGoalInfoComponent(
-    bookGoalData: BookGoalData = BookGoalData() ,
+    bookProgressData: BookProgressData = BookProgressData(),
     onContinueClicked : () -> Unit = {}
 ) {
 
@@ -75,7 +71,7 @@ fun BookGoalInfoComponent(
                 textAlign = TextAlign.Start
             )
             GoalDataComponent(
-                bookGoalData = bookGoalData ,
+                bookProgressData = bookProgressData ,
                 onContinue = {
                     onContinueClicked()
                 }
@@ -88,7 +84,7 @@ fun BookGoalInfoComponent(
 @Composable
 @Preview(showBackground = true)
 fun GoalDataComponent(
-    bookGoalData: BookGoalData = BookGoalData() ,
+    bookProgressData: BookProgressData = BookProgressData(),
     onContinue : () -> Unit = {}
 ) {
     //use constraint layout
@@ -128,25 +124,25 @@ fun GoalDataComponent(
     ) {
         BookImageComponent(
             modifier = Modifier.layoutId("image_section"),
-            image = bookGoalData.bookImage,
-            isUri = bookGoalData.isUri
+            image = bookProgressData.bookImage,
+            isUri = bookProgressData.isUri
         )
         ProgressComponent(
             modifier = Modifier.layoutId("progress_section"),
-            progress = bookGoalData.progress
+            progress = bookProgressData.progress
         )
 
         ReadProgressComponent(
             modifier = Modifier.layoutId("chapter_section"),
             icon = R.drawable.ic_bookmark_24,
-            title = "Chapter ${bookGoalData.currentChapter}",
-            subTitle = bookGoalData.currentChapterTitle
+            title = "Chapter ${bookProgressData.currentChapter}",
+            subTitle = bookProgressData.currentChapterTitle
         )
         ReadProgressComponent(
             modifier = Modifier.layoutId("best_time_section"),
             icon = R.drawable.ic_clock_24,
             title = "Total time",
-            subTitle = bookGoalData.totalTimeSpent.formatTimeToDHMS()
+            subTitle = bookProgressData.totalTimeSpent.formatTimeToDHMS()
         )
 
         ElevatedButton(
