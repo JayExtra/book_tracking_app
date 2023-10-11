@@ -2,9 +2,7 @@ package com.dev.james.data.datasource
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import com.dev.james.booktracker.core.test_commons.getTestBookGoalEntity
-import com.dev.james.booktracker.core.test_commons.getTestOverallGoalEntity
-import com.dev.james.booktracker.core.test_commons.getTestSpecificGoalEntity
+import com.dev.james.booktracker.core.test_commons.getTestGoalEntity
 import com.dev.james.booktracker.core_database.room.dao.GoalsDao
 import com.dev.james.booktracker.core_database.room.database.BookTrackerDatabase
 import com.dev.james.data.datasources.goals.GoalsLocalDataSourceImpl
@@ -44,35 +42,14 @@ class GoalsLocalDataSourceTest {
     @Test
     fun insertOverallGoal_expectedOneOverallGoalInserted() = runTest {
         //given
-        val overallGoalEntity = getTestOverallGoalEntity()
+        val testGoalEntity = getTestGoalEntity()
         //when
-        goalsLocalDataSourceImpl.addOverallGoalToDatabase(overallGoalEntity)
-        val addedOverallGoal = goalsDao.getGoalById(overallGoalEntity.id)
+        goalsLocalDataSourceImpl.addGoalToDatabase(testGoalEntity)
+        val addedOverallGoal = goalsDao.getGoalById(testGoalEntity.id)
         //then
-        assertThat(addedOverallGoal.id).isEqualTo(overallGoalEntity.id)
+        assertThat(addedOverallGoal.id).isEqualTo(testGoalEntity.id)
 
     }
 
-    @Test
-    fun insertSpecificGoal_expectedOneSpecificGoalInserted() = runTest {
-        //given
-        val specificGoalsEntity = getTestSpecificGoalEntity()
-        //when
-        goalsLocalDataSourceImpl.addSpecificGoalToDatabase(specificGoalsEntity)
-        val addedSpecificGoal = goalsDao.getSingleSpecificGoal(goalId = specificGoalsEntity.goalId)
-        //then
-        assertThat(addedSpecificGoal.goalId).isEqualTo(specificGoalsEntity.goalId)
-    }
-
-    @Test
-    fun insertBookGoal_expectedOneBookGoalInserted() = runTest {
-        //given
-        val bookGoalEntity = getTestBookGoalEntity()
-        //when
-        goalsLocalDataSourceImpl.addBookGoalToDatabase(bookGoalEntity)
-        val addedBookGoal = goalsDao.getBookGoal(bookGoalEntity.bookId)
-        //then
-        assertThat(addedBookGoal.bookId).isEqualTo(bookGoalEntity.bookId)
-    }
 
 }

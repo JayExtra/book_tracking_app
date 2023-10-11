@@ -826,7 +826,7 @@ fun StatelessReadGoalScreen(
                 )
             }
 
-            androidx.compose.animation.AnimatedVisibility(
+           /* androidx.compose.animation.AnimatedVisibility(
                 visible = uiState.currentPosition == 2,
                 enter = fadeIn() + slideInHorizontally { if (uiState.currentPosition > uiState.previousPosition) it else -it },
                 exit = fadeOut() + slideOutHorizontally { if (uiState.currentPosition > uiState.previousPosition) -it else it }
@@ -837,7 +837,7 @@ fun StatelessReadGoalScreen(
                     specificGoalsFormState = specificGoalsFormState ,
                     readGoalsScreenUiState = uiState
                 )
-            }
+            }*/
         }
 
         BottomNextPreviousButtons(

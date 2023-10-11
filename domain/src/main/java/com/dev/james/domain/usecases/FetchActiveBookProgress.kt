@@ -13,14 +13,18 @@ import kotlin.math.roundToInt
 
 class FetchActiveBookProgress @Inject constructor(
     private val booksRepository: BooksRepository,
-    private val logsRepository: LogsRepository ,
+    private val logsRepository: LogsRepository,
     private val dataSoreManager : DataStoreManager
 ) {
 
-    suspend operator fun invoke() : BookProgressData {
-            val activeBookId = dataSoreManager.readStringValueOnce(DataStorePreferenceKeys.CURRENT_ACTIVE_BOOK_ID)
-            val cachedBook = getCachedBook(activeBookId)
-            val bookLogs = getBookGoalLogs(activeBookId)
+    suspend operator fun invoke(
+        bookId : String? = null
+    ) : BookProgressData {
+
+            val requiredBookId = bookId ?: dataSoreManager.readStringValueOnce(DataStorePreferenceKeys.CURRENT_ACTIVE_BOOK_ID)
+
+            val cachedBook = getCachedBook(requiredBookId)
+            val bookLogs = getBookGoalLogs(requiredBookId)
             val totalPages = cachedBook.bookPagesCount
 
         return if (bookLogs.isNotEmpty()){
@@ -30,9 +34,10 @@ class FetchActiveBookProgress @Inject constructor(
             val mostRecentLog = bookLogs.getMostRecentLog()
 
             BookProgressData(
-                bookId = activeBookId ,
+                bookId = requiredBookId ,
                 bookImage = cachedBook.bookImage ,
                 bookTitle = cachedBook.bookTitle,
+                authors = cachedBook.bookAuthors,
                 isUri = cachedBook.isUri ,
                 totalPages = totalPages,
                 totalTimeSpent = totalTimeSpent ,
@@ -47,7 +52,7 @@ class FetchActiveBookProgress @Inject constructor(
             )
         }else {
             BookProgressData(
-                bookId = activeBookId ,
+                bookId = requiredBookId ,
                 bookImage = cachedBook.bookImage ,
                 bookTitle = cachedBook.bookTitle,
                 isUri = cachedBook.isUri ,

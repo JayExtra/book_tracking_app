@@ -2,9 +2,7 @@ package com.dev.james.booktracker.core.test_commons
 
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.entities.BookEntity
-import com.dev.james.booktracker.core.entities.BookGoalsEntity
 import com.dev.james.booktracker.core.entities.GoalEntity
-import com.dev.james.booktracker.core.entities.SpecificGoalsEntity
 import com.dev.james.booktracker.core.dto.BookDto
 import com.dev.james.booktracker.core.dto.BookVolumeDto
 import com.dev.james.booktracker.core.dto.Identifiers
@@ -26,7 +24,7 @@ fun getTestBookEntity() = BookEntity(
     currentChapterTitle = "Some chapter title"
 )
 
-fun getTestOverallGoalEntity() = GoalEntity(
+fun getTestGoalEntity() = GoalEntity(
     id = "test1234GOAL",
     information = "Read for 10 minutes every day",
     time = 1600000L,
@@ -35,26 +33,11 @@ fun getTestOverallGoalEntity() = GoalEntity(
     shouldShowAlert = true,
     alertNote = "Some test note",
     isActive = true,
+    booksToRead = 3,
+    booksRead = 1,
     alertTime = "Friday 12:30 pm"
 )
 
-fun getTestSpecificGoalEntity() = SpecificGoalsEntity(
-    bookCountGoal = 5,
-    goalId = "test123SGOAL",
-    booksReadCount = 2,
-    isActive = true
-)
-
-fun getTestBookGoalEntity() = BookGoalsEntity(
-    bookId = "abab12345",
-    isChapterGoal = true,
-    goalInfo = "Read 1 chapter every day",
-    isTimeGoal = false,
-    goalSet = "Read 1 chapter every day",
-    goalPeriod = "Every day",
-    specificDays = listOf(),
-    isActive = true
-)
 
 fun getTestBookVolumeDto() = BookVolumeDto(
     kind = "books#volumes",
