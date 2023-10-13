@@ -8,6 +8,7 @@ import com.dev.james.booktracker.core_datastore.local.datastore.DataStorePrefere
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.home.LogsRepository
 import kotlinx.coroutines.flow.first
+import timber.log.Timber
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -16,16 +17,31 @@ class FetchActiveBookProgress @Inject constructor(
     private val logsRepository: LogsRepository,
     private val dataSoreManager : DataStoreManager
 ) {
+    companion object {
+        const val TAG = "FetchActiveBookProgress"
+    }
 
     suspend operator fun invoke(
-        bookId : String? = null
+        bookId : String?
     ) : BookProgressData {
 
+        Timber.tag(TAG).d("invoke triggered!")
             val requiredBookId = bookId ?: dataSoreManager.readStringValueOnce(DataStorePreferenceKeys.CURRENT_ACTIVE_BOOK_ID)
 
-            val cachedBook = getCachedBook(requiredBookId)
-            val bookLogs = getBookGoalLogs(requiredBookId)
-            val totalPages = cachedBook.bookPagesCount
+            return if(requiredBookId.trim().isEmpty()){
+                Timber.tag(TAG).d("book id is null or empty not fetching")
+                BookProgressData()
+            }else {
+                Timber.tag(TAG).d("book id is not null or empty , fetching book with id : $requiredBookId!")
+                fetchBookProgressData(requiredBookId)
+            }
+
+    }
+
+    private suspend fun fetchBookProgressData(requiredBookId : String) : BookProgressData {
+        val cachedBook = getCachedBook(requiredBookId)
+        val bookLogs = getBookGoalLogs(requiredBookId)
+        val totalPages = cachedBook.bookPagesCount
 
         return if (bookLogs.isNotEmpty()){
 

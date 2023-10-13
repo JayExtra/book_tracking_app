@@ -19,8 +19,8 @@ class BookTrackingViewModel @Inject constructor(
     private var _bookStatsState : MutableStateFlow<BookProgressData> = MutableStateFlow(BookProgressData())
     val bookStatsState get() = _bookStatsState.asStateFlow()
 
-    fun getBookStatistics() = viewModelScope.launch {
-       _bookStatsState.value =  fetchActiveBookProgress.invoke()
+    fun getBookStatistics(bookId : String) = viewModelScope.launch {
+       _bookStatsState.value =  fetchActiveBookProgress.invoke(bookId)
     }
 
 }

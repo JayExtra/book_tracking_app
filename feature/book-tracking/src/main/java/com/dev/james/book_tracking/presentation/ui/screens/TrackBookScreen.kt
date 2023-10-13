@@ -95,7 +95,7 @@ fun TrackBookScreen(
 
     LaunchedEffect(key1 = true){
         bookId?.let {
-            bookTrackingViewModel.getBookStatistics()
+            bookTrackingViewModel.getBookStatistics(it)
         }
     }
 

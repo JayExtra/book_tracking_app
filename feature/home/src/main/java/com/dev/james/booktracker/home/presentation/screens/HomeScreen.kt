@@ -30,6 +30,7 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.R
 import com.dev.james.booktracker.core.common_models.BookProgressData
+import com.dev.james.booktracker.core.common_models.GoalProgressData
 import com.dev.james.booktracker.home.presentation.components.BookGoalInfoComponent
 import com.dev.james.booktracker.home.presentation.components.MyGoalsCardComponent
 import com.dev.james.booktracker.home.presentation.components.StreakComponent
@@ -62,7 +63,8 @@ fun HomeScreen(
 @Preview("Home Screen" , showBackground = true)
 fun StatelessHomeScreen(
     homeScreenState : HomeScreenViewModel.HomeScreenUiState = HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData(
-        BookProgressData()
+        BookProgressData() ,
+        GoalProgressData()
     ),
     context : Context = LocalContext.current,
     onAddButtonClick : () -> Unit = {},
@@ -85,7 +87,7 @@ fun StatelessHomeScreen(
 
             when(homeScreenState){
                 is HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData -> {
-                    if(homeScreenState.bookProgressData.bookId.isBlank()) {
+                    if(homeScreenState.bookProgressData.bookId.isBlank() && homeScreenState.goalProgressData.goalId.isBlank()) {
                         EmptyAnimationSection(
                             animation = LottieCompositionSpec.RawRes(R.raw.shake_a_empty_box) ,
                             shouldShow = true ,
@@ -122,23 +124,26 @@ fun StatelessHomeScreen(
                         ).show()*/
 
                         Timber.tag("HomeScreen").d("data => ${homeScreenState.bookProgressData}")
+                        if(homeScreenState.bookProgressData.bookId.isNotBlank()){
+                            BookGoalInfoComponent(
+                                bookProgressData = homeScreenState.bookProgressData ,
+                                onContinueClicked = {
+                                    onContinueBtnClicked(
+                                        homeScreenState.bookProgressData.bookId
+                                    )
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
 
-                        BookGoalInfoComponent(
-                            bookProgressData = homeScreenState.bookProgressData ,
-                            onContinueClicked = {
-                                onContinueBtnClicked(
-                                    homeScreenState.bookProgressData.bookId
-                                )
-                            }
-                        )
+                        if(homeScreenState.goalProgressData.goalId.isNotBlank()){
+                            StreakComponent()
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                        StreakComponent()
+                            MyGoalsCardComponent()
+                        }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        MyGoalsCardComponent()
                     }
                 }
                 else -> {}

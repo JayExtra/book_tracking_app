@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -44,8 +45,13 @@ class GoalsRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getAllGoals(): Flow<List<Goal>> {
+    override fun getActiveGoals(): Flow<List<Goal>> {
         return goalsLocalDataSource.getCachedGoals()
+            .map { goalEntities ->
+                goalEntities.filter {
+                    it.isActive
+                }
+            }
             .map { goalsList ->
                 goalsList.map {
                     it.toDomain()

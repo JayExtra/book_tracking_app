@@ -3,8 +3,10 @@ package com.dev.james.booktracker.core.common_models.mappers
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.dev.james.booktracker.core.common_models.BookLog
+import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.Goal
 import com.dev.james.booktracker.core.common_models.GoalLog
+import com.dev.james.booktracker.core.entities.BookEntity
 import com.dev.james.booktracker.core.entities.BookLogsEntity
 import com.dev.james.booktracker.core.entities.GoalEntity
 import com.dev.james.booktracker.core.entities.GoalLogsEntity
@@ -50,6 +52,24 @@ fun GoalLog.toEntity() : GoalLogsEntity{
         startTime = startTime ?: LocalDate.now() ,
         endTime = endTime ?: LocalDate.now().plus(1 , ChronoUnit.MINUTES ),
         duration = duration
+    )
+}
+
+
+fun BookSave.mapToBookEntity(): BookEntity {
+    return BookEntity(
+        bookId = bookId,
+        bookImage = bookImage,
+        isUri = isUri,
+        bookAuthors = bookAuthors,
+        bookTitle = bookTitle,
+        bookSmallThumbnail = bookSmallThumbnail,
+        bookPagesCount = bookPagesCount,
+        publisher = publisher,
+        publishedDate = publishedDate,
+        currentChapterTitle = currentChapterTitle,
+        chapters = chapters,
+        currentChapter = currentChapter
     )
 }
 

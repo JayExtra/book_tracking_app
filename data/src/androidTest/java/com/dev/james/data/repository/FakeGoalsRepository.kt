@@ -17,7 +17,7 @@ class FakeGoalsRepository : GoalsRepository {
         return Resource.Success(true)
     }
 
-    override fun getAllGoals(): Flow<List<Goal>> {
+    override fun getActiveGoals(): Flow<List<Goal>> {
         return flow { emit(fakeGoalsDatabase.map { it.toDomain() }) }
     }
 
