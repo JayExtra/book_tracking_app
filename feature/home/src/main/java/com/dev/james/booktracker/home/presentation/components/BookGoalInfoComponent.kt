@@ -2,8 +2,10 @@ package com.dev.james.booktracker.home.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -49,6 +51,7 @@ import com.dev.james.booktracker.home.R
 @Composable
 @Preview(showBackground = true)
 fun BookGoalInfoComponent(
+    shouldNotShowBlankMessage : Boolean = false,
     bookProgressData: BookProgressData = BookProgressData(),
     onContinueClicked : () -> Unit = {}
 ) {
@@ -62,20 +65,43 @@ fun BookGoalInfoComponent(
         shape = RoundedCornerShape(10.dp)
     ) {
         Column(
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp) ,
+            horizontalAlignment = Alignment.CenterHorizontally ,
+            verticalArrangement = if(shouldNotShowBlankMessage) Arrangement.Center else Arrangement.Top
         ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.current_read),
-                style = BookAppTypography.labelLarge,
-                textAlign = TextAlign.Start
-            )
-            GoalDataComponent(
-                bookProgressData = bookProgressData ,
-                onContinue = {
-                    onContinueClicked()
+            if(shouldNotShowBlankMessage){
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(R.string.current_read),
+                    style = BookAppTypography.labelLarge,
+                    textAlign = TextAlign.Start
+                )
+                GoalDataComponent(
+                    bookProgressData = bookProgressData ,
+                    onContinue = {
+                        onContinueClicked()
+                    }
+                )
+
+            }else {
+
+                Text(
+                    text = "No reading progress currently available. Go to my library and start reading a book." ,
+                    style = BookAppTypography.bodyMedium ,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                ElevatedButton(onClick = { /*TODO*/ } , colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )) {
+                    Text(text = "proceed" , style = BookAppTypography.labelSmall)
                 }
-            )
+
+
+            }
+
         }
 
     }

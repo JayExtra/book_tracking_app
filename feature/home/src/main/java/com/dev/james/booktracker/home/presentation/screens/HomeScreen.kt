@@ -124,8 +124,9 @@ fun StatelessHomeScreen(
                         ).show()*/
 
                         Timber.tag("HomeScreen").d("data => ${homeScreenState.bookProgressData}")
-                        if(homeScreenState.bookProgressData.bookId.isNotBlank()){
+
                             BookGoalInfoComponent(
+                                shouldNotShowBlankMessage = homeScreenState.bookProgressData.bookId.isNotBlank(),
                                 bookProgressData = homeScreenState.bookProgressData ,
                                 onContinueClicked = {
                                     onContinueBtnClicked(
@@ -134,7 +135,6 @@ fun StatelessHomeScreen(
                                 }
                             )
                             Spacer(modifier = Modifier.height(10.dp))
-                        }
 
                         if(homeScreenState.goalProgressData.goalId.isNotBlank()){
                             StreakComponent()
