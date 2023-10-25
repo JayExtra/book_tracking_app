@@ -63,7 +63,7 @@ fun BottomNextPreviousButtons(
             }
 
             RoundedBrownButton(
-                label = if (currentPosition == 2) "Finish" else "Next",
+                label = if (currentPosition == 1) "Finish" else "Next",
                 cornerRadius = 8.dp ,
                 color = if (disableNext) Color.LightGray else MaterialTheme.colorScheme.secondary,
                 textColor = if(disableNext) Color.White else MaterialTheme.colorScheme.onPrimary

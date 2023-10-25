@@ -9,6 +9,9 @@ class FakeDataStoreManager : DataStoreManager {
     private val booleansMap = mutableMapOf<Preferences.Key<Boolean> , Boolean>()
     private val stringsMap = mutableMapOf<Preferences.Key<String> , String>()
     private val intMap = mutableMapOf<Preferences.Key<Int> , Int>()
+    override suspend fun storeStringValue(key: Preferences.Key<String>, value: String) {
+        stringsMap[key] = value
+    }
 
     override suspend fun storeBooleanValue(key: Preferences.Key<Boolean>, value: Boolean) {
         booleansMap[key] = value
@@ -32,6 +35,10 @@ class FakeDataStoreManager : DataStoreManager {
 
     override fun readIntValueAsFlow(key: Preferences.Key<Int>): Flow<Int> {
        return flow { intMap[key] }
+    }
+
+    override suspend fun readStringValueOnce(key: Preferences.Key<String>): String {
+        return stringsMap[key] ?: ""
     }
 
     override fun getSelectedThemeStream(key: Preferences.Key<Int>): Flow<Int> {

@@ -4,6 +4,7 @@ package com.dev.james.core_di.modules
 import com.dev.james.booktracker.core_database.room.dao.BooksDao
 import com.dev.james.booktracker.core_database.room.dao.GoalsDao
 import com.dev.james.booktracker.core_database.room.dao.LogsDao
+import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import com.dev.james.booktracker.core_network.api_service.BooksApi
 import com.dev.james.domain.utilities.ConnectivityManager
 import com.dev.james.data.datasources.books.BooksApiDataSourceImpl
@@ -77,11 +78,13 @@ object HomeModule {
     fun provideBooksRemoteRepository(
         booksApiDataSource: BooksApiDataSource,
         booksLocalDataSource: BooksLocalDataSource,
+        dataStoreManager: DataStoreManager ,
         connectivityManager: ConnectivityManager
     ) : BooksRepository {
         return BooksRepositoryImpl(
             booksApiDataSource,
             booksLocalDataSource,
+            dataStoreManager ,
             connectivityManager
         )
     }

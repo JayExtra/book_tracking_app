@@ -75,6 +75,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.common_models.BookStatsData
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -94,7 +95,7 @@ fun TrackBookScreen(
 
     LaunchedEffect(key1 = true){
         bookId?.let {
-            bookTrackingViewModel.getBookStatistics(bookId)
+            bookTrackingViewModel.getBookStatistics(it)
         }
     }
 
@@ -220,7 +221,7 @@ fun ProgressGraphSection(){
 @Composable
 @Preview(showBackground = true)
 fun BookProgressSection(
-    bookData: BookStatsData = BookStatsData() ,
+    bookData: BookProgressData = BookProgressData() ,
     timerValue : String = "00:00:00" ,
     showTimerText : Boolean = false ,
     timerRunning : Boolean = false ,
@@ -287,7 +288,7 @@ fun BookProgressSection(
             fontSize = 20.sp
             )
         Text(
-            text = bookData.author ,
+            text = bookData.authors ,
             style = BookAppTypography.bodyMedium ,
             modifier = Modifier.layoutId("author_title") ,
             fontSize = 15.sp
@@ -535,7 +536,7 @@ fun HoursWithEmojiComponent(modifier : Modifier = Modifier){
 @Preview(showBackground = true)
 fun BookProgressImageSection(
     modifier: Modifier = Modifier ,
-    bookData : BookStatsData = BookStatsData(),
+    bookData : BookProgressData = BookProgressData(),
 ) {
     var animationTriggered by remember{
         mutableStateOf(false)

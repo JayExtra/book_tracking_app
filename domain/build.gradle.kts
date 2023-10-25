@@ -64,5 +64,6 @@ kotlin {
 
 dependencies {
     implementation(project(Modules.core))
+    implementation(project(Modules.coreDataStore))
 
 }

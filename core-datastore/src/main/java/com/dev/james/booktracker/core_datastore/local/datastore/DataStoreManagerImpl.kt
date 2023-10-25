@@ -21,6 +21,13 @@ class DataStoreManagerImpl @Inject constructor(
     companion object {
         private val Context.datastore : DataStore<Preferences> by preferencesDataStore(name = Constants.STORE_NAME)
     }
+
+    override suspend fun storeStringValue(key: Preferences.Key<String>, value: String) {
+        context.datastore.edit {
+            it[key] = value
+        }
+    }
+
     override suspend fun storeBooleanValue(key: Preferences.Key<Boolean>, value: Boolean) {
         context.datastore.edit {
             it[key] = value
@@ -63,6 +70,10 @@ class DataStoreManagerImpl @Inject constructor(
             }
             Timber.e( "Datastore read string value error =>" + exception.localizedMessage)
         }
+    }
+
+    override suspend fun readStringValueOnce(key: Preferences.Key<String>): String {
+        return context.datastore.data.first()[key] ?: " "
     }
 
     override fun getSelectedThemeStream(key: Preferences.Key<Int>): Flow<Int> {

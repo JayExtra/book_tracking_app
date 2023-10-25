@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,14 +44,15 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.core.common_models.BookGoalData
+import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 import com.dev.james.booktracker.home.R
 
 @Composable
 @Preview(showBackground = true)
 fun BookGoalInfoComponent(
-    bookGoalData: BookGoalData = BookGoalData() ,
+    shouldNotShowBlankMessage : Boolean = false,
+    bookProgressData: BookProgressData = BookProgressData(),
     onContinueClicked : () -> Unit = {}
 ) {
 
@@ -66,20 +65,43 @@ fun BookGoalInfoComponent(
         shape = RoundedCornerShape(10.dp)
     ) {
         Column(
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp) ,
+            horizontalAlignment = Alignment.CenterHorizontally ,
+            verticalArrangement = if(shouldNotShowBlankMessage) Arrangement.Center else Arrangement.Top
         ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.current_read),
-                style = BookAppTypography.labelLarge,
-                textAlign = TextAlign.Start
-            )
-            GoalDataComponent(
-                bookGoalData = bookGoalData ,
-                onContinue = {
-                    onContinueClicked()
+            if(shouldNotShowBlankMessage){
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(R.string.current_read),
+                    style = BookAppTypography.labelLarge,
+                    textAlign = TextAlign.Start
+                )
+                GoalDataComponent(
+                    bookProgressData = bookProgressData ,
+                    onContinue = {
+                        onContinueClicked()
+                    }
+                )
+
+            }else {
+
+                Text(
+                    text = "No reading progress currently available. Go to my library and start reading a book." ,
+                    style = BookAppTypography.bodyMedium ,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                ElevatedButton(onClick = { /*TODO*/ } , colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )) {
+                    Text(text = "proceed" , style = BookAppTypography.labelSmall)
                 }
-            )
+
+
+            }
+
         }
 
     }
@@ -88,7 +110,7 @@ fun BookGoalInfoComponent(
 @Composable
 @Preview(showBackground = true)
 fun GoalDataComponent(
-    bookGoalData: BookGoalData = BookGoalData() ,
+    bookProgressData: BookProgressData = BookProgressData(),
     onContinue : () -> Unit = {}
 ) {
     //use constraint layout
@@ -128,25 +150,25 @@ fun GoalDataComponent(
     ) {
         BookImageComponent(
             modifier = Modifier.layoutId("image_section"),
-            image = bookGoalData.bookImage,
-            isUri = bookGoalData.isUri
+            image = bookProgressData.bookImage,
+            isUri = bookProgressData.isUri
         )
         ProgressComponent(
             modifier = Modifier.layoutId("progress_section"),
-            progress = bookGoalData.progress
+            progress = bookProgressData.progress
         )
 
         ReadProgressComponent(
             modifier = Modifier.layoutId("chapter_section"),
             icon = R.drawable.ic_bookmark_24,
-            title = "Chapter ${bookGoalData.currentChapter}",
-            subTitle = bookGoalData.currentChapterTitle
+            title = "Chapter ${bookProgressData.currentChapter}",
+            subTitle = bookProgressData.currentChapterTitle
         )
         ReadProgressComponent(
             modifier = Modifier.layoutId("best_time_section"),
             icon = R.drawable.ic_clock_24,
             title = "Total time",
-            subTitle = bookGoalData.totalTimeSpent.formatTimeToDHMS()
+            subTitle = bookProgressData.totalTimeSpent.formatTimeToDHMS()
         )
 
         ElevatedButton(

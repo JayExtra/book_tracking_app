@@ -1,21 +1,20 @@
 package com.dev.james.domain.repository.home
 
-import com.dev.james.booktracker.core.common_models.BookGoal
-import com.dev.james.booktracker.core.common_models.BookGoalLog
-import com.dev.james.booktracker.core.common_models.OverallGoal
-import com.dev.james.booktracker.core.common_models.SpecificGoal
+import com.dev.james.booktracker.core.common_models.Goal
 import com.dev.james.booktracker.core.utilities.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface GoalsRepository {
 
     suspend fun saveGoals(
-        overallGoal: OverallGoal ,
-        specificGoal: SpecificGoal ,
-        bookGoal: BookGoal
+        goal: Goal
     ) : Resource<Boolean>
 
-    suspend fun getAllActiveBookGoals() : List<BookGoal>
+    fun getActiveGoals() : Flow<List<Goal>>
+
+    suspend fun deleteGoal(id : String) : Resource<Boolean>
+
+    suspend fun getAGoal(id : String) : Resource<Goal>
 
 
 }

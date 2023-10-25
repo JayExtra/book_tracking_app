@@ -2,8 +2,11 @@ package com.dev.james.booktracker.home.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dev.james.booktracker.core.common_models.BookGoalData
-import com.dev.james.domain.usecases.home.FetchActiveBookGoalLogsUseCase
+import com.dev.james.booktracker.core.common_models.BookProgressData
+import com.dev.james.booktracker.core.common_models.Goal
+import com.dev.james.booktracker.core.common_models.GoalProgressData
+import com.dev.james.domain.usecases.FetchActiveBookProgress
+import com.dev.james.domain.usecases.FetchGoalProgress
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,12 +15,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
-  private val fetchActiveBookGoalLogsUseCase: FetchActiveBookGoalLogsUseCase
+  private val fetchActiveBookProgress: FetchActiveBookProgress ,
+  private val fetchGoalProgress: FetchGoalProgress
 ) : ViewModel() {
 
   private var _homeScreenUiState : MutableStateFlow<HomeScreenUiState>  = MutableStateFlow(
     HomeScreenUiState.HasFetchedScreenData(
-      BookGoalData()
+      BookProgressData() ,
+      GoalProgressData()
     )
   )
   val homeScreenUiState get() = _homeScreenUiState.asStateFlow()
@@ -25,16 +30,19 @@ class HomeScreenViewModel @Inject constructor(
 
   init {
     viewModelScope.launch {
-      val bookGoal = fetchActiveBookGoalLogsUseCase.invoke()
+      val bookGoal = fetchActiveBookProgress.invoke(null)
+      val goalProgress = fetchGoalProgress.invoke()
       _homeScreenUiState.value = HomeScreenUiState.HasFetchedScreenData(
-        bookGoalData = bookGoal
+        bookProgressData = bookGoal ,
+        goalProgressData = goalProgress
       )
     }
   }
 
   sealed class HomeScreenUiState {
     data class HasFetchedScreenData(
-      val bookGoalData: BookGoalData
+      val bookProgressData: BookProgressData ,
+      val goalProgressData: GoalProgressData
     ) : HomeScreenUiState()
   }
 }

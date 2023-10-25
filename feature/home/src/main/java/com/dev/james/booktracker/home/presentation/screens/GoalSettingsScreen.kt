@@ -17,24 +17,18 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -63,7 +57,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -74,15 +67,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.core.common_models.BookSave
-import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.dev.james.booktracker.home.R
-import com.dev.james.booktracker.home.presentation.components.BottomNextPreviousButtons
 import com.dev.james.booktracker.home.presentation.components.CameraView
 import com.dev.james.booktracker.home.presentation.components.GoogleBooksSearchBottomSheet
-import com.dev.james.booktracker.home.presentation.forms.CurrentReadForm
 import com.dev.james.booktracker.home.presentation.forms.OverallGoalsForm
-import com.dev.james.booktracker.home.presentation.forms.SpecificGoalsForm
 import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiState
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
@@ -375,6 +363,7 @@ fun ReadGoalScreen(
                         homeNavigator.openHomeScreen()
                     }
                 },
+                /*
                 onGoogleIconClicked = {
                     //open botton sheet with books info
                     //readGoalsScreenViewModel.searchForBook()
@@ -387,7 +376,7 @@ fun ReadGoalScreen(
                     }
                 },
                 imageSelectorState = imageSelectorState.value,
-                onSaveClicked = {
+               onSaveClicked = {
 
                     val currentReadFormTitleFieldState: TextFieldState =
                         currentReadFormState.getState("title")
@@ -473,7 +462,7 @@ fun ReadGoalScreen(
                         }
                     }
 
-                },
+                },*/
                 onImageSelectorClicked = {
 
 
@@ -516,7 +505,7 @@ fun ReadGoalScreen(
                     checkedState = status
                 },
 
-                onNextClicked = {
+               /* onNextClicked = {
 
                     val supportedDays = listOf(
                         "Select specific days", "Every day except"
@@ -627,7 +616,7 @@ fun ReadGoalScreen(
 
                         else -> {}
                     }
-                },
+                }
                 onPreviousClicked = {
                     readGoalsScreenViewModel.passMainScreenActions(
                         action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MovePrevious(
@@ -635,8 +624,38 @@ fun ReadGoalScreen(
                         )
                     )
                 } ,
+
                 callSavedBooks = {
                     readGoalsScreenViewModel.getCachedBooks()
+                } ,*/
+                saveGoalToDatabase = {
+                    val supportedDays = listOf(
+                        "Select specific days", "Every day except"
+                    )
+
+                    val timeFieldState =
+                        overallGoalsFormState.getState<TextFieldState>("time")
+                    val freqFieldState =
+                        overallGoalsFormState.getState<ChoiceState>("frequency field")
+                    val daysSelectedState =
+                        overallGoalsFormState.getState<SelectState>("specific days")
+                    val booksCountState: TextFieldState =
+                        overallGoalsFormState.getState("books_month")
+
+                    if (timeFieldState.validate() && freqFieldState.validate() && booksCountState.validate()) {
+                        if (supportedDays.contains(freqFieldState.value)) {
+                            if (daysSelectedState.validate()) {
+                                readGoalsScreenViewModel.passMainScreenActions(
+                                    action = ReadGoalsScreenViewModel.ReadGoalsUiActions.SaveGoalToDatabase
+                                )
+                            }
+                        } else {
+                            readGoalsScreenViewModel.passMainScreenActions(
+                                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.SaveGoalToDatabase
+                            )
+                        }
+                    }
+
                 }
             )
 
@@ -727,7 +746,8 @@ fun StatelessReadGoalScreen(
     onNextClicked: () -> Unit = {},
     onPreviousClicked: () -> Unit = {},
     onAlertSwitchChecked: (Boolean) -> Unit = {} ,
-    callSavedBooks : () -> Unit = {}
+    callSavedBooks : () -> Unit = {} ,
+    saveGoalToDatabase :() -> Unit = {}
 ) {
     Column(
         verticalArrangement = Arrangement.Top,
@@ -735,7 +755,7 @@ fun StatelessReadGoalScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         StandardToolBar(
-            navActions = {
+            /*navActions = {
                 //control visibility depending on where we are
                 if (uiState.currentPosition == 0) {
                     Button(
@@ -762,20 +782,15 @@ fun StatelessReadGoalScreen(
                     }
                 }
 
-            },
+            },*/
             navigate = {
                 //navigate back to home screen
                 popBackStack()
             }
         ) {
-            val toolBarTitle =
-                if (uiState.currentPosition > 0) {
-                    "Set goals"
-                } else {
-                    "Add your current read"
-                }
+            
             Text(
-                text = toolBarTitle,
+                text = "Set goals",
                 style = BookAppTypography.headlineSmall,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -786,11 +801,11 @@ fun StatelessReadGoalScreen(
             modifier = Modifier.weight(1f)
         ) {
 
-            if(uiState.currentPosition == 2){
+           /* if(uiState.currentPosition == 2){
                callSavedBooks()
-            }
+            }*/
 
-            androidx.compose.animation.AnimatedVisibility(
+          /*  androidx.compose.animation.AnimatedVisibility(
                 visible = uiState.currentPosition == 0,
                 enter = fadeIn() + slideInHorizontally { if (uiState.currentPosition > uiState.previousPosition) it else -it },
                 exit = fadeOut() + slideOutHorizontally { if (uiState.currentPosition > uiState.previousPosition) -it else it }
@@ -809,10 +824,10 @@ fun StatelessReadGoalScreen(
                         onClearImage()
                     }
                 )
-            }
+            }*/
 
             androidx.compose.animation.AnimatedVisibility(
-                visible = uiState.currentPosition == 1,
+                visible = uiState.currentPosition == 0,
                 enter = fadeIn() + slideInHorizontally { if (uiState.currentPosition > uiState.previousPosition) it else -it },
                 exit = fadeOut() + slideOutHorizontally { if (uiState.currentPosition > uiState.previousPosition) -it else it }
 
@@ -822,11 +837,15 @@ fun StatelessReadGoalScreen(
                     alertSwitchState = alertSwitchState,
                     onAlertSwitchChecked = { status ->
                         onAlertSwitchChecked(status)
+                    } ,
+                    onSaveGoal = {
+                        //save goal to db
+                        saveGoalToDatabase()
                     }
                 )
             }
 
-            androidx.compose.animation.AnimatedVisibility(
+           /* androidx.compose.animation.AnimatedVisibility(
                 visible = uiState.currentPosition == 2,
                 enter = fadeIn() + slideInHorizontally { if (uiState.currentPosition > uiState.previousPosition) it else -it },
                 exit = fadeOut() + slideOutHorizontally { if (uiState.currentPosition > uiState.previousPosition) -it else it }
@@ -837,10 +856,10 @@ fun StatelessReadGoalScreen(
                     specificGoalsFormState = specificGoalsFormState ,
                     readGoalsScreenUiState = uiState
                 )
-            }
+            }*/
         }
 
-        BottomNextPreviousButtons(
+       /* BottomNextPreviousButtons(
             modifier = Modifier.padding(16.dp),
             currentPosition = uiState.currentPosition,
             onNextClicked = {
@@ -850,7 +869,7 @@ fun StatelessReadGoalScreen(
                 onPreviousClicked()
             } ,
             disableNext = uiState.shouldDisableNextButton
-        )
+        )*/
 
     }
 
