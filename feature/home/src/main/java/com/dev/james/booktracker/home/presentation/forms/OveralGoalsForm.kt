@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -77,7 +79,8 @@ fun OverallGoalsForm(
     alertSwitchState: Boolean = false,
     onAlertSwitchChecked: (Boolean) -> Unit = {},
     startDialPickerDialog: () -> Unit = {},
-    startAlarmPickerDialog: () -> Unit = {}
+    startAlarmPickerDialog: () -> Unit = {} ,
+    onSaveGoal : () -> Unit = {}
 ) {
 
     val booksFieldState = overallGoalsFormState.getState<TextFieldState>(
@@ -417,6 +420,16 @@ fun OverallGoalsForm(
                 timeSet = formattedTime
             )
 
+        }
+
+        ElevatedButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            onClick = { onSaveGoal() } ,
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+        ) {
+            Text(text = "save goal" , style = BookAppTypography.labelMedium)
         }
 
 

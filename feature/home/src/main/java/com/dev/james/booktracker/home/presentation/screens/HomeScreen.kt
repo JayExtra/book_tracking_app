@@ -71,6 +71,7 @@ fun StatelessHomeScreen(
     onAddFabClick : () -> Unit = {} ,
     onContinueBtnClicked : (String) -> Unit = {}
 ){
+
     Box(
         modifier = Modifier.fillMaxSize() ,
         contentAlignment = Alignment.TopCenter
@@ -82,7 +83,7 @@ fun StatelessHomeScreen(
                 .padding(start = 8.dp, end = 8.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Center
         ) {
 
             when(homeScreenState){
@@ -91,7 +92,7 @@ fun StatelessHomeScreen(
                         EmptyAnimationSection(
                             animation = LottieCompositionSpec.RawRes(R.raw.shake_a_empty_box) ,
                             shouldShow = true ,
-                            message = "No goals or current read set. Click the button below to add a current read and goals."
+                            message = "No goals currently set. Click the button below to set a reading goal."
                         )
 
                         ElevatedButton(

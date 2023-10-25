@@ -300,7 +300,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
                         )
                 } else {
                     //save final goal set here
-                    val goal = Goal(
+                    /*val goal = Goal(
                         goalId = generateRandomId(10),
                         goalInfo = prepareGoalString(
                             goalTime = overallGoalTimeFieldState.value,
@@ -319,7 +319,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
                     saveUserGoals(
                         goal
-                    )
+                    )*/
                 }
             }
 
@@ -337,6 +337,29 @@ class ReadGoalsScreenViewModel @Inject constructor(
             is ReadGoalsUiActions.UndoBookSave -> {
                 Timber.tag(TAG).d("Undo action triggered")
                 undoBookSaved()
+            }
+
+            is ReadGoalsUiActions.SaveGoalToDatabase -> {
+                val goal = Goal(
+                    goalId = generateRandomId(10),
+                    goalInfo = prepareGoalString(
+                        goalTime = overallGoalTimeFieldState.value,
+                        condition = overallGoalFrequencyFieldState.value,
+                        daysList = overallGoalSpecificFieldState.value
+                    ),
+                    goalTime = overallGoalTimeFieldState.value.calculateTimeToLong(),
+                    goalPeriod = overallGoalFrequencyFieldState.value,
+                    specificDays = if (overallGoalSpecificFieldState.value.isEmpty()) emptyList() else overallGoalSpecificFieldState.value,
+                    shouldShowAlert = overallGoalAlertSwitchFieldState.value == "Yes",
+                    booksToRead= specificGoalsBookCountState.value.toInt(),
+                    booksRead = 0,
+                    alertNote = overallGoalAlertNoteFieldState.value,
+                    alertTime = overallGoalSelectedDialogTime.value
+                )
+
+                saveUserGoals(
+                    goal
+                )
             }
 
             else -> {}
@@ -542,6 +565,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
         data class MoveNext(val currentPosition: Int) : ReadGoalsUiActions()
         data class MovePrevious(val currentPosition: Int) : ReadGoalsUiActions()
         object UndoBookSave : ReadGoalsUiActions()
+
+        object SaveGoalToDatabase : ReadGoalsUiActions()
     }
 
     sealed class ReadGoalsUiEvents {
