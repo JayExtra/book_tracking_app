@@ -41,10 +41,15 @@ import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
+import kotlin.math.roundToInt
 
 @Composable
 @Preview(showBackground = false)
-fun StreakComponent(){
+fun StreakComponent(
+    streakCount : Int = 0 ,
+    booksReadCount : Int = 0 ,
+    targetBooks : Int = 0
+){
     Card(
         shape = RoundedCornerShape(10.dp) ,
         elevation = CardDefaults.cardElevation(5.dp) ,
@@ -58,17 +63,24 @@ fun StreakComponent(){
             horizontalArrangement = Arrangement.SpaceBetween ,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            StreakCounterComponent()
+            StreakCounterComponent(
+                streakCount = streakCount
+            )
 
-            BookCounterComponent()
+            BookCounterComponent(
+                booksReadCount, targetBooks
+            )
 
         }
     }
 }
 
+
 @Composable
 @Preview
-fun StreakCounterComponent(){
+fun StreakCounterComponent(
+    streakCount: Int = 0
+){
     val constraintSet = ConstraintSet {
         val flameImage = createRefFor("flame_item")
         val title = createRefFor("streak_title")
@@ -110,6 +122,13 @@ fun StreakCounterComponent(){
         constraintSet = constraintSet ,
         modifier = Modifier.padding(8.dp)
     ) {
+
+        val streakIcon = if(streakCount in 0..1) R.drawable.ic_snow_24 else  R.drawable.ic_flame_24
+        val (onStreakIcon , onStreakText , iconColor) = when(streakCount){
+            0 -> Triple(R.drawable.ic_cancel_24 , "No streak" , MaterialTheme.colorScheme.error)
+            1 -> Triple(R.drawable.ic_check_24 , "Starting" , Color.Green)
+            else -> Triple(R.drawable.ic_check_24 , "On track" , Color.Green)
+        }
         Box(
             modifier = Modifier
                 .size(70.dp)
@@ -123,9 +142,8 @@ fun StreakCounterComponent(){
                 .layoutId("flame_item"),
             contentAlignment = Alignment.Center
         ){
-
             Icon(
-                painter = painterResource(id = R.drawable.ic_flame_24),
+                painter = painterResource(id = streakIcon),
                 contentDescription = "" ,
                 modifier = Modifier.size(60.dp) ,
                 tint = Color.White
@@ -139,8 +157,10 @@ fun StreakCounterComponent(){
             modifier = Modifier.layoutId("streak_title")
         )
 
+        val dayOrDays = if(streakCount == 1) "day" else "days"
+
         Text(
-            text = "7 days" ,
+            text = "$streakCount $dayOrDays" ,
             color = MaterialTheme.colorScheme.primary ,
             textAlign = TextAlign.Start,
             style = BookAppTypography.bodyLarge,
@@ -148,16 +168,16 @@ fun StreakCounterComponent(){
             modifier = Modifier.layoutId("days_item")
         )
         Icon(
-            painter = painterResource(id = R.drawable.ic_check_24),
+            painter = painterResource(id = onStreakIcon),
             contentDescription = "" ,
             modifier = Modifier
                 .size(18.dp)
                 .layoutId("check_item") ,
-            tint = Color.Green
+            tint = iconColor
         )
 
         Text(
-            text = "On track" ,
+            text = onStreakText ,
             color = MaterialTheme.colorScheme.primary ,
             textAlign = TextAlign.Start,
             style = BookAppTypography.bodySmall,
@@ -169,7 +189,18 @@ fun StreakCounterComponent(){
 
 @Composable
 @Preview
-fun BookCounterComponent(){
+fun BookCounterComponent(
+    booksReadCount : Int = 0 ,
+    targetBooks: Int = 0
+){
+    val progressFloat by remember {
+        mutableStateOf(
+            ((booksReadCount.toFloat() / targetBooks.toFloat()) * 10.0f).roundToInt() / 10.0f
+        )
+    }
+    val bookProgressPercentage by remember {
+        mutableStateOf((progressFloat * 100.0f).toInt())
+    }
     val constraintSet = ConstraintSet {
         val flameImage = createRefFor("book_item")
         val title = createRefFor("read_title")
@@ -222,7 +253,7 @@ fun BookCounterComponent(){
             }
 
             val progressValue by animateFloatAsState(
-                targetValue = if(animationTriggered) 0.8f else 0f,
+                targetValue = if(animationTriggered) progressFloat else 0f,
                 animationSpec = tween(
                     durationMillis = 1000,
                     delayMillis = 0
@@ -240,30 +271,34 @@ fun BookCounterComponent(){
                 strokeCap = StrokeCap.Round
             )
 
+
             Text(
-                text = "80%" ,
+                text = "$bookProgressPercentage%" ,
                 style = BookAppTypography.labelSmall ,
                 color = MaterialTheme.colorScheme.primary
             )
         }
 
         Text(
-            text = "read" ,
+            text = "books read" ,
             color = MaterialTheme.colorScheme.primary ,
             style = BookAppTypography.labelMedium,
             modifier = Modifier.layoutId("read_title")
         )
 
+        val bookText = if(booksReadCount == 1) "book" else "books"
+
         Text(
-            text = "5 books" ,
+            text = "$booksReadCount $bookText" ,
             color = MaterialTheme.colorScheme.primary ,
             textAlign = TextAlign.Start,
             style = BookAppTypography.bodyLarge,
             fontSize = 24.sp,
             modifier = Modifier.layoutId("book_count_item")
         )
+        val bookIcon = if(bookProgressPercentage == 100) R.drawable.ic_check_24 else  R.drawable.ic_book_24
         Icon(
-            painter = painterResource(id = R.drawable.ic_book_24),
+            painter = painterResource(id = bookIcon),
             contentDescription = "" ,
             modifier = Modifier
                 .size(18.dp)
@@ -272,7 +307,7 @@ fun BookCounterComponent(){
         )
 
         Text(
-            text = "target 8" ,
+            text = "target $targetBooks" ,
             color = MaterialTheme.colorScheme.primary ,
             textAlign = TextAlign.Start,
             style = BookAppTypography.bodySmall,

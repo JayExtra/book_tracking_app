@@ -138,7 +138,12 @@ fun StatelessHomeScreen(
                             Spacer(modifier = Modifier.height(10.dp))
 
                         if(homeScreenState.goalProgressData.goalId.isNotBlank()){
-                            StreakComponent()
+                           
+                            StreakComponent(
+                                booksReadCount = homeScreenState.goalProgressData.booksRead ,
+                                targetBooks = homeScreenState.goalProgressData.booksToRead,
+                                streakCount = 3
+                            )
 
                             Spacer(modifier = Modifier.height(8.dp))
 

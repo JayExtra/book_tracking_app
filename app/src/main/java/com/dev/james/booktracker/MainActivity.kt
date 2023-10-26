@@ -12,9 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -26,6 +32,7 @@ import com.dev.james.my_library.presentation.ui.destinations.MyLibraryScreenDest
 import com.example.core_navigation.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
+import java.util.concurrent.Executors
 
 
 @AndroidEntryPoint
@@ -62,13 +69,33 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
+            val lifeCycleOwner = LocalLifecycleOwner.current
+
             val theme by mainViewModel.theme.collectAsStateWithLifecycle()
 
             val hasOnBoarded by mainViewModel.isOnBoarded.collectAsStateWithLifecycle()
 
             val user by mainViewModel.user.collectAsStateWithLifecycle()
 
+            val greeting by mainViewModel.greeting.collectAsStateWithLifecycle()
+
             Timber.tag("MainActivity").d("user => $user")
+
+            DisposableEffect(key1 = lifeCycleOwner) {
+                val eventObserver = LifecycleEventObserver { _, event ->
+                    when (event) {
+                        Lifecycle.Event.ON_RESUME -> {
+                           mainViewModel.updateGreeting()
+                        }
+                        else -> {}
+                    }
+                }
+                lifeCycleOwner.lifecycle.addObserver(eventObserver)
+
+                onDispose {
+                    lifeCycleOwner.lifecycle.removeObserver(eventObserver)
+                }
+            }
 
             BookTrackerTheme(
                 theme = theme
@@ -96,7 +123,8 @@ class MainActivity : ComponentActivity() {
                             "my-library/${MyLibraryScreenDestination.route}" ,
                             "achievements/${AchievementsScreenDestination.route}"
                         ) ,
-                        userDetails = user
+                        userDetails = user ,
+                        greeting = greeting
                     ) { innerPadding ->
 
                         Box(modifier = Modifier.padding(innerPadding)){

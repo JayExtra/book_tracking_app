@@ -1,5 +1,7 @@
 package com.dev.james.booktracker
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
@@ -13,8 +15,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val mainRepository: MainRepository ,
@@ -47,11 +51,33 @@ class MainViewModel @Inject constructor(
             initialValue =  UserDetails("fetching.." , emptyList() , selectedAvatar = R.drawable.round_account_circle_24)
         )
 
+    private val _greeting : MutableStateFlow<String> = MutableStateFlow("")
+    val greeting get() = _greeting.asStateFlow()
+
     init {
         viewModelScope.launch {
             delay(2000L)
             _isLoading.value = false
         }
+        _greeting.value = getGreeting()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getGreeting() : String {
+        val hour = LocalDateTime.now().hour
+        val twelve = "00"
+
+        return if(hour == twelve.toInt() || hour < 12){
+            "Good Morning"
+        }else if (hour in 12..18){
+            "Good Afternoon"
+        }else{
+            "Good Evening"
+        }
+    }
+
+    fun updateGreeting() {
+        _greeting.value = getGreeting()
     }
 
   /* private fun getOnBoardingStatus(){
