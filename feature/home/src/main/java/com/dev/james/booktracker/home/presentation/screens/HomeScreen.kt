@@ -55,6 +55,9 @@ fun HomeScreen(
         } ,
         onContinueBtnClicked = { bookId ->
             homeNavigator.openTrackingScreen(bookId)
+        } ,
+        onProceedClicked = {
+            homeNavigator.openMyLibraryScreen()
         }
     )
 }
@@ -69,7 +72,8 @@ fun StatelessHomeScreen(
     context : Context = LocalContext.current,
     onAddButtonClick : () -> Unit = {},
     onAddFabClick : () -> Unit = {} ,
-    onContinueBtnClicked : (String) -> Unit = {}
+    onContinueBtnClicked : (String) -> Unit = {} ,
+    onProceedClicked : () -> Unit = {}
 ){
 
     Box(
@@ -133,6 +137,9 @@ fun StatelessHomeScreen(
                                     onContinueBtnClicked(
                                         homeScreenState.bookProgressData.bookId
                                     )
+                                } ,
+                                onProceedToMyLibrary = {
+                                    onProceedClicked()
                                 }
                             )
                             Spacer(modifier = Modifier.height(10.dp))

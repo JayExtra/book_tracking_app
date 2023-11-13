@@ -5,4 +5,6 @@ interface HomeNavigator {
     fun openReadGoalsScreen()
 
     fun openTrackingScreen(id : String)
+
+    fun openMyLibraryScreen()
 }

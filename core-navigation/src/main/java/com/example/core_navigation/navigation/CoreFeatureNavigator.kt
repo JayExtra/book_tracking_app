@@ -15,6 +15,7 @@ import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingW
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
 import com.dev.james.my_library.presentation.navigation.MyLibraryScreenNavigator
+import com.dev.james.my_library.presentation.ui.destinations.MyLibraryScreenDestination
 import com.example.core_navigation.navigation.NavGraphs
 import com.ramcosta.composedestinations.dynamic.within
 import com.ramcosta.composedestinations.navigation.navigate
@@ -72,6 +73,12 @@ class CoreFeatureNavigator(
         navController.navigate(
             TrackBookScreenDestination(bookId = id) within navGraph
         )
+    }
+
+    override fun openMyLibraryScreen() {
+       navController.navigate(
+           MyLibraryScreenDestination within navGraph
+       )
     }
 
     override fun navigateToUserDetailsCaptureScreen() {
