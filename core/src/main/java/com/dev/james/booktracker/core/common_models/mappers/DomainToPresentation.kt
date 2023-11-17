@@ -10,7 +10,6 @@ fun BookSave.mapToPresentation() : Book {
         bookTitle = bookTitle ,
         //update this to support change from json to list
         bookAuthors = null  ,
-        bookSmallThumbnail = bookSmallThumbnail ,
         bookPagesCount = bookPagesCount ,
         publisher = publisher ,
         publishedDate = publishedDate

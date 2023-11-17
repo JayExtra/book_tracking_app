@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,8 +75,8 @@ import java.security.Permission
 @Composable
 @Destination
 fun HomeScreen(
-    homeNavigator: HomeNavigator ,
-    homeScreenViewModel : HomeScreenViewModel = hiltViewModel()
+    homeNavigator: HomeNavigator,
+    homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val homeScreenState = homeScreenViewModel.homeScreenUiState.collectAsStateWithLifecycle()
@@ -96,30 +98,28 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
 
 
-
-    val storagePermissionState = rememberPermissionState(permission = Manifest.permission.READ_EXTERNAL_STORAGE)
+    val storagePermissionState =
+        rememberPermissionState(permission = Manifest.permission.READ_EXTERNAL_STORAGE)
     val storagePermissionDialogRationaleState = rememberMaterialDialogState()
-
 
     val permissionLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
                 Toast.makeText(context, "Permission has been granted", Toast.LENGTH_SHORT).show()
                 //launch camera picker screen here
-               coroutineScope.launch {
-                   sheetState.expand()
-               }
+                coroutineScope.launch {
+                    sheetState.expand()
+                }
             } else {
                 //show rationale dialog
                 storagePermissionDialogRationaleState.show()
             }
         }
 
-
     BottomSheetScaffold(
         modifier = Modifier.testTag("pdf_bottom_sheet"),
-        scaffoldState = scaffoldState ,
-        sheetContainerColor = MaterialTheme.colorScheme.background ,
+        scaffoldState = scaffoldState,
+        sheetContainerColor = MaterialTheme.colorScheme.background,
         sheetDragHandle = {
             Column(
                 modifier = Modifier
@@ -131,7 +131,7 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Pdf books available" , modifier = Modifier.weight(0.5f))
+                    Text("Pdf books available", modifier = Modifier.weight(0.5f))
 
                     IconButton(
                         onClick = {
@@ -142,9 +142,9 @@ fun HomeScreen(
                         )
                     ) {
                         Icon(
-                            painter = if(isGrid) painterResource(id = com.dev.james.booktracker.home.R.drawable.ic_grid_view_24) else painterResource(
+                            painter = if (isGrid) painterResource(id = com.dev.james.booktracker.home.R.drawable.ic_grid_view_24) else painterResource(
                                 id = com.dev.james.booktracker.home.R.drawable.ic_view_list_24
-                            )  ,
+                            ),
                             contentDescription = "list or grid view",
                             tint = MaterialTheme.colorScheme.secondary
                         )
@@ -173,10 +173,10 @@ fun HomeScreen(
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
-        } ,
+        },
         sheetShape = RoundedCornerShape(0.dp),
         sheetTonalElevation = 5.dp,
-       // sheetPeekHeight = 0.dp,
+        // sheetPeekHeight = 0.dp,
         sheetSwipeEnabled = false,
         sheetContent = {
             Box(
@@ -187,46 +187,77 @@ fun HomeScreen(
             ) {
                 //call our google bottom sheet here
                 PdfListBottomSheetContent(
-                    isGrid = isGrid ,
+                    isGrid = isGrid,
                     pdfBookItems = listOf(
-                        Book(bookImage = "" , bookTitle = "Title A" , bookAuthors = listOf("Author A")) ,
-                        Book(bookImage = "" , bookTitle = "Title B" , bookAuthors = listOf("Author B")) ,
-                        Book(bookImage = "" , bookTitle = "Title C" , bookAuthors = listOf("Author C")) ,
-                        Book(bookImage = "" , bookTitle = "Title D" , bookAuthors = listOf("Author D")) ,
-                        Book(bookImage = "" , bookTitle = "Title E" , bookAuthors = listOf("Author E")) ,
-                        Book(bookImage = "" , bookTitle = "Title F" , bookAuthors = listOf("Author F")) ,
+                        Book(
+                            bookImage = "",
+                            bookTitle = "Title A",
+                            bookAuthors = listOf("Author A")
+                        ),
+                        Book(
+                            bookImage = "",
+                            bookTitle = "Title B",
+                            bookAuthors = listOf("Author B")
+                        ),
+                        Book(
+                            bookImage = "",
+                            bookTitle = "Title C",
+                            bookAuthors = listOf("Author C")
+                        ),
+                        Book(
+                            bookImage = "",
+                            bookTitle = "Title D",
+                            bookAuthors = listOf("Author D")
+                        ),
+                        Book(
+                            bookImage = "",
+                            bookTitle = "Title E",
+                            bookAuthors = listOf("Author E")
+                        ),
+                        Book(
+                            bookImage = "",
+                            bookTitle = "Title F",
+                            bookAuthors = listOf("Author F")
+                        ),
                     )
                 )
             }
         }
-    ){
+    ) {
         StatelessHomeScreen(
             homeScreenState = homeScreenState.value,
             onAddButtonClick = {
                 // Toast.makeText(context , "add button clicked", Toast.LENGTH_SHORT).show()
                 homeNavigator.openReadGoalsScreen()
-            } ,
+            },
             onContinueBtnClicked = { bookId ->
                 homeNavigator.openTrackingScreen(bookId)
-            } ,
+            },
             onProceedClicked = {
 
                 //check if storage permission has been granted
-                when{
-                    storagePermissionState.status.isGranted -> {
-                        coroutineScope.launch {
-                            sheetState.expand()
+                Timber.tag("HomeScreen")
+                    .d("Storage permission states isGranted => ${storagePermissionState.status.isGranted}")
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    coroutineScope.launch {
+                        sheetState.expand()
+                    }
+                } else {
+                    when {
+                        storagePermissionState.status.isGranted -> {
+                            coroutineScope.launch {
+                                sheetState.expand()
+                            }
+                        }
+                        storagePermissionState.status.shouldShowRationale -> {
+                            storagePermissionDialogRationaleState.show()
+                        }
+                        else -> {
+                            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
                         }
                     }
-                    storagePermissionState.status == PermissionStatus.Denied(shouldShowRationale = false) -> {
-                        permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    }
-                    storagePermissionState.status.shouldShowRationale -> {
-                        //show rationale why you need this storage perimission in dialog
-                        storagePermissionDialogRationaleState.show()
-                    }
                 }
-
 
             }
         )
@@ -296,26 +327,26 @@ fun HomeScreen(
 }
 
 @Composable
-@Preview("Home Screen" , showBackground = true)
+@Preview("Home Screen", showBackground = true)
 fun StatelessHomeScreen(
-    homeScreenState : HomeScreenViewModel.HomeScreenUiState = HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData(
-        BookProgressData() ,
+    homeScreenState: HomeScreenViewModel.HomeScreenUiState = HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData(
+        BookProgressData(),
         GoalProgressData()
     ),
-    context : Context = LocalContext.current,
-    onAddButtonClick : () -> Unit = {},
-    onAddFabClick : () -> Unit = {} ,
-    onContinueBtnClicked : (String) -> Unit = {} ,
-    onProceedClicked : () -> Unit = {}
-){
+    context: Context = LocalContext.current,
+    onAddButtonClick: () -> Unit = {},
+    onAddFabClick: () -> Unit = {},
+    onContinueBtnClicked: (String) -> Unit = {},
+    onProceedClicked: () -> Unit = {}
+) {
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.TopCenter ,
+        contentAlignment = Alignment.TopCenter,
 
-    ){
+        ) {
 
         Column(
             modifier = Modifier
@@ -327,37 +358,42 @@ fun StatelessHomeScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
-            when(homeScreenState){
+            when (homeScreenState) {
                 is HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData -> {
-                    if(homeScreenState.bookProgressData.bookId.isBlank() && homeScreenState.goalProgressData.goalId.isBlank()) {
+                    if (homeScreenState.bookProgressData.bookId.isBlank() && homeScreenState.goalProgressData.goalId.isBlank()) {
                         EmptyAnimationSection(
-                            animation = LottieCompositionSpec.RawRes(R.raw.shake_a_empty_box) ,
-                            shouldShow = true ,
+                            animation = LottieCompositionSpec.RawRes(R.raw.shake_a_empty_box),
+                            shouldShow = true,
                             message = "No goals currently set. Click the button below to set a reading goal."
                         )
 
                         ElevatedButton(
-                            onClick = { onAddButtonClick() } ,
-                            shape = BookAppShapes.medium ,
+                            onClick = { onAddButtonClick() },
+                            shape = BookAppShapes.medium,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondaryContainer
-                            ) ,
-                            contentPadding = PaddingValues(start = 16.dp , end = 16.dp , top = 8.dp , bottom = 8.dp)
+                            ),
+                            contentPadding = PaddingValues(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = 8.dp,
+                                bottom = 8.dp
+                            )
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = "Add button icon" ,
+                                contentDescription = "Add button icon",
                                 tint = MaterialTheme.colorScheme.primary
                             )
 
                             Text(
-                                text = "Add goals and current read" ,
-                                style = BookAppTypography.labelMedium ,
+                                text = "Add goals and current read",
+                                style = BookAppTypography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
 
                         }
-                    }else {
+                    } else {
 
                         /*Toast.makeText(
                             context ,
@@ -370,23 +406,23 @@ fun StatelessHomeScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         BookGoalInfoComponent(
-                                shouldNotShowBlankMessage = homeScreenState.bookProgressData.bookId.isNotBlank(),
-                                bookProgressData = homeScreenState.bookProgressData ,
-                                onContinueClicked = {
-                                    onContinueBtnClicked(
-                                        homeScreenState.bookProgressData.bookId
-                                    )
-                                } ,
-                                onProceedToMyLibrary = {
-                                    onProceedClicked()
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
+                            shouldNotShowBlankMessage = homeScreenState.bookProgressData.bookId.isNotBlank(),
+                            bookProgressData = homeScreenState.bookProgressData,
+                            onContinueClicked = {
+                                onContinueBtnClicked(
+                                    homeScreenState.bookProgressData.bookId
+                                )
+                            },
+                            onProceedToMyLibrary = {
+                                onProceedClicked()
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                        if(homeScreenState.goalProgressData.goalId.isNotBlank()){
-                           
+                        if (homeScreenState.goalProgressData.goalId.isNotBlank()) {
+
                             StreakComponent(
-                                booksReadCount = homeScreenState.goalProgressData.booksRead ,
+                                booksReadCount = homeScreenState.goalProgressData.booksRead,
                                 targetBooks = homeScreenState.goalProgressData.booksToRead,
                                 streakCount = 3
                             )
@@ -398,24 +434,26 @@ fun StatelessHomeScreen(
 
                     }
                 }
+
                 else -> {}
             }
 
-            Spacer(modifier = Modifier
-                .height(100.dp)
-                .fillMaxWidth()
+            Spacer(
+                modifier = Modifier
+                    .height(100.dp)
+                    .fillMaxWidth()
             )
         }
 
-/*
-        FloatingActionButton(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            shape = BookAppShapes.medium ,
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            onClick = {
-                *//*navigate or show goal addition bottom sheet*//*
+        /*
+                FloatingActionButton(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp),
+                    shape = BookAppShapes.medium ,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    onClick = {
+                        *//*navigate or show goal addition bottom sheet*//*
                 onAddFabClick()
             }
         ) {
@@ -432,11 +470,11 @@ fun StatelessHomeScreen(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun EmptyAnimationSection(
-    modifier: Modifier = Modifier ,
-    shouldShow : Boolean = false ,
-    animation : LottieCompositionSpec.RawRes ,
-    message : String = ""
-){
+    modifier: Modifier = Modifier,
+    shouldShow: Boolean = false,
+    animation: LottieCompositionSpec.RawRes,
+    message: String = ""
+) {
 
     AnimatedVisibility(
         visible = shouldShow,
@@ -480,17 +518,19 @@ fun EmptyAnimationSection(
                 modifier = Modifier.size(200.dp)
             )
 
-            Spacer(modifier = Modifier
-                .height(8.dp)
-                .fillMaxWidth())
+            Spacer(
+                modifier = Modifier
+                    .height(8.dp)
+                    .fillMaxWidth()
+            )
 
 
             Text(
                 text = message,
                 style = BookAppTypography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary,
-                textAlign = TextAlign.Center ,
-                modifier = Modifier.padding(start = 16.dp , end = 16.dp)
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp)
             )
 
             Spacer(
