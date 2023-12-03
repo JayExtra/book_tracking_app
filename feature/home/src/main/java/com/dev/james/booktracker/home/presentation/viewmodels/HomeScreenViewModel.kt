@@ -41,9 +41,11 @@ class HomeScreenViewModel @Inject constructor(
         bookProgressData = bookGoal ,
         goalProgressData = goalProgress
       )
-
-      fetchPdfBooks.invoke()
     }
+  }
+  fun getCachedPdfs(){
+    //test run to see if pdfs will be fetched
+    fetchPdfBooks.invoke()
   }
 
   sealed class HomeScreenUiState {

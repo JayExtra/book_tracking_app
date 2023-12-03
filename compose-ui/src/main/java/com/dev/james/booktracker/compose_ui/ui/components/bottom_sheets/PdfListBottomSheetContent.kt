@@ -19,6 +19,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,8 +40,12 @@ fun PdfListBottomSheetContent(
     modifier : Modifier = Modifier,
     pdfBookItems : List<Book> = listOf(),
     isGrid : Boolean = true,
+    isVisible : (Boolean) -> Unit = {},
     onPdfBookSelected : (Book) -> Unit = {}
 ){
+
+        isVisible(true)
+
     Column(modifier = modifier.fillMaxSize()) {
         if(isGrid){
             LazyVerticalGrid(
@@ -65,7 +74,9 @@ fun BookContent(
     onBookSelected : (Book) -> Unit
 ){
     BookCardComponent(
-        modifier = Modifier.width(120.dp).height(160.dp) ,
+        modifier = Modifier
+            .width(120.dp)
+            .height(160.dp) ,
         book = book ,
         onBookSelected = {
             onBookSelected(book)

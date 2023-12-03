@@ -9,6 +9,7 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Spring
@@ -43,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airbnb.lottie.compose.*
@@ -60,17 +62,15 @@ import com.dev.james.booktracker.home.presentation.components.StreakComponent
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.viewmodels.HomeScreenViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.security.Permission
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 @Destination
@@ -99,10 +99,29 @@ fun HomeScreen(
 
 
     val storagePermissionState =
-        rememberPermissionState(permission = Manifest.permission.READ_EXTERNAL_STORAGE)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+            rememberMultiplePermissionsState(
+                permissions = listOf(
+                    Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.READ_MEDIA_AUDIO,
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                )
+            )
+
+        }else{
+            rememberMultiplePermissionsState(
+                permissions = listOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE ,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            )
+        }
+
+
     val storagePermissionDialogRationaleState = rememberMaterialDialogState()
 
-    val permissionLauncher =
+   /* val permissionLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
                 Toast.makeText(context, "Permission has been granted", Toast.LENGTH_SHORT).show()
@@ -110,11 +129,11 @@ fun HomeScreen(
                 coroutineScope.launch {
                     sheetState.expand()
                 }
-            } else {
-                //show rationale dialog
-                storagePermissionDialogRationaleState.show()
             }
-        }
+        }*/
+
+
+
 
     BottomSheetScaffold(
         modifier = Modifier.testTag("pdf_bottom_sheet"),
@@ -176,9 +195,11 @@ fun HomeScreen(
         },
         sheetShape = RoundedCornerShape(0.dp),
         sheetTonalElevation = 5.dp,
-        // sheetPeekHeight = 0.dp,
+        sheetPeekHeight = 0.dp,
         sheetSwipeEnabled = false,
         sheetContent = {
+
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -218,8 +239,12 @@ fun HomeScreen(
                             bookImage = "",
                             bookTitle = "Title F",
                             bookAuthors = listOf("Author F")
-                        ),
-                    )
+                        )
+                    ) ,
+                    isVisible = { visible ->
+
+
+                    }
                 )
             }
         }
@@ -237,28 +262,36 @@ fun HomeScreen(
 
                 //check if storage permission has been granted
                 Timber.tag("HomeScreen")
-                    .d("Storage permission states isGranted => ${storagePermissionState.status.isGranted}")
+                    .d("Storage permissions states isGranted => ${storagePermissionState.allPermissionsGranted}")
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                Timber.tag("HomeScreen")
+                    .d("should show rationale: ${storagePermissionState.shouldShowRationale}")
+
+                if(storagePermissionState.allPermissionsGranted){
                     coroutineScope.launch {
                         sheetState.expand()
                     }
-                } else {
-                    when {
-                        storagePermissionState.status.isGranted -> {
-                            coroutineScope.launch {
-                                sheetState.expand()
-                            }
-                        }
-                        storagePermissionState.status.shouldShowRationale -> {
-                            storagePermissionDialogRationaleState.show()
-                        }
-                        else -> {
-                            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-                        }
+                }else{
+                    if(storagePermissionState.shouldShowRationale){
+                        storagePermissionDialogRationaleState.show()
+                    }else {
+                        storagePermissionState.launchMultiplePermissionRequest()
                     }
                 }
-
+                /*when {
+                     storagePermissionState.allPermissionsGranted -> {
+                        coroutineScope.launch {
+                            sheetState.expand()
+                        }
+                    }
+                    storagePermissionState.shouldShowRationale -> {
+                        storagePermissionDialogRationaleState.show()
+                    }
+                    else -> {
+                        storagePermissionState.launchMultiplePermissionRequest()
+                        //permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    }
+                }*/
             }
         )
     }
@@ -285,36 +318,28 @@ fun HomeScreen(
                     .height(100.dp)
             )
 
-            val rationalText =
-                if (!storagePermissionState.status.isGranted && !storagePermissionState.status.shouldShowRationale) {
-                    //camera permission is fully denied by user
-                    stringResource(com.dev.james.booktracker.home.R.string.storage_rationale_message_redirect)
-                } else {
-                    stringResource(com.dev.james.booktracker.home.R.string.storage_permission_rationale_message)
-                }
+            Timber.tag("HomeScreen")
+                .d("should show rationale: ${storagePermissionState.shouldShowRationale}")
 
             Text(
-                text = rationalText,
+                text = stringResource(com.dev.james.booktracker.home.R.string.storage_rationale_message_redirect),
                 style = BookAppTypography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary
             )
 
             RoundedBrownButton(
-                label = "Grant permission.",
+                label = "Proceed to settings",
                 onClick = {
-                    if (!storagePermissionState.status.isGranted && !storagePermissionState.status.shouldShowRationale) {
-                        //camera permission is fully denied by user
-                        val intent = Intent(Settings.ACTION_APPLICATION_SETTINGS).apply {
-                            data = Uri.parse("package:${context.packageName}")
-                        }
-                        context.startActivity(
-                            intent
-                        )
 
-                    } else {
-                        permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    }
+                    //storage is permission is fully denied by user redirect to settings screen to accept
+                    val intent =
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                    startActivity(context, intent, null)
+
+
                     storagePermissionDialogRationaleState.hide()
                 }
             )
@@ -326,6 +351,7 @@ fun HomeScreen(
 
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 @Preview("Home Screen", showBackground = true)
 fun StatelessHomeScreen(
