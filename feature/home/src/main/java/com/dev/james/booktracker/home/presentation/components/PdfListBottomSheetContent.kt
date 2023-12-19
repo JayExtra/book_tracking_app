@@ -1,50 +1,40 @@
-package com.dev.james.booktracker.compose_ui.ui.components.bottom_sheets
+package com.dev.james.booktracker.home.presentation.components
 
-import androidx.compose.foundation.Image
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.dev.james.booktracker.compose_ui.R
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.dev.james.booktracker.compose_ui.ui.components.BookCardComponent
-import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
-import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.Book
-import com.dev.james.booktracker.core.utilities.convertToAuthorsString
+import com.dev.james.booktracker.home.presentation.viewmodels.HomeScreenViewModel
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun PdfListBottomSheetContent(
     modifier : Modifier = Modifier,
     pdfBookItems : List<Book> = listOf(),
+    homeScreenViewModel: HomeScreenViewModel = hiltViewModel(),
+    isExpanded : Boolean = false ,
     isGrid : Boolean = true,
-    isVisible : (Boolean) -> Unit = {},
     onPdfBookSelected : (Book) -> Unit = {}
 ){
 
-        isVisible(true)
+    if(isExpanded){
+        homeScreenViewModel.getCachedPdfs()
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         if(isGrid){
@@ -85,6 +75,7 @@ fun BookContent(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 @Preview(showBackground = true , widthDp = 220  , heightDp = 720 )
 fun PdfListBottomSheetPreview(){

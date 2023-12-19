@@ -31,25 +31,32 @@ class FetchPdfBooks
     }
 
     private fun getPdfInStorage( setPdfFiles : (files : List<File>) -> Unit){
-        return  try {
-            val folder = File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    .toString()
-            )
+        try {
+            val uri = MediaStore.Files.getContentUri("external")
+            val projection = arrayOf(MediaStore.Files.FileColumns.DATA)
+            val selection = MediaStore.Files.FileColumns.MIME_TYPE + "=?"
+            val selectionArgs = arrayOf("application/pdf")
+            val cursor = context.contentResolver.query(uri, projection, selection, selectionArgs, null)
+            val pdfList = mutableListOf<File>()
 
-            if(!folder.exists() || !folder.isDirectory){
-                Timber.tag(TAG).e("Directory does not exist or is not a directory")
-                return
+            if(cursor != null){
+                val pdfPathIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA)
+                while (cursor.moveToNext()) {
+                    if (pdfPathIndex != -1) {
+                        val pdfPath = cursor.getString(pdfPathIndex)
+                        val pdfFile = File(pdfPath)
+                        if (pdfFile.exists() && pdfFile.isFile) {
+                            pdfList.add(pdfFile);
+                        }
+                    }
+                }
+                cursor.close()
+                setPdfFiles(pdfList)
+            }else{
+                Timber.tag(TAG).d("Cursor returned null!")
+                setPdfFiles(emptyList<File>())
             }
-            val files = folder.listFiles{ _ , name ->
-                name.endsWith(".pdf")
-            }
-            if(files != null){
-                Timber.tag(TAG).d( message = "Files ${files.contentToString()}")
-                setPdfFiles(files.toList())
-            } else {
-                Timber.tag(TAG).e("Error: No pdfs found in the directory")
-            }
+
         }catch (e : Exception){
             Timber.tag(TAG).e("Error => Exception: ${e.localizedMessage}")
             e.printStackTrace()
