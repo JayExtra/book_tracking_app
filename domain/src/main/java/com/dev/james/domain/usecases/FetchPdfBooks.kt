@@ -12,6 +12,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
@@ -31,6 +32,7 @@ class FetchPdfBooks
 
     @RequiresApi(Build.VERSION_CODES.Q)
     suspend operator fun invoke() {
+        try{
             getPdfInStorage { files ->
                 Timber.tag(TAG).d("pdf list : $files")
                 val processedFiles = files.map { file ->
@@ -57,39 +59,46 @@ class FetchPdfBooks
                 Timber.tag(TAG).d("pdf list : $processedFiles")
 
             }
+        }catch (e : Exception){
+            Timber.tag(TAG).d("error fetching pdf : ${e.localizedMessage}")
+        }
+
     }
 
-    private fun getPdfInStorage( setPdfFiles : (files : List<File>) -> Unit){
-        try {
-            val uri = MediaStore.Files.getContentUri("external")
-            val projection = arrayOf(MediaStore.Files.FileColumns.DATA)
-            val selection = MediaStore.Files.FileColumns.MIME_TYPE + "=?"
-            val selectionArgs = arrayOf("application/pdf")
-            val cursor = context.contentResolver.query(uri, projection, selection, selectionArgs, null)
-            val pdfList = mutableListOf<File>()
+    private suspend fun getPdfInStorage( setPdfFiles : (files : List<File>) -> Unit){
+        withContext(Dispatchers.IO){
+            try {
+                val uri = MediaStore.Files.getContentUri("external")
+                val projection = arrayOf(MediaStore.Files.FileColumns.DATA)
+                val selection = MediaStore.Files.FileColumns.MIME_TYPE + "=?"
+                val selectionArgs = arrayOf("application/pdf")
+                val cursor = context.contentResolver.query(uri, projection, selection, selectionArgs, null)
+                val pdfList = mutableListOf<File>()
 
-            if(cursor != null){
-                val pdfPathIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA)
-                while (cursor.moveToNext()) {
-                    if (pdfPathIndex != -1) {
-                        val pdfPath = cursor.getString(pdfPathIndex)
-                        val pdfFile = File(pdfPath)
-                        if (pdfFile.exists() && pdfFile.isFile) {
-                            pdfList.add(pdfFile);
+                if(cursor != null){
+                    val pdfPathIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA)
+                    while (cursor.moveToNext()) {
+                        if (pdfPathIndex != -1) {
+                            val pdfPath = cursor.getString(pdfPathIndex)
+                            val pdfFile = File(pdfPath)
+                            if (pdfFile.exists() && pdfFile.isFile) {
+                                pdfList.add(pdfFile);
+                            }
                         }
                     }
+                    cursor.close()
+                    setPdfFiles(pdfList)
+                }else{
+                    Timber.tag(TAG).d("Cursor returned null!")
+                    setPdfFiles(emptyList<File>())
                 }
-                cursor.close()
-                setPdfFiles(pdfList)
-            }else{
-                Timber.tag(TAG).d("Cursor returned null!")
-                setPdfFiles(emptyList<File>())
-            }
 
-        }catch (e : Exception){
-            Timber.tag(TAG).e("Error => Exception: ${e.localizedMessage}")
-            e.printStackTrace()
+            }catch (e : Exception){
+                Timber.tag(TAG).e("Error => Exception: ${e.localizedMessage}")
+                e.printStackTrace()
+            }
         }
+
     }
 
    /* @RequiresApi(Build.VERSION_CODES.Q)
