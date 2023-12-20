@@ -45,7 +45,10 @@ class HomeScreenViewModel @Inject constructor(
   }
   fun getCachedPdfs(){
     //test run to see if pdfs will be fetched
-    fetchPdfBooks.invoke()
+    viewModelScope.launch {
+      fetchPdfBooks.invoke()
+    }
+
   }
 
   sealed class HomeScreenUiState {

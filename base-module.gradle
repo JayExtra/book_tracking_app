@@ -138,4 +138,8 @@ dependencies{
     implementation("com.squareup.moshi:moshi-kotlin:${Versions.moshi_version}")
 
 
+    //pdfs
+    implementation ("com.tom-roush:pdfbox-android:2.0.27.0")
+
+
 }

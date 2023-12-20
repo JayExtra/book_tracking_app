@@ -1,15 +1,17 @@
 package com.dev.james.domain.usecases
 
-import android.content.ContentResolver
 import android.content.Context
 import android.os.Build
-import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
+import androidx.core.net.toUri
 import com.dev.james.booktracker.core.common_models.Book
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import com.tom_roush.pdfbox.pdmodel.PDDocument
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
@@ -23,11 +25,38 @@ class FetchPdfBooks
         const val TAG = "FetchPdfBooks"
     }
 
+    init {
+        PDFBoxResourceLoader.init(context)
+    }
+
     @RequiresApi(Build.VERSION_CODES.Q)
-    operator fun invoke() {
-        getPdfInStorage { files ->
-            Timber.tag(TAG).d("pdf list : $files")
-        }
+    suspend operator fun invoke() {
+            getPdfInStorage { files ->
+                Timber.tag(TAG).d("pdf list : $files")
+                val processedFiles = files.map { file ->
+                    val document = PDDocument.load(file)
+
+                    if(document.isEncrypted){
+                        Book()
+                    }else{
+                        val pageSize = document.numberOfPages
+                        val pdfTitle = document.documentInformation.title
+                        val pdfAuthor = document.documentInformation.author
+                        val pdfId = document.documentId.toString()
+                        Book(
+                            bookId = pdfId ,
+                            bookAuthors = listOf(pdfAuthor) ,
+                            bookUri = file.toUri() ,
+                            bookTitle = pdfTitle ,
+                            bookPagesCount = pageSize
+                        )
+                    }
+
+                }
+
+                Timber.tag(TAG).d("pdf list : $processedFiles")
+
+            }
     }
 
     private fun getPdfInStorage( setPdfFiles : (files : List<File>) -> Unit){
