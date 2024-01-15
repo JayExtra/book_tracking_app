@@ -7,6 +7,8 @@ import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import com.dev.james.booktracker.core.common_models.Book
+import com.dev.james.booktracker.core.common_models.PdfBookItem
+import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.itextpdf.text.exceptions.BadPasswordException
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.ReaderProperties
@@ -17,6 +19,8 @@ import com.tom_roush.pdfbox.pdmodel.encryption.StandardDecryptionMaterial
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -39,27 +43,26 @@ class FetchPdfBooks
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    suspend operator fun invoke() {
-        try {
+    suspend operator fun invoke() : Flow<List<PdfBookItem>>  = flow {
+
             getPdfInStorage { files ->
                 Timber.tag(TAG).d("pdf list : $files")
                // Timber.tag(TAG).d("file at pos 19 ${files[19]}")
                 val processedFiles = files.map { file ->
                     extractPdfMetadata(file.toUri())
-                }.filter { book ->
-                    book.bookPagesCount!! > 20
+                }.filter { pdfBook ->
+                    pdfBook.pages > 20
                 }
-
                 Timber.tag(TAG).d("pdf list : $processedFiles")
-
+                withContext(Dispatchers.Main){
+                    emit(processedFiles)
+                }
             }
-        } catch (e: InvalidPasswordException) {
-            Timber.tag(TAG).d("error fetching pdf : ${e.localizedMessage}")
-        }
 
     }
 
-    private fun extractPdfMetadata(pdfUri : Uri) : Book {
+    private fun extractPdfMetadata(pdfUri : Uri) : PdfBookItem {
+
         return try {
             val inputStream = context.contentResolver.openInputStream(pdfUri)
             val pdfReader = PdfReader(inputStream)
@@ -68,27 +71,29 @@ class FetchPdfBooks
             val author = pdfInfo["Author"] ?: pdfInfo["Creator"] ?: "No author information"
             val publisher = pdfInfo["Producer"] ?: "No publisher information"
             val title = pdfInfo["Title"] ?: "No title"
+            val date = pdfInfo["CreationDate"] ?: pdfInfo["ProducerCreationDate"] ?: pdfInfo["ModDate"] ?: "No date information"
 
             pdfReader.close()
-            Book(
-                bookPagesCount = pagesCount ,
-                bookAuthors = listOf(author) ,
+            PdfBookItem(
+                pages = pagesCount ,
+                author = author ,
                 bookUri = pdfUri ,
                 publisher = publisher ,
-                bookTitle = title
+                title = title ,
+                date = date
             )
+
         }catch (e : BadPasswordException ){
             Timber.tag(TAG).d("Bad password exception! => ${e.localizedMessage}")
-            Book(
-                bookPagesCount = 0
+            PdfBookItem(
+                pages = 0
             )
         }catch (e : IOException){
             Timber.tag(TAG).d("IOException! => ${e.localizedMessage}")
-            Book(
-                bookPagesCount = 0
+            PdfBookItem(
+                pages = 0
             )
         }
-
     }
 
     private suspend fun getPdfInStorage(setPdfFiles: suspend (files: List<File>) -> Unit) {
@@ -125,7 +130,6 @@ class FetchPdfBooks
                 e.printStackTrace()
             }
         }
-
     }
 
 }

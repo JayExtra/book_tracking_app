@@ -32,8 +32,8 @@ fun CoilImageComponent(
             .Builder(LocalContext.current)
             .data(data = image)
             .apply(block = {
-                placeholder(R.drawable.image_placeholder_24)
-                error(R.drawable.image_placeholder_24)
+                placeholder(R.drawable.pdf_icon)
+                error(R.drawable.pdf_icon)
                 crossfade(true)
                 transformations(
                     RoundedCornersTransformation(0f)

@@ -208,38 +208,6 @@ fun HomeScreen(
                 //call our google bottom sheet here
                 PdfListBottomSheetContent(
                     isGrid = isGrid,
-                    pdfBookItems = listOf(
-                        Book(
-                            bookImage = "",
-                            bookTitle = "Title A",
-                            bookAuthors = listOf("Author A")
-                        ),
-                        Book(
-                            bookImage = "",
-                            bookTitle = "Title B",
-                            bookAuthors = listOf("Author B")
-                        ),
-                        Book(
-                            bookImage = "",
-                            bookTitle = "Title C",
-                            bookAuthors = listOf("Author C")
-                        ),
-                        Book(
-                            bookImage = "",
-                            bookTitle = "Title D",
-                            bookAuthors = listOf("Author D")
-                        ),
-                        Book(
-                            bookImage = "",
-                            bookTitle = "Title E",
-                            bookAuthors = listOf("Author E")
-                        ),
-                        Book(
-                            bookImage = "",
-                            bookTitle = "Title F",
-                            bookAuthors = listOf("Author F")
-                        )
-                    ) ,
                     isExpanded = sheetState.currentValue == SheetValue.Expanded
                 )
             }
