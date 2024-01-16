@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.home.presentation.components
+package com.dev.james.booktracker.compose_ui.ui.components
 
 import android.content.Context
 import androidx.compose.foundation.Image
@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -43,8 +42,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.dev.james.booktracker.compose_ui.ui.components.AnimationWithMessageComponent
-import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
+import com.dev.james.booktracker.compose_ui.R
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.utilities.convertToAuthorsString
@@ -57,15 +55,16 @@ import timber.log.Timber
 
 @Composable
 fun GoogleBooksSearchBottomSheet(
-    readGoalsScreenViewModel: ReadGoalsScreenViewModel = hiltViewModel()
+   // readGoalsScreenViewModel: ReadGoalsScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    /*
     val searchFieldState by remember { mutableStateOf(readGoalsScreenViewModel.bottomSheetSearchFieldState) }
 
     val googleSearchBottomSheetUiState: ReadGoalsScreenViewModel.GoogleBottomSheetUiState by readGoalsScreenViewModel.googleBottomSheetSearchState
         .collectAsStateWithLifecycle()
 
-    StateLessGoogleBooksSearchBottomSheet(
+   StateLessGoogleBooksSearchBottomSheet(
         searchFieldState = searchFieldState,
         googleSearchBottomSheetUiState = googleSearchBottomSheetUiState,
         context = context,
@@ -78,7 +77,7 @@ fun GoogleBooksSearchBottomSheet(
             // update the search query
             readGoalsScreenViewModel.searchForBook(query)
         }
-    )
+    )*/
 
 }
 
@@ -87,7 +86,7 @@ fun GoogleBooksSearchBottomSheet(
 fun StateLessGoogleBooksSearchBottomSheet(
     context: Context = LocalContext.current,
     searchFieldState: FormState<TextFieldState> = FormState(fields = listOf()),
-    googleSearchBottomSheetUiState: ReadGoalsScreenViewModel.GoogleBottomSheetUiState = ReadGoalsScreenViewModel.GoogleBottomSheetUiState.IsLoading,
+   // googleSearchBottomSheetUiState: ReadGoalsScreenViewModel.GoogleBottomSheetUiState = ReadGoalsScreenViewModel.GoogleBottomSheetUiState.IsLoading,
     onSearchTextChanged: (String) -> Unit = {},
     onBookSelected: (Book) -> Unit = {}
 ) {

@@ -42,7 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,7 +53,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -62,14 +60,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
-import com.dev.james.booktracker.home.presentation.components.CameraView
-import com.dev.james.booktracker.home.presentation.components.GoogleBooksSearchBottomSheet
+import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
 import com.dev.james.booktracker.home.presentation.forms.OverallGoalsForm
 import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiState
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
@@ -91,12 +87,7 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
-
-private lateinit var outputDirectory: File
-private lateinit var cameraExecutor: ExecutorService
 
 @OptIn(
     ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
@@ -112,28 +103,7 @@ fun ReadGoalScreen(
 
     val context = LocalContext.current
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(key1 = lifecycleOwner) {
-        val eventObserver = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_DESTROY -> {
-                    cameraExecutor.shutdown()
-                }
-
-                Lifecycle.Event.ON_CREATE -> {
-                    outputDirectory = context.getDirectory()
-                    cameraExecutor = Executors.newSingleThreadExecutor()
-                }
-
-                else -> {}
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(eventObserver)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(eventObserver)
-        }
-    }
+    context.getDirectory()
 
 
     val currentReadFormState by remember { mutableStateOf(readGoalsScreenViewModel.currentReadFormState) }
@@ -156,6 +126,7 @@ fun ReadGoalScreen(
             initialValue = ReadGoalsScreenState(),
             minActiveState = Lifecycle.State.STARTED
         )
+
     val selectedBookState = readGoalsScreenViewModel.selectedBookState
         .collectAsStateWithLifecycle()
 
@@ -255,36 +226,6 @@ fun ReadGoalScreen(
     }
 
 
-
-    if (shouldShowCameraScreen) {
-        CameraView(
-            outputDirectory = outputDirectory,
-            executor = cameraExecutor,
-            onImageCaptured = { uri ->
-                //update the image state in view model
-                readGoalsScreenViewModel.passAddReadFormAction(
-                    ReadGoalsScreenViewModel
-                        .AddReadFormUiActions.ImageSelected(
-                            imageUri = uri
-                        )
-                )
-                //hide camera
-                shouldShowCameraScreen = false
-
-            },
-            onError = { error ->
-                Toast.makeText(context, "${error.message}", Toast.LENGTH_SHORT).show()
-            },
-            onCloseAction = {
-                shouldShowCameraScreen = false
-                readGoalsScreenViewModel.passAddReadFormAction(
-                    ReadGoalsScreenViewModel.AddReadFormUiActions
-                        .DismissImagePicker
-                )
-            }
-        )
-
-    } else {
 
         BottomSheetScaffold(
             modifier = Modifier.testTag("read_goals_screen_scaffold"),
@@ -661,7 +602,6 @@ fun ReadGoalScreen(
 
         }
 
-    }
 
 
     MaterialDialog(

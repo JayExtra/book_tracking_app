@@ -208,7 +208,10 @@ fun HomeScreen(
                 //call our google bottom sheet here
                 PdfListBottomSheetContent(
                     isGrid = isGrid,
-                    isExpanded = sheetState.currentValue == SheetValue.Expanded
+                    isExpanded = sheetState.currentValue == SheetValue.Expanded ,
+                    onPdfBookSelected = { book ->
+
+                    }
                 )
             }
         }

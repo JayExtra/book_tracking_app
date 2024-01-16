@@ -1,4 +1,4 @@
-package com.dev.james.booktracker.home.presentation.components
+package com.dev.james.booktracker.compose_ui.ui.components
 
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -32,9 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.dev.james.booktracker.compose_ui.R
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.home.R
-import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiState
 
 @Composable
 @Preview("ImageSelectorComponent")
