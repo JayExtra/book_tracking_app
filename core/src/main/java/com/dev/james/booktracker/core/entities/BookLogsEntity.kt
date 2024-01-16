@@ -4,10 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.LocalDate
-import java.util.Date
 
-@Entity("book_goal_logs")
-data class BookGoalLogsEntity(
+@Entity("book_logs")
+data class BookLogsEntity(
     @ColumnInfo("book_id")
     val bookId : String,
     @ColumnInfo("log_id")

@@ -20,7 +20,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -41,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.dev.james.booktracker.compose_ui.ui.components.CounterComponent
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.WeekDaySelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
@@ -74,8 +79,14 @@ fun OverallGoalsForm(
     alertSwitchState: Boolean = false,
     onAlertSwitchChecked: (Boolean) -> Unit = {},
     startDialPickerDialog: () -> Unit = {},
-    startAlarmPickerDialog: () -> Unit = {}
+    startAlarmPickerDialog: () -> Unit = {} ,
+    onSaveGoal : () -> Unit = {}
 ) {
+
+    val booksFieldState = overallGoalsFormState.getState<TextFieldState>(
+        name = "books_month"
+    )
+
 
     val context = LocalContext.current
 
@@ -128,12 +139,39 @@ fun OverallGoalsForm(
 
     val timeDialogState = rememberMaterialDialogState()
 
+    var shouldShowCounterDialog  by remember {
+        mutableStateOf(false)
+    }
+
+
+    if(shouldShowCounterDialog){
+        Dialog(
+            properties = DialogProperties(
+                dismissOnBackPress = true ,
+                dismissOnClickOutside = false ,
+                usePlatformDefaultWidth = false
+            ) ,
+            onDismissRequest = { }
+        ) {
+            CounterComponent(
+                onSet = { count ->
+                    booksFieldState.change(count.toString())
+                } ,
+                onDismiss = {
+                    shouldShowCounterDialog = false
+                }
+            )
+        }
+    }
+
 
 
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
 
         Text(
@@ -274,6 +312,68 @@ fun OverallGoalsForm(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        //add number of books section here
+        Column(
+            modifier = Modifier.fillMaxWidth() ,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ){
+            Text(
+                text = "How many books do you want to read in a month?.",
+                modifier = Modifier.fillMaxWidth(),
+                style = BookAppTypography.labelMedium,
+                color = if (booksFieldState.hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                OutlinedTextField(
+                    value = booksFieldState.value,
+                    onValueChange = {
+                        //  booksFieldState.change(update = it)
+                    },
+                    modifier = Modifier
+                        .border(
+                            width = 2.dp,
+                            shape = RoundedCornerShape(0.dp),
+                            //if error is available , change the color of border to error color
+                            color = if (booksFieldState.hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                        )
+                        .weight(1f),
+
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        errorCursorColor = MaterialTheme.colorScheme.error
+                    ),
+                    textStyle = BookAppTypography.bodyMedium,
+                    shape = RoundedCornerShape(0.dp),
+                    //adjust error depending if error is available
+                    isError = booksFieldState.hasError,
+                    singleLine = true,
+                    readOnly = true
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+
+                RoundedBrownButton(
+                    label = "Set",
+                    onClick = {
+                        //launch book count dialog
+                        shouldShowCounterDialog = true
+                    },
+                    cornerRadius = 10.dp
+                )
+
+            }
+        }
+
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+
+
         val alertSwitchFieldState : ChoiceState = overallGoalsFormState.getState<ChoiceState>("alert_switch")
 
         SwitchComponent(
@@ -320,6 +420,16 @@ fun OverallGoalsForm(
                 timeSet = formattedTime
             )
 
+        }
+
+        ElevatedButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            onClick = { onSaveGoal() } ,
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+        ) {
+            Text(text = "save goal" , style = BookAppTypography.labelMedium)
         }
 
 

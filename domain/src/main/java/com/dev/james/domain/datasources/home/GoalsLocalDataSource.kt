@@ -1,17 +1,16 @@
 package com.dev.james.domain.datasources.home
 
-import com.dev.james.booktracker.core.common_models.BookGoalLog
-import com.dev.james.booktracker.core.entities.BookGoalLogsEntity
-import com.dev.james.booktracker.core.entities.BookGoalsEntity
-import com.dev.james.booktracker.core.entities.OverallGoalEntity
-import com.dev.james.booktracker.core.entities.SpecificGoalsEntity
+import com.dev.james.booktracker.core.entities.GoalEntity
+import kotlinx.coroutines.flow.Flow
 
 interface GoalsLocalDataSource {
 
-    suspend fun addOverallGoalToDatabase(overallGoalEntity: OverallGoalEntity)
-    suspend fun addSpecificGoalToDatabase(specificGoalsEntity: SpecificGoalsEntity)
-    suspend fun addBookGoalToDatabase(bookGoalsEntity: BookGoalsEntity)
+    suspend fun addGoalToDatabase(goalEntity : GoalEntity)
 
-    suspend fun getAllBookGoals() : List<BookGoalsEntity>
+    suspend fun getCachedGoalFromDatabase(goalId : String): GoalEntity
+
+    suspend fun deleteCachedGoal(goalId: String)
+
+    fun getCachedGoals() : Flow<List<GoalEntity>>
 
 }

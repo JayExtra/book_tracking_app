@@ -12,16 +12,14 @@ import com.dev.james.booktracker.core_database.room.dao.BooksDao
 import com.dev.james.booktracker.core_database.room.dao.GoalsDao
 import com.dev.james.booktracker.core_database.room.dao.LogsDao
 import com.dev.james.booktracker.core.entities.BookEntity
-import com.dev.james.booktracker.core.entities.BookGoalLogsEntity
-import com.dev.james.booktracker.core.entities.BookGoalsEntity
-import com.dev.james.booktracker.core.entities.OverallGoalEntity
-import com.dev.james.booktracker.core.entities.OverallGoalLogsEntity
-import com.dev.james.booktracker.core.entities.SpecificGoalsEntity
+import com.dev.james.booktracker.core.entities.BookLogsEntity
+import com.dev.james.booktracker.core.entities.GoalEntity
+import com.dev.james.booktracker.core.entities.GoalLogsEntity
 
 @Database(
-    entities = [UserDetailsEntity::class , BookEntity::class , BookGoalsEntity::class , BookGoalLogsEntity::class ,
-    OverallGoalEntity::class , OverallGoalLogsEntity::class , SpecificGoalsEntity::class] ,
-    version = 4 ,
+    entities = [UserDetailsEntity::class , BookEntity::class , BookLogsEntity::class ,
+    GoalEntity::class , GoalLogsEntity::class ] ,
+    version = 5 ,
     exportSchema = false
 )
 @TypeConverters(ListTypeConverter::class , DateTypeConverter::class)

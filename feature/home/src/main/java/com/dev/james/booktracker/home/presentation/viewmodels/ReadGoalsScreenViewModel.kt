@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookGoal
-import com.dev.james.booktracker.core.common_models.OverallGoal
+import com.dev.james.booktracker.core.common_models.Goal
 import com.dev.james.booktracker.core.common_models.SpecificGoal
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.mappers.mapToPresentation
@@ -124,6 +124,14 @@ class ReadGoalsScreenViewModel @Inject constructor(
                     Validators.Required(message = "Please provide minimum times")
                 )
             ),
+            TextFieldState(
+                name = "books_month",
+                transform = { it.toInt() },
+                validators = listOf(
+                    Validators.Required(message = "Please provide number of books"),
+                    Validators.MinValue(limit = 1, message = "")
+                )
+            ),
             ChoiceState(
                 name = "frequency field",
                 validators = listOf(Validators.Required())
@@ -155,14 +163,6 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
     val specificGoalsFormState = FormState(
         fields = listOf(
-            TextFieldState(
-                name = "books_month",
-                transform = { it.toInt() },
-                validators = listOf(
-                    Validators.Required(message = "Please provide number of books"),
-                    Validators.MinValue(limit = 1, message = "")
-                ),
-            ),
             ChoiceState(
                 name = "available_books",
                 validators = listOf(Validators.Required(message = "You need to set a goal for an added book."))
@@ -222,17 +222,18 @@ class ReadGoalsScreenViewModel @Inject constructor(
         overallGoalFormState.getState("alert_switch")
     private val overallGoalSelectedDialogTime: ChoiceState =
         overallGoalFormState.getState("alert_dialog_time")
-
     private val specificGoalsBookCountState: TextFieldState =
-        specificGoalsFormState.getState("books_month")
-    private val availableBooksCountState: ChoiceState =
+        overallGoalFormState.getState("books_month")
+
+
+  /*  private val availableBooksCountState: ChoiceState =
         specificGoalsFormState.getState("available_books")
     private val chapterOrHoursState: ChoiceState = specificGoalsFormState.getState("chapter_hours")
     private val timeOrChapterState: TextFieldState = specificGoalsFormState.getState("time_chapter")
     private val specificGoalPeriodState: ChoiceState = specificGoalsFormState.getState("period")
     private val periodDaysState: SelectState = specificGoalsFormState.getState("period_days")
 
-
+*/
     fun validateImageSelected(imageUri: Uri , imageUrl : String) {
         if (imageUri != Uri.EMPTY || imageUrl.isNotBlank()) {
             _imageSelectorState.value = _imageSelectorState.value.copy(
@@ -291,15 +292,15 @@ class ReadGoalsScreenViewModel @Inject constructor(
         when (action) {
             is ReadGoalsUiActions.MoveNext -> {
                 val currentPosition = action.currentPosition
-                if (currentPosition < 2) {
+                if (currentPosition < 1) {
                     _readGoalsScreenUiState.value = _readGoalsScreenUiState
                         .value.copy(
                             currentPosition = currentPosition + 1,
                             previousPosition = currentPosition
                         )
                 } else {
-                    //save final goals set here
-                    val overallGoal = OverallGoal(
+                    //save final goal set here
+                    /*val goal = Goal(
                         goalId = generateRandomId(10),
                         goalInfo = prepareGoalString(
                             goalTime = overallGoalTimeFieldState.value,
@@ -310,34 +311,15 @@ class ReadGoalsScreenViewModel @Inject constructor(
                         goalPeriod = overallGoalFrequencyFieldState.value,
                         specificDays = if (overallGoalSpecificFieldState.value.isEmpty()) emptyList() else overallGoalSpecificFieldState.value,
                         shouldShowAlert = overallGoalAlertSwitchFieldState.value == "Yes",
+                        booksToRead= specificGoalsBookCountState.value.toInt(),
+                        booksRead = 0,
                         alertNote = overallGoalAlertNoteFieldState.value,
                         alertTime = overallGoalSelectedDialogTime.value
                     )
 
-                    val specificGoal = SpecificGoal(
-                        goalId = generateRandomId(10),
-                        bookCount = specificGoalsBookCountState.value.toInt(),
-                        booksReadCount = 0
-                    )
-
-                    val bookGoal = BookGoal(
-                        bookId = savedBookState.value.bookId,
-                        isChapterGoal = chapterOrHoursState.value == "By chapters",
-                        goalInfo = prepareGoalString(
-                            goalTime = timeOrChapterState.value,
-                            condition = specificGoalPeriodState.value,
-                            daysList = periodDaysState.value
-                        ),
-                        isTimeGoal = chapterOrHoursState.value == "By hours",
-                        goalSet = timeOrChapterState.value,
-                        goalPeriod = specificGoalPeriodState.value,
-                        specificDays = periodDaysState.value
-                    )
                     saveUserGoals(
-                        overallGoal ,
-                        specificGoal ,
-                        bookGoal
-                    )
+                        goal
+                    )*/
                 }
             }
 
@@ -355,6 +337,29 @@ class ReadGoalsScreenViewModel @Inject constructor(
             is ReadGoalsUiActions.UndoBookSave -> {
                 Timber.tag(TAG).d("Undo action triggered")
                 undoBookSaved()
+            }
+
+            is ReadGoalsUiActions.SaveGoalToDatabase -> {
+                val goal = Goal(
+                    goalId = generateRandomId(10),
+                    goalInfo = prepareGoalString(
+                        goalTime = overallGoalTimeFieldState.value,
+                        condition = overallGoalFrequencyFieldState.value,
+                        daysList = overallGoalSpecificFieldState.value
+                    ),
+                    goalTime = overallGoalTimeFieldState.value.calculateTimeToLong(),
+                    goalPeriod = overallGoalFrequencyFieldState.value,
+                    specificDays = if (overallGoalSpecificFieldState.value.isEmpty()) emptyList() else overallGoalSpecificFieldState.value,
+                    shouldShowAlert = overallGoalAlertSwitchFieldState.value == "Yes",
+                    booksToRead= specificGoalsBookCountState.value.toInt(),
+                    booksRead = 0,
+                    alertNote = overallGoalAlertNoteFieldState.value,
+                    alertTime = overallGoalSelectedDialogTime.value
+                )
+
+                saveUserGoals(
+                    goal
+                )
             }
 
             else -> {}
@@ -408,14 +413,12 @@ class ReadGoalsScreenViewModel @Inject constructor(
     }
 
     private fun saveUserGoals(
-        overallGoal: OverallGoal,
-        specificGoal: SpecificGoal,
-        bookGoal: BookGoal
+        goal: Goal
     ) = viewModelScope.launch {
         Timber.tag(TAG).d("Saving user goals in db")
         //save user goals
 
-        when (val result = goalsRepository.saveGoals(overallGoal, specificGoal, bookGoal)) {
+        when (val result = goalsRepository.saveGoals(goal)) {
             is Resource.Success -> {
                 if (result.data == true) {
                     Timber.tag(TAG).d("goals successfully added to database")
@@ -562,6 +565,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
         data class MoveNext(val currentPosition: Int) : ReadGoalsUiActions()
         data class MovePrevious(val currentPosition: Int) : ReadGoalsUiActions()
         object UndoBookSave : ReadGoalsUiActions()
+
+        object SaveGoalToDatabase : ReadGoalsUiActions()
     }
 
     sealed class ReadGoalsUiEvents {
@@ -604,7 +609,6 @@ fun BookDto.mapToBookUiObject(): Book {
         bookImage = volumeInfo?.image_links?.thumbnail,
         bookAuthors = volumeInfo?.authors,
         bookTitle = volumeInfo?.title,
-        bookSmallThumbnail = volumeInfo?.image_links?.small_thumbnail,
         bookPagesCount = volumeInfo?.pageCount,
         publishedDate = volumeInfo?.published_date,
         publisher = volumeInfo?.publisher

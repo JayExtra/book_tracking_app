@@ -15,8 +15,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 
@@ -26,6 +31,7 @@ fun MainTopBar(
     modifier: Modifier = Modifier ,
     avatarImage : Int = 0 ,
     username : String = "Test username" ,
+    greeting : String = "",
     onSettingsClick : () -> Unit = {} ,
 ){
 
@@ -39,9 +45,22 @@ fun MainTopBar(
             .padding(top = 8.dp , bottom = 8.dp , end = 16.dp , start = 16.dp)
             .fillMaxWidth()
     ) {
+        val newText = buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(fontWeight = FontWeight.Normal)
+            ){
+                append("Hi $username")
+            }
+            append("\n")
+            withStyle(
+                style = SpanStyle(fontWeight = FontWeight.Bold , fontSize = 22.sp)
+            ){
+                append(greeting)
+            }
+        }
         Text(
             modifier = Modifier.weight(0.8f) ,
-            text = "Hello $username !",
+            text = newText,
             style = BookAppTypography.headlineSmall ,
             color = MaterialTheme.colorScheme.secondary
         )

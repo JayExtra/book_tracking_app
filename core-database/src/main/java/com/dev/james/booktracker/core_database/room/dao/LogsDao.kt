@@ -1,16 +1,38 @@
 package com.dev.james.booktracker.core_database.room.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dev.james.booktracker.core.entities.BookGoalLogsEntity
-import com.dev.james.booktracker.core.entities.OverallGoalLogsEntity
+import com.dev.james.booktracker.core.entities.BookLogsEntity
+import com.dev.james.booktracker.core.entities.GoalEntity
+import com.dev.james.booktracker.core.entities.GoalLogsEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LogsDao {
-    @Query("SELECT * FROM book_goal_logs WHERE book_id =:id")
-    fun getBookGoaLogs(id : String) : Flow<List<BookGoalLogsEntity>>
 
-    @Query("SELECT * FROM daily_overall_goal_logs WHERE parent_goal_id =:id")
-    fun getOverallGoalLogs(id : String) : Flow<List<OverallGoalLogsEntity>>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addBookLog(bookLogsEntity: BookLogsEntity)
+    @Query("SELECT * FROM book_logs WHERE book_id = :bookId")
+    fun getBookLogs(bookId : String) : Flow<List<BookLogsEntity>>
+
+    @Query("DELETE FROM book_logs WHERE log_id = :id")
+    suspend fun deleteBookLog(id : String)
+
+    @Query("SELECT * FROM book_logs WHERE log_id = :id")
+    suspend fun getABookLog(id : String) : BookLogsEntity
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addGoalLog(goalLogsEntity: GoalLogsEntity)
+    @Query("SELECT * FROM daily_goal_logs WHERE parent_goal_id =:id")
+    fun getGoalLogs(id : String) : Flow<List<GoalLogsEntity>>
+
+    @Query("DELETE FROM daily_goal_logs WHERE id = :id")
+    suspend fun deleteGoalLog(id : String)
+
+    @Query("SELECT * FROM daily_goal_logs WHERE id = :id")
+    suspend fun getAGoalLog(id : String) : GoalLogsEntity
+
+
 }

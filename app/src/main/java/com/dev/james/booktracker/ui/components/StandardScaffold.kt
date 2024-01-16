@@ -31,6 +31,7 @@ fun StandardScaffold(
         BottomNavItem.Achievements
     ),
     userDetails : UserDetails,
+    greeting : String ,
     content : @Composable (paddingValues : PaddingValues) -> Unit
 ){
     Timber.tag("StandardScaffold").d(
@@ -43,6 +44,7 @@ fun StandardScaffold(
                     MainTopBar(
                         username = userDetails.username ,
                         avatarImage = userDetails.selectedAvatar ,
+                        greeting = greeting
                     ){/*executes navigation action to navigate to settings screen*/}
                  }
         },

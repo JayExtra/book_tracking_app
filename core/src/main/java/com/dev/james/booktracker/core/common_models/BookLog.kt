@@ -1,10 +1,8 @@
 package com.dev.james.booktracker.core.common_models
 
-import androidx.room.ColumnInfo
-import androidx.room.PrimaryKey
 import java.time.LocalDate
 
-data class BookGoalLog(
+data class BookLog(
     val bookId : String = "",
     val logId : String = "",
     val startedTime : LocalDate? = null,

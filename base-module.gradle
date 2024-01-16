@@ -41,6 +41,8 @@ dependencies{
 
     implementation("androidx.appcompat:appcompat:1.6.1")
 
+    //activity
+    //implementation ("androidx.activity:activity-ktx:1.8.2")
 
 
 
@@ -134,6 +136,12 @@ dependencies{
     implementation ("com.squareup.okhttp3:okhttp:${Versions.okhttp_version}")
 //moshi dependency
     implementation("com.squareup.moshi:moshi-kotlin:${Versions.moshi_version}")
+
+
+    //pdfs
+    implementation ("com.tom-roush:pdfbox-android:2.0.27.0")
+    implementation ("com.itextpdf:itextpdf:5.5.13.3")
+
 
 
 }

@@ -4,4 +4,6 @@
     <string name="overall_form_heading">In day , I want to read for at least</string>
     <string name="current_read">Current Read</string>
     <string name="continue_reading">continue reading</string>
+    <string name="storage_rationale_message_redirect">Storage permission is required to access saved books. Redirecting you to the settings screen to grant this permission.</string>
+    <string name="storage_permission_rationale_message">Storage permission is required to access saved books in your device.Please grant to enjoy this apps features.</string>
 </resources>

@@ -1,41 +1,75 @@
 package com.dev.james.booktracker.core.common_models.mappers
 
-import com.dev.james.booktracker.core.common_models.BookGoal
-import com.dev.james.booktracker.core.common_models.OverallGoal
-import com.dev.james.booktracker.core.common_models.SpecificGoal
-import com.dev.james.booktracker.core.entities.BookGoalsEntity
-import com.dev.james.booktracker.core.entities.OverallGoalEntity
-import com.dev.james.booktracker.core.entities.SpecificGoalsEntity
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.dev.james.booktracker.core.common_models.BookLog
+import com.dev.james.booktracker.core.common_models.BookSave
+import com.dev.james.booktracker.core.common_models.Goal
+import com.dev.james.booktracker.core.common_models.GoalLog
+import com.dev.james.booktracker.core.entities.BookEntity
+import com.dev.james.booktracker.core.entities.BookLogsEntity
+import com.dev.james.booktracker.core.entities.GoalEntity
+import com.dev.james.booktracker.core.entities.GoalLogsEntity
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAmount
+import kotlin.time.DurationUnit
 
-fun OverallGoal.mapToEntityObject() : OverallGoalEntity {
-    return OverallGoalEntity(
-        goalId = goalId ,
-        goalInfo = goalInfo ,
-        goalTime = goalTime ,
-        goalPeriod = goalPeriod ,
-        specificDays = specificDays ,
+fun Goal.mapToEntityObject() : GoalEntity {
+    return GoalEntity(
+        id = goalId ,
+        information = goalInfo ,
+        time = goalTime ,
+        period = goalPeriod ,
+        selectedDays = specificDays ,
         shouldShowAlert = shouldShowAlert ,
+        booksToRead = booksToRead ,
+        booksRead = booksRead ,
         alertNote = alertNote ,
         alertTime = alertTime
     )
 }
 
-fun BookGoal.mapToEntityObject() : BookGoalsEntity {
-    return BookGoalsEntity(
+@RequiresApi(Build.VERSION_CODES.O)
+fun BookLog.toEntity() : BookLogsEntity {
+   return  BookLogsEntity(
         bookId = bookId ,
-        goalInfo = goalInfo ,
-        isChapterGoal = isChapterGoal ,
-        isTimeGoal = isTimeGoal ,
-        goalSet = goalSet ,
-        goalPeriod = goalPeriod ,
-        specificDays = specificDays
+        logId = logId ,
+        startedTime = startedTime ?: LocalDate.now() ,
+        endTime = endTime ?: LocalDate.now().plus(1 , ChronoUnit.MINUTES ) ,
+        period = period ,
+        pagesRead = pagesRead ,
+        currentChapterTitle = currentChapterTitle ,
+        currentChapter = currentChapter
     )
 }
 
-fun SpecificGoal.mapToEntityObject() : SpecificGoalsEntity {
-    return SpecificGoalsEntity(
-        goalId = goalId ,
-        bookCountGoal = bookCount ,
-        booksReadCount = booksReadCount
+@RequiresApi(Build.VERSION_CODES.O)
+fun GoalLog.toEntity() : GoalLogsEntity{
+    return GoalLogsEntity(
+        parentGoalId = parentGoalId ,
+        id = id ,
+        startTime = startTime ?: LocalDate.now() ,
+        endTime = endTime ?: LocalDate.now().plus(1 , ChronoUnit.MINUTES ),
+        duration = duration
     )
 }
+
+
+fun BookSave.mapToBookEntity(): BookEntity {
+    return BookEntity(
+        bookId = bookId,
+        bookImage = bookImage,
+        isUri = isUri,
+        bookAuthors = bookAuthors,
+        bookTitle = bookTitle,
+        bookSmallThumbnail = bookSmallThumbnail,
+        bookPagesCount = bookPagesCount,
+        publisher = publisher,
+        publishedDate = publishedDate,
+        currentChapterTitle = currentChapterTitle,
+        chapters = chapters,
+        currentChapter = currentChapter
+    )
+}
+

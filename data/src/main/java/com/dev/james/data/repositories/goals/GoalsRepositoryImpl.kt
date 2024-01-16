@@ -2,8 +2,7 @@ package com.dev.james.data.repositories.goals
 
 import android.database.sqlite.SQLiteException
 import com.dev.james.booktracker.core.common_models.BookGoal
-import com.dev.james.booktracker.core.common_models.BookGoalLog
-import com.dev.james.booktracker.core.common_models.OverallGoal
+import com.dev.james.booktracker.core.common_models.Goal
 import com.dev.james.booktracker.core.common_models.SpecificGoal
 import com.dev.james.booktracker.core.common_models.mappers.mapToEntityObject
 import com.dev.james.booktracker.core.common_models.mappers.toDomain
@@ -14,8 +13,13 @@ import com.dev.james.domain.repository.home.GoalsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
 
@@ -23,19 +27,15 @@ class GoalsRepositoryImpl @Inject constructor(
     private val goalsLocalDataSource: GoalsLocalDataSource,
     private val defaultDispatcher : CoroutineDispatcher = Dispatchers.IO
 ) : GoalsRepository {
+
+    companion object {
+        const val TAG = "GoalsRepositoryImpl"
+    }
     override suspend fun saveGoals(
-        overallGoal: OverallGoal,
-        specificGoal: SpecificGoal,
-        bookGoal: BookGoal
+        goal: Goal
     ): Resource<Boolean> {
         return try {
-            coroutineScope {
-                val overallGoalJob = launch { goalsLocalDataSource.addOverallGoalToDatabase(overallGoal.mapToEntityObject()) }
-                val specificGoalJob = launch { goalsLocalDataSource.addSpecificGoalToDatabase(specificGoal.mapToEntityObject()) }
-                val bookGoalJob = launch { goalsLocalDataSource.addBookGoalToDatabase(bookGoal.mapToEntityObject()) }
-
-                joinAll(overallGoalJob , specificGoalJob , bookGoalJob)
-            }
+            goalsLocalDataSource.addGoalToDatabase(goal.mapToEntityObject())
              Resource.Success(data = true)
 
         }catch (e : IOException){
@@ -45,15 +45,49 @@ class GoalsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllActiveBookGoals(): List<BookGoal> =
-            goalsLocalDataSource
-                .getAllBookGoals()
-                .filter { bookGoalsEntity ->
-                    bookGoalsEntity.isActive
+    override fun getActiveGoals(): Flow<List<Goal>> {
+        return goalsLocalDataSource.getCachedGoals()
+            .map { goalEntities ->
+                goalEntities.filter {
+                    it.isActive
                 }
-                .map { bookGoalsEntity ->
-                    bookGoalsEntity.toDomain()
+            }
+            .map { goalsList ->
+                goalsList.map {
+                    it.toDomain()
                 }
+            }.catch { t->
+                Timber.tag(TAG).e("getAllGoals : $t")
+                Timber.tag(TAG).e(t)
+            }
+    }
+
+    override suspend fun deleteGoal(id: String): Resource<Boolean> {
+       return try {
+           goalsLocalDataSource.deleteCachedGoal(id)
+           Resource.Success(data = true)
+       }catch (e : IOException){
+           Timber.tag(TAG).e("deleteGoal : $e")
+           Resource.Error("Could not delete goal in the database.Issue : ${e.message}")
+       }catch ( e : SQLiteException){
+           Timber.tag(TAG).e("deleteGoal : $e")
+           Resource.Error("Could not delete goal in the database.Issue : ${e.message}")
+       }
+    }
+
+    override suspend fun getAGoal(id: String): Resource<Goal> {
+        return try {
+            Resource.Success(
+                data = goalsLocalDataSource.getCachedGoalFromDatabase(id).toDomain()
+            )
+        }catch (e : IOException){
+            Timber.tag(TAG).e("getAGoal : $e")
+            Resource.Error("Could not fetch goal in the database.Issue : ${e.message}")
+        }catch ( e : SQLiteException){
+            Timber.tag(TAG).e("getAGoal : $e")
+            Resource.Error("Could not fetch goal in the database.Issue : ${e.message}")
+        }
+    }
 
 
 }
