@@ -53,7 +53,8 @@ import com.dev.james.booktracker.home.R
 fun BookGoalInfoComponent(
     shouldNotShowBlankMessage : Boolean = false,
     bookProgressData: BookProgressData = BookProgressData(),
-    onContinueClicked : () -> Unit = {}
+    onContinueClicked : () -> Unit = {} ,
+    onProceedToMyLibrary : () -> Unit = {}
 ) {
 
     Card(
@@ -93,7 +94,7 @@ fun BookGoalInfoComponent(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                ElevatedButton(onClick = { /*TODO*/ } , colors = ButtonDefaults.buttonColors(
+                ElevatedButton(onClick = { onProceedToMyLibrary() } , colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )) {
                     Text(text = "proceed" , style = BookAppTypography.labelSmall)

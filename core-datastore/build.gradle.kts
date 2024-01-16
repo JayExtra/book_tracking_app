@@ -45,5 +45,5 @@ android {
 }
 
 dependencies {
-    implementation(project(Modules.composeUi))
+    //implementation(project(Modules.composeUi))
 }

@@ -609,7 +609,6 @@ fun BookDto.mapToBookUiObject(): Book {
         bookImage = volumeInfo?.image_links?.thumbnail,
         bookAuthors = volumeInfo?.authors,
         bookTitle = volumeInfo?.title,
-        bookSmallThumbnail = volumeInfo?.image_links?.small_thumbnail,
         bookPagesCount = volumeInfo?.pageCount,
         publishedDate = volumeInfo?.published_date,
         publisher = volumeInfo?.publisher

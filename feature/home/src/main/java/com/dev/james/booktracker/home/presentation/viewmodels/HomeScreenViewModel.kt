@@ -1,22 +1,36 @@
 package com.dev.james.booktracker.home.presentation.viewmodels
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.common_models.Goal
 import com.dev.james.booktracker.core.common_models.GoalProgressData
+import com.dev.james.booktracker.core.common_models.PdfBookItem
+import com.dev.james.booktracker.core.common_models.mappers.mapToPresentation
 import com.dev.james.domain.usecases.FetchActiveBookProgress
 import com.dev.james.domain.usecases.FetchGoalProgress
+import com.dev.james.domain.usecases.FetchPdfBooks
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
   private val fetchActiveBookProgress: FetchActiveBookProgress ,
-  private val fetchGoalProgress: FetchGoalProgress
+  private val fetchGoalProgress: FetchGoalProgress ,
+  private val fetchPdfBooks: FetchPdfBooks
 ) : ViewModel() {
 
   private var _homeScreenUiState : MutableStateFlow<HomeScreenUiState>  = MutableStateFlow(
@@ -26,6 +40,11 @@ class HomeScreenViewModel @Inject constructor(
     )
   )
   val homeScreenUiState get() = _homeScreenUiState.asStateFlow()
+
+  private var _pdfBookListFlow : MutableStateFlow<List<Book>> = MutableStateFlow(listOf(Book()))
+  val pdfBookListFlow get() = _pdfBookListFlow.asStateFlow()
+
+  private var fetchPdfsJob : Job? = null
 
 
   init {
@@ -38,6 +57,25 @@ class HomeScreenViewModel @Inject constructor(
       )
     }
   }
+  fun getCachedPdfs(){
+    //test run to see if pdfs will be fetched
+    fetchPdfsJob?.cancel()
+    fetchPdfsJob = viewModelScope.launch {
+       fetchPdfBooks.invoke()
+         .flowOn(Dispatchers.Main)
+        .collectLatest { pdfs ->
+            val booksList = pdfs.map {
+              it.mapToPresentation()
+            }
+          _pdfBookListFlow.value = booksList
+         }
+    }
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    fetchPdfsJob?.cancel()
+  }
 
   sealed class HomeScreenUiState {
     data class HasFetchedScreenData(
@@ -45,4 +83,9 @@ class HomeScreenViewModel @Inject constructor(
       val goalProgressData: GoalProgressData
     ) : HomeScreenUiState()
   }
+
+  data class PdfBottomSheetUiState(
+    val showCircularProgress : Boolean = false
+  )
+
 }

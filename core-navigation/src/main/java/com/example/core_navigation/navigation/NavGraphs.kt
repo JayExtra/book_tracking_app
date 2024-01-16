@@ -44,7 +44,8 @@ object NavGraphs {
             HomeScreenDestination ,
             OnBoardingWelcomeScreenDestination ,
             ReadGoalScreenDestination ,
-            TrackBookScreenDestination
+            TrackBookScreenDestination ,
+            MyLibraryScreenDestination
         ).routedIn(this)
             .associateBy { it.route }
 
