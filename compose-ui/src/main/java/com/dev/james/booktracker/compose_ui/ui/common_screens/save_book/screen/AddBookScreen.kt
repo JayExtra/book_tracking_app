@@ -61,16 +61,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.R
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.forms.CurrentReadForm
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.navigation.AddBookScreenNavigator
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.AddBookViewModel
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.CurrentReadFormActions
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
 import com.dev.james.booktracker.compose_ui.ui.components.CameraView
 import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dsc.form_builder.FormState
+import com.dsc.form_builder.TextFieldState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.isGranted
@@ -91,15 +98,17 @@ private lateinit var cameraExecutor: ExecutorService
 @RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun AddBookScreen(
-    addBookScreenNavigator: AddBookScreenNavigator
+    addBookScreenNavigator: AddBookScreenNavigator ,
+    addBookViewModel: AddBookViewModel = hiltViewModel()
 ){
     val context = LocalContext.current
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    var shouldShowCameraScreen by remember { mutableStateOf(false) }
+    val imageSelectorState = addBookViewModel.imageSelectorUiState.collectAsStateWithLifecycle()
+    val currentReadFormState = addBookViewModel.currentReadFormState
 
-    var checkedState by remember { mutableStateOf(false) }
+    var shouldShowCameraScreen by remember { mutableStateOf(false) }
 
     var isCameraButtonClicked by remember { mutableStateOf(false) }
 
@@ -173,7 +182,7 @@ fun AddBookScreen(
             executor = cameraExecutor,
             onImageCaptured = { uri ->
                 //update the image state in view model
-
+                addBookViewModel.passUiAction(action = CurrentReadFormActions.ImageSelected(imageUri = uri))
                 //hide camera
                 shouldShowCameraScreen = false
 
@@ -253,6 +262,8 @@ fun AddBookScreen(
 
             StatelessAddBookScreen(
                 context = context,
+                currentReadFormState = currentReadFormState,
+                imageSelectorState = imageSelectorState.value,
                 popBackStack = {
 
                 } ,
@@ -268,6 +279,7 @@ fun AddBookScreen(
 
                 } ,
                 onImageSelectorClicked = {
+
                     when {
                         cameraPermissionState.status.isGranted -> {
                             //if so launch image picker
@@ -364,6 +376,8 @@ fun AddBookScreen(
 fun StatelessAddBookScreen(
     modifier: Modifier = Modifier ,
     context: Context = LocalContext.current,
+    currentReadFormState : FormState<TextFieldState>,
+    imageSelectorState : ImageSelectorUiState ,
     popBackStack: () -> Unit = {},
     onGoogleIconClicked: () -> Unit = {},
     onSaveClicked: () -> Unit = {},

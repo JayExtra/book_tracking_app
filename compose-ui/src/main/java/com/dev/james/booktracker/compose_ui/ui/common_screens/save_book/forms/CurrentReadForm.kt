@@ -24,13 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
 import com.dev.james.booktracker.compose_ui.ui.components.DropDownComponent
 import com.dev.james.booktracker.compose_ui.ui.components.ImageSelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.home.presentation.components.DropDownComponent
-import com.dev.james.booktracker.home.presentation.components.ImageSelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
-import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
 import timber.log.Timber
@@ -39,11 +37,11 @@ import timber.log.Timber
 @Preview("CurrentReadForm")
 fun CurrentReadForm(
     //will take in form state
-    modifier: Modifier = Modifier ,
+    modifier: Modifier = Modifier,
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
     imageSelectorState: ImageSelectorUiState = ImageSelectorUiState(),
     onSaveBookClicked: () -> Unit = {},
-    imageSelectorClicked: () -> Unit = {} ,
+    imageSelectorClicked: () -> Unit = {},
     onClearImage : () -> Unit = {}
 ) {
 
