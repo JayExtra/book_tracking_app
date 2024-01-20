@@ -237,8 +237,6 @@ class AddBookViewModel @Inject constructor(
                         )
 
                         saveBookToDb(bookSave)
-
-
                     }
                 }
             }

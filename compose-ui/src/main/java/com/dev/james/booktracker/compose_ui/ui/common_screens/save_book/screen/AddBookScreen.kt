@@ -107,8 +107,8 @@ private lateinit var cameraExecutor: ExecutorService
 @Destination
 @Composable
 fun AddBookScreen(
-    addBookScreenNavigator: AddBookScreenNavigator ,
-   // previousScreenDestinations: PreviousScreenDestinations ,
+    addBookScreenNavigator: AddBookScreenNavigator,
+    previousScreenDestinations: PreviousScreenDestinations,
     addBookViewModel: AddBookViewModel = hiltViewModel()
 ){
     val context = LocalContext.current
@@ -231,7 +231,17 @@ fun AddBookScreen(
                     }
 
                     is AddBookScreenUiEvents.Navigate -> {
-
+                        when (previousScreenDestinations) {
+                            PreviousScreenDestinations.HOME_SCREEN -> {
+                                addBookScreenNavigator.backToHomeDestination()
+                            }
+                            PreviousScreenDestinations.LIBRARY_SCREEN -> {
+                                addBookScreenNavigator.backToLibraryScreen()
+                            }
+                            else -> {
+                                Timber.tag("AddBookScreen").d("No naviation event received!")
+                            }
+                        }
                     }
                     else -> {}
                 }
@@ -332,6 +342,11 @@ fun AddBookScreen(
                 showHorizontalProgress = addBookViewModel.saveProgressBarState ,
                 popBackStack = {
                     //navigate out of this screen
+                     coroutineScope.launch {
+                         addBookViewModel.passUiAction(
+                             action  = CurrentReadFormActions.Navigate
+                         )
+                     }
                 } ,
                 onGoogleIconClicked = {
                     coroutineScope.launch {

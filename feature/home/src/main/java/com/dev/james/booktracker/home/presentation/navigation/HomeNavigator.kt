@@ -8,5 +8,7 @@ interface HomeNavigator {
 
     fun openMyLibraryScreen()
 
+    fun openAddBookScreen()
+
     //add navigation to add book screen
 }

@@ -18,7 +18,10 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -107,6 +110,8 @@ fun HomeScreen(
     }
 
     val storagePermissionDialogRationaleState = rememberMaterialDialogState()
+
+    val pdfOrPhysicalDialogState = rememberMaterialDialogState()
 
     if(isExpandBottomSheet) {
         Toast.makeText(context, "Expand bottom sheet", Toast.LENGTH_SHORT).show()
@@ -210,7 +215,7 @@ fun HomeScreen(
                     isGrid = isGrid,
                     isExpanded = sheetState.currentValue == SheetValue.Expanded ,
                     onPdfBookSelected = { book ->
-
+                        //add pdf to db
                     }
                 )
             }
@@ -227,7 +232,8 @@ fun HomeScreen(
             },
             onProceedClicked = {
 
-                isExpandBottomSheet = true
+               //open dialog
+                pdfOrPhysicalDialogState.show()
 
                 /*
                 //check if storage permission has been granted
@@ -270,7 +276,7 @@ fun HomeScreen(
         )
     }
 
-
+// permission rationale dialog
     MaterialDialog(
         dialogState = storagePermissionDialogRationaleState,
         backgroundColor = MaterialTheme.colorScheme.background,
@@ -322,6 +328,85 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(20.dp))
         }
 
+
+    }
+
+    // pdf or physical book dialog
+    MaterialDialog(
+        dialogState = pdfOrPhysicalDialogState ,
+        backgroundColor = MaterialTheme.colorScheme.background,
+        shape = RoundedCornerShape(10.dp) ,
+        elevation = 5.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .height(250.dp),
+            horizontalAlignment = Alignment.CenterHorizontally ,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween ,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Card(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .height(100.dp)
+                        .border(width = 3.dp, color = MaterialTheme.colorScheme.primary),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) ,
+                    onClick = {
+                        isExpandBottomSheet = true
+                        pdfOrPhysicalDialogState.hide()
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .height(60.dp)
+                            .width(60.dp),
+                        painter = painterResource(id = com.dev.james.booktracker.home.R.drawable.pdf_icon),
+                        contentDescription = "Pdf icon"
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "Add a pdf book")
+                }
+
+                Card(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .height(100.dp)
+                        .border(width = 3.dp, color = MaterialTheme.colorScheme.primary),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) ,
+                    onClick = {
+                        homeNavigator.openAddBookScreen()
+                        pdfOrPhysicalDialogState.hide()
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .height(60.dp)
+                            .width(60.dp) ,
+                        painter = painterResource(id = com.dev.james.booktracker.home.R.drawable.baseline_book_24),
+                        contentDescription = "book icon" ,
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "Add a physical book")
+                }
+            }
+
+            Row(horizontalArrangement = Arrangement.End) {
+                RoundedBrownButton(
+                    label = "Dismiss" ,
+                    textColor = MaterialTheme.colorScheme.onPrimary ,
+                    color = MaterialTheme.colorScheme.primary ,
+                    onClick = {
+                        pdfOrPhysicalDialogState.hide()
+                    }
+                )
+            }
+        }
 
     }
 
