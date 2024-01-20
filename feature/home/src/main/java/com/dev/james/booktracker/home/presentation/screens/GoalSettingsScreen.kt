@@ -470,9 +470,9 @@ fun ReadGoalScreen(
                                     Toast.makeText(
                                         context,
                                         "The current chapter you are in exceeds the total chapters in this book",
-                                        Toast.LENGTH_LONG
+                                        Toast.LENGTH_LONG                                } else {
+
                                     ).show()
-                                } else {
                                     readGoalsScreenViewModel.passMainScreenActions(
                                         action = ReadGoalsScreenViewModel.ReadGoalsUiActions.MoveNext(
                                             currentPosition = readGoalsScreenUiState.value.currentPosition

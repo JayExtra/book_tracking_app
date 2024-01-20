@@ -73,3 +73,8 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:${Versions.camerx_version}")
     implementation("androidx.camera:camera-view:${Versions.camerx_version}")
 }
+
+ksp{
+    arg("compose-destinations.mode", "destinations")
+    arg("compose-destinations.moduleName" , "compose-ui")
+}

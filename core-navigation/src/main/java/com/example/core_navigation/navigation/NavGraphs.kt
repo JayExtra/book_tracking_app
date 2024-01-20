@@ -45,7 +45,8 @@ object NavGraphs {
             OnBoardingWelcomeScreenDestination ,
             ReadGoalScreenDestination ,
             TrackBookScreenDestination ,
-            MyLibraryScreenDestination
+            MyLibraryScreenDestination ,
+           // AddBookScreenDestination
         ).routedIn(this)
             .associateBy { it.route }
 
@@ -61,7 +62,8 @@ object NavGraphs {
 
         override val destinationsByRoute =
             listOf<DestinationSpec<*>>(
-                MyLibraryScreenDestination
+                MyLibraryScreenDestination ,
+               // AddBookScreenDestination
             ).routedIn(this)
                 .associateBy { it.route }
 
@@ -96,6 +98,22 @@ object NavGraphs {
             .associateBy { it.route }
     }
 
+ /*   val commonScreens = object : NavGraphSpec {
+
+        override val route: String = "common-screens"
+
+        override val startRoute: Route = AddBookScreenDestination routedIn this
+
+        override val destinationsByRoute = listOf<DestinationSpec<*>>(
+                AddBookScreenDestination ,
+                HomeScreenDestination ,
+                MyLibraryScreenDestination
+            ).routedIn(this)
+                .associateBy { it.route }
+
+    }*/
+
+
     val rootWithOnBoarding = object : NavGraphSpec {
         override val route: String = "rootWithOnBoarding"
         override val startRoute: Route
@@ -107,7 +125,8 @@ object NavGraphs {
             home ,
             myLibrary ,
             achievements ,
-            bookTracking
+            bookTracking ,
+           // commonScreens
         )
     }
 
@@ -122,7 +141,8 @@ object NavGraphs {
             home ,
             myLibrary ,
             achievements ,
-            bookTracking
+            bookTracking ,
+            //commonScreens
         )
     }
 }

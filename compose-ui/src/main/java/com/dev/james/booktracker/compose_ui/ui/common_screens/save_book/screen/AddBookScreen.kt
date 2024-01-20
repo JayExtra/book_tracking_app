@@ -36,8 +36,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
@@ -48,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -68,6 +72,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.R
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.forms.CurrentReadForm
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.navigation.AddBookScreenNavigator
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.AddBookScreenUiEvents
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.AddBookViewModel
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.CurrentReadFormActions
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
@@ -75,6 +80,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.CameraView
 import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
+import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
@@ -83,9 +89,11 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -96,9 +104,11 @@ private lateinit var cameraExecutor: ExecutorService
     ExperimentalComposeUiApi::class
 )
 @RequiresApi(Build.VERSION_CODES.M)
+@Destination
 @Composable
 fun AddBookScreen(
     addBookScreenNavigator: AddBookScreenNavigator ,
+   // previousScreenDestinations: PreviousScreenDestinations ,
     addBookViewModel: AddBookViewModel = hiltViewModel()
 ){
     val context = LocalContext.current
@@ -143,7 +153,6 @@ fun AddBookScreen(
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
-
     LaunchedEffect(key1 = !isCameraButtonClicked) {
         //check if user has granted permission
         if (isCameraButtonClicked) {
@@ -157,6 +166,7 @@ fun AddBookScreen(
         val eventObserver = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_DESTROY -> {
+                    //when screen is destroyed shutdown the camera executor
                     cameraExecutor.shutdown()
                 }
 
@@ -175,6 +185,60 @@ fun AddBookScreen(
         }
     }
 
+    LaunchedEffect(key1 = true  ){
+        addBookViewModel.addBookScreenUiEvents
+            .collect { event ->
+                when (event) {
+                    is AddBookScreenUiEvents.ShowSnackBar -> {
+                        if (event.isSaving) {
+                            Timber.tag("AddBookScreen").d("Save successful showing Snackbar")
+                            coroutineScope.launch {
+                                val snackBarResult = scaffoldState.snackbarHostState.showSnackbar(
+                                    message = event.message,
+                                    actionLabel = "Undo" ,
+                                    duration = SnackbarDuration.Short ,
+                                    withDismissAction = true
+                                )
+                                when (snackBarResult) {
+                                    SnackbarResult.Dismissed -> {
+                                        //do nothing
+                                        Timber.tag("ReadGoalsScreen").d("SnackBar dismissed")
+                                        addBookViewModel.passUiAction(
+                                            action = CurrentReadFormActions.Navigate
+                                        )
+
+                                    }
+                                    SnackbarResult.ActionPerformed -> {
+                                        addBookViewModel.passUiAction(
+                                            CurrentReadFormActions
+                                                .UndoBookSaving
+                                        )
+                                    }
+                                }
+                            }
+
+                        } else {
+
+                            Timber.tag("ReadGoalsScreen").d("Just a normal snackbar message")
+
+                            scaffoldState.snackbarHostState.showSnackbar(
+                                message = event.message,
+                                withDismissAction = true  ,
+                                duration = SnackbarDuration.Short
+                            )
+
+                        }
+                    }
+
+                    is AddBookScreenUiEvents.Navigate -> {
+
+                    }
+                    else -> {}
+                }
+            }
+
+    }
+
 
     if (shouldShowCameraScreen) {
         CameraView(
@@ -182,7 +246,9 @@ fun AddBookScreen(
             executor = cameraExecutor,
             onImageCaptured = { uri ->
                 //update the image state in view model
-                addBookViewModel.passUiAction(action = CurrentReadFormActions.ImageSelected(imageUri = uri))
+                coroutineScope.launch {
+                    addBookViewModel.passUiAction(action = CurrentReadFormActions.ImageSelected(imageUri = uri))
+                }
                 //hide camera
                 shouldShowCameraScreen = false
 
@@ -192,7 +258,6 @@ fun AddBookScreen(
             },
             onCloseAction = {
                 shouldShowCameraScreen = false
-
             }
 
         )
@@ -220,7 +285,7 @@ fun AddBookScreen(
                         IconButton(
                             onClick = {
                                 keyboardController?.hide()
-                                //readGoalsScreenViewModel.cancelQueryJob()
+                                addBookViewModel.cancelQueryJob()
                                 coroutineScope.launch {
                                     sheetState.hide()
                                 }
@@ -264,8 +329,9 @@ fun AddBookScreen(
                 context = context,
                 currentReadFormState = currentReadFormState,
                 imageSelectorState = imageSelectorState.value,
+                showHorizontalProgress = addBookViewModel.saveProgressBarState ,
                 popBackStack = {
-
+                    //navigate out of this screen
                 } ,
                 onGoogleIconClicked = {
                     coroutineScope.launch {
@@ -273,16 +339,26 @@ fun AddBookScreen(
                     }
                 } ,
                 onSaveClicked = {
-
+                    coroutineScope.launch {
+                        addBookViewModel.passUiAction(action = CurrentReadFormActions.SaveBookToDatabase)
+                    }
                 } ,
                 onClearImage = {
-
+                    coroutineScope.launch {
+                        addBookViewModel.passUiAction(action = CurrentReadFormActions.ClearImage)
+                    }
                 } ,
                 onImageSelectorClicked = {
-
+                    //show circular progress
+                    coroutineScope.launch {
+                        addBookViewModel.passUiAction(
+                            action = CurrentReadFormActions.LaunchImagePicker
+                        )
+                    }
+                    //check if camera permission has been granted
                     when {
                         cameraPermissionState.status.isGranted -> {
-                            //if so launch image picker
+                            //if so launch camera screen
                             Toast.makeText(
                                 context,
                                 "Starting camera",
@@ -293,10 +369,13 @@ fun AddBookScreen(
                         }
 
                         cameraPermissionState.status == PermissionStatus.Denied(shouldShowRationale = false) -> {
+                            //if not granted and should not show rationale then handle the button click
+                            //which will launch the permission launcher above
                             isCameraButtonClicked = true
                         }
 
                         cameraPermissionState.status.shouldShowRationale -> {
+                            //if should show rationale then go ahead and do so
                             cameraPermissionRationalDialogState.show()
                         }
 
@@ -365,6 +444,10 @@ fun AddBookScreen(
             )
             Spacer(modifier = Modifier.height(20.dp))
 
+            val progress by rememberSaveable {
+                mutableStateOf(true)
+            }
+
         }
 
     }
@@ -374,10 +457,11 @@ fun AddBookScreen(
 
 @Composable
 fun StatelessAddBookScreen(
-    modifier: Modifier = Modifier ,
+    modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
+    showHorizontalProgress : Boolean = false,
     currentReadFormState : FormState<TextFieldState>,
-    imageSelectorState : ImageSelectorUiState ,
+    imageSelectorState : ImageSelectorUiState,
     popBackStack: () -> Unit = {},
     onGoogleIconClicked: () -> Unit = {},
     onSaveClicked: () -> Unit = {},
@@ -425,8 +509,15 @@ fun StatelessAddBookScreen(
                 //navigate back to home screen
                 popBackStack()
             },
+            showBackArrow = true
         )
-
+        if(showHorizontalProgress){
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.primary
+            )
+            Divider(modifier = Modifier.fillMaxWidth().height(4.dp))
+        }
         CurrentReadForm(
             modifier = Modifier.fillMaxHeight(),
             currentReadFormState = currentReadFormState,

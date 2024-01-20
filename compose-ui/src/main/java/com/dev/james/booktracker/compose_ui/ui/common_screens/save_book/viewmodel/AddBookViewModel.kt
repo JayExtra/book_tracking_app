@@ -1,6 +1,9 @@
 package com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel
 
 import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
@@ -8,6 +11,7 @@ import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.mappers.mapToBookUiObject
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core.utilities.convertToAuthorsString
+import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
@@ -65,6 +69,9 @@ class AddBookViewModel @Inject constructor(
     private var _addBookScreenUiEvents: Channel<AddBookScreenUiEvents> = Channel()
     val addBookScreenUiEvents get() = _addBookScreenUiEvents.receiveAsFlow()
 
+    var saveProgressBarState by mutableStateOf(false)
+        private set
+
 
     val currentReadFormState = FormState(
         fields = listOf(
@@ -104,6 +111,13 @@ class AddBookViewModel @Inject constructor(
     private val currentReadFormPagesFieldState: TextFieldState =
         currentReadFormState.getState("pages_count")
 
+    private val currentReadFormChaptersState: TextFieldState =
+        currentReadFormState.getState("chapters")
+    private val currentReadFormCurrentChapter: TextFieldState =
+        currentReadFormState.getState("current chapter")
+    private val currentReadFormCurChaptTitleState: TextFieldState =
+        currentReadFormState.getState("chapter title")
+
     val bottomSheetSearchFieldState = FormState(
         fields = listOf(
             TextFieldState(
@@ -113,7 +127,7 @@ class AddBookViewModel @Inject constructor(
         )
     )
 
-    fun validateImageSelected(imageUri: Uri , imageUrl : String) {
+    private fun validateImageSelected(imageUri: Uri , imageUrl : String) {
         if (imageUri != Uri.EMPTY || imageUrl.isNotBlank()) {
             _imageSelectorState.value = _imageSelectorState.value.copy(
                 showProgress = false,
@@ -127,7 +141,7 @@ class AddBookViewModel @Inject constructor(
         }
     }
 
-    fun passUiAction(action : CurrentReadFormActions ) {
+    suspend fun passUiAction(action : CurrentReadFormActions ) {
 
         when (action) {
             is CurrentReadFormActions.LaunchImagePicker -> {
@@ -161,11 +175,82 @@ class AddBookViewModel @Inject constructor(
             }
 
             is CurrentReadFormActions.SaveBookToDatabase -> {
-                saveBookToDb(action.bookSave)
+                //saveBookToDb(action.bookSave)
+                //validate the form and the image picker first
+               validateImageSelected(
+                    imageUri = _imageSelectorState.value.imageSelectedUri ,
+                    imageUrl = _imageSelectorState.value.imageUrl
+                )
+                val formValidationResult = currentReadFormState.validate()
+                //check validation result
+                if (formValidationResult && !_imageSelectorState.value.isError) {
+                    if (currentReadFormCurrentChapter.value.toInt() > currentReadFormChaptersState.value.toInt()) {
+                            _addBookScreenUiEvents.send(
+                                AddBookScreenUiEvents.ShowSnackBar(
+                                    message =  "The current chapter you are in exceeds the total chapters in this book" ,
+                                    isSaving = false
+                                )
+                            )
+                    }else {
+
+                      /*  _addBookScreenUiEvents.send(
+                            AddBookScreenUiEvents.ShowSaveProgressBar(
+                                message = "Saving your book to the database"
+                            )
+                        )*/
+                       saveProgressBarState = true
+
+                        val author = currentReadFormAuthorFieldState.value
+                        val title = currentReadFormTitleFieldState.value
+                        val pages = currentReadFormPagesFieldState.value
+                        val chapters = currentReadFormChaptersState.value
+                        val currentChapter = currentReadFormCurrentChapter.value
+                        val chapterTitle = currentReadFormCurChaptTitleState.value
+
+                        val bookId = if (_imageSelectorState.value.imageSelectedUri != Uri.EMPTY)
+                            generateSecureUUID()
+                        else
+                            selectedBookState.value.bookId ?: "n/a"
+
+
+                        val isUri = _imageSelectorState.value.imageSelectedUri != Uri.EMPTY
+
+                        val bookImage =
+                            if (isUri) _imageSelectorState.value.imageSelectedUri.toString() else _imageSelectorState.value.imageUrl
+
+                        val publisher = selectedBookState.value.publisher
+                        val publishedDate = selectedBookState.value.publishedDate
+
+                        val bookSave = BookSave(
+                            bookId = bookId,
+                            bookImage = bookImage,
+                            bookTitle = title,
+                            bookAuthors = author,
+                            bookSmallThumbnail = "n/a",
+                            bookPagesCount = pages.toInt(),
+                            publisher = publisher ?: "n/a",
+                            publishedDate = publishedDate ?: "n/a",
+                            isUri = isUri,
+                            chapters = chapters.toInt(),
+                            currentChapter = currentChapter.toInt(),
+                            currentChapterTitle = chapterTitle
+                        )
+
+                        saveBookToDb(bookSave)
+
+
+                    }
+                }
             }
 
-            is CurrentReadFormActions.UndoBooSaving -> {
+            is CurrentReadFormActions.UndoBookSaving -> {
                 undoBookSaved()
+            }
+
+            is CurrentReadFormActions.Navigate -> {
+                _addBookScreenUiEvents.send(
+                    AddBookScreenUiEvents.Navigate
+                )
             }
 
             else -> {}
@@ -174,7 +259,6 @@ class AddBookViewModel @Inject constructor(
     }
 
     private fun saveBookToDb(bookSave: BookSave) = viewModelScope.launch {
-        //1. save to db
         Timber.tag(TAG).d("Save action triggered")
         if (booksRepository.saveBookToDatabase(bookSave)) {
             savedBookState.value = bookSave
@@ -185,6 +269,12 @@ class AddBookViewModel @Inject constructor(
                     isSaving = true
                 )
             )
+            //for testing, if it does not work please remove
+           /* _addBookScreenUiEvents.send(
+                AddBookScreenUiEvents.HideSaveProgressBar
+            )*/
+            saveProgressBarState = false
+
             Timber.tag(TAG).d("Book successfully added to database")
         } else {
             Timber.tag(TAG).d("Could not add any book to database")
@@ -290,24 +380,29 @@ class AddBookViewModel @Inject constructor(
         }
     }
 
+    fun cancelQueryJob() {
+        queryJob?.cancel()
+    }
+
 }
 
 sealed class CurrentReadFormActions {
-    data class SaveBookToDatabase(val bookSave: BookSave) : CurrentReadFormActions()
+    object SaveBookToDatabase : CurrentReadFormActions()
 
-    object UndoBooSaving : CurrentReadFormActions()
+    object UndoBookSaving : CurrentReadFormActions()
     object LaunchImagePicker : CurrentReadFormActions()
     data class ImageSelected(val imageUri: Uri) : CurrentReadFormActions()
     object DismissImagePicker : CurrentReadFormActions()
     object ClearImage : CurrentReadFormActions()
 
+    object Navigate : CurrentReadFormActions()
+
 }
 
 sealed class AddBookScreenUiEvents {
     data class ShowSnackBar(val message: String, val isSaving: Boolean) : AddBookScreenUiEvents()
-    object navigateToHome : AddBookScreenUiEvents()
 
-    object navigateToMyLibrary : AddBookScreenUiEvents()
+    object Navigate : AddBookScreenUiEvents()
 
 }
 

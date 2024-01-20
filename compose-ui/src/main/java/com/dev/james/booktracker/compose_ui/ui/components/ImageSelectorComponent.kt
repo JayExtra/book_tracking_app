@@ -33,13 +33,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.dev.james.booktracker.compose_ui.R
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 
 @Composable
 @Preview("ImageSelectorComponent")
 fun ImageSelectorComponent(
     imageSelectorState: ImageSelectorUiState = ImageSelectorUiState(),
-    onSelect: () -> Unit = {} ,
+    onSelect: () -> Unit = {},
     onClear : () -> Unit = {}
 ) {
 

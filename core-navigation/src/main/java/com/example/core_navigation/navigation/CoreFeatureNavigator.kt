@@ -5,6 +5,7 @@ import androidx.navigation.navOptions
 import com.dev.james.achievements.presentation.navigation.AchievementsScreenNavigator
 import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
 import com.dev.james.book_tracking.presentation.ui.screens.destinations.TrackBookScreenDestination
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.navigation.AddBookScreenNavigator
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.home.presentation.screens.destinations.ReadGoalScreenDestination
@@ -31,7 +32,8 @@ class CoreFeatureNavigator(
     UserSetupScreenNavigator ,
         AchievementsScreenNavigator ,
         MyLibraryScreenNavigator ,
-        BookTrackNavigation
+        BookTrackNavigation ,
+        AddBookScreenNavigator
 {
 
     override fun openOnBoardingWelcomeScreen() {
@@ -119,6 +121,14 @@ class CoreFeatureNavigator(
                 inclusive = true
             }
         }
+    }
+
+    override fun backToHomeDestination() {
+        //navigate to home from add book
+    }
+
+    override fun backToLibraryScreen() {
+       //navigate to library screen from add book
     }
 
     override fun openPdfScreen() {
