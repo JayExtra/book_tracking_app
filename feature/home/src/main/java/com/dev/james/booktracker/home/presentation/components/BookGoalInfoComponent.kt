@@ -87,7 +87,7 @@ fun BookGoalInfoComponent(
             }else {
 
                 Text(
-                    text = "No reading progress currently available. Go to my library and start reading a book." ,
+                    text = "No reading progress currently available. Please add a book to start tracking the progress." ,
                     style = BookAppTypography.bodyMedium ,
                     textAlign = TextAlign.Center
                 )

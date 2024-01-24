@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -251,6 +252,12 @@ class AddBookViewModel @Inject constructor(
                 )
             }
 
+            is CurrentReadFormActions.CloseCameraScreen -> {
+                _imageSelectorState.update { state ->
+                    state.copy(showProgress = false)
+                }
+            }
+
             else -> {}
         }
 
@@ -394,6 +401,8 @@ sealed class CurrentReadFormActions {
     object ClearImage : CurrentReadFormActions()
 
     object Navigate : CurrentReadFormActions()
+
+    object CloseCameraScreen : CurrentReadFormActions()
 
 }
 

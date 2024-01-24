@@ -2,6 +2,7 @@ package com.dev.james.booktracker.compose_ui.ui.components
 
 import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -94,14 +95,15 @@ fun StateLessGoogleBooksSearchBottomSheet(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp),
+            .padding(8.dp)
+            .background(color = MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedTextFieldComponent(
             modifier = Modifier.fillMaxWidth(),
             text = searchState.value,
-            hint = "Search for any book",
+            hint = "Enter book title",
             isSingleLine = true,
             startingIcon = Icons.Default.Search,
             trailingIcon = Icons.Default.Close,

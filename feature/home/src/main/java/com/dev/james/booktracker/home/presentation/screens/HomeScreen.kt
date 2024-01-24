@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -164,8 +165,8 @@ fun HomeScreen(
                         )
                     ) {
                         Icon(
-                            painter = if (isGrid) painterResource(id = com.dev.james.booktracker.home.R.drawable.ic_grid_view_24) else painterResource(
-                                id = com.dev.james.booktracker.home.R.drawable.ic_view_list_24
+                            painter = if (isGrid) painterResource(id = com.dev.james.booktracker.home.R.drawable.ic_view_list_24) else painterResource(
+                                id = com.dev.james.booktracker.home.R.drawable.ic_grid_view_24
                             ),
                             contentDescription = "list or grid view",
                             tint = MaterialTheme.colorScheme.secondary
@@ -346,58 +347,106 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally ,
             verticalArrangement = Arrangement.Center
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp , top = 2.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "Start reading a book." , style = BookAppTypography.headlineMedium , fontWeight = FontWeight.Bold)
+            }
+
             Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 4.dp , end = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween ,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Card(
+
+                OutlinedCard(
                     modifier = Modifier
                         .width(100.dp)
-                        .height(100.dp)
-                        .border(width = 3.dp, color = MaterialTheme.colorScheme.primary),
+                        .wrapContentHeight()
+                    //.border(width = 3.dp, color = MaterialTheme.colorScheme.primary)
+                    ,
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) ,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                     onClick = {
                         isExpandBottomSheet = true
                         pdfOrPhysicalDialogState.hide()
                     }
                 ) {
-                    Icon(
+                    Box(
                         modifier = Modifier
-                            .height(60.dp)
-                            .width(60.dp),
-                        painter = painterResource(id = com.dev.james.booktracker.home.R.drawable.pdf_icon),
-                        contentDescription = "Pdf icon"
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Add a pdf book")
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .height(90.dp)
+                                .width(90.dp) ,
+                            painter = painterResource(id = com.dev.james.booktracker.home.R.drawable.pdf_icon),
+                            contentDescription = "pdf icon" ,
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Pdf book" , style = BookAppTypography.labelMedium)
+                    }
                 }
 
-                Card(
+                OutlinedCard(
                     modifier = Modifier
                         .width(100.dp)
-                        .height(100.dp)
-                        .border(width = 3.dp, color = MaterialTheme.colorScheme.primary),
+                        .wrapContentHeight()
+                        //.border(width = 3.dp, color = MaterialTheme.colorScheme.primary)
+                            ,
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) ,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                     onClick = {
                         homeNavigator.openAddBookScreen()
                         pdfOrPhysicalDialogState.hide()
                     }
                 ) {
-                    Icon(
+                    Box(
                         modifier = Modifier
-                            .height(60.dp)
-                            .width(60.dp) ,
-                        painter = painterResource(id = com.dev.james.booktracker.home.R.drawable.baseline_book_24),
-                        contentDescription = "book icon" ,
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Add a physical book")
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .height(90.dp)
+                                .width(90.dp) ,
+                            painter = painterResource(id = com.dev.james.booktracker.home.R.drawable.baseline_book_24),
+                            contentDescription = "book icon" ,
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Physical book" , style = BookAppTypography.labelMedium)
+                    }
                 }
             }
 
-            Row(horizontalArrangement = Arrangement.End) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Box(
+                modifier = Modifier.fillMaxWidth() ,
+                contentAlignment = Alignment.Center
+            ) {
                 RoundedBrownButton(
+                    modifier = Modifier.width(100.dp),
                     label = "Dismiss" ,
                     textColor = MaterialTheme.colorScheme.onPrimary ,
                     color = MaterialTheme.colorScheme.primary ,

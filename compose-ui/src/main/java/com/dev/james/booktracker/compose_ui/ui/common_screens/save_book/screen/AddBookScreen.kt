@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -268,6 +269,11 @@ fun AddBookScreen(
             },
             onCloseAction = {
                 shouldShowCameraScreen = false
+                coroutineScope.launch {
+                    addBookViewModel.passUiAction(
+                        action = CurrentReadFormActions.CloseCameraScreen
+                    )
+                }
             }
 
         )
@@ -275,9 +281,11 @@ fun AddBookScreen(
     } else {
 
         BottomSheetScaffold(
-            modifier = Modifier.testTag("read_goals_screen_scaffold"),
+            modifier = Modifier.testTag("read_goals_screen_scaffold")
+                .background(color = MaterialTheme.colorScheme.background),
             sheetPeekHeight = 0.dp,
             scaffoldState = scaffoldState,
+            sheetContainerColor = MaterialTheme.colorScheme.background ,
             sheetDragHandle = {
 
                 Column(
@@ -289,8 +297,9 @@ fun AddBookScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
+
                     ) {
-                        Text("Search for book")
+                        Text("Search" , style = BookAppTypography.headlineMedium)
 
                         IconButton(
                             onClick = {
@@ -326,6 +335,7 @@ fun AddBookScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .background(color = MaterialTheme.colorScheme.background)
                         .height(600.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -487,7 +497,7 @@ fun StatelessAddBookScreen(
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.background)
     ) {
 
         StandardToolBar(
