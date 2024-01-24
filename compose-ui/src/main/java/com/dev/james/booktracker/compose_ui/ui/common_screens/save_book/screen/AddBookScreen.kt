@@ -101,7 +101,9 @@ import java.util.concurrent.Executors
 
 private lateinit var outputDirectory: File
 private lateinit var cameraExecutor: ExecutorService
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
+
+@OptIn(
+    ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class,
     ExperimentalComposeUiApi::class
 )
 @RequiresApi(Build.VERSION_CODES.M)
@@ -111,7 +113,7 @@ fun AddBookScreen(
     addBookScreenNavigator: AddBookScreenNavigator,
     previousScreenDestinations: PreviousScreenDestinations,
     addBookViewModel: AddBookViewModel = hiltViewModel()
-){
+) {
     val context = LocalContext.current
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -186,7 +188,7 @@ fun AddBookScreen(
         }
     }
 
-    LaunchedEffect(key1 = true  ){
+    LaunchedEffect(key1 = true) {
         addBookViewModel.addBookScreenUiEvents
             .collect { event ->
                 when (event) {
@@ -196,8 +198,8 @@ fun AddBookScreen(
                             coroutineScope.launch {
                                 val snackBarResult = scaffoldState.snackbarHostState.showSnackbar(
                                     message = event.message,
-                                    actionLabel = "Undo" ,
-                                    duration = SnackbarDuration.Short ,
+                                    actionLabel = "Undo",
+                                    duration = SnackbarDuration.Short,
                                     withDismissAction = true
                                 )
                                 when (snackBarResult) {
@@ -209,6 +211,7 @@ fun AddBookScreen(
                                         )
 
                                     }
+
                                     SnackbarResult.ActionPerformed -> {
                                         addBookViewModel.passUiAction(
                                             CurrentReadFormActions
@@ -224,7 +227,7 @@ fun AddBookScreen(
 
                             scaffoldState.snackbarHostState.showSnackbar(
                                 message = event.message,
-                                withDismissAction = true  ,
+                                withDismissAction = true,
                                 duration = SnackbarDuration.Short
                             )
 
@@ -236,14 +239,17 @@ fun AddBookScreen(
                             PreviousScreenDestinations.HOME_SCREEN -> {
                                 addBookScreenNavigator.backToHomeDestination()
                             }
+
                             PreviousScreenDestinations.LIBRARY_SCREEN -> {
                                 addBookScreenNavigator.backToLibraryScreen()
                             }
+
                             else -> {
                                 Timber.tag("AddBookScreen").d("No naviation event received!")
                             }
                         }
                     }
+
                     else -> {}
                 }
             }
@@ -257,9 +263,9 @@ fun AddBookScreen(
             executor = cameraExecutor,
             onImageCaptured = { uri ->
                 //update the image state in view model
-                coroutineScope.launch {
-                    addBookViewModel.passUiAction(action = CurrentReadFormActions.ImageSelected(imageUri = uri))
-                }
+
+                addBookViewModel.passUiAction(action = CurrentReadFormActions.ImageSelected(imageUri = uri))
+
                 //hide camera
                 shouldShowCameraScreen = false
 
@@ -269,11 +275,11 @@ fun AddBookScreen(
             },
             onCloseAction = {
                 shouldShowCameraScreen = false
-                coroutineScope.launch {
-                    addBookViewModel.passUiAction(
-                        action = CurrentReadFormActions.CloseCameraScreen
-                    )
-                }
+
+                addBookViewModel.passUiAction(
+                    action = CurrentReadFormActions.CloseCameraScreen
+                )
+
             }
 
         )
@@ -281,11 +287,12 @@ fun AddBookScreen(
     } else {
 
         BottomSheetScaffold(
-            modifier = Modifier.testTag("read_goals_screen_scaffold")
+            modifier = Modifier
+                .testTag("read_goals_screen_scaffold")
                 .background(color = MaterialTheme.colorScheme.background),
             sheetPeekHeight = 0.dp,
             scaffoldState = scaffoldState,
-            sheetContainerColor = MaterialTheme.colorScheme.background ,
+            sheetContainerColor = MaterialTheme.colorScheme.background,
             sheetDragHandle = {
 
                 Column(
@@ -299,7 +306,7 @@ fun AddBookScreen(
                         modifier = Modifier.fillMaxWidth()
 
                     ) {
-                        Text("Search" , style = BookAppTypography.headlineMedium)
+                        Text("Search", style = BookAppTypography.headlineMedium)
 
                         IconButton(
                             onClick = {
@@ -349,37 +356,37 @@ fun AddBookScreen(
                 context = context,
                 currentReadFormState = currentReadFormState,
                 imageSelectorState = imageSelectorState.value,
-                showHorizontalProgress = addBookViewModel.saveProgressBarState ,
+                showHorizontalProgress = addBookViewModel.saveProgressBarState,
                 popBackStack = {
                     //navigate out of this screen
-                     coroutineScope.launch {
-                         addBookViewModel.passUiAction(
-                             action  = CurrentReadFormActions.Navigate
-                         )
-                     }
-                } ,
+
+                    addBookViewModel.passUiAction(
+                        action = CurrentReadFormActions.Navigate
+                    )
+
+                },
                 onGoogleIconClicked = {
                     coroutineScope.launch {
                         sheetState.expand()
                     }
-                } ,
+                },
                 onSaveClicked = {
-                    coroutineScope.launch {
-                        addBookViewModel.passUiAction(action = CurrentReadFormActions.SaveBookToDatabase)
-                    }
-                } ,
+
+                    addBookViewModel.passUiAction(action = CurrentReadFormActions.SaveBookToDatabase)
+
+                },
                 onClearImage = {
-                    coroutineScope.launch {
-                        addBookViewModel.passUiAction(action = CurrentReadFormActions.ClearImage)
-                    }
-                } ,
+
+                    addBookViewModel.passUiAction(action = CurrentReadFormActions.ClearImage)
+
+                },
                 onImageSelectorClicked = {
                     //show circular progress
-                    coroutineScope.launch {
-                        addBookViewModel.passUiAction(
-                            action = CurrentReadFormActions.LaunchImagePicker
-                        )
-                    }
+
+                    addBookViewModel.passUiAction(
+                        action = CurrentReadFormActions.LaunchImagePicker
+                    )
+
                     //check if camera permission has been granted
                     when {
                         cameraPermissionState.status.isGranted -> {
@@ -484,50 +491,52 @@ fun AddBookScreen(
 fun StatelessAddBookScreen(
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
-    showHorizontalProgress : Boolean = false,
-    currentReadFormState : FormState<TextFieldState>,
-    imageSelectorState : ImageSelectorUiState,
+    showHorizontalProgress: Boolean = false,
+    currentReadFormState: FormState<TextFieldState>,
+    imageSelectorState: ImageSelectorUiState,
     popBackStack: () -> Unit = {},
     onGoogleIconClicked: () -> Unit = {},
     onSaveClicked: () -> Unit = {},
     onImageSelectorClicked: () -> Unit = {},
     onClearImage: () -> Unit = {},
-){
+) {
 
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.background)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background)
     ) {
 
         StandardToolBar(
             title = {
-                    Text(text = "Add a physical book")
+                Text(text = "Add a book")
             },
             navActions = {
                 //control visibility depending on where we are
-                    Button(
-                        onClick = {
-                            onGoogleIconClicked()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
-                        ),
+                Button(
+                    onClick = {
+                        onGoogleIconClicked()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ),
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .size(40.dp),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.google_icon_24),
+                        contentDescription = "google icon for searching books",
+                        tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier
-                            .padding(end = 8.dp)
-                            .size(40.dp),
-                        shape = CircleShape,
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.google_icon_24),
-                            contentDescription = "google icon for searching books",
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier
-                                .width(24.dp)
-                                .height(24.dp)
-                        )
-                    }
+                            .width(24.dp)
+                            .height(24.dp)
+                    )
+                }
 
             },
             navigate = {
@@ -536,12 +545,14 @@ fun StatelessAddBookScreen(
             },
             showBackArrow = true
         )
-        if(showHorizontalProgress){
+        if (showHorizontalProgress) {
             LinearProgressIndicator(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.primary
             )
-            Divider(modifier = Modifier.fillMaxWidth().height(4.dp))
+            Divider(modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp))
         }
         CurrentReadForm(
             modifier = Modifier.fillMaxHeight(),

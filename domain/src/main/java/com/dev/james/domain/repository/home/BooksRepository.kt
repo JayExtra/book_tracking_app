@@ -18,8 +18,10 @@ interface BooksRepository {
 
     suspend fun getSingleSavedBook(id : String) : BookSave
 
-    suspend fun setAsActiveBook(bookId : String) : Resource<Boolean>
+    suspend fun setAsActiveBook(bookId : String , onSuccess : (Boolean) -> Unit , onFailure: (String) -> Unit)
 
-    suspend fun getActiveBookId() : Resource<String>
+    suspend fun getActiveBookId(onSuccess: (String) -> Unit , onFailure: (String) -> Unit)
+
+    suspend fun unsetActiveBook(onSuccess : (Boolean) -> Unit , onFailure : (String) -> Unit)
 
 }

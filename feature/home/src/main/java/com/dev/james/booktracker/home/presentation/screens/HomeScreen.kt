@@ -86,7 +86,13 @@ fun HomeScreen(
     homeNavigator: HomeNavigator,
     homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
 ) {
+
     val context = LocalContext.current
+
+    LaunchedEffect(key1 = true ){
+        homeScreenViewModel.fetchData()
+    }
+
     val homeScreenState = homeScreenViewModel.homeScreenUiState.collectAsStateWithLifecycle()
     var isGrid by rememberSaveable {
         mutableStateOf(true)
@@ -234,7 +240,8 @@ fun HomeScreen(
             onProceedClicked = {
 
                //open dialog
-                pdfOrPhysicalDialogState.show()
+                // /*pdfOrPhysicalDialogState.show()*/
+                homeNavigator.openAddBookScreen()
 
                 /*
                 //check if storage permission has been granted
@@ -350,14 +357,16 @@ fun HomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 4.dp , top = 2.dp),
+                    .padding(bottom = 4.dp, top = 2.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = "Start reading a book." , style = BookAppTypography.headlineMedium , fontWeight = FontWeight.Bold)
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 4.dp , end = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp, end = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween ,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -506,6 +515,7 @@ fun StatelessHomeScreen(
 
             when (homeScreenState) {
                 is HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData -> {
+                    Timber.tag("HomeScreen").d("HomeScreen: book progress data=> ${homeScreenState.bookProgressData} , goal progress data=> ${homeScreenState.goalProgressData}")
                     if (homeScreenState.bookProgressData.bookId.isBlank() && homeScreenState.goalProgressData.goalId.isBlank()) {
                         EmptyAnimationSection(
                             animation = LottieCompositionSpec.RawRes(R.raw.shake_a_empty_box),
@@ -579,6 +589,11 @@ fun StatelessHomeScreen(
                         }
 
                     }
+
+                }
+
+                is HomeScreenViewModel.HomeScreenUiState.DefaultState -> {
+                    ProgressComponent()
                 }
 
                 else -> {}
@@ -610,6 +625,19 @@ fun StatelessHomeScreen(
             )
         }*/
     }
+}
+
+@Composable
+fun ProgressComponent(modifier: Modifier = Modifier){
+
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(100.dp) , contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+
 }
 
 

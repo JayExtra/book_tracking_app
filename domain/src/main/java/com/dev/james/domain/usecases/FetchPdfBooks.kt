@@ -10,6 +10,8 @@ import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.PdfBookItem
 import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.itextpdf.text.exceptions.BadPasswordException
+import com.itextpdf.text.pdf.PdfDictionary
+import com.itextpdf.text.pdf.PdfName
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.ReaderProperties
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
@@ -51,7 +53,7 @@ class FetchPdfBooks
                 val processedFiles = files.map { file ->
                     extractPdfMetadata(file.toUri())
                 }.filter { pdfBook ->
-                    pdfBook.pages > 20
+                    pdfBook.pages > 40
                 }
                 Timber.tag(TAG).d("pdf list : $processedFiles")
                 withContext(Dispatchers.Main){
@@ -70,10 +72,11 @@ class FetchPdfBooks
             val pagesCount = pdfReader.numberOfPages
             val author = pdfInfo["Author"] ?: pdfInfo["Creator"] ?: "No author information"
             val publisher = pdfInfo["Producer"] ?: "No publisher information"
-            val title = pdfInfo["Title"] ?: "No title"
+            val title = pdfInfo["Title"] ?: pdfInfo["Document Title"] ?: pdfInfo["DocTitle"] ?: pdfInfo["Subject"] ?: pdfInfo["Name"] ?: "No title"
             val date = pdfInfo["CreationDate"] ?: pdfInfo["ProducerCreationDate"] ?: pdfInfo["ModDate"] ?: "No date information"
 
             pdfReader.close()
+
             PdfBookItem(
                 pages = pagesCount ,
                 author = author ,

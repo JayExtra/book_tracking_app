@@ -1,5 +1,6 @@
 package com.dev.james.booktracker.compose_ui.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -113,6 +115,7 @@ fun DropDownComponent(
             )
 
             ExposedDropdownMenu(
+                modifier= Modifier.background(color = MaterialTheme.colorScheme.background) ,
                 expanded = isExpanded,
                 onDismissRequest = { isExpanded = false }
             ) {

@@ -19,9 +19,9 @@ fun getTestBookEntity() = BookEntity(
     bookPagesCount = 122,
     publisher = "somepublisher",
     publishedDate = "12/10/2023",
-    currentChapter = 11,
+    //currentChapter = 11,
     chapters = 22,
-    currentChapterTitle = "Some chapter title"
+    //currentChapterTitle = "Some chapter title"
 )
 
 fun getTestGoalEntity() = GoalEntity(
@@ -86,8 +86,8 @@ fun getFakeBookSaveWithUri() = BookSave(
     publisher = "n/a" ,
     publishedDate = "n/a" ,
     isUri = true ,
-    currentChapter = 14 ,
-    currentChapterTitle = "some title" ,
+   // currentChapter = 14 ,
+    //currentChapterTitle = "some title" ,
     chapters = 22
 )
 
@@ -101,7 +101,7 @@ fun getFakeBookSaveWithUrl() = BookSave(
     publisher = "McMillan Publishers" ,
     publishedDate = "14/02/2005" ,
     isUri = false ,
-    currentChapter = 12 ,
-    currentChapterTitle = "some title 2" ,
+   // currentChapter = 12 ,
+   // currentChapterTitle = "some title 2" ,
     chapters = 3
 )

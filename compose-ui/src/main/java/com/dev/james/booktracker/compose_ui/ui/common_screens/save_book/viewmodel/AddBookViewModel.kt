@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
@@ -38,10 +39,12 @@ import javax.inject.Inject
 @HiltViewModel
 class AddBookViewModel @Inject constructor(
     private val booksRepository: BooksRepository,
+    private val savedStateHandle : SavedStateHandle
 ): ViewModel() {
 
     companion object {
         const val TAG = "AddBookViewModel"
+        const val DEFAULT_SEARCH_QUERY = "Think Big"
     }
 
     private var queryJob: Job? = null
@@ -54,14 +57,15 @@ class AddBookViewModel @Inject constructor(
     private val _selectedBookState: MutableStateFlow<Book> = MutableStateFlow(
         Book()
     )
-    val selectedBookState get() = _selectedBookState
+    private val selectedBookState get() = _selectedBookState
 
     private val savedBookState: MutableStateFlow<BookSave> = MutableStateFlow(
         BookSave()
     )
 
-    private val searchQueryMutableStateFlow: MutableStateFlow<String> =
-        MutableStateFlow("Think Big")
+
+
+    private val searchQueryStateFlow = savedStateHandle.getStateFlow("search_query" , DEFAULT_SEARCH_QUERY)
 
     private var _googleBottomSheetSearchState: MutableStateFlow<GoogleBottomSheetUiState> =
         MutableStateFlow(GoogleBottomSheetUiState.StandbyState)
@@ -89,7 +93,7 @@ class AddBookViewModel @Inject constructor(
                 transform = { it.toInt() },
                 validators = listOf(Validators.Required(message = "Please specify the number of chapters."))
             ),
-            TextFieldState(
+           /* TextFieldState(
                 name = "current chapter",
                 validators = listOf(Validators.Required(message = "Please specify the current chapter you are in."))
             ),
@@ -97,7 +101,7 @@ class AddBookViewModel @Inject constructor(
                 name = "chapter title",
                 transform = { it.toInt() },
                 validators = listOf(Validators.Required(message = "Please specify the current chapter title."))
-            ),
+            ),*/
             TextFieldState(
                 name = "pages_count",
                 validators = listOf(Validators.Required(message = "Please specify the number of pages in the book."))
@@ -114,10 +118,10 @@ class AddBookViewModel @Inject constructor(
 
     private val currentReadFormChaptersState: TextFieldState =
         currentReadFormState.getState("chapters")
-    private val currentReadFormCurrentChapter: TextFieldState =
+    /*private val currentReadFormCurrentChapter: TextFieldState =
         currentReadFormState.getState("current chapter")
     private val currentReadFormCurChaptTitleState: TextFieldState =
-        currentReadFormState.getState("chapter title")
+        currentReadFormState.getState("chapter title")*/
 
     val bottomSheetSearchFieldState = FormState(
         fields = listOf(
@@ -130,69 +134,83 @@ class AddBookViewModel @Inject constructor(
 
     private fun validateImageSelected(imageUri: Uri , imageUrl : String) {
         if (imageUri != Uri.EMPTY || imageUrl.isNotBlank()) {
-            _imageSelectorState.value = _imageSelectorState.value.copy(
-                showProgress = false,
-                isError = false
-            )
+            _imageSelectorState.update {
+                it.copy(
+                    showProgress = false,
+                    isError = false
+                )
+            }
         } else {
-            _imageSelectorState.value = _imageSelectorState.value.copy(
-                showProgress = false,
-                isError = true
-            )
+            _imageSelectorState.update {
+                it.copy(
+                    showProgress = false,
+                    isError = true
+                )
+            }
         }
     }
 
-    suspend fun passUiAction(action : CurrentReadFormActions ) {
+     fun passUiAction(action : CurrentReadFormActions ) = viewModelScope.launch {
 
         when (action) {
             is CurrentReadFormActions.LaunchImagePicker -> {
-                _imageSelectorState.value = _imageSelectorState.value.copy(
-                    showProgress = true
-                )
+                _imageSelectorState.update {
+                    it.copy(
+                        showProgress = true
+                    )
+                }
             }
 
             is CurrentReadFormActions.DismissImagePicker -> {
-                _imageSelectorState.value = _imageSelectorState.value.copy(
-                    showProgress = false
-                )
+                _imageSelectorState.update {
+                    it.copy(
+                        showProgress = false
+                    )
+                }
             }
 
             is CurrentReadFormActions.ImageSelected -> {
 
-                _imageSelectorState.value = _imageSelectorState.value.copy(
-                    showProgress = false,
-                    isError = false,
-                    imageSelectedUri = action.imageUri
-                )
+                _imageSelectorState.update {
+                    it.copy(
+                        showProgress = false,
+                        isError = false,
+                        imageSelectedUri = action.imageUri
+                    )
+                }
 
             }
 
             is CurrentReadFormActions.ClearImage -> {
-                _imageSelectorState.value = _imageSelectorState.value.copy(
-                    imageSelectedUri = Uri.EMPTY,
-                    imageUrl = ""
-                )
-
+                _imageSelectorState.update {
+                    it.copy(
+                        imageSelectedUri = Uri.EMPTY,
+                        imageUrl = ""
+                    )
+                }
             }
 
             is CurrentReadFormActions.SaveBookToDatabase -> {
+
+                Timber.tag(TAG).d("Save book called")
                 //saveBookToDb(action.bookSave)
                 //validate the form and the image picker first
-               validateImageSelected(
+                validateImageSelected(
                     imageUri = _imageSelectorState.value.imageSelectedUri ,
                     imageUrl = _imageSelectorState.value.imageUrl
                 )
                 val formValidationResult = currentReadFormState.validate()
                 //check validation result
+                Timber.tag(TAG).d("Validation result => form: $formValidationResult image: ${!_imageSelectorState.value.isError}")
                 if (formValidationResult && !_imageSelectorState.value.isError) {
-                    if (currentReadFormCurrentChapter.value.toInt() > currentReadFormChaptersState.value.toInt()) {
+             /*       if (currentReadFormCurrentChapter.value.toInt() > currentReadFormChaptersState.value.toInt()) {
                             _addBookScreenUiEvents.send(
                                 AddBookScreenUiEvents.ShowSnackBar(
                                     message =  "The current chapter you are in exceeds the total chapters in this book" ,
                                     isSaving = false
                                 )
                             )
-                    }else {
+                    }else {*/
 
                       /*  _addBookScreenUiEvents.send(
                             AddBookScreenUiEvents.ShowSaveProgressBar(
@@ -205,8 +223,8 @@ class AddBookViewModel @Inject constructor(
                         val title = currentReadFormTitleFieldState.value
                         val pages = currentReadFormPagesFieldState.value
                         val chapters = currentReadFormChaptersState.value
-                        val currentChapter = currentReadFormCurrentChapter.value
-                        val chapterTitle = currentReadFormCurChaptTitleState.value
+                       /* val currentChapter = currentReadFormCurrentChapter.value
+                        val chapterTitle = currentReadFormCurChaptTitleState.value*/
 
                         val bookId = if (_imageSelectorState.value.imageSelectedUri != Uri.EMPTY)
                             generateSecureUUID()
@@ -233,12 +251,12 @@ class AddBookViewModel @Inject constructor(
                             publishedDate = publishedDate ?: "n/a",
                             isUri = isUri,
                             chapters = chapters.toInt(),
-                            currentChapter = currentChapter.toInt(),
-                            currentChapterTitle = chapterTitle
+                            /*currentChapter = currentChapter.toInt(),
+                            currentChapterTitle = chapterTitle*/
                         )
 
                         saveBookToDb(bookSave)
-                    }
+                    //}
                 }
             }
 
@@ -267,6 +285,17 @@ class AddBookViewModel @Inject constructor(
         Timber.tag(TAG).d("Save action triggered")
         if (booksRepository.saveBookToDatabase(bookSave)) {
             savedBookState.value = bookSave
+
+            //set as currently active book
+            booksRepository.setAsActiveBook(
+                bookId = bookSave.bookId ,
+                onSuccess = { isSuccessful ->
+                    Timber.tag(TAG).d("success set on active book : $isSuccessful")
+                } ,
+                onFailure = { errorMessage ->
+                    Timber.tag(TAG).d("could not active book : $errorMessage")
+                })
+
             //show snackbar
             _addBookScreenUiEvents.send(
                 AddBookScreenUiEvents.ShowSnackBar(
@@ -291,9 +320,18 @@ class AddBookViewModel @Inject constructor(
         val result = booksRepository.deleteBookInDatabase(savedBookState.value.bookId)
         Timber.tag(TAG).d("Book id = ${savedBookState.value.bookId}")
 
+
         if (result) {
             //dismiss snackbar
             Timber.tag(TAG).d("Book removed from db successfully.")
+            booksRepository.unsetActiveBook(
+                onSuccess = { isSuccessful ->
+                    Timber.tag(TAG).d("success on removing active book : $isSuccessful")
+                },
+                onFailure = {errorMessage ->
+                    Timber.tag(TAG).d("failure on removing active book : $errorMessage")
+                }
+            )
 
             _addBookScreenUiEvents.send(
                 AddBookScreenUiEvents.ShowSnackBar(
@@ -308,10 +346,12 @@ class AddBookViewModel @Inject constructor(
 
     fun onBookSelected(book: Book) {
         //update various states
-        _imageSelectorState.value = imageSelectorUiState.value.copy(
-            imageUrl = book.bookImage!!,
-            imageSelectedUri = Uri.EMPTY
-        )
+        _imageSelectorState.update {
+            it.copy(
+                imageUrl = book.bookImage!!,
+                imageSelectedUri = Uri.EMPTY
+            )
+        }
 
         currentReadFormTitleFieldState.change(book.bookTitle ?: "No title found")
         currentReadFormAuthorFieldState.change(
@@ -326,8 +366,9 @@ class AddBookViewModel @Inject constructor(
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     fun searchForBook(searchQuery: String) {
         queryJob = viewModelScope.launch {
-            searchQueryMutableStateFlow.value = searchQuery
-            searchQueryMutableStateFlow
+            //searchQueryStateFlow.value = searchQuery
+            savedStateHandle["search_query"] = searchQuery
+            searchQueryStateFlow
                 .debounce(200)
                 .filter { query ->
                     if (query.isEmpty()) {
