@@ -1,14 +1,21 @@
 package com.dev.james.domain.usecases
 
+import android.icu.util.Calendar
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.common_models.BookLog
 import com.dev.james.booktracker.core.common_models.BookSave
+import com.dev.james.booktracker.core.utilities.formatDateToString
+import com.dev.james.booktracker.core.utilities.getDateRange
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStorePreferenceKeys
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.home.LogsRepository
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
+import java.time.LocalDate
+import java.time.Year
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -21,6 +28,7 @@ class FetchActiveBookProgress @Inject constructor(
         const val TAG = "FetchActiveBookProgress"
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     suspend operator fun invoke(
         bookId : String?
     ) : BookProgressData {
@@ -38,6 +46,7 @@ class FetchActiveBookProgress @Inject constructor(
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private suspend fun fetchBookProgressData(requiredBookId : String) : BookProgressData {
         val cachedBook = getCachedBook(requiredBookId)
         val bookLogs = getBookGoalLogs(requiredBookId)
@@ -116,12 +125,15 @@ class FetchActiveBookProgress @Inject constructor(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private suspend fun getBookGoalLogs(id : String) : List<BookLog>{
-        return logsRepository.getBookLogs(bookId = id).first()
+        val dateRange = getDateRange()
+        Timber.tag(TAG).d("date range: $dateRange")
+        return logsRepository.getBookLogs(bookId = id , mondayDate = dateRange.startDate , sundayDate = dateRange.endDate)
     }
 
     private suspend fun getCachedBook(id : String) : BookSave =
         booksRepository.getSingleSavedBook(id)
 
-
 }
+

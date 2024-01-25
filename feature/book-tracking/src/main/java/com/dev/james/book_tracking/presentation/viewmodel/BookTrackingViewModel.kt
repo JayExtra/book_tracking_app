@@ -1,5 +1,7 @@
 package com.dev.james.book_tracking.presentation.viewmodel
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.BookProgressData
@@ -19,6 +21,7 @@ class BookTrackingViewModel @Inject constructor(
     private var _bookStatsState : MutableStateFlow<BookProgressData> = MutableStateFlow(BookProgressData())
     val bookStatsState get() = _bookStatsState.asStateFlow()
 
+    @RequiresApi(Build.VERSION_CODES.N)
     fun getBookStatistics(bookId : String) = viewModelScope.launch {
        _bookStatsState.value =  fetchActiveBookProgress.invoke(bookId)
     }

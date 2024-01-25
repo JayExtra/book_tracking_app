@@ -1,10 +1,14 @@
 package com.dev.james.booktracker.core.utilities
 
 import android.content.Context
+import android.icu.util.Calendar
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.dev.james.booktracker.core.R
+import com.dev.james.booktracker.core.common_models.DateRange
+import timber.log.Timber
 import java.security.SecureRandom
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -116,4 +120,27 @@ fun formatTime(timeMillis: Long): String {
         Locale.getDefault()
     )
     return localDateTime.format(formatter)
+}
+
+@RequiresApi(Build.VERSION_CODES.N)
+fun Calendar.formatDateToString() : String {
+    val formatter = SimpleDateFormat("dd-MM-yyyy hh:mm a" , Locale.UK)
+    return formatter.format(this.time)
+}
+
+@RequiresApi(Build.VERSION_CODES.N)
+fun getDateRange() : DateRange {
+    val calendar = Calendar.getInstance()
+    calendar.firstDayOfWeek = Calendar.SUNDAY
+    calendar.set(Calendar.DAY_OF_WEEK , Calendar.SUNDAY)
+    val daysOfThisWeek = mutableListOf<String>()
+    (0..6).forEach { day ->
+        daysOfThisWeek.add(day , calendar.formatDateToString())
+        calendar.add(Calendar.DAY_OF_MONTH , 1)
+    }
+    Timber.tag("Extensions").d(daysOfThisWeek.toString())
+    return DateRange(
+        startDate = daysOfThisWeek.first() ,
+        endDate = daysOfThisWeek.last()
+    )
 }
