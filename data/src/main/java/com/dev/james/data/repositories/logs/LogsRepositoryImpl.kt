@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import okio.IOException
 import timber.log.Timber
+import java.time.LocalDate
 import javax.inject.Inject
 
 class LogsRepositoryImpl @Inject constructor(
@@ -133,6 +134,25 @@ class LogsRepositoryImpl @Inject constructor(
         } catch (e: SQLiteException) {
             Timber.tag(TAG).e("deleteGoalLog $e")
             Resource.Error(data = false, message = "Could not delete this log! Reason: $e ")
+        }
+    }
+
+
+    override suspend fun getRecentGoalLog(): GoalLog {
+        return try {
+            logsLocalDataSource.fetchLatestGoalLog().toDomain()
+        }catch (e : Exception){
+            Timber.tag(TAG).e("DB error $e : ${e.localizedMessage}")
+            GoalLog()
+        }
+    }
+
+    override suspend fun getRecentBookLog(): BookLog {
+        return try {
+            logsLocalDataSource.fetchLatestBookLog().toDomain()
+        }catch (e : Exception){
+            Timber.tag(TAG).e("DB error $e : ${e.localizedMessage}")
+            BookLog()
         }
     }
 

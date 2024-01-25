@@ -19,6 +19,8 @@ interface LogsLocalDataSource {
 
     suspend fun deleteGoalLog(id : String)
 
+    suspend fun fetchLatestBookLog() : BookLogsEntity
 
+    suspend fun fetchLatestGoalLog() : GoalLogsEntity
 
 }

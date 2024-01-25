@@ -21,4 +21,8 @@ interface LogsRepository {
 
     suspend fun deleteGoalLog(id : String) : Resource<Boolean>
 
+    suspend fun getRecentGoalLog() : GoalLog
+
+    suspend fun getRecentBookLog() : BookLog
+
 }

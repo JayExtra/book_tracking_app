@@ -31,7 +31,9 @@ import com.dev.james.booktracker.home.R
 
 @Composable
 @Preview(showBackground = false)
-fun MyGoalsCardComponent() {
+fun MyGoalsCardComponent(
+
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

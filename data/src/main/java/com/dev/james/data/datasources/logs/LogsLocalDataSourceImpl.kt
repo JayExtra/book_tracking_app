@@ -42,4 +42,12 @@ class LogsLocalDataSourceImpl @Inject constructor(
     override suspend fun deleteGoalLog(id: String) {
         logsDao.deleteGoalLog(id)
     }
+
+    override suspend fun fetchLatestBookLog(): BookLogsEntity {
+        return logsDao.getRecentBookLog()
+    }
+
+    override suspend fun fetchLatestGoalLog(): GoalLogsEntity {
+        return logsDao.getRecentGoalLog()
+    }
 }

@@ -10,9 +10,11 @@ import timber.log.Timber
 import java.security.SecureRandom
 import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.util.UUID
 
@@ -109,6 +111,11 @@ fun Long.formatTimeToDHMS() : String {
     return formattedTime.ifBlank { "0s" }
 }
 
+fun Long.checkDaysTaken() : Int {
+    val values = this / 86400000L
+    return values.toInt()
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 fun formatTime(timeMillis: Long): String {
     val localDateTime = LocalDateTime.ofInstant(
@@ -143,4 +150,13 @@ fun getDateRange() : DateRange {
         startDate = daysOfThisWeek.first() ,
         endDate = daysOfThisWeek.last()
     )
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun LocalDate.calculateDaysPast(): Int {
+    val currentDate = LocalDate.now()
+    //val daysBetween2 = lastLog.until(currentDate , ChronoUnit.DAYS).toInt()
+    val daysBetween = ChronoUnit.DAYS.between(currentDate, this).checkDaysTaken()
+    Timber.tag("Extensions").d("Days between ${currentDate.toString()} & $this is => $daysBetween")
+    return daysBetween
 }

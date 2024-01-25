@@ -23,6 +23,9 @@ interface LogsDao {
     @Query("SELECT * FROM book_logs WHERE log_id = :id ")
     suspend fun getABookLog(id : String) : BookLogsEntity
 
+    @Query("SELECT * FROM book_logs ORDER BY started_time DESC LIMIT 1 ")
+    suspend fun getRecentBookLog() : BookLogsEntity
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addGoalLog(goalLogsEntity: GoalLogsEntity)
     @Query("SELECT * FROM daily_goal_logs WHERE parent_goal_id = :parentLogId AND start_time >= :startDate AND start_time <= :endDate ")
@@ -33,6 +36,11 @@ interface LogsDao {
 
     @Query("SELECT * FROM daily_goal_logs WHERE id = :id")
     suspend fun getAGoalLog(id : String) : GoalLogsEntity
+
+    @Query("SELECT * FROM daily_goal_logs ORDER BY start_time DESC LIMIT 1")
+    suspend fun getRecentGoalLog() : GoalLogsEntity
+
+
 
 
 }
