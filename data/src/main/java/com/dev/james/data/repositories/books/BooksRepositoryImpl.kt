@@ -113,23 +113,42 @@ class BooksRepositoryImpl
         }
     }
 
-    override suspend fun setAsActiveBook(bookId: String): Resource<Boolean> {
-        return try {
+    override suspend fun setAsActiveBook(
+        bookId: String,
+        onSuccess: (Boolean) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
             dataStoreManager.storeStringValue(DataStorePreferenceKeys.CURRENT_ACTIVE_BOOK_ID , bookId)
             Resource.Success(data = true)
+            onSuccess(true)
         }catch (e : IOException){
             Timber.e("Could not set as active book into datastore : ${e.message}")
-            Resource.Error(data = false , message = "${e.message}")
+            onFailure("Could not set as active book into datastore : ${e.message}")
         }
     }
 
-    override suspend fun getActiveBookId(): Resource<String> {
-        return try {
+    override suspend fun getActiveBookId(onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+        try {
             val bookId = dataStoreManager.readStringValueOnce(DataStorePreferenceKeys.CURRENT_ACTIVE_BOOK_ID)
-            Resource.Success(data = bookId)
+            onSuccess(bookId)
         }catch (e : IOException){
             Timber.e("Could not get active book into datastore : ${e.message}")
-            Resource.Error( message = "${e.message}")
+           // Resource.Error( message = "${e.message}")
+            onFailure("Could not get active book into datastore : ${e.message}")
+        }
+    }
+
+    override suspend fun unsetActiveBook(
+        onSuccess: (Boolean) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        try {
+            dataStoreManager.storeStringValue(DataStorePreferenceKeys.CURRENT_ACTIVE_BOOK_ID , "")
+            onSuccess(true)
+        }catch (e : IOException){
+            Timber.e("Could not unset active book into datastore : ${e.message}")
+            onFailure("Could not get active book into datastore : ${e.message}")
         }
     }
 }

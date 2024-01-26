@@ -18,7 +18,10 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -82,7 +86,13 @@ fun HomeScreen(
     homeNavigator: HomeNavigator,
     homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
 ) {
+
     val context = LocalContext.current
+
+    LaunchedEffect(key1 = true ){
+        homeScreenViewModel.fetchData()
+    }
+
     val homeScreenState = homeScreenViewModel.homeScreenUiState.collectAsStateWithLifecycle()
     var isGrid by rememberSaveable {
         mutableStateOf(true)
@@ -107,6 +117,8 @@ fun HomeScreen(
     }
 
     val storagePermissionDialogRationaleState = rememberMaterialDialogState()
+
+    val pdfOrPhysicalDialogState = rememberMaterialDialogState()
 
     if(isExpandBottomSheet) {
         Toast.makeText(context, "Expand bottom sheet", Toast.LENGTH_SHORT).show()
@@ -159,8 +171,8 @@ fun HomeScreen(
                         )
                     ) {
                         Icon(
-                            painter = if (isGrid) painterResource(id = com.dev.james.booktracker.home.R.drawable.ic_grid_view_24) else painterResource(
-                                id = com.dev.james.booktracker.home.R.drawable.ic_view_list_24
+                            painter = if (isGrid) painterResource(id = com.dev.james.booktracker.home.R.drawable.ic_view_list_24) else painterResource(
+                                id = com.dev.james.booktracker.home.R.drawable.ic_grid_view_24
                             ),
                             contentDescription = "list or grid view",
                             tint = MaterialTheme.colorScheme.secondary
@@ -208,7 +220,10 @@ fun HomeScreen(
                 //call our google bottom sheet here
                 PdfListBottomSheetContent(
                     isGrid = isGrid,
-                    isExpanded = sheetState.currentValue == SheetValue.Expanded
+                    isExpanded = sheetState.currentValue == SheetValue.Expanded ,
+                    onPdfBookSelected = { book ->
+                        //add pdf to db
+                    }
                 )
             }
         }
@@ -224,7 +239,9 @@ fun HomeScreen(
             },
             onProceedClicked = {
 
-                isExpandBottomSheet = true
+               //open dialog
+                // /*pdfOrPhysicalDialogState.show()*/
+                homeNavigator.openAddBookScreen()
 
                 /*
                 //check if storage permission has been granted
@@ -267,7 +284,7 @@ fun HomeScreen(
         )
     }
 
-
+// permission rationale dialog
     MaterialDialog(
         dialogState = storagePermissionDialogRationaleState,
         backgroundColor = MaterialTheme.colorScheme.background,
@@ -322,6 +339,135 @@ fun HomeScreen(
 
     }
 
+    // pdf or physical book dialog
+    MaterialDialog(
+        dialogState = pdfOrPhysicalDialogState ,
+        backgroundColor = MaterialTheme.colorScheme.background,
+        shape = RoundedCornerShape(10.dp) ,
+        elevation = 5.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .height(250.dp),
+            horizontalAlignment = Alignment.CenterHorizontally ,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp, top = 2.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "Start reading a book." , style = BookAppTypography.headlineMedium , fontWeight = FontWeight.Bold)
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp, end = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween ,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                OutlinedCard(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .wrapContentHeight()
+                    //.border(width = 3.dp, color = MaterialTheme.colorScheme.primary)
+                    ,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) ,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+                    onClick = {
+                        isExpandBottomSheet = true
+                        pdfOrPhysicalDialogState.hide()
+                    }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .height(90.dp)
+                                .width(90.dp) ,
+                            painter = painterResource(id = com.dev.james.booktracker.home.R.drawable.pdf_icon),
+                            contentDescription = "pdf icon" ,
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Pdf book" , style = BookAppTypography.labelMedium)
+                    }
+                }
+
+                OutlinedCard(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .wrapContentHeight()
+                        //.border(width = 3.dp, color = MaterialTheme.colorScheme.primary)
+                            ,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) ,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+                    onClick = {
+                        homeNavigator.openAddBookScreen()
+                        pdfOrPhysicalDialogState.hide()
+                    }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .height(90.dp)
+                                .width(90.dp) ,
+                            painter = painterResource(id = com.dev.james.booktracker.home.R.drawable.baseline_book_24),
+                            contentDescription = "book icon" ,
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "Physical book" , style = BookAppTypography.labelMedium)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Box(
+                modifier = Modifier.fillMaxWidth() ,
+                contentAlignment = Alignment.Center
+            ) {
+                RoundedBrownButton(
+                    modifier = Modifier.width(100.dp),
+                    label = "Dismiss" ,
+                    textColor = MaterialTheme.colorScheme.onPrimary ,
+                    color = MaterialTheme.colorScheme.primary ,
+                    onClick = {
+                        pdfOrPhysicalDialogState.hide()
+                    }
+                )
+            }
+        }
+
+    }
+
 
 }
 
@@ -369,6 +515,7 @@ fun StatelessHomeScreen(
 
             when (homeScreenState) {
                 is HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData -> {
+                    Timber.tag("HomeScreen").d("HomeScreen: book progress data=> ${homeScreenState.bookProgressData} , goal progress data=> ${homeScreenState.goalProgressData}")
                     if (homeScreenState.bookProgressData.bookId.isBlank() && homeScreenState.goalProgressData.goalId.isBlank()) {
                         EmptyAnimationSection(
                             animation = LottieCompositionSpec.RawRes(R.raw.shake_a_empty_box),
@@ -442,6 +589,11 @@ fun StatelessHomeScreen(
                         }
 
                     }
+
+                }
+
+                is HomeScreenViewModel.HomeScreenUiState.DefaultState -> {
+                    ProgressComponent()
                 }
 
                 else -> {}
@@ -473,6 +625,19 @@ fun StatelessHomeScreen(
             )
         }*/
     }
+}
+
+@Composable
+fun ProgressComponent(modifier: Modifier = Modifier){
+
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .height(100.dp) , contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+
 }
 
 

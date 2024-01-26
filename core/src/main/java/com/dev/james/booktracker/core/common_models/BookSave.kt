@@ -10,7 +10,7 @@ data class BookSave(
     val publisher : String = ""  ,
     val publishedDate : String = "" ,
     val isUri : Boolean = false ,
-    val currentChapter : Int = 0 ,
-    val currentChapterTitle : String = "" ,
+ /*   val currentChapter : Int = 0 ,
+    val currentChapterTitle : String = "" ,*/
     val chapters : Int = 0
 )

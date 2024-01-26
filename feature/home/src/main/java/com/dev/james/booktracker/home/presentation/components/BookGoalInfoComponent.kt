@@ -87,7 +87,7 @@ fun BookGoalInfoComponent(
             }else {
 
                 Text(
-                    text = "No reading progress currently available. Go to my library and start reading a book." ,
+                    text = "No reading progress currently available. Please add a book to start tracking the progress." ,
                     style = BookAppTypography.bodyMedium ,
                     textAlign = TextAlign.Center
                 )
@@ -186,7 +186,7 @@ fun GoalDataComponent(
             }) {
             Text(
                // modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.continue_reading) ,
+                text = if(bookProgressData.currentChapter == 0) stringResource(R.string.start_reading) else stringResource(R.string.continue_reading) ,
                 style = BookAppTypography.labelMedium ,
                 textAlign = TextAlign.Center
             )
@@ -304,7 +304,7 @@ fun ReadProgressComponent(
         )
         Text(
             modifier = Modifier.layoutId("message_label"),
-            text = subTitle,
+            text = subTitle.ifBlank { "No chapter progress recorded" },
             style = BookAppTypography.bodySmall,
             fontSize = 16.sp
         )

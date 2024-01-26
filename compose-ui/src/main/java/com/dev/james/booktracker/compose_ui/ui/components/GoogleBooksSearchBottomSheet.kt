@@ -1,7 +1,8 @@
-package com.dev.james.booktracker.home.presentation.components
+package com.dev.james.booktracker.compose_ui.ui.components
 
 import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,40 +44,38 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.dev.james.booktracker.compose_ui.ui.components.AnimationWithMessageComponent
-import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
+import com.dev.james.booktracker.compose_ui.R
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.AddBookViewModel
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.GoogleBottomSheetUiState
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.utilities.convertToAuthorsString
-import com.dev.james.booktracker.home.R
-import com.dev.james.booktracker.home.presentation.screens.EmptyAnimationSection
-import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
 import timber.log.Timber
 
 @Composable
 fun GoogleBooksSearchBottomSheet(
-    readGoalsScreenViewModel: ReadGoalsScreenViewModel = hiltViewModel()
+    addBookViewModel : AddBookViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val searchFieldState by remember { mutableStateOf(readGoalsScreenViewModel.bottomSheetSearchFieldState) }
+    val searchFieldState by remember { mutableStateOf(addBookViewModel.bottomSheetSearchFieldState) }
 
-    val googleSearchBottomSheetUiState: ReadGoalsScreenViewModel.GoogleBottomSheetUiState by readGoalsScreenViewModel.googleBottomSheetSearchState
+    val googleSearchBottomSheetUiState: GoogleBottomSheetUiState by addBookViewModel.googleBottomSheetSearchState
         .collectAsStateWithLifecycle()
 
-    StateLessGoogleBooksSearchBottomSheet(
+   StateLessGoogleBooksSearchBottomSheet(
         searchFieldState = searchFieldState,
         googleSearchBottomSheetUiState = googleSearchBottomSheetUiState,
         context = context,
         onBookSelected = { book ->
             // update the view model image state and also pass the book selected data to various required fields
-            readGoalsScreenViewModel.onBookSelected(book = book)
+            addBookViewModel.onBookSelected(book = book)
 
         },
         onSearchTextChanged = { query ->
             // update the search query
-            readGoalsScreenViewModel.searchForBook(query)
+            addBookViewModel.searchForBook(query)
         }
     )
 
@@ -87,7 +86,7 @@ fun GoogleBooksSearchBottomSheet(
 fun StateLessGoogleBooksSearchBottomSheet(
     context: Context = LocalContext.current,
     searchFieldState: FormState<TextFieldState> = FormState(fields = listOf()),
-    googleSearchBottomSheetUiState: ReadGoalsScreenViewModel.GoogleBottomSheetUiState = ReadGoalsScreenViewModel.GoogleBottomSheetUiState.IsLoading,
+    googleSearchBottomSheetUiState: GoogleBottomSheetUiState = GoogleBottomSheetUiState.IsLoading,
     onSearchTextChanged: (String) -> Unit = {},
     onBookSelected: (Book) -> Unit = {}
 ) {
@@ -96,14 +95,15 @@ fun StateLessGoogleBooksSearchBottomSheet(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp),
+            .padding(8.dp)
+            .background(color = MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedTextFieldComponent(
             modifier = Modifier.fillMaxWidth(),
             text = searchState.value,
-            hint = "Search for any book",
+            hint = "Enter book title",
             isSingleLine = true,
             startingIcon = Icons.Default.Search,
             trailingIcon = Icons.Default.Close,
@@ -128,7 +128,7 @@ fun StateLessGoogleBooksSearchBottomSheet(
         ) {
 
             when (googleSearchBottomSheetUiState) {
-                is ReadGoalsScreenViewModel.GoogleBottomSheetUiState.StandbyState -> {
+                is GoogleBottomSheetUiState.StandbyState -> {
 
                     AnimationWithMessageComponent(
                         animation = LottieCompositionSpec.RawRes(R.raw.search_lottie) ,
@@ -137,14 +137,14 @@ fun StateLessGoogleBooksSearchBottomSheet(
                     )
 
                 }
-                is ReadGoalsScreenViewModel.GoogleBottomSheetUiState.IsLoading -> {
+                is GoogleBottomSheetUiState.IsLoading -> {
                     CircularProgressIndicator(
                         strokeWidth = 3.dp,
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
 
-                is ReadGoalsScreenViewModel.GoogleBottomSheetUiState.HasFetched -> {
+                is GoogleBottomSheetUiState.HasFetched -> {
 
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -155,7 +155,10 @@ fun StateLessGoogleBooksSearchBottomSheet(
                         content = {
                             val booksList = googleSearchBottomSheetUiState.booksList
                             if (booksList.isNotEmpty()) {
-                                items(booksList) { book ->
+                                items(booksList ,
+                                    key = {
+                                      book -> book.bookId!!
+                                    }){ book ->
                                     BookInformationCard(
                                         book,
                                         onBookSelected = {
@@ -177,7 +180,7 @@ fun StateLessGoogleBooksSearchBottomSheet(
                     )
                 }
 
-                is ReadGoalsScreenViewModel.GoogleBottomSheetUiState.HasFailed -> {
+                is GoogleBottomSheetUiState.HasFailed -> {
                     Timber.tag("GoogleBottomSheet")
                         .d("Failed to fetch books , reason: ${googleSearchBottomSheetUiState.errorMessage}")
                     val error = googleSearchBottomSheetUiState.errorMessage

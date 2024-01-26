@@ -34,10 +34,7 @@ class HomeScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
   private var _homeScreenUiState : MutableStateFlow<HomeScreenUiState>  = MutableStateFlow(
-    HomeScreenUiState.HasFetchedScreenData(
-      BookProgressData() ,
-      GoalProgressData()
-    )
+    HomeScreenUiState.DefaultState
   )
   val homeScreenUiState get() = _homeScreenUiState.asStateFlow()
 
@@ -47,15 +44,13 @@ class HomeScreenViewModel @Inject constructor(
   private var fetchPdfsJob : Job? = null
 
 
-  init {
-    viewModelScope.launch {
-      val bookGoal = fetchActiveBookProgress.invoke(null)
-      val goalProgress = fetchGoalProgress.invoke()
-      _homeScreenUiState.value = HomeScreenUiState.HasFetchedScreenData(
-        bookProgressData = bookGoal ,
-        goalProgressData = goalProgress
-      )
-    }
+  fun fetchData() = viewModelScope.launch {
+    val bookGoal = fetchActiveBookProgress.invoke(null)
+    val goalProgress = fetchGoalProgress.invoke()
+    _homeScreenUiState.value = HomeScreenUiState.HasFetchedScreenData(
+      bookProgressData = bookGoal ,
+      goalProgressData = goalProgress
+    )
   }
   fun getCachedPdfs(){
     //test run to see if pdfs will be fetched
@@ -82,10 +77,12 @@ class HomeScreenViewModel @Inject constructor(
       val bookProgressData: BookProgressData ,
       val goalProgressData: GoalProgressData
     ) : HomeScreenUiState()
+
+    object DefaultState : HomeScreenUiState()
   }
 
-  data class PdfBottomSheetUiState(
+/*  data class PdfBottomSheetUiState(
     val showCircularProgress : Boolean = false
-  )
+  )*/
 
 }

@@ -5,6 +5,9 @@ import androidx.navigation.navOptions
 import com.dev.james.achievements.presentation.navigation.AchievementsScreenNavigator
 import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
 import com.dev.james.book_tracking.presentation.ui.screens.destinations.TrackBookScreenDestination
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.navigation.AddBookScreenNavigator
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.screen.destinations.AddBookScreenDestination
+import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.home.presentation.screens.destinations.ReadGoalScreenDestination
@@ -31,7 +34,8 @@ class CoreFeatureNavigator(
     UserSetupScreenNavigator ,
         AchievementsScreenNavigator ,
         MyLibraryScreenNavigator ,
-        BookTrackNavigation
+        BookTrackNavigation ,
+        AddBookScreenNavigator
 {
 
     override fun openOnBoardingWelcomeScreen() {
@@ -81,6 +85,12 @@ class CoreFeatureNavigator(
        )
     }
 
+    override fun openAddBookScreen() {
+        navController.navigate(
+            AddBookScreenDestination(previousScreenDestinations = PreviousScreenDestinations.HOME_SCREEN) within navGraph
+        )
+    }
+
     override fun navigateToUserDetailsCaptureScreen() {
         navController.navigate(
             UserPreferenceSetupScreenDestination within navGraph
@@ -119,6 +129,16 @@ class CoreFeatureNavigator(
                 inclusive = true
             }
         }
+    }
+
+    override fun backToHomeDestination() {
+        //navigate to home from add book
+        navController.popBackStack()
+    }
+
+    override fun backToLibraryScreen() {
+       //navigate to library screen from add book
+        navController.popBackStack()
     }
 
     override fun openPdfScreen() {

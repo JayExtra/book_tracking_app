@@ -58,8 +58,8 @@ class FetchActiveBookProgress @Inject constructor(
                 totalPages = totalPages,
                 totalTimeSpent = totalTimeSpent ,
                 totalPagesRead = totalPagesRead ,
-                currentChapterTitle = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapterTitle else cachedBook.currentChapterTitle ,
-                currentChapter = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapter else cachedBook.currentChapter,
+                currentChapterTitle = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapterTitle else "",
+                currentChapter = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapter else 0,
                 logs = bookLogs ,
                 progress = calculateProgress(
                     totalPagesRead = totalPagesRead ,
@@ -73,8 +73,8 @@ class FetchActiveBookProgress @Inject constructor(
                 bookTitle = cachedBook.bookTitle,
                 isUri = cachedBook.isUri ,
                 totalPages = totalPages,
-                currentChapterTitle = cachedBook.currentChapterTitle ,
-                currentChapter = cachedBook.currentChapter
+                currentChapterTitle = "" ,
+                currentChapter = 0
             )
         }
 

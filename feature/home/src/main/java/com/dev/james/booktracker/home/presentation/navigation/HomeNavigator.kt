@@ -7,4 +7,8 @@ interface HomeNavigator {
     fun openTrackingScreen(id : String)
 
     fun openMyLibraryScreen()
+
+    fun openAddBookScreen()
+
+    //add navigation to add book screen
 }

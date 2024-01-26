@@ -1,5 +1,6 @@
-package com.dev.james.booktracker.home.presentation.forms
+package com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.forms
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,11 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
+import com.dev.james.booktracker.compose_ui.ui.components.DropDownComponent
+import com.dev.james.booktracker.compose_ui.ui.components.ImageSelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.home.presentation.components.DropDownComponent
-import com.dev.james.booktracker.home.presentation.components.ImageSelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
-import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiState
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
 import timber.log.Timber
@@ -37,11 +38,11 @@ import timber.log.Timber
 @Preview("CurrentReadForm")
 fun CurrentReadForm(
     //will take in form state
-    modifier: Modifier = Modifier ,
+    modifier: Modifier = Modifier,
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
     imageSelectorState: ImageSelectorUiState = ImageSelectorUiState(),
     onSaveBookClicked: () -> Unit = {},
-    imageSelectorClicked: () -> Unit = {} ,
+    imageSelectorClicked: () -> Unit = {},
     onClearImage : () -> Unit = {}
 ) {
 
@@ -51,6 +52,7 @@ fun CurrentReadForm(
         modifier = modifier
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
+            .background(color = MaterialTheme.colorScheme.background)
     ) {
 
         ImageSelectorComponent(
@@ -132,73 +134,75 @@ fun CurrentReadForm(
 
 
         val chapterDropDownState: TextFieldState = currentReadFormState.getState("chapters")
-        val currentChapterDropDownState: TextFieldState =
-            currentReadFormState.getState("current chapter")
+        /*val currentChapterDropDownState: TextFieldState =
+            currentReadFormState.getState("current chapter")*/
 
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically ,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-
-            val chapterCount = mutableListOf<String>()
-            for (chapter in 1..50) {
-                chapterCount.add(
-                    chapter.toString()
-                )
-            }
-
-            DropDownComponent(
-                modifier = Modifier.width(180.dp),
-                label = "Chapters count",
-                selectedText = chapterDropDownState.value,
-                dropDownItems = chapterCount.toList(),
-                hasError = chapterDropDownState.hasError,
-                onListItemSelected = { chapter ->
-                    Timber.tag("ReadGoalsScreen").d(chapter)
-                    chapterDropDownState.change(chapter)
-                    //update chapter count
-                },
-                canUserFill = true
+        val chapterCount = mutableListOf<String>()
+        for (chapter in 1..50) {
+            chapterCount.add(
+                chapter.toString()
             )
-
-            Spacer(modifier = Modifier.width(20.dp))
-
-            DropDownComponent(
-                modifier = Modifier.width(180.dp),
-                label = "Current chapter",
-                selectedText = currentChapterDropDownState.value,
-                dropDownItems = chapterCount.toList(),
-                hasError = currentChapterDropDownState.hasError,
-                onListItemSelected = { chapter ->
-                    Timber.tag("ReadGoalsScreen").d(chapter)
-                    currentChapterDropDownState.change(chapter)
-                    //update current selected chapter
-                },
-                canUserFill = true
-            )
-
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val chapterTitleState: TextFieldState = currentReadFormState.getState("chapter title")
-
-        OutlinedTextFieldComponent(
+        DropDownComponent(
             modifier = Modifier.fillMaxWidth(),
-            text = chapterTitleState.value,
-            label = "Current chapter title",
-            hasError = chapterTitleState.hasError,
-            onTextChanged = { text ->
-                chapterTitleState.change(text)
-            } ,
-            trailingIcon = Icons.Default.Close ,
-            onTrailingIconClicked = {
-                chapterTitleState.change("")
-            }  ,
-            isSingleLine = true
+            label = "Chapters count",
+            selectedText = chapterDropDownState.value,
+            dropDownItems = chapterCount.toList(),
+            hasError = chapterDropDownState.hasError,
+            onListItemSelected = { chapter ->
+                Timber.tag("ReadGoalsScreen").d(chapter)
+                chapterDropDownState.change(chapter)
+                //update chapter count
+            },
+            canUserFill = true
         )
 
+        /*       Row(
+                   horizontalArrangement = Arrangement.SpaceEvenly,
+                   verticalAlignment = Alignment.CenterVertically ,
+                   modifier = Modifier.fillMaxWidth()
+               ) {
+
+
+
+                   Spacer(modifier = Modifier.width(20.dp))
+
+                   DropDownComponent(
+                       modifier = Modifier.width(180.dp),
+                       label = "Current chapter",
+                       selectedText = currentChapterDropDownState.value,
+                       dropDownItems = chapterCount.toList(),
+                       hasError = currentChapterDropDownState.hasError,
+                       onListItemSelected = { chapter ->
+                           Timber.tag("ReadGoalsScreen").d(chapter)
+                           currentChapterDropDownState.change(chapter)
+                           //update current selected chapter
+                       },
+                       canUserFill = true
+                   )
+
+               }
+
+               Spacer(modifier = Modifier.height(16.dp))
+
+               val chapterTitleState: TextFieldState = currentReadFormState.getState("chapter title")
+
+               OutlinedTextFieldComponent(
+                   modifier = Modifier.fillMaxWidth(),
+                   text = chapterTitleState.value,
+                   label = "Current chapter title",
+                   hasError = chapterTitleState.hasError,
+                   onTextChanged = { text ->
+                       chapterTitleState.change(text)
+                   } ,
+                   trailingIcon = Icons.Default.Close ,
+                   onTrailingIconClicked = {
+                       chapterTitleState.change("")
+                   }  ,
+                   isSingleLine = true
+               )
+       */
         Spacer(modifier = Modifier.height(12.dp))
 
         ElevatedButton(
