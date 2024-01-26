@@ -67,9 +67,9 @@ fun BookSave.mapToBookEntity(): BookEntity {
         bookPagesCount = bookPagesCount,
         publisher = publisher,
         publishedDate = publishedDate,
-        currentChapterTitle = currentChapterTitle,
-        chapters = chapters,
-        currentChapter = currentChapter
+       // currentChapterTitle = currentChapterTitle,
+        chapters = chapters
+        //currentChapter = currentChapter
     )
 }
 

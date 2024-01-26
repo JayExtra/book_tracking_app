@@ -2,6 +2,7 @@ package com.example.core_navigation.navigation
 
 import com.dev.james.achievements.presentation.ui.screens.destinations.AchievementsScreenDestination
 import com.dev.james.book_tracking.presentation.ui.screens.destinations.TrackBookScreenDestination
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.screen.destinations.AddBookScreenDestination
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.home.presentation.screens.destinations.ReadGoalScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
@@ -45,7 +46,8 @@ object NavGraphs {
             OnBoardingWelcomeScreenDestination ,
             ReadGoalScreenDestination ,
             TrackBookScreenDestination ,
-            MyLibraryScreenDestination
+            MyLibraryScreenDestination ,
+            AddBookScreenDestination
         ).routedIn(this)
             .associateBy { it.route }
 
@@ -61,7 +63,8 @@ object NavGraphs {
 
         override val destinationsByRoute =
             listOf<DestinationSpec<*>>(
-                MyLibraryScreenDestination
+                MyLibraryScreenDestination ,
+                AddBookScreenDestination
             ).routedIn(this)
                 .associateBy { it.route }
 
@@ -96,6 +99,22 @@ object NavGraphs {
             .associateBy { it.route }
     }
 
+    val commonScreens = object : NavGraphSpec {
+
+        override val route: String = "compose-ui"
+
+        override val startRoute: Route = AddBookScreenDestination routedIn this
+
+        override val destinationsByRoute = listOf<DestinationSpec<*>>(
+                AddBookScreenDestination ,
+                HomeScreenDestination ,
+                MyLibraryScreenDestination
+            ).routedIn(this)
+                .associateBy { it.route }
+
+    }
+
+
     val rootWithOnBoarding = object : NavGraphSpec {
         override val route: String = "rootWithOnBoarding"
         override val startRoute: Route
@@ -107,7 +126,8 @@ object NavGraphs {
             home ,
             myLibrary ,
             achievements ,
-            bookTracking
+            bookTracking ,
+            commonScreens
         )
     }
 
@@ -122,7 +142,8 @@ object NavGraphs {
             home ,
             myLibrary ,
             achievements ,
-            bookTracking
+            bookTracking ,
+            commonScreens
         )
     }
 }

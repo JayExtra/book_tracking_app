@@ -25,10 +25,10 @@ data class BookEntity(
     val publisher : String ,
     @ColumnInfo("published_date")
     val publishedDate : String ,
-    @ColumnInfo("current_chapter")
+   /* @ColumnInfo("current_chapter")
     val currentChapter : Int ,
     @ColumnInfo("current_chapter_title")
-    val currentChapterTitle : String ,
+    val currentChapterTitle : String ,*/
     @ColumnInfo("total_chapters")
     val chapters : Int
 )

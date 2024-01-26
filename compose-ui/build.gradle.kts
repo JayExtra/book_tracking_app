@@ -64,7 +64,18 @@ kotlin {
 
 dependencies {
     implementation(project(Modules.core))
+    implementation(project(Modules.domain))
+    implementation(project(Modules.coreDi))
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     implementation("androidx.appcompat:appcompat:1.6.1")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
+
+    implementation("androidx.camera:camera-camera2:${Versions.camerx_version}")
+    implementation("androidx.camera:camera-lifecycle:${Versions.camerx_version}")
+    implementation("androidx.camera:camera-view:${Versions.camerx_version}")
+}
+
+ksp{
+    arg("compose-destinations.mode", "destinations")
+    arg("compose-destinations.moduleName" , "compose-ui")
 }

@@ -8,11 +8,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -28,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.components.BookCardComponent
+import com.dev.james.booktracker.compose_ui.ui.enums.Orientation
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.home.presentation.viewmodels.HomeScreenViewModel
 
@@ -64,9 +68,25 @@ fun PdfListBottomSheetContent(
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ){
 
+                    items(pdfBookItemsListState.value , /*key = { book -> book.bookId!! }*/){ book ->
+                        BookContent(
+                            book = book ,
+                            orientation = Orientation.PORTRAIT,
+                            onBookSelected = {
+                                onPdfBookSelected(book)
+                            }
+                        )
+                    }
+                }
+            }else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth() ,
+                    contentPadding = PaddingValues(start = 8.dp , end = 8.dp , top = 4.dp)
+                ) {
                     items(pdfBookItemsListState.value){ book ->
                         BookContent(
                             book = book ,
+                            orientation = Orientation.LANDSCAPE,
                             onBookSelected = {
                                 onPdfBookSelected(book)
                             }
@@ -81,13 +101,14 @@ fun PdfListBottomSheetContent(
 
 @Composable
 fun BookContent(
+    orientation: Orientation = Orientation.PORTRAIT ,
     book : Book = Book() ,
     onBookSelected : (Book) -> Unit
 ){
+    val modifier = if(orientation == Orientation.PORTRAIT) Modifier.width(120.dp).height(160.dp) else Modifier.fillMaxWidth()
     BookCardComponent(
-        modifier = Modifier
-            .width(120.dp)
-            .height(160.dp) ,
+        modifier = modifier,
+        orientation = orientation ,
         book = book ,
         onBookSelected = {
             onBookSelected(book)
