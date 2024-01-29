@@ -658,7 +658,12 @@ fun StatelessHomeScreen(
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            MyGoalsCardComponent()
+                            MyGoalsCardComponent(
+                                goalInfo = homeScreenState.goalProgressData.goalInfo ,
+                                onEditGoalClicked = {
+                                   //navigate to edit goal screen
+                                }
+                            )
                         }
 
                     }
