@@ -4,7 +4,6 @@ import com.dev.james.booktracker.core_database.room.dao.LogsDao
 import com.dev.james.booktracker.core.entities.BookLogsEntity
 import com.dev.james.booktracker.core.entities.GoalLogsEntity
 import com.dev.james.domain.datasources.home.LogsLocalDataSource
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class LogsLocalDataSourceImpl @Inject constructor(
@@ -14,11 +13,15 @@ class LogsLocalDataSourceImpl @Inject constructor(
         logsDao.addBookLog(bookLogsEntity)
     }
 
-    override fun getBookLogs(bookId: String): Flow<List<BookLogsEntity>> =
-        logsDao.getBookLogs(bookId = bookId)
+    override suspend fun getBookLogs(
+        bookId: String,
+        startDate: String,
+        endDate: String
+    ): List<BookLogsEntity> =
+        logsDao.getBookLogs(bookId = bookId , startDate = startDate , endDate = endDate)
 
     override suspend fun getBookLog(id: String): BookLogsEntity {
-        return logsDao.getABookLog(id)
+        return logsDao.getABookLog(id = id )
     }
 
     override suspend fun deleteBookLog(id: String) {
@@ -29,8 +32,8 @@ class LogsLocalDataSourceImpl @Inject constructor(
         logsDao.addGoalLog(goalLogsEntity)
     }
 
-    override fun getGoalLogs(goalId: String): Flow<List<GoalLogsEntity>> =
-        logsDao.getGoalLogs(goalId)
+    override suspend fun getAllGoalLogs(parentLogId : String , startDate :  String, endDate : String): List<GoalLogsEntity> =
+        logsDao.getGoalLogs(parentLogId = parentLogId, startDate = startDate , endDate = endDate)
 
     override suspend fun getGoalLog(id: String): GoalLogsEntity {
         return logsDao.getAGoalLog(id)
@@ -38,5 +41,13 @@ class LogsLocalDataSourceImpl @Inject constructor(
 
     override suspend fun deleteGoalLog(id: String) {
         logsDao.deleteGoalLog(id)
+    }
+
+    override suspend fun fetchLatestBookLog(): BookLogsEntity {
+        return logsDao.getRecentBookLog()
+    }
+
+    override suspend fun fetchLatestGoalLog(): GoalLogsEntity {
+        return logsDao.getRecentGoalLog()
     }
 }

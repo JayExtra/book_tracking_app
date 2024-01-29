@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -74,6 +76,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -94,6 +97,13 @@ fun HomeScreen(
     }
 
     val homeScreenState = homeScreenViewModel.homeScreenUiState.collectAsStateWithLifecycle()
+    val homeScreeEvents = homeScreenViewModel.homeScreenUiEvent.collectAsStateWithLifecycle(
+        initialValue = HomeScreenViewModel.HomeScreenUiEvent.NoEvent ,
+        lifecycleOwner = LocalLifecycleOwner.current
+    )
+
+
+
     var isGrid by rememberSaveable {
         mutableStateOf(true)
     }
@@ -120,6 +130,11 @@ fun HomeScreen(
 
     val pdfOrPhysicalDialogState = rememberMaterialDialogState()
 
+    val streakResetDialogState = rememberMaterialDialogState()
+    var streakDialogMessage by rememberSaveable {
+        mutableStateOf("")
+    }
+
     if(isExpandBottomSheet) {
         Toast.makeText(context, "Expand bottom sheet", Toast.LENGTH_SHORT).show()
 
@@ -143,6 +158,19 @@ fun HomeScreen(
                 sheetState.expand()
             }
         }
+    }
+
+    when(val event = homeScreeEvents.value){
+        is HomeScreenViewModel.HomeScreenUiEvent.ShowStreakResetDialog -> {
+            //show streak reset dialog
+            streakDialogMessage = event.message
+            streakResetDialogState.show()
+
+        }
+        is HomeScreenViewModel.HomeScreenUiEvent.NoEvent -> {
+
+        }
+        else -> {}
     }
 
     BottomSheetScaffold(
@@ -228,6 +256,7 @@ fun HomeScreen(
             }
         }
     ) {
+
         StatelessHomeScreen(
             homeScreenState = homeScreenState.value,
             onAddButtonClick = {
@@ -468,6 +497,49 @@ fun HomeScreen(
 
     }
 
+    MaterialDialog(
+        dialogState = streakResetDialogState ,
+        backgroundColor = MaterialTheme.colorScheme.background,
+        shape = RoundedCornerShape(10.dp) ,
+        elevation = 5.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(8.dp)
+            ,
+            verticalArrangement = Arrangement.Center ,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp) ,
+                contentAlignment = Alignment.Center
+            ){
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = streakDialogMessage ,
+                    style = BookAppTypography.bodyMedium ,
+                    fontSize = 18.sp
+                )
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            RoundedBrownButton(
+                modifier = Modifier.width(100.dp),
+                label = "Dismiss" ,
+                textColor = MaterialTheme.colorScheme.onPrimary ,
+                color = MaterialTheme.colorScheme.primary ,
+                onClick = {
+                    streakResetDialogState.hide()
+                }
+            )
+        }
+
+    }
+
+
 
 }
 
@@ -486,7 +558,8 @@ fun checkPermission(context: Context) : Boolean{
 fun StatelessHomeScreen(
     homeScreenState: HomeScreenViewModel.HomeScreenUiState = HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData(
         BookProgressData(),
-        GoalProgressData()
+        GoalProgressData() ,
+        0
     ),
     context: Context = LocalContext.current,
     onAddButtonClick: () -> Unit = {},
@@ -580,12 +653,17 @@ fun StatelessHomeScreen(
                             StreakComponent(
                                 booksReadCount = homeScreenState.goalProgressData.booksRead,
                                 targetBooks = homeScreenState.goalProgressData.booksToRead,
-                                streakCount = 3
+                                streakCount = homeScreenState.streakCount
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            MyGoalsCardComponent()
+                            MyGoalsCardComponent(
+                                goalInfo = homeScreenState.goalProgressData.goalInfo ,
+                                onEditGoalClicked = {
+                                   //navigate to edit goal screen
+                                }
+                            )
                         }
 
                     }

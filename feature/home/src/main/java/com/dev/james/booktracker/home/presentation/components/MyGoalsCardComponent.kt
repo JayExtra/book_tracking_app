@@ -31,7 +31,10 @@ import com.dev.james.booktracker.home.R
 
 @Composable
 @Preview(showBackground = false)
-fun MyGoalsCardComponent() {
+fun MyGoalsCardComponent(
+    goalInfo : String = "" ,
+    onEditGoalClicked : () -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -45,7 +48,11 @@ fun MyGoalsCardComponent() {
     ) {
         Spacer(modifier = Modifier.height(6.dp))
 
-        TitleAndEditButtonSection()
+        TitleAndEditButtonSection(
+            navigateToEdit = {
+                onEditGoalClicked()
+            }
+        )
         Text(
             text = "overall" ,
             style = BookAppTypography.labelMedium ,
@@ -64,7 +71,7 @@ fun MyGoalsCardComponent() {
             )
 
             Text(
-                text = "Read 3 hrs a day accept Saturday and Sunday" ,
+                text = goalInfo ,
                 style = BookAppTypography.bodySmall ,
                 modifier = Modifier.padding(start = 8.dp , top = 2.dp)
             )

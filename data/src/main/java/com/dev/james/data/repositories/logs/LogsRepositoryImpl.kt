@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import okio.IOException
 import timber.log.Timber
+import java.time.LocalDate
 import javax.inject.Inject
 
 class LogsRepositoryImpl @Inject constructor(
@@ -29,33 +30,44 @@ class LogsRepositoryImpl @Inject constructor(
         return try {
             logsLocalDataSource.addBookLogToDatabase(bookLog.toEntity())
             Resource.Success(data = true)
-        }catch (e : IOException){
+        } catch (e: IOException) {
             Timber.tag(TAG).e("addBookLog $e")
-            Resource.Error(data = false , message = "Could not log your current progress! Reason: $e ")
-        }catch (e : SQLiteException){
+            Resource.Error(
+                data = false,
+                message = "Could not log your current progress! Reason: $e "
+            )
+        } catch (e: SQLiteException) {
             Timber.tag(TAG).e("addBookLog $e")
-            Resource.Error(data = false , message = "Could not log your current progress! Reason: $e ")
+            Resource.Error(
+                data = false,
+                message = "Could not log your current progress! Reason: $e "
+            )
         }
     }
 
-    override fun getBookLogs(bookId: String): Flow<List<BookLog>> =
-        logsLocalDataSource.getBookLogs(bookId)
-            .map { bookGoalLogsEntityList ->
-                bookGoalLogsEntityList.map { bookGoalLogsEntity ->
-                    bookGoalLogsEntity.toDomain()
-                }
-            }.catch { t->
-                Timber.tag(TAG).e("getBookLogs : $t")
-                emit(emptyList<BookLog>())
+    override suspend fun getBookLogs(
+        bookId: String,
+        mondayDate: String,
+        sundayDate: String
+    ): List<BookLog> =
+        logsLocalDataSource.getBookLogs(bookId = bookId , startDate = mondayDate , endDate = sundayDate)
+            .map { bookLogsEntity ->
+                bookLogsEntity.toDomain()
             }
 
-    override suspend fun getBookLog(id: String): Resource<BookLog> {
+    override suspend fun getBookLog(
+        id: String
+    ): Resource<BookLog> {
         return try {
-            Resource.Success(data = logsLocalDataSource.getBookLog(id).toDomain())
-        }catch (e : IOException){
+            Resource.Success(
+                data = logsLocalDataSource.getBookLog(
+                    id = id
+                ).toDomain()
+            )
+        } catch (e: IOException) {
             Timber.tag(TAG).e("addBookLog $e")
             Resource.Error(message = "Could not get this log! Reason: $e ")
-        }catch (e : SQLiteException){
+        } catch (e: SQLiteException) {
             Timber.tag(TAG).e("addBookLog $e")
             Resource.Error(message = "Could not get this log! Reason: $e ")
         }
@@ -65,12 +77,12 @@ class LogsRepositoryImpl @Inject constructor(
         return try {
             logsLocalDataSource.deleteBookLog(id)
             Resource.Success(data = true)
-        }catch (e : IOException){
+        } catch (e: IOException) {
             Timber.tag(TAG).e("deleteBookLog $e")
-            Resource.Error(data = false , message = "Could not delete this log! Reason: $e ")
-        }catch (e : SQLiteException){
+            Resource.Error(data = false, message = "Could not delete this log! Reason: $e ")
+        } catch (e: SQLiteException) {
             Timber.tag(TAG).e("addBookLog $e")
-            Resource.Error(data = false , message = "Could not delete this log! Reason: $e ")
+            Resource.Error(data = false, message = "Could not delete this log! Reason: $e ")
         }
     }
 
@@ -79,32 +91,34 @@ class LogsRepositoryImpl @Inject constructor(
         return try {
             logsLocalDataSource.addGoalLogToDatabase(goalLog.toEntity())
             Resource.Success(data = true)
-        }catch (e : IOException){
+        } catch (e: IOException) {
             Timber.tag(TAG).e("addGoalLog $e")
-            Resource.Error(data = false , message = "Could not log your current progress! Reason: $e ")
-        }catch (e : SQLiteException){
+            Resource.Error(
+                data = false,
+                message = "Could not log your current progress! Reason: $e "
+            )
+        } catch (e: SQLiteException) {
             Timber.tag(TAG).e("addGoalLog $e")
-            Resource.Error(data = false , message = "Could not log your current progress! Reason: $e ")
+            Resource.Error(
+                data = false,
+                message = "Could not log your current progress! Reason: $e "
+            )
         }
     }
 
-    override fun getGoalLogs(goalId: String): Flow<List<GoalLog>> =
-        logsLocalDataSource.getGoalLogs(goalId = goalId)
-            .map { goalLogsList ->
-                goalLogsList.map { goalLogsEntity ->
-                    goalLogsEntity.toDomain()
-                }
-            }.catch { t->
-                Timber.tag(TAG).e("getGoalLogs: $t")
-                emit(emptyList<GoalLog>())
+    override suspend fun getGoalLogs(parentLogId:String , mondayDate: String, sundayDate: String): List<GoalLog> =
+        logsLocalDataSource.getAllGoalLogs( parentLogId = parentLogId, startDate = mondayDate , endDate = sundayDate)
+            .map { goalLogsEntity ->
+                goalLogsEntity.toDomain()
             }
+
     override suspend fun getGoalLog(id: String): Resource<GoalLog> {
         return try {
             Resource.Success(data = logsLocalDataSource.getGoalLog(id).toDomain())
-        }catch (e : IOException){
+        } catch (e: IOException) {
             Timber.tag(TAG).e("getGoalLog $e")
             Resource.Error(message = "Could not get this log! Reason: $e ")
-        }catch (e : SQLiteException){
+        } catch (e: SQLiteException) {
             Timber.tag(TAG).e("getGoalLog $e")
             Resource.Error(message = "Could not get this log! Reason: $e ")
         }
@@ -114,12 +128,31 @@ class LogsRepositoryImpl @Inject constructor(
         return try {
             logsLocalDataSource.deleteGoalLog(id)
             Resource.Success(data = true)
-        }catch (e : IOException){
+        } catch (e: IOException) {
             Timber.tag(TAG).e("deleteGoalLog $e")
-            Resource.Error(data = false , message = "Could not delete this log! Reason: $e ")
-        }catch (e : SQLiteException){
+            Resource.Error(data = false, message = "Could not delete this log! Reason: $e ")
+        } catch (e: SQLiteException) {
             Timber.tag(TAG).e("deleteGoalLog $e")
-            Resource.Error(data = false , message = "Could not delete this log! Reason: $e ")
+            Resource.Error(data = false, message = "Could not delete this log! Reason: $e ")
+        }
+    }
+
+
+    override suspend fun getRecentGoalLog(): GoalLog {
+        return try {
+            logsLocalDataSource.fetchLatestGoalLog().toDomain()
+        }catch (e : Exception){
+            Timber.tag(TAG).e("DB error $e : ${e.localizedMessage}")
+            GoalLog()
+        }
+    }
+
+    override suspend fun getRecentBookLog(): BookLog {
+        return try {
+            logsLocalDataSource.fetchLatestBookLog().toDomain()
+        }catch (e : Exception){
+            Timber.tag(TAG).e("DB error $e : ${e.localizedMessage}")
+            BookLog()
         }
     }
 

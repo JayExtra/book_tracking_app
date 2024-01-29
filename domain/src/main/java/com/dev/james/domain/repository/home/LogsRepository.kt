@@ -8,18 +8,21 @@ import kotlinx.coroutines.flow.Flow
 interface LogsRepository {
 
     suspend fun addBookLog(bookLog: BookLog) : Resource<Boolean>
-    fun getBookLogs(bookId : String) : Flow<List<BookLog>>
+    suspend fun getBookLogs(bookId : String , mondayDate : String , sundayDate : String) : List<BookLog>
 
     suspend fun getBookLog(id : String) : Resource<BookLog>
 
     suspend fun deleteBookLog(id : String) : Resource<Boolean>
 
-
     suspend fun addGoalLog(goalLog : GoalLog) : Resource<Boolean>
-    fun getGoalLogs(goalId : String) : Flow<List<GoalLog>>
+    suspend fun getGoalLogs(parentLogId : String , mondayDate : String , sundayDate : String) : List<GoalLog>
 
     suspend fun getGoalLog(id : String) : Resource<GoalLog>
 
     suspend fun deleteGoalLog(id : String) : Resource<Boolean>
+
+    suspend fun getRecentGoalLog() : GoalLog
+
+    suspend fun getRecentBookLog() : BookLog
 
 }
