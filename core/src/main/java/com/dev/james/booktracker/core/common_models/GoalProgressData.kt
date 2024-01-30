@@ -7,5 +7,5 @@ data class GoalProgressData(
     val goalPeriod : String = "" ,
     val booksToRead : Int = 0 ,
     val booksRead : Int = 0,
-    val goalLogsList : List<GoalLog> = listOf<GoalLog>()
+    val weeklyLogData : Map<String , Long> = mapOf()
 )

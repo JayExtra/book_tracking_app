@@ -33,6 +33,7 @@ import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
 import com.dev.james.booktracker.compose_ui.ui.enums.BarType
 import com.dev.james.booktracker.compose_ui.ui.utils.formatTimeToDHMS
+import timber.log.Timber
 
 @Composable
 @Preview(showBackground = true)
@@ -148,7 +149,8 @@ fun BarGraph(
         // main graph
 
         //Get maximum value in graph for normalization later
-        val maxDuration = graphBarData.maxByOrNull { it.value }?.value ?: 1L
+        val durationTemp = graphBarData.maxByOrNull { it.value }?.value ?: 1L
+        val maxDuration = if(durationTemp == 0L) 1L else durationTemp
 
         Box(
             modifier = Modifier
@@ -168,7 +170,10 @@ fun BarGraph(
 
                     val (dayOfWeek , duration) = entry
 
+
                     val normalizedGraphHeight = duration.toFloat() / maxDuration.toFloat()
+
+                    Timber.tag("BarGraph").d("Normalized graph height=> $normalizedGraphHeight , maxDuration => $maxDuration , duration => $duration")
 
                     val finalBarColor = if(duration >= targetDuration ) Color.Green else barColor
 

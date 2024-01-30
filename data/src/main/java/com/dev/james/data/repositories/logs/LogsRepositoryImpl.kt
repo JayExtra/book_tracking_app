@@ -10,12 +10,8 @@ import com.dev.james.booktracker.core.common_models.mappers.toEntity
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.domain.datasources.home.LogsLocalDataSource
 import com.dev.james.domain.repository.home.LogsRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
 import okio.IOException
 import timber.log.Timber
-import java.time.LocalDate
 import javax.inject.Inject
 
 class LogsRepositoryImpl @Inject constructor(
@@ -106,8 +102,8 @@ class LogsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getGoalLogs(parentLogId:String , mondayDate: String, sundayDate: String): List<GoalLog> =
-        logsLocalDataSource.getAllGoalLogs( parentLogId = parentLogId, startDate = mondayDate , endDate = sundayDate)
+    override suspend fun getGoalLogs(parentLogId:String, startDate: String, endDate: String): List<GoalLog> =
+        logsLocalDataSource.getAllGoalLogs( parentLogId = parentLogId, startDate = startDate , endDate = endDate)
             .map { goalLogsEntity ->
                 goalLogsEntity.toDomain()
             }
