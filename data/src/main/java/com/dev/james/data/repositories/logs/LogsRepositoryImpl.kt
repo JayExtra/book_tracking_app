@@ -43,10 +43,10 @@ class LogsRepositoryImpl @Inject constructor(
 
     override suspend fun getBookLogs(
         bookId: String,
-        mondayDate: String,
-        sundayDate: String
+        startDate: String,
+        endDate: String
     ): List<BookLog> =
-        logsLocalDataSource.getBookLogs(bookId = bookId , startDate = mondayDate , endDate = sundayDate)
+        logsLocalDataSource.getBookLogs(bookId = bookId , startDate = startDate , endDate = endDate)
             .map { bookLogsEntity ->
                 bookLogsEntity.toDomain()
             }

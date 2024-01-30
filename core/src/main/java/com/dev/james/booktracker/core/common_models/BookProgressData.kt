@@ -12,5 +12,5 @@ data class BookProgressData(
     val progress : Float = 0f,
     val currentChapter : Int = 0 ,
     val currentChapterTitle : String = "",
-    val logs : List<BookLog> = emptyList()
+    val logs : Map<String , Long> = mapOf()
 )

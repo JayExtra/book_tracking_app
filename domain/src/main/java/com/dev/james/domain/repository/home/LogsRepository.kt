@@ -7,7 +7,7 @@ import com.dev.james.booktracker.core.utilities.Resource
 interface LogsRepository {
 
     suspend fun addBookLog(bookLog: BookLog) : Resource<Boolean>
-    suspend fun getBookLogs(bookId : String , mondayDate : String , sundayDate : String) : List<BookLog>
+    suspend fun getBookLogs(bookId : String, startDate : String, endDate : String) : List<BookLog>
 
     suspend fun getBookLog(id : String) : Resource<BookLog>
 

@@ -1,21 +1,22 @@
 package com.dev.james.domain.usecases
 
-import android.icu.util.Calendar
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.common_models.BookLog
 import com.dev.james.booktracker.core.common_models.BookSave
-import com.dev.james.booktracker.core.utilities.formatDateToString
+import com.dev.james.booktracker.core.common_models.GoalLog
+import com.dev.james.booktracker.core.utilities.formatToDateString
 import com.dev.james.booktracker.core.utilities.getDateRange
+import com.dev.james.booktracker.core.utilities.getDayString
+import com.dev.james.booktracker.core.utilities.getWeekRange
+import com.dev.james.booktracker.core.utilities.toAppropriateDay
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStorePreferenceKeys
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.home.LogsRepository
-import kotlinx.coroutines.flow.first
 import timber.log.Timber
-import java.time.LocalDate
-import java.time.Year
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -37,6 +38,9 @@ class FetchActiveBookProgress @Inject constructor(
             val requiredBookId = bookId ?: dataSoreManager.readStringValueOnce(DataStorePreferenceKeys.CURRENT_ACTIVE_BOOK_ID)
 
             return if(requiredBookId.trim().isEmpty()){
+                // this situation happens if you launch the app for the very first time
+                //however this will not work well if user already previously used the app , will replace this
+                // with api call to fetch last book being read.
                 Timber.tag(TAG).d("book id is null or empty not fetching")
                 BookProgressData()
             }else {
@@ -46,11 +50,13 @@ class FetchActiveBookProgress @Inject constructor(
 
     }
 
+    @SuppressLint("NewApi")
     @RequiresApi(Build.VERSION_CODES.N)
     private suspend fun fetchBookProgressData(requiredBookId : String) : BookProgressData {
         val cachedBook = getCachedBook(requiredBookId)
         val bookLogs = getBookGoalLogs(requiredBookId)
         val totalPages = cachedBook.bookPagesCount
+        val mappedLogs = mapDataToGraphData(bookLogs)
 
         return if (bookLogs.isNotEmpty()){
 
@@ -69,7 +75,7 @@ class FetchActiveBookProgress @Inject constructor(
                 totalPagesRead = totalPagesRead ,
                 currentChapterTitle = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapterTitle else "",
                 currentChapter = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapter else 0,
-                logs = bookLogs ,
+                logs = mappedLogs ,
                 progress = calculateProgress(
                     totalPagesRead = totalPagesRead ,
                     totalPages = totalPages
@@ -82,11 +88,37 @@ class FetchActiveBookProgress @Inject constructor(
                 bookTitle = cachedBook.bookTitle,
                 isUri = cachedBook.isUri ,
                 totalPages = totalPages,
-                currentChapterTitle = "" ,
-                currentChapter = 0
+                currentChapterTitle = "",
+                currentChapter = 0 ,
+                logs = mappedLogs
             )
         }
+    }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun mapDataToGraphData(goalLogs : List<BookLog>) : Map<String , Long> {
+        val weekRange = getWeekRange()
+        val mappedLogs = mutableMapOf<String , Long>()
+        val finalLog = mutableMapOf<String , Long>()
+
+        return if (goalLogs.isNotEmpty()){
+            goalLogs.forEach { log ->
+                log.startedTime?.formatToDateString()?.let { mappedLogs[it] = log.period }
+            }
+            weekRange.forEach { date ->
+                if(mappedLogs.containsKey(date)){
+                    mappedLogs[date]?.let { finalLog.put( date.getDayString().toAppropriateDay() , it) }
+                }else{
+                    finalLog[date.getDayString().toAppropriateDay()] = 0L
+                }
+            }
+            finalLog
+        }else {
+            weekRange.forEach { date ->
+                finalLog[date.getDayString().toAppropriateDay()] = 0L
+            }
+            finalLog
+        }
     }
 
     //repair here//
@@ -129,7 +161,7 @@ class FetchActiveBookProgress @Inject constructor(
     private suspend fun getBookGoalLogs(id : String) : List<BookLog>{
         val dateRange = getDateRange()
         Timber.tag(TAG).d("date range: $dateRange")
-        return logsRepository.getBookLogs(bookId = id , mondayDate = dateRange.startDate , sundayDate = dateRange.endDate)
+        return logsRepository.getBookLogs(bookId = id , startDate = dateRange.startDate , endDate = dateRange.endDate)
     }
 
     private suspend fun getCachedBook(id : String) : BookSave =

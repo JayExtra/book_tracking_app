@@ -39,10 +39,9 @@ import timber.log.Timber
 @Preview(showBackground = true)
 fun BarGraph(
     modifier: Modifier = Modifier,
-    graphBarData : Map<String , Long> = mapOf("Sun" to 7200000L , "Mon" to 3600000L , "Teu" to 1800000L , "Wen" to 1200000L , "Thur" to 3600000L , "Fri" to 2400000L , "Sat" to 600000L
-    ),
+    graphBarData : Map<String , Long> = mapOf(),
     xAxisScaleData: List<Int> = listOf(),
-    targetDuration : Long = 7200000L,
+    targetDuration : Long = 0L,
     height: Dp = 380.dp,
     roundType: BarType = BarType.CIRCULAR_TYPE,
     barWidth: Dp = 38.dp,
