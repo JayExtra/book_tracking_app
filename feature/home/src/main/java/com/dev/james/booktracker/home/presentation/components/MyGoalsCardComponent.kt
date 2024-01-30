@@ -29,8 +29,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
+import com.dev.james.booktracker.compose_ui.ui.enums.BarType
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
+import timber.log.Timber
 
 @Composable
 @Preview(showBackground = false)
@@ -59,7 +61,7 @@ fun MyGoalsCardComponent(
             }
         )
         Text(
-            text = "overall" ,
+            text = "This week" ,
             style = BookAppTypography.labelMedium ,
             modifier = Modifier.fillMaxWidth() ,
             textAlign = TextAlign.Center
@@ -95,9 +97,10 @@ fun MyGoalsCardComponent(
 
         Spacer(modifier = Modifier.height(6.dp))
 
+        Timber.tag("GoalsCard").d("Bar graph data => $graphData")
         BarGraph(
             graphBarData = graphData ,
-            height = 270.dp ,
+            height = 190.dp ,
             targetDuration = target
         )
 

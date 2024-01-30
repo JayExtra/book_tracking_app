@@ -14,6 +14,7 @@ import com.dev.james.domain.repository.home.GoalsRepository
 import com.dev.james.domain.repository.home.LogsRepository
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
+import java.time.LocalDate
 import javax.inject.Inject
 
 class FetchGoalProgress @Inject constructor(
@@ -25,7 +26,7 @@ class FetchGoalProgress @Inject constructor(
     }
 
     @SuppressLint("NewApi")
-    @RequiresApi(Build.VERSION_CODES.N , Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.N)
     suspend operator fun invoke() : GoalProgressData {
         val activeGoalsList = goalsRepository.getActiveGoals().first()
         return if(activeGoalsList.isEmpty()){
@@ -33,6 +34,31 @@ class FetchGoalProgress @Inject constructor(
         }else{
             val activeGoal = activeGoalsList.first()
             val activeGoalLogs = fetchGoalLogs(activeGoal.goalId)
+
+     /*       val testLogs = listOf(
+                GoalLog(
+                    parentGoalId = "siuhsdcs80" ,
+                    id = "823sajhjhascas" ,
+                    startTime = LocalDate.now() ,
+                    endTime = LocalDate.now() ,
+                    duration = 1800000L
+                ) ,
+                GoalLog(
+                    parentGoalId = "siuhsdcs80" ,
+                    id = "823sajhjhascas" ,
+                    startTime = LocalDate.now().minusDays(2) ,
+                    endTime = LocalDate.now().minusDays(2) ,
+                    duration = 3600000L
+                ) ,
+                GoalLog(
+                    parentGoalId = "siuhsdcs80" ,
+                    id = "823sajhjhascas" ,
+                    startTime = LocalDate.now().plusDays(2) ,
+                    endTime = LocalDate.now().plusDays(2) ,
+                    duration = 7200000L
+                )
+
+            )*/
 
             Timber.tag(TAG).d("Test graph data: ${mapDataToGraphData(activeGoalLogs)}")
 

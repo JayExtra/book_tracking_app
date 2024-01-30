@@ -170,9 +170,8 @@ fun BarGraph(
 
                     val (dayOfWeek , duration) = entry
 
-                    val normalize = duration.toFloat() / maxDuration.toFloat()
 
-                    val normalizedGraphHeight = if(normalize < 1) 0f else normalize
+                    val normalizedGraphHeight = duration.toFloat() / maxDuration.toFloat()
 
                     Timber.tag("BarGraph").d("Normalized graph height=> $normalizedGraphHeight , maxDuration => $maxDuration , duration => $duration")
 
