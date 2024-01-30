@@ -662,7 +662,9 @@ fun StatelessHomeScreen(
                                 goalInfo = homeScreenState.goalProgressData.goalInfo ,
                                 onEditGoalClicked = {
                                    //navigate to edit goal screen
-                                }
+                                } ,
+                                graphData = homeScreenState.goalProgressData.weeklyLogData ,
+                                target = homeScreenState.goalProgressData.goalTime
                             )
                         }
 

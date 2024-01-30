@@ -1,10 +1,8 @@
 package com.dev.james.booktracker.core.utilities
 
-import android.content.Context
 import android.icu.util.Calendar
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.dev.james.booktracker.core.R
 import com.dev.james.booktracker.core.common_models.DateRange
 import timber.log.Timber
 import java.security.SecureRandom
@@ -130,8 +128,9 @@ fun formatTime(timeMillis: Long): String {
 }
 
 @RequiresApi(Build.VERSION_CODES.N)
-fun Calendar.formatDateToString() : String {
-    val formatter = SimpleDateFormat("dd-MM-yyyy hh:mm a" , Locale.UK)
+fun Calendar.formatDateToString(toDateOnly : Boolean) : String {
+    val pattern = if(!toDateOnly) "dd-MM-yyyy hh:mm a" else "dd-MM-yyyy"
+    val formatter = SimpleDateFormat(pattern , Locale.UK)
     return formatter.format(this.time)
 }
 
@@ -142,7 +141,7 @@ fun getDateRange() : DateRange {
     calendar.set(Calendar.DAY_OF_WEEK , Calendar.SUNDAY)
     val daysOfThisWeek = mutableListOf<String>()
     (0..6).forEach { day ->
-        daysOfThisWeek.add(day , calendar.formatDateToString())
+        daysOfThisWeek.add(day , calendar.formatDateToString(false))
         calendar.add(Calendar.DAY_OF_MONTH , 1)
     }
     Timber.tag("Extensions").d(daysOfThisWeek.toString())
@@ -152,6 +151,27 @@ fun getDateRange() : DateRange {
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.N)
+fun getWeekRange() : List<String> {
+    val calendar = Calendar.getInstance()
+    calendar.firstDayOfWeek = Calendar.SUNDAY
+    calendar.set(Calendar.DAY_OF_WEEK , Calendar.SUNDAY)
+    val daysOfThisWeek = mutableListOf<String>()
+    (0..6).forEach { day ->
+        daysOfThisWeek.add(day , calendar.formatDateToString(true))
+        calendar.add(Calendar.DAY_OF_MONTH , 1)
+    }
+    Timber.tag("Extensions").d("Days of week => ${daysOfThisWeek.toString()}")
+    return daysOfThisWeek
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun LocalDate.formatToDateString() : String {
+    val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    return dateFormatter.format(this)
+}
+
+
 @RequiresApi(Build.VERSION_CODES.O)
 fun LocalDate.calculateDaysPast(): Int {
     val currentDate = LocalDate.now()
@@ -159,4 +179,41 @@ fun LocalDate.calculateDaysPast(): Int {
     val daysBetween = ChronoUnit.DAYS.between(currentDate, this).checkDaysTaken()
     Timber.tag("Extensions").d("Days between ${currentDate.toString()} & $this is => $daysBetween")
     return daysBetween
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun String.getDayString() : String {
+    val dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    val date = LocalDate.parse(this, dateFormat)
+    return date.dayOfWeek.toString()
+}
+
+fun String.toAppropriateDay() : String {
+    return when(this){
+        "MONDAY" -> {
+            "Mon"
+        }
+        "TUESDAY" -> {
+            "Teu"
+        }
+        "WEDNESDAY" -> {
+            "Wed"
+        }
+        "THURSDAY" -> {
+            "Thur"
+        }
+        "FRIDAY" -> {
+            "Fri"
+        }
+        "SATURDAY" -> {
+            "Sat"
+        }
+        "SUNDAY" -> {
+            "Sun"
+        }
+
+        else -> {
+            ""
+        }
+    }
 }
