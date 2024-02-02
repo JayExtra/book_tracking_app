@@ -102,8 +102,9 @@ class BooksRepositoryImpl
 
     override suspend fun getSingleSavedBook(id: String): BookSave {
         return try {
-            booksLocalDataSource.getCachedBook(id)
-                .mapToBookDomainObject()
+            val book = booksLocalDataSource.getCachedBook(id)
+            Timber.tag(TAG).d("book saved => $book")
+            book.mapToBookDomainObject()
         } catch (e: IOException) {
             Timber.e("Could not fetch book from the database.Issue : ${e.message}")
             BookSave()

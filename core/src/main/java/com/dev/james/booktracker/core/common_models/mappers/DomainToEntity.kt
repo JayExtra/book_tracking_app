@@ -40,7 +40,8 @@ fun BookLog.toEntity() : BookLogsEntity {
         period = period ,
         pagesRead = pagesRead ,
         currentChapterTitle = currentChapterTitle ,
-        currentChapter = currentChapter
+        currentChapter = currentChapter ,
+        currentPage = currentPage
     )
 }
 

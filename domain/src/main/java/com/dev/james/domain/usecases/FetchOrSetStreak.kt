@@ -16,7 +16,8 @@ class FetchOrSetStreak @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun fetch(onStreakReset : (Boolean) -> Unit = {}) : Int {
 
-        val mostRecentLog = logsRepository.getRecentGoalLog()
+        val currentGoalId = dataStoreManager.readStringValueOnce(DataStorePreferenceKeys.CURRENT_ACTIVE_GOAL_ID)
+        val mostRecentLog = logsRepository.getRecentGoalLog(currentGoalId)
 
         return if(mostRecentLog.id.isNotBlank()){
             val logDate = mostRecentLog.startTime

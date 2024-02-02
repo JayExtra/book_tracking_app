@@ -23,5 +23,7 @@ data class BookLogsEntity(
     @ColumnInfo("current_chapter_title")
     val currentChapterTitle : String ,
     @ColumnInfo("current_chapter")
-    val currentChapter: Int
+    val currentChapter: Int,
+    @ColumnInfo("current_page")
+    val currentPage : Int
 )

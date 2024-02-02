@@ -10,5 +10,6 @@ data class BookLog(
     val period : Long = 0L,
     val pagesRead : Int = 0 ,
     val currentChapterTitle : String = "" ,
-    val currentChapter : Int = 0
+    val currentChapter : Int = 0 ,
+    val currentPage : Int = 0
 )

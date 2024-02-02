@@ -13,12 +13,16 @@ class LogsLocalDataSourceImpl @Inject constructor(
         logsDao.addBookLog(bookLogsEntity)
     }
 
-    override suspend fun getBookLogs(
+    override suspend fun getWeeklyBookLogs(
         bookId: String,
         startDate: String,
         endDate: String
     ): List<BookLogsEntity> =
-        logsDao.getBookLogs(bookId = bookId , startDate = startDate , endDate = endDate)
+        logsDao.getWeeklyBookLogs(bookId = bookId , startDate = startDate , endDate = endDate)
+
+    override suspend fun getAllBookLogs(bookId: String): List<BookLogsEntity> {
+        return logsDao.getAllBookLogs(bookId)
+    }
 
     override suspend fun getBookLog(id: String): BookLogsEntity {
         return logsDao.getABookLog(id = id )
@@ -32,8 +36,12 @@ class LogsLocalDataSourceImpl @Inject constructor(
         logsDao.addGoalLog(goalLogsEntity)
     }
 
-    override suspend fun getAllGoalLogs(parentLogId : String , startDate :  String, endDate : String): List<GoalLogsEntity> =
-        logsDao.getGoalLogs(parentLogId = parentLogId, startDate = startDate , endDate = endDate)
+    override suspend fun getWeeklyGoalLogs(parentLogId : String, startDate :  String, endDate : String): List<GoalLogsEntity> =
+        logsDao.getWeeklyGoalLogs(parentLogId = parentLogId, startDate = startDate , endDate = endDate)
+
+    override suspend fun getAllGoalLogs(parentGoalId: String): List<GoalLogsEntity> {
+        return logsDao.getAllGoalLogs(parentGoalId)
+    }
 
     override suspend fun getGoalLog(id: String): GoalLogsEntity {
         return logsDao.getAGoalLog(id)
@@ -43,11 +51,11 @@ class LogsLocalDataSourceImpl @Inject constructor(
         logsDao.deleteGoalLog(id)
     }
 
-    override suspend fun fetchLatestBookLog(): BookLogsEntity {
-        return logsDao.getRecentBookLog()
+    override suspend fun fetchLatestBookLog(bookId: String): List<BookLogsEntity> {
+        return logsDao.getRecentBookLog(bookId)
     }
 
-    override suspend fun fetchLatestGoalLog(): GoalLogsEntity {
-        return logsDao.getRecentGoalLog()
+    override suspend fun fetchLatestGoalLog(parentGoalId: String): List<GoalLogsEntity> {
+        return logsDao.getRecentGoalLog(parentGoalId)
     }
 }

@@ -7,10 +7,12 @@ data class BookProgressData(
     val authors : String = "",
     val isUri : Boolean = false,
     val totalPages : Int = 0,
+    val totalTimeSpentWeekly : Long = 0L,
     val totalTimeSpent : Long = 0L,
     val totalPagesRead : Int = 0,
     val progress : Float = 0f,
-    val currentChapter : Int = 0 ,
+    val currentChapter : Int = 0,
     val currentChapterTitle : String = "",
+    val currentPage : Int = 0 ,
     val logs : Map<String , Long> = mapOf()
 )

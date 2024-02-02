@@ -16,6 +16,9 @@ object DataStorePreferenceKeys {
     val CURRENT_ACTIVE_BOOK_ID : Preferences.Key<String> =
         stringPreferencesKey("current_active_book_id")
 
+    val CURRENT_ACTIVE_GOAL_ID : Preferences.Key<String> =
+        stringPreferencesKey("current_active_goal_id")
+
     val CURRENT_STREAK : Preferences.Key<Int> =
         intPreferencesKey("current_streak")
 }

@@ -169,7 +169,7 @@ fun GoalDataComponent(
             modifier = Modifier.layoutId("best_time_section"),
             icon = R.drawable.ic_clock_24,
             title = "Total time",
-            subTitle = bookProgressData.totalTimeSpent.formatTimeToDHMS()
+            subTitle = bookProgressData.totalTimeSpentWeekly.formatTimeToDHMS()
         )
 
         ElevatedButton(

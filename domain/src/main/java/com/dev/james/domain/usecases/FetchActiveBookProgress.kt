@@ -6,7 +6,6 @@ import androidx.annotation.RequiresApi
 import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.common_models.BookLog
 import com.dev.james.booktracker.core.common_models.BookSave
-import com.dev.james.booktracker.core.common_models.GoalLog
 import com.dev.james.booktracker.core.utilities.formatToDateString
 import com.dev.james.booktracker.core.utilities.getDateRange
 import com.dev.james.booktracker.core.utilities.getDayString
@@ -53,16 +52,18 @@ class FetchActiveBookProgress @Inject constructor(
     @SuppressLint("NewApi")
     @RequiresApi(Build.VERSION_CODES.N)
     private suspend fun fetchBookProgressData(requiredBookId : String) : BookProgressData {
+
         val cachedBook = getCachedBook(requiredBookId)
-        val bookLogs = getBookGoalLogs(requiredBookId)
-        val totalPages = cachedBook.bookPagesCount
-        val mappedLogs = mapDataToGraphData(bookLogs)
+        val allBookLogs = getAllBookLogs(requiredBookId)
 
-        return if (bookLogs.isNotEmpty()){
+        return if (allBookLogs.isNotEmpty()){
 
-            val totalPagesRead = bookLogs.calculateTotalPagesRead()
-            val totalTimeSpent = bookLogs.calculateTotalTimeSpent()
-            val mostRecentLog = bookLogs.getMostRecentLog()
+            val weeklyBookLogs = getWeeklyBookGoalLogs(requiredBookId)
+            val mappedLogs = mapDataToGraphData(weeklyBookLogs)
+            val mostRecentLog = getMostRecentLog(requiredBookId)
+            val totalTimeSpentWeekly = weeklyBookLogs.calculateTotalTimeSpent()
+            val totalTimeSpentOverall = allBookLogs.calculateTotalTimeSpent()
+
 
             BookProgressData(
                 bookId = requiredBookId ,
@@ -70,15 +71,17 @@ class FetchActiveBookProgress @Inject constructor(
                 bookTitle = cachedBook.bookTitle,
                 authors = cachedBook.bookAuthors,
                 isUri = cachedBook.isUri ,
-                totalPages = totalPages,
-                totalTimeSpent = totalTimeSpent ,
-                totalPagesRead = totalPagesRead ,
-                currentChapterTitle = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapterTitle else "",
-                currentChapter = if(mostRecentLog.logId.isNotBlank()) mostRecentLog.currentChapter else 0,
+                totalPages = cachedBook.bookPagesCount,
+                totalTimeSpentWeekly = totalTimeSpentWeekly ,
+                totalTimeSpent = totalTimeSpentOverall,
+                totalPagesRead = mostRecentLog.pagesRead ,
+                currentChapterTitle = mostRecentLog.currentChapterTitle ,
+                currentChapter = mostRecentLog.currentChapter ,
+                currentPage = mostRecentLog.currentPage ,
                 logs = mappedLogs ,
                 progress = calculateProgress(
-                    totalPagesRead = totalPagesRead ,
-                    totalPages = totalPages
+                    totalPagesRead = mostRecentLog.pagesRead ,
+                    totalPages = cachedBook.bookPagesCount
                 )
             )
         }else {
@@ -87,10 +90,12 @@ class FetchActiveBookProgress @Inject constructor(
                 bookImage = cachedBook.bookImage ,
                 bookTitle = cachedBook.bookTitle,
                 isUri = cachedBook.isUri ,
-                totalPages = totalPages,
+                totalPages = cachedBook.bookPagesCount,
                 currentChapterTitle = "",
                 currentChapter = 0 ,
-                logs = mappedLogs
+                logs = mapOf(
+                    "Sun" to 0L , "Mon" to 0L , "Teu" to 0L , "Wen" to 0L , "Thur" to 0L , "Fri" to 0L , "Sat" to 0L
+                )
             )
         }
     }
@@ -122,15 +127,8 @@ class FetchActiveBookProgress @Inject constructor(
     }
 
     //repair here//
-    private fun List<BookLog>.getMostRecentLog() : BookLog {
-        return if(this.isNotEmpty()){
-            val latest = this.sortedBy { log ->
-                log.startedTime
-            }
-            latest[0]
-        }else {
-            BookLog()
-        }
+    private suspend fun getMostRecentLog(requiredBookId: String): BookLog {
+        return logsRepository.getRecentBookLog(requiredBookId)
 
     }
 
@@ -158,10 +156,14 @@ class FetchActiveBookProgress @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    private suspend fun getBookGoalLogs(id : String) : List<BookLog>{
+    private suspend fun getWeeklyBookGoalLogs(id : String) : List<BookLog>{
         val dateRange = getDateRange()
         Timber.tag(TAG).d("date range: $dateRange")
-        return logsRepository.getBookLogs(bookId = id , startDate = dateRange.startDate , endDate = dateRange.endDate)
+        return logsRepository.getWeeklyBookLogs(bookId = id , startDate = dateRange.startDate , endDate = dateRange.endDate)
+    }
+
+    private suspend fun getAllBookLogs(bookId : String) : List<BookLog>{
+        return logsRepository.getAllBookLogs(bookId)
     }
 
     private suspend fun getCachedBook(id : String) : BookSave =

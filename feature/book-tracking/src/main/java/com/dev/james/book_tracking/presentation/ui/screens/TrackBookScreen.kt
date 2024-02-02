@@ -55,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -85,6 +86,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.common_models.BookStatsData
+import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
@@ -176,7 +178,8 @@ fun TrackBookScreen(
             )
 
             ProgressGraphSection(
-                bookLogs = bookData.value.logs
+                bookLogs = bookData.value.logs ,
+                totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly
             )
             /*
                         AnimatedVisibility(
@@ -256,7 +259,8 @@ fun TrackBookScreen(
 @Composable
 @Preview(showBackground = true)
 fun ProgressGraphSection(
-    bookLogs: Map<String, Long> = mapOf()
+    bookLogs: Map<String, Long> = mapOf() ,
+    totalTimeSpentWeekly: Long = 0L
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -275,7 +279,9 @@ fun ProgressGraphSection(
         )
         Row(modifier = Modifier.padding(8.dp)) {
             HoursWithEmojiComponent(
-                modifier = Modifier.size(90.dp)
+                modifier = Modifier.size(90.dp) ,
+                totalTimeSpentWeekly = totalTimeSpentWeekly
+
             )
             BarGraph(
                 height = 150.dp,
@@ -593,7 +599,7 @@ fun TrackSection(
 
     }
 }
-
+/*
 @Composable
 @Preview(showBackground = true)
 fun CounterSection(
@@ -618,9 +624,9 @@ fun CounterSection(
             }
         )
     }
-}
+}*/
 
-@Composable
+/*@Composable
 @Preview(showBackground = true)
 fun CounterButtonsComponent(
     countValue: Int = 0,
@@ -688,11 +694,14 @@ fun CounterButtonsComponent(
             )
         }
     }
-}
+}*/
 
 @Composable
 @Preview(showBackground = true)
-fun HoursWithEmojiComponent(modifier: Modifier = Modifier) {
+fun HoursWithEmojiComponent(
+    modifier: Modifier = Modifier ,
+    totalTimeSpentWeekly : Long = 0L
+) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = modifier) {
         Text(
             text = "This week",
@@ -702,7 +711,7 @@ fun HoursWithEmojiComponent(modifier: Modifier = Modifier) {
             fontSize = 14.sp
         )
         Text(
-            text = "25 hours",
+            text = totalTimeSpentWeekly.formatTimeToDHMS(),
             style = BookAppTypography.labelLarge,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
@@ -714,8 +723,19 @@ fun HoursWithEmojiComponent(modifier: Modifier = Modifier) {
                 .width(70.dp)
                 .height(70.dp)
         ) {
+            val resource = when (totalTimeSpentWeekly) {
+                in 0L..3600000L -> {
+                    R.drawable.shocked_emoji
+                }
+                in 3600001L..14400000L -> {
+                    R.drawable.worried_emoji
+                }
+                else -> {
+                    R.drawable.happy_emoji
+                }
+            }
             Image(
-                painter = painterResource(id = R.drawable.happy_emoji),
+                painter = painterResource(id = resource),
                 contentDescription = "",
                 modifier = Modifier.size(60.dp)
             )
@@ -757,7 +777,7 @@ fun BookProgressImageSection(
                 .data(data = bookData.bookImage)
                 .apply(block = {
                     //placeholder(R.drawable.image_placeholder_24)
-                    error(R.drawable.ic_error_24)
+                    //error(R.drawable.ic_error_24)
                     crossfade(true)
                     transformations(
                         RoundedCornersTransformation(0f)
@@ -789,7 +809,8 @@ fun BookProgressImageSection(
             strokeCap = StrokeCap.Round,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.size(width = 161.dp, height = 170.dp),
-            strokeWidth = 12.dp
+            strokeWidth = 12.dp ,
+            trackColor = Color.Gray
         )
     }
 }

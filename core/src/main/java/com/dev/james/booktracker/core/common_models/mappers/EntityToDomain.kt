@@ -11,7 +11,7 @@ import com.dev.james.booktracker.core.entities.GoalLogsEntity
 
 fun BookLogsEntity.toDomain() : BookLog =
     BookLog(
-        bookId, logId, startedTime, endTime, period, pagesRead , currentChapterTitle, currentChapter
+        bookId, logId, startedTime, endTime, period, pagesRead , currentChapterTitle, currentChapter , currentPage
     )
 
 fun GoalEntity.toDomain() : Goal =
