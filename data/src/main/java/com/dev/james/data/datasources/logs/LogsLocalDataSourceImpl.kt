@@ -3,6 +3,8 @@ package com.dev.james.data.datasources.logs
 import com.dev.james.booktracker.core_database.room.dao.LogsDao
 import com.dev.james.booktracker.core.entities.BookLogsEntity
 import com.dev.james.booktracker.core.entities.GoalLogsEntity
+import com.dev.james.booktracker.core.entities.updates.BookLogUpdate
+import com.dev.james.booktracker.core.entities.updates.GoalLogUpdate
 import com.dev.james.domain.datasources.home.LogsLocalDataSource
 import javax.inject.Inject
 
@@ -36,6 +38,10 @@ class LogsLocalDataSourceImpl @Inject constructor(
         logsDao.addGoalLog(goalLogsEntity)
     }
 
+    override suspend fun updateGoalLog(goalLogUpdate: GoalLogUpdate) {
+        logsDao.updateGoalLog(goalLogUpdate)
+    }
+
     override suspend fun getWeeklyGoalLogs(parentLogId : String, startDate :  String, endDate : String): List<GoalLogsEntity> =
         logsDao.getWeeklyGoalLogs(parentLogId = parentLogId, startDate = startDate , endDate = endDate)
 
@@ -57,5 +63,9 @@ class LogsLocalDataSourceImpl @Inject constructor(
 
     override suspend fun fetchLatestGoalLog(parentGoalId: String): List<GoalLogsEntity> {
         return logsDao.getRecentGoalLog(parentGoalId)
+    }
+
+    override suspend fun updateBookLog(bookLogUpdate: BookLogUpdate) {
+        logsDao.updateBookLog(bookLogUpdate)
     }
 }

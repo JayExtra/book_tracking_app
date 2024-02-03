@@ -21,6 +21,8 @@ class StopWatch {
     private var hours by mutableStateOf("00")
     private var isActive = false
     var formattedTime by mutableStateOf("00:00:00")
+    private var _finalTime by mutableStateOf(0L)
+    val finalTime get() = _finalTime
 
     companion object{
         const val TAG = "StopWatch"
@@ -49,11 +51,13 @@ class StopWatch {
 
     fun pause() {
         isActive = false
+        _finalTime = time.inWholeMilliseconds
         timer.cancel()
     }
 
     fun reset() {
         pause()
+        _finalTime = time.inWholeMilliseconds
         formattedTime = "00:00:00"
         time = Duration.ZERO
         updateTimeStates()

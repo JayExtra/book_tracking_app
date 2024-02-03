@@ -80,6 +80,7 @@ import com.dev.james.book_tracking.R
 import com.dev.james.domain.utilities.StopWatch
 import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
 import com.dev.james.book_tracking.presentation.viewmodel.BookTrackingViewModel
+import com.dev.james.book_tracking.presentation.viewmodel.TrackBookScreenUiEvents
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
@@ -90,6 +91,7 @@ import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -105,10 +107,25 @@ fun TrackBookScreen(
     bookId: String?
 ) {
 
+    var finishSessionDialogState = rememberMaterialDialogState(false)
+
+
+    val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
+        initialValue = TrackBookScreenUiEvents.DefaultState
+    )
+
     LaunchedEffect(key1 = true) {
         bookId?.let {
             bookTrackingViewModel.getBookStatistics(it)
         }
+
+        when(screenEvents.value){
+            is TrackBookScreenUiEvents.DefaultState -> {}
+            is TrackBookScreenUiEvents.CloseLogDialog -> {
+                finishSessionDialogState.hide()
+            }
+        }
+
     }
 
     val stopWatch = remember {
@@ -127,7 +144,6 @@ fun TrackBookScreen(
         mutableStateOf(false)
     }
 
-    var finishSessionDialogState = rememberMaterialDialogState(false)
 
     val bookData = bookTrackingViewModel.bookStatsState.collectAsStateWithLifecycle()
 
@@ -243,9 +259,21 @@ fun TrackBookScreen(
                         isStopWatchRunning = false
                         isStopWatchPaused = false
                         stopWatch.reset()
+                        Timber.tag("TrackBookScreen").d("Final time from timer => %s", stopWatch.finalTime.toString())
                         showTimerAndTrackCard = false
-                        finishSessionDialogState.hide()
+
                         //log to database
+                        bookTrackingViewModel.logProgress(
+                            bookId = bookId!! ,
+                            timeTaken = stopWatch.finalTime ,
+                            chapterTitle = chapterTitle ,
+                            currentPage = pageNum.toInt() ,
+                            chapterNumber = chapterNum.toInt()
+                        )
+
+                        //finishSessionDialogState.hide()
+
+
                     }
 
                 }
@@ -795,6 +823,7 @@ fun BookProgressImageSection(
             modifier = Modifier
                 .height(135.dp)
                 .width(85.dp)
+                .padding(8.dp)
         )
         if (painterState is AsyncImagePainter.State.Loading) {
             CircularProgressIndicator(
@@ -808,9 +837,9 @@ fun BookProgressImageSection(
             progress = finalProgress.value,
             strokeCap = StrokeCap.Round,
             color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(width = 161.dp, height = 170.dp),
+            modifier = Modifier.size(width = 200.dp, height = 200.dp),
             strokeWidth = 12.dp ,
-            trackColor = Color.Gray
+            trackColor = MaterialTheme.colorScheme.onBackground
         )
     }
 }

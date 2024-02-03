@@ -19,7 +19,7 @@ import com.dev.james.booktracker.core.entities.GoalLogsEntity
 @Database(
     entities = [UserDetailsEntity::class , BookEntity::class , BookLogsEntity::class ,
     GoalEntity::class , GoalLogsEntity::class ] ,
-    version = 8 ,
+    version = 9 ,
     exportSchema = false
 )
 @TypeConverters(ListTypeConverter::class , DateTypeConverter::class)

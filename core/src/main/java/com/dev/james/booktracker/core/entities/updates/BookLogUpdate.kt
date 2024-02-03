@@ -1,19 +1,14 @@
-package com.dev.james.booktracker.core.entities
+package com.dev.james.booktracker.core.entities.updates
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.time.LocalDate
 
-@Entity("book_logs")
-data class BookLogsEntity(
-    @ColumnInfo("book_id")
-    val bookId : String,
-    @ColumnInfo("log_id")
+@Entity
+data class BookLogUpdate(
     @PrimaryKey(autoGenerate = false)
-    val logId : String,
-    @ColumnInfo("started_time")
-    val startedTime : LocalDate,
+    @ColumnInfo("log_id")
+    val logId : String ,
     @ColumnInfo("period_taken")
     val period : Long ,
     @ColumnInfo("pages_read")
@@ -21,7 +16,7 @@ data class BookLogsEntity(
     @ColumnInfo("current_chapter_title")
     val currentChapterTitle : String ,
     @ColumnInfo("current_chapter")
-    val currentChapter: Int,
+    val currentChapter : Int ,
     @ColumnInfo("current_page")
     val currentPage : Int
 )

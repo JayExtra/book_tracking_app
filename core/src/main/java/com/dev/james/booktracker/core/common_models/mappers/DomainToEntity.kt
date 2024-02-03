@@ -36,7 +36,6 @@ fun BookLog.toEntity() : BookLogsEntity {
         bookId = bookId ,
         logId = logId ,
         startedTime = startedTime ?: LocalDate.now() ,
-        endTime = endTime ?: LocalDate.now().plus(1 , ChronoUnit.MINUTES ) ,
         period = period ,
         pagesRead = pagesRead ,
         currentChapterTitle = currentChapterTitle ,
@@ -51,7 +50,6 @@ fun GoalLog.toEntity() : GoalLogsEntity{
         parentGoalId = parentGoalId ,
         id = id ,
         startTime = startTime ?: LocalDate.now() ,
-        endTime = endTime ?: LocalDate.now().plus(1 , ChronoUnit.MINUTES ),
         duration = duration
     )
 }

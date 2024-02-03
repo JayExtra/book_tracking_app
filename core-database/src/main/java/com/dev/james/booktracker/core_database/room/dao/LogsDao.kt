@@ -4,8 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.dev.james.booktracker.core.entities.BookLogsEntity
 import com.dev.james.booktracker.core.entities.GoalLogsEntity
+import com.dev.james.booktracker.core.entities.updates.BookLogUpdate
+import com.dev.james.booktracker.core.entities.updates.GoalLogUpdate
 
 @Dao
 interface LogsDao {
@@ -48,6 +51,10 @@ interface LogsDao {
     suspend fun getRecentGoalLog(parentGoalId: String) : List<GoalLogsEntity>
 
 
+    @Update(BookLogsEntity::class)
+    suspend fun updateBookLog(bookLogUpdate: BookLogUpdate)
 
+    @Update(GoalLogsEntity::class)
+    suspend fun updateGoalLog(goalLogUpdate: GoalLogUpdate)
 
 }

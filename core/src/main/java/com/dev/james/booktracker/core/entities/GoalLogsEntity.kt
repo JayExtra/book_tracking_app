@@ -14,8 +14,6 @@ data class GoalLogsEntity(
     val id : String,
     @ColumnInfo("start_time")
     val startTime : LocalDate,
-    @ColumnInfo("end_time")
-    val endTime : LocalDate,
     @ColumnInfo("duration_taken")
     val duration : Long
 )

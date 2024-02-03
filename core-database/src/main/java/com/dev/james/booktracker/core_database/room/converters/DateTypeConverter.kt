@@ -12,14 +12,14 @@ class DateTypeConverter {
     @RequiresApi(Build.VERSION_CODES.O)
     @TypeConverter
     fun fromDateToString(date : LocalDate) : String {
-        val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a")
+        val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         return date.format(dateFormatter)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     @TypeConverter
     fun fromStringToDate(string : String) : LocalDate {
-        val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a")
+        val dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         return LocalDate.parse(string , dateFormatter)
     }
 }

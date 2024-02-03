@@ -269,7 +269,7 @@ fun BookCounterComponent(
                 color = MaterialTheme.colorScheme.primary ,
                 modifier = Modifier.size(70.dp) ,
                 strokeCap = StrokeCap.Round ,
-                trackColor = Color.Gray
+                trackColor = MaterialTheme.colorScheme.onBackground
             )
 
 

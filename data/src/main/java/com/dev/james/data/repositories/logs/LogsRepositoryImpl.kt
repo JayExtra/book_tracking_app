@@ -7,7 +7,10 @@ import com.dev.james.booktracker.core.common_models.BookLog
 import com.dev.james.booktracker.core.common_models.GoalLog
 import com.dev.james.booktracker.core.common_models.mappers.toDomain
 import com.dev.james.booktracker.core.common_models.mappers.toEntity
+import com.dev.james.booktracker.core.entities.updates.BookLogUpdate
+import com.dev.james.booktracker.core.entities.updates.GoalLogUpdate
 import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import com.dev.james.domain.datasources.home.LogsLocalDataSource
 import com.dev.james.domain.repository.home.LogsRepository
 import okio.IOException
@@ -26,6 +29,7 @@ class LogsRepositoryImpl @Inject constructor(
         return try {
             logsLocalDataSource.addBookLogToDatabase(bookLog.toEntity())
             Resource.Success(data = true)
+
         } catch (e: IOException) {
             Timber.tag(TAG).e("addBookLog $e")
             Resource.Error(
@@ -38,6 +42,26 @@ class LogsRepositoryImpl @Inject constructor(
                 data = false,
                 message = "Could not log your current progress! Reason: $e "
             )
+        }
+    }
+
+    override suspend fun updateBookLog(bookLogUpdate: BookLogUpdate) {
+        try {
+            logsLocalDataSource.updateBookLog(bookLogUpdate)
+        } catch (e: IOException) {
+            Timber.tag(TAG).e("updateBookLog ${e.localizedMessage}")
+        } catch (e: SQLiteException) {
+            Timber.tag(TAG).e("updateBookLog ${e.localizedMessage}")
+        }
+    }
+
+    override suspend fun updateGoalLog(goalLogUpdate: GoalLogUpdate) {
+        try {
+            logsLocalDataSource.updateGoalLog(goalLogUpdate)
+        } catch (e: IOException) {
+            Timber.tag(TAG).e("updateGoalLog ${e.localizedMessage}")
+        } catch (e: SQLiteException) {
+            Timber.tag(TAG).e("updateGoalLog ${e.localizedMessage}")
         }
     }
 
