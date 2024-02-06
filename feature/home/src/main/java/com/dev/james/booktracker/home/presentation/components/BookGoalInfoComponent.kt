@@ -1,5 +1,7 @@
 package com.dev.james.booktracker.home.presentation.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +25,11 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -169,7 +176,7 @@ fun GoalDataComponent(
             modifier = Modifier.layoutId("best_time_section"),
             icon = R.drawable.ic_clock_24,
             title = "Total time",
-            subTitle = bookProgressData.totalTimeSpent.formatTimeToDHMS()
+            subTitle = bookProgressData.totalTimeSpentWeekly.formatTimeToDHMS()
         )
 
         ElevatedButton(
@@ -225,6 +232,24 @@ fun ProgressComponent(
         }
     }
 
+    var hasTriggeredAnim by remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect( key1 = true){
+        hasTriggeredAnim = true
+    }
+
+    val progressBarLength by animateFloatAsState(targetValue = if(hasTriggeredAnim)progress else 0f,
+        label = "horizontal_progress_anim" ,
+        animationSpec = tween(
+            durationMillis = 1000,
+            delayMillis = 0
+        )
+    )
+
+
+
     ConstraintLayout(
         constraintSet = constraints,
         modifier = modifier
@@ -240,8 +265,9 @@ fun ProgressComponent(
                 .width(200.dp)
                 .height(5.dp),
             color = MaterialTheme.colorScheme.primary,
-            progress = progress ,
-            strokeCap = StrokeCap.Round
+            progress = progressBarLength ,
+            strokeCap = StrokeCap.Round ,
+            trackColor = MaterialTheme.colorScheme.onBackground
         )
         Box(
             contentAlignment = Alignment.Center, modifier =
@@ -253,7 +279,7 @@ fun ProgressComponent(
 
         ) {
             Text(
-                text = "${progress.toInt()}%",
+                text = "${(progress * 100).toInt()}%",
                 color = Color.White,
                 style = BookAppTypography.bodySmall,
                 fontSize = 9.sp

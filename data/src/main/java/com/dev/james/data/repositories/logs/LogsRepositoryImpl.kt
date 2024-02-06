@@ -7,7 +7,10 @@ import com.dev.james.booktracker.core.common_models.BookLog
 import com.dev.james.booktracker.core.common_models.GoalLog
 import com.dev.james.booktracker.core.common_models.mappers.toDomain
 import com.dev.james.booktracker.core.common_models.mappers.toEntity
+import com.dev.james.booktracker.core.entities.updates.BookLogUpdate
+import com.dev.james.booktracker.core.entities.updates.GoalLogUpdate
 import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import com.dev.james.domain.datasources.home.LogsLocalDataSource
 import com.dev.james.domain.repository.home.LogsRepository
 import okio.IOException
@@ -26,6 +29,7 @@ class LogsRepositoryImpl @Inject constructor(
         return try {
             logsLocalDataSource.addBookLogToDatabase(bookLog.toEntity())
             Resource.Success(data = true)
+
         } catch (e: IOException) {
             Timber.tag(TAG).e("addBookLog $e")
             Resource.Error(
@@ -41,15 +45,62 @@ class LogsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getBookLogs(
+    override suspend fun updateBookLog(bookLogUpdate: BookLogUpdate) {
+        try {
+            logsLocalDataSource.updateBookLog(bookLogUpdate)
+        } catch (e: IOException) {
+            Timber.tag(TAG).e("updateBookLog ${e.localizedMessage}")
+        } catch (e: SQLiteException) {
+            Timber.tag(TAG).e("updateBookLog ${e.localizedMessage}")
+        }
+    }
+
+    override suspend fun updateGoalLog(goalLogUpdate: GoalLogUpdate) {
+        try {
+            logsLocalDataSource.updateGoalLog(goalLogUpdate)
+        } catch (e: IOException) {
+            Timber.tag(TAG).e("updateGoalLog ${e.localizedMessage}")
+        } catch (e: SQLiteException) {
+            Timber.tag(TAG).e("updateGoalLog ${e.localizedMessage}")
+        }
+    }
+
+    override suspend fun getWeeklyBookLogs(
         bookId: String,
-        mondayDate: String,
-        sundayDate: String
-    ): List<BookLog> =
-        logsLocalDataSource.getBookLogs(bookId = bookId , startDate = mondayDate , endDate = sundayDate)
-            .map { bookLogsEntity ->
-                bookLogsEntity.toDomain()
+        startDate: String,
+        endDate: String
+    ): List<BookLog> {
+        return try{
+            logsLocalDataSource.getWeeklyBookLogs(bookId = bookId , startDate = startDate , endDate = endDate)
+                .map { bookLogsEntity ->
+                    bookLogsEntity.toDomain()
+                }
+        }catch (e : Exception){
+            if(e is SQLiteException){
+                Timber.tag(TAG).e("SQL Lite exception => ${e.localizedMessage}")
+            }else{
+                Timber.tag(TAG).e("Exception => ${e.localizedMessage}")
             }
+            listOf(BookLog())
+        }
+    }
+
+
+    override suspend fun getAllBookLogs(bookId: String): List<BookLog> {
+        return try {
+            logsLocalDataSource.getAllBookLogs(bookId).map {
+                it.toDomain()
+            }
+        }catch (e : Exception){
+            //specify which exeption though
+            if(e is SQLiteException){
+                Timber.tag(TAG).e("SQL Lite exception => ${e.localizedMessage}")
+            }else{
+                Timber.tag(TAG).e("Exception => ${e.localizedMessage}")
+            }
+            listOf(BookLog())
+        }
+    }
 
     override suspend fun getBookLog(
         id: String
@@ -102,11 +153,36 @@ class LogsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getGoalLogs(parentLogId:String, startDate: String, endDate: String): List<GoalLog> =
-        logsLocalDataSource.getAllGoalLogs( parentLogId = parentLogId, startDate = startDate , endDate = endDate)
-            .map { goalLogsEntity ->
-                goalLogsEntity.toDomain()
+    override suspend fun getWeeklyGoalLogs(parentLogId:String, startDate: String, endDate: String): List<GoalLog> {
+        return try {
+            logsLocalDataSource.getWeeklyGoalLogs( parentLogId = parentLogId, startDate = startDate , endDate = endDate)
+                .map { goalLogsEntity ->
+                    goalLogsEntity.toDomain()
+                }
+        }catch ( e : Exception){
+            if(e is SQLiteException){
+                Timber.tag(TAG).e("SQL Lite exception => ${e.localizedMessage}")
+            }else{
+                Timber.tag(TAG).e("Exception => ${e.localizedMessage}")
             }
+            listOf(GoalLog())
+        }
+    }
+
+    override suspend fun getAllGoalLogs(parentGoalId: String): List<GoalLog> {
+        return try {
+            logsLocalDataSource.getAllGoalLogs(parentGoalId).map {
+                it.toDomain()
+            }
+        }catch ( e: Exception){
+            if(e is SQLiteException){
+                Timber.tag(TAG).e("SQL Lite exception => ${e.localizedMessage}")
+            }else{
+                Timber.tag(TAG).e("Exception => ${e.localizedMessage}")
+            }
+            listOf(GoalLog())
+        }
+    }
 
     override suspend fun getGoalLog(id: String): Resource<GoalLog> {
         return try {
@@ -134,18 +210,28 @@ class LogsRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun getRecentGoalLog(): GoalLog {
+    override suspend fun getRecentGoalLog(parentGoalId: String): GoalLog {
         return try {
-            logsLocalDataSource.fetchLatestGoalLog().toDomain()
+            val latestGoalLog = logsLocalDataSource.fetchLatestGoalLog(parentGoalId)
+            return if(latestGoalLog.isEmpty()){
+                 GoalLog()
+            }else{
+                latestGoalLog.first().toDomain()
+            }
         }catch (e : Exception){
             Timber.tag(TAG).e("DB error $e : ${e.localizedMessage}")
             GoalLog()
         }
     }
 
-    override suspend fun getRecentBookLog(): BookLog {
+    override suspend fun getRecentBookLog(bookId: String): BookLog {
         return try {
-            logsLocalDataSource.fetchLatestBookLog().toDomain()
+            val recentBookLogList = logsLocalDataSource.fetchLatestBookLog(bookId)
+            return if(recentBookLogList.isEmpty()){
+                BookLog()
+            }else{
+                recentBookLogList.first().toDomain()
+            }
         }catch (e : Exception){
             Timber.tag(TAG).e("DB error $e : ${e.localizedMessage}")
             BookLog()

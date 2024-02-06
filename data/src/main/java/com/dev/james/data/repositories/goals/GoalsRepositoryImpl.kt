@@ -7,6 +7,8 @@ import com.dev.james.booktracker.core.common_models.SpecificGoal
 import com.dev.james.booktracker.core.common_models.mappers.mapToEntityObject
 import com.dev.james.booktracker.core.common_models.mappers.toDomain
 import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
+import com.dev.james.booktracker.core_datastore.local.datastore.DataStorePreferenceKeys
 import com.dev.james.domain.datasources.home.GoalsLocalDataSource
 import com.dev.james.domain.repository.home.GoalsRepository
 
@@ -25,6 +27,7 @@ import javax.inject.Inject
 
 class GoalsRepositoryImpl @Inject constructor(
     private val goalsLocalDataSource: GoalsLocalDataSource,
+    private val dataStoreManager: DataStoreManager ,
     private val defaultDispatcher : CoroutineDispatcher = Dispatchers.IO
 ) : GoalsRepository {
 
@@ -36,7 +39,8 @@ class GoalsRepositoryImpl @Inject constructor(
     ): Resource<Boolean> {
         return try {
             goalsLocalDataSource.addGoalToDatabase(goal.mapToEntityObject())
-             Resource.Success(data = true)
+            dataStoreManager.storeStringValue(DataStorePreferenceKeys.CURRENT_ACTIVE_GOAL_ID , goal.goalId)
+            Resource.Success(data = true)
 
         }catch (e : IOException){
              Resource.Error("Could not save goal to the database.Issue : ${e.message}")

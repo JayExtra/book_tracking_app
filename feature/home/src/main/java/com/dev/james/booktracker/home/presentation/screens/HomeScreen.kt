@@ -632,7 +632,7 @@ fun StatelessHomeScreen(
 
                         Timber.tag("HomeScreen").d("data => ${homeScreenState.bookProgressData}")
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
 
                         BookGoalInfoComponent(
                             shouldNotShowBlankMessage = homeScreenState.bookProgressData.bookId.isNotBlank(),

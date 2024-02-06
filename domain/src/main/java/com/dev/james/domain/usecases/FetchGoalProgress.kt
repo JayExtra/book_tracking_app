@@ -14,7 +14,6 @@ import com.dev.james.domain.repository.home.GoalsRepository
 import com.dev.james.domain.repository.home.LogsRepository
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
-import java.time.LocalDate
 import javax.inject.Inject
 
 class FetchGoalProgress @Inject constructor(
@@ -33,7 +32,7 @@ class FetchGoalProgress @Inject constructor(
             GoalProgressData()
         }else{
             val activeGoal = activeGoalsList.first()
-            val activeGoalLogs = fetchGoalLogs(activeGoal.goalId)
+            val activeGoalLogs = fetchWeeklyGoalLogs(activeGoal.goalId)
 
      /*       val testLogs = listOf(
                 GoalLog(
@@ -104,8 +103,8 @@ class FetchGoalProgress @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    private suspend fun fetchGoalLogs(goalId : String ) : List<GoalLog>{
+    private suspend fun fetchWeeklyGoalLogs(goalId : String ) : List<GoalLog>{
         val dateRange = getDateRange()
-        return goalLogsRepository.getGoalLogs(parentLogId = goalId, startDate = dateRange.startDate , endDate = dateRange.endDate)
+        return goalLogsRepository.getWeeklyGoalLogs(parentLogId = goalId, startDate = dateRange.startDate , endDate = dateRange.endDate)
     }
 }

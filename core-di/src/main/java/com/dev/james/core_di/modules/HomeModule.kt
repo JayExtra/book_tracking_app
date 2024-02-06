@@ -92,10 +92,12 @@ object HomeModule {
     @Provides
     @Singleton
     fun provideGoalsRepository(
-        goalsLocalDataSource : GoalsLocalDataSource
+        goalsLocalDataSource : GoalsLocalDataSource ,
+        dataStoreManager: DataStoreManager
     ) : GoalsRepository {
         return GoalsRepositoryImpl(
-            goalsLocalDataSource
+            goalsLocalDataSource ,
+            dataStoreManager
         )
     }
 
