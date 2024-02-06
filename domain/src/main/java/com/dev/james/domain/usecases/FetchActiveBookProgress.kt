@@ -136,7 +136,7 @@ class FetchActiveBookProgress @Inject constructor(
         totalPages : Int ,
         totalPagesRead : Int
     ) : Float {
-        return (totalPagesRead.toFloat() / totalPages.toFloat()).roundToInt().toFloat()
+        return ((totalPagesRead.toFloat() / totalPages.toFloat()) * 10.0f).roundToInt() / 10.0f
     }
 
     private fun List<BookLog>.calculateTotalPagesRead() : Int {

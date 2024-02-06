@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,6 +44,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -50,6 +55,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -91,6 +97,7 @@ import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -106,8 +113,23 @@ fun TrackBookScreen(
     bookTrackingViewModel: BookTrackingViewModel = hiltViewModel(),
     bookId: String?
 ) {
+    val coroutineScope = rememberCoroutineScope()
 
     var finishSessionDialogState = rememberMaterialDialogState(false)
+
+    var resetClockDialogState = rememberMaterialDialogState(false)
+
+    var proceedToSaveDialogState = rememberMaterialDialogState(false)
+
+    var chapterTitleFieldState by rememberSaveable {
+        mutableStateOf("")
+    }
+    var chapterNumberFieldState by rememberSaveable {
+        mutableStateOf("")
+    }
+    var pageNumberFieldState by rememberSaveable {
+        mutableStateOf("")
+    }
 
 
     val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
@@ -119,12 +141,12 @@ fun TrackBookScreen(
             bookTrackingViewModel.getBookStatistics(it)
         }
 
-        when(screenEvents.value){
+        /*when(screenEvents.value){
             is TrackBookScreenUiEvents.DefaultState -> {}
             is TrackBookScreenUiEvents.CloseLogDialog -> {
                 finishSessionDialogState.hide()
             }
-        }
+        }*/
 
     }
 
@@ -144,85 +166,126 @@ fun TrackBookScreen(
         mutableStateOf(false)
     }
 
+    var isTimerValueZero by rememberSaveable {
+        mutableStateOf(false)
+    }
+
 
     val bookData = bookTrackingViewModel.bookStatsState.collectAsStateWithLifecycle()
 
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        StandardToolBar(
-            showBackArrow = true,
-            title = {
-                Text(text = "Track your progress", style = BookAppTypography.headlineSmall)
-            },
-            navigate = {
-                navigation.backToHomeScreen()
-            }
-        )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.verticalScroll(
-                state = rememberScrollState()
-            )
-        ) {
-
-
-
-            BookProgressSection(
-                showTimerText = showTimerAndTrackCard,
-                bookData = bookData.value,
-                timerValue = stopWatch.formattedTime,
-                timerRunning = isStopWatchRunning,
-                isTimerPaused = isStopWatchPaused,
-                onShowTimerText = { show ->
-                    showTimerAndTrackCard = show
-                    if (isStopWatchRunning) {
-                        isStopWatchRunning = false
-                        isStopWatchPaused = true
-                        stopWatch.pause()
-                    } else {
-                        isStopWatchRunning = true
-                        isStopWatchPaused = false
-                        stopWatch.start()
-                    }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            StandardToolBar(
+                showBackArrow = true,
+                title = {
+                    Text(text = "Track your progress", style = BookAppTypography.headlineSmall)
                 },
-                onFinish = {
-                    isStopWatchRunning = false
-                    isStopWatchPaused = true
-                    stopWatch.pause()
-                    finishSessionDialogState.show()
+                navigate = {
+                    navigation.backToHomeScreen()
                 }
             )
-
-            ProgressGraphSection(
-                bookLogs = bookData.value.logs ,
-                totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState
             )
-            /*
-                        AnimatedVisibility(
-                            visible = showTimerAndTrackCard ,
-                            exit = fadeOut(
-                                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
-                            ) + slideOutVertically(
-                                animationSpec = tween(durationMillis = 500),
-                                targetOffsetY = { -it / 2 }
-                            ),
-                            enter = fadeIn(
-                                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
-                            ) + slideInVertically(
-                                animationSpec = tween(durationMillis = 500),
-                                initialOffsetY = { -it / 2 }
-                            )
-                        ){
+        },
+        content = { paddingValues ->
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues), verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.verticalScroll(
+                        state = rememberScrollState()
+                    )
+                ) {
 
 
-                        }*/
+                    BookProgressSection(
+                        showTimerText = showTimerAndTrackCard,
+                        bookData = bookData.value,
+                        timerValue = stopWatch.formattedTime,
+                        timerRunning = isStopWatchRunning,
+                        isTimerPaused = isStopWatchPaused,
+                        onShowTimerText = { show ->
+                            showTimerAndTrackCard = show
+                            if (isStopWatchRunning) {
+                                isStopWatchRunning = false
+                                isStopWatchPaused = true
+                                stopWatch.pause()
+                            } else {
+                                isStopWatchRunning = true
+                                isStopWatchPaused = false
+                                stopWatch.start()
+                            }
+                        },
+                        onFinish = {
+                            isStopWatchRunning = false
+                            isStopWatchPaused = true
+                            stopWatch.pause()
+                            if (stopWatch.finalTime == 0L){
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Reading time cannot be 0 seconds" ,
+                                        withDismissAction = true ,
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }else {
+                                isTimerValueZero = false
+                                finishSessionDialogState.show()
+                            }
+                        },
+                        onReset = {
+                            resetClockDialogState.show()
+                        }
+                    )
+
+                    ProgressGraphSection(
+                        bookLogs = bookData.value.logs,
+                        totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly
+                    )
+                    /*
+                                AnimatedVisibility(
+                                    visible = showTimerAndTrackCard ,
+                                    exit = fadeOut(
+                                        animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+                                    ) + slideOutVertically(
+                                        animationSpec = tween(durationMillis = 500),
+                                        targetOffsetY = { -it / 2 }
+                                    ),
+                                    enter = fadeIn(
+                                        animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+                                    ) + slideInVertically(
+                                        animationSpec = tween(durationMillis = 500),
+                                        initialOffsetY = { -it / 2 }
+                                    )
+                                ){
+
+
+                                }*/
+                }
+            }
+
         }
-    }
+    )
+
+
 
     MaterialDialog(
         dialogState = finishSessionDialogState,
         shape = RoundedCornerShape(10.dp)
     ) {
+
         var chapterFieldErrorState by remember {
             mutableStateOf(false)
         }
@@ -232,6 +295,7 @@ fun TrackBookScreen(
         var chapterNumberFieldErrorState by remember {
             mutableStateOf(false)
         }
+
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -256,24 +320,12 @@ fun TrackBookScreen(
                         chapterFieldErrorState = false
                         chapterNumberFieldErrorState = false
                         pagesFieldErrorState = false
-                        isStopWatchRunning = false
-                        isStopWatchPaused = false
-                        stopWatch.reset()
-                        Timber.tag("TrackBookScreen").d("Final time from timer => %s", stopWatch.finalTime.toString())
-                        showTimerAndTrackCard = false
 
-                        //log to database
-                        bookTrackingViewModel.logProgress(
-                            bookId = bookId!! ,
-                            timeTaken = stopWatch.finalTime ,
-                            chapterTitle = chapterTitle ,
-                            currentPage = pageNum.toInt() ,
-                            chapterNumber = chapterNum.toInt()
-                        )
+                        chapterTitleFieldState = chapterTitle
+                        chapterNumberFieldState = chapterNum
+                        pageNumberFieldState = pageNum
 
-                        //finishSessionDialogState.hide()
-
-
+                        proceedToSaveDialogState.show()
                     }
 
                 }
@@ -282,12 +334,119 @@ fun TrackBookScreen(
 
     }
 
+    MaterialDialog(
+        dialogState = resetClockDialogState,
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        MessageDialog(
+            message = "You are about to reset the timer. Do you wish to proceed?",
+            onDismiss = {
+                resetClockDialogState.hide()
+            },
+            onAccept = {
+                isStopWatchPaused = false
+                isStopWatchRunning = false
+                stopWatch.reset()
+                resetClockDialogState.hide()
+            })
+    }
+
+    MaterialDialog(
+        dialogState = proceedToSaveDialogState,
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        MessageDialog(
+            message = "You are about to save today's log do you wish to proceed?",
+            onDismiss = {
+                proceedToSaveDialogState.hide()
+            },
+            onAccept = {
+                //proceed to save to db
+                isStopWatchRunning = false
+                isStopWatchPaused = false
+                stopWatch.reset()
+                Timber.tag("TrackBookScreen")
+                    .d("Final time from timer => %s", stopWatch.finalTime.toString())
+                showTimerAndTrackCard = false
+                //log to database
+                bookTrackingViewModel.logProgress(
+                    bookId = bookId!!,
+                    timeTaken = stopWatch.finalTime,
+                    chapterTitle = chapterTitleFieldState,
+                    currentPage = pageNumberFieldState.toInt(),
+                    chapterNumber = chapterNumberFieldState.toInt()
+                )
+
+                finishSessionDialogState.hide()
+                proceedToSaveDialogState.hide()
+            }
+        )
+    }
+
+}
+
+@Composable
+fun MessageDialog(
+    message: String,
+    onDismiss: () -> Unit,
+    onAccept: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .wrapContentHeight(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            modifier = Modifier
+                .wrapContentWidth()
+                .padding(4.dp),
+            text = message,
+            textAlign = TextAlign.Center,
+            style = BookAppTypography.labelMedium
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            ElevatedButton(
+                onClick = {
+                    onDismiss()
+                }, colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                ),
+                modifier = Modifier.wrapContentWidth(),
+                shape = RoundedCornerShape(5.dp)
+            ) {
+                Text("cancel", style = BookAppTypography.labelSmall)
+            }
+
+            // Spacer(modifier = Modifier.width(5.dp))
+
+            ElevatedButton(
+                onClick = {
+                    onAccept()
+                }, colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                ),
+                modifier = Modifier.wrapContentWidth(),
+                shape = RoundedCornerShape(5.dp)
+            ) {
+                Text("proceed", style = BookAppTypography.labelMedium)
+            }
+        }
+    }
+
 }
 
 @Composable
 @Preview(showBackground = true)
 fun ProgressGraphSection(
-    bookLogs: Map<String, Long> = mapOf() ,
+    bookLogs: Map<String, Long> = mapOf(),
     totalTimeSpentWeekly: Long = 0L
 ) {
     Card(
@@ -307,7 +466,7 @@ fun ProgressGraphSection(
         )
         Row(modifier = Modifier.padding(8.dp)) {
             HoursWithEmojiComponent(
-                modifier = Modifier.size(90.dp) ,
+                modifier = Modifier.size(90.dp),
                 totalTimeSpentWeekly = totalTimeSpentWeekly
 
             )
@@ -330,7 +489,8 @@ fun BookProgressSection(
     timerRunning: Boolean = false,
     isTimerPaused: Boolean = false,
     onShowTimerText: (Boolean) -> Unit = {},
-    onFinish: () -> Unit = {}
+    onFinish: () -> Unit = {},
+    onReset: () -> Unit = {}
 ) {
     val constraints = ConstraintSet {
         val imageSet = createRefFor("progress_image")
@@ -340,6 +500,7 @@ fun BookProgressSection(
         val timerSet = createRefFor("timer")
         val startBtnSet = createRefFor("start_button")
         val finishButton = createRefFor("finish_button")
+        val resetTimerBtn = createRefFor("reset_button")
 
         constrain(imageSet) {
             top.linkTo(parent.top)
@@ -379,12 +540,17 @@ fun BookProgressSection(
         }
 
         if (showTimerText) {
-            constrain(finishButton) {
+            constrain(resetTimerBtn) {
                 start.linkTo(startBtnSet.end)
                 top.linkTo(startBtnSet.top)
                 bottom.linkTo(startBtnSet.bottom)
             }
-            createHorizontalChain(startBtnSet, finishButton)
+            constrain(finishButton) {
+                start.linkTo(resetTimerBtn.end)
+                top.linkTo(resetTimerBtn.top)
+                bottom.linkTo(resetTimerBtn.bottom)
+            }
+            createHorizontalChain(startBtnSet, resetTimerBtn, finishButton)
         }
 
     }
@@ -469,6 +635,21 @@ fun BookProgressSection(
 
 
         if (showTimerText) {
+
+            ElevatedButton(
+                modifier = Modifier.layoutId("reset_button"),
+                onClick = {
+                    // shows finish dialog
+                    onReset()
+                },
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Text(text = "reset", style = BookAppTypography.labelLarge)
+            }
+
             ElevatedButton(
                 modifier = Modifier.layoutId("finish_button"),
                 onClick = {
@@ -727,8 +908,8 @@ fun CounterButtonsComponent(
 @Composable
 @Preview(showBackground = true)
 fun HoursWithEmojiComponent(
-    modifier: Modifier = Modifier ,
-    totalTimeSpentWeekly : Long = 0L
+    modifier: Modifier = Modifier,
+    totalTimeSpentWeekly: Long = 0L
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = modifier) {
         Text(
@@ -755,9 +936,11 @@ fun HoursWithEmojiComponent(
                 in 0L..3600000L -> {
                     R.drawable.shocked_emoji
                 }
+
                 in 3600001L..14400000L -> {
                     R.drawable.worried_emoji
                 }
+
                 else -> {
                     R.drawable.happy_emoji
                 }
@@ -838,7 +1021,7 @@ fun BookProgressImageSection(
             strokeCap = StrokeCap.Round,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.size(width = 200.dp, height = 200.dp),
-            strokeWidth = 12.dp ,
+            strokeWidth = 12.dp,
             trackColor = MaterialTheme.colorScheme.onBackground
         )
     }

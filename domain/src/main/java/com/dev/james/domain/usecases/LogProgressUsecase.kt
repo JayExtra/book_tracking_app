@@ -17,6 +17,7 @@ import javax.inject.Inject
 
 class LogProgressUsecase @Inject constructor(
     private val logsRepository: LogsRepository,
+    private val fetchOrSetStreak: FetchOrSetStreak ,
     private val dataStoreManager: DataStoreManager
 ) {
 
@@ -78,6 +79,7 @@ class LogProgressUsecase @Inject constructor(
                 Timber.tag(TAG).d("book log for today does not exist!")
 
                 // a log for this book doesn't exist for today
+
                 logsRepository.addBookLog(
                     BookLog(
                         bookId = bookId,
@@ -97,6 +99,8 @@ class LogProgressUsecase @Inject constructor(
                     currentDate = currentDate,
                     duration = readingPeriod
                 )
+
+                fetchOrSetStreak.setStreak()
 
                 onSaveComplete(true)
 
@@ -126,6 +130,8 @@ class LogProgressUsecase @Inject constructor(
                 currentDate = currentDate,
                 duration = readingPeriod
             )
+
+            fetchOrSetStreak.setStreak()
 
             onSaveComplete(true)
         }

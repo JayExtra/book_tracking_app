@@ -44,7 +44,7 @@ private val LightColorPalette = lightColorScheme(
     inversePrimary = Brown40 ,
 //     Other default colors to override
     background = SurfaceLight ,
-    onBackground = SurfaceDark70 ,
+    onBackground = SurfaceDark80 ,
     surface = Brown60 ,
     onSurface = Brown80 ,
     error = ErrorColor60,
