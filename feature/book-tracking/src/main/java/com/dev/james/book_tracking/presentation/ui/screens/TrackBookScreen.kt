@@ -91,6 +91,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.compose_ui.ui.utils.splitToDHMS
 import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.common_models.BookStatsData
 import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
@@ -172,6 +173,7 @@ fun TrackBookScreen(
 
 
     val bookData = bookTrackingViewModel.bookStatsState.collectAsStateWithLifecycle()
+    val goalData = bookTrackingViewModel.goalProgressState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -252,7 +254,8 @@ fun TrackBookScreen(
 
                     ProgressGraphSection(
                         bookLogs = bookData.value.logs,
-                        totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly
+                        totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly ,
+                        targetTime = goalData.value.goalTime
                     )
                     /*
                                 AnimatedVisibility(
@@ -447,7 +450,8 @@ fun MessageDialog(
 @Preview(showBackground = true)
 fun ProgressGraphSection(
     bookLogs: Map<String, Long> = mapOf(),
-    totalTimeSpentWeekly: Long = 0L
+    totalTimeSpentWeekly: Long = 0L ,
+    targetTime : Long = 0L
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -472,7 +476,9 @@ fun ProgressGraphSection(
             )
             BarGraph(
                 height = 150.dp,
-                graphBarData = bookLogs
+                graphBarData = bookLogs ,
+                targetDuration = targetTime
+
             )
 
         }
@@ -920,7 +926,7 @@ fun HoursWithEmojiComponent(
             fontSize = 14.sp
         )
         Text(
-            text = totalTimeSpentWeekly.formatTimeToDHMS(),
+            text = totalTimeSpentWeekly.formatTimeToDHMS().splitToDHMS(),
             style = BookAppTypography.labelLarge,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
