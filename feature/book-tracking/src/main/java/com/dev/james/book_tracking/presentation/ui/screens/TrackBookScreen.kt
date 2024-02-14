@@ -91,6 +91,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.compose_ui.ui.utils.splitToDHMS
 import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.common_models.BookStatsData
 import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
@@ -132,9 +133,9 @@ fun TrackBookScreen(
     }
 
 
-    val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
+   /* val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
         initialValue = TrackBookScreenUiEvents.DefaultState
-    )
+    )*/
 
     LaunchedEffect(key1 = true) {
         bookId?.let {
@@ -172,6 +173,7 @@ fun TrackBookScreen(
 
 
     val bookData = bookTrackingViewModel.bookStatsState.collectAsStateWithLifecycle()
+    val goalData = bookTrackingViewModel.goalProgressState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -252,7 +254,8 @@ fun TrackBookScreen(
 
                     ProgressGraphSection(
                         bookLogs = bookData.value.logs,
-                        totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly
+                        totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly ,
+                        targetTime = goalData.value.goalTime
                     )
                     /*
                                 AnimatedVisibility(
@@ -447,7 +450,8 @@ fun MessageDialog(
 @Preview(showBackground = true)
 fun ProgressGraphSection(
     bookLogs: Map<String, Long> = mapOf(),
-    totalTimeSpentWeekly: Long = 0L
+    totalTimeSpentWeekly: Long = 0L ,
+    targetTime : Long = 0L
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -472,7 +476,9 @@ fun ProgressGraphSection(
             )
             BarGraph(
                 height = 150.dp,
-                graphBarData = bookLogs
+                graphBarData = bookLogs ,
+                targetDuration = targetTime
+
             )
 
         }
@@ -509,7 +515,7 @@ fun BookProgressSection(
         }
 
         constrain(titleSet) {
-            top.linkTo(imageSet.bottom)
+            top.linkTo(imageSet.bottom , margin = 8.dp)
             start.linkTo(imageSet.start)
             end.linkTo(imageSet.end)
         }
@@ -920,7 +926,7 @@ fun HoursWithEmojiComponent(
             fontSize = 14.sp
         )
         Text(
-            text = totalTimeSpentWeekly.formatTimeToDHMS(),
+            text = totalTimeSpentWeekly.formatTimeToDHMS().splitToDHMS(),
             style = BookAppTypography.labelLarge,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
@@ -976,9 +982,9 @@ fun BookProgressImageSection(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .height(200.dp)
-            .width(200.dp)
-            .padding(8.dp)
+            .height(230.dp)
+            .width(230.dp)
+            .padding(bottom = 8.dp)
     ) {
 
 
@@ -997,17 +1003,34 @@ fun BookProgressImageSection(
         )
 
         val painterState = coilImage.state
-        //glide image
-        Image(
-            painter = coilImage,
-            contentDescription = "",
-            // .clip(RoundedCornerShape(5.dp)) ,
-            contentScale = ContentScale.FillBounds,
+
+        Column(
             modifier = Modifier
-                .height(135.dp)
-                .width(85.dp)
-                .padding(8.dp)
-        )
+                .wrapContentHeight()
+                .wrapContentWidth(),
+            verticalArrangement = Arrangement.Center ,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = coilImage,
+                contentDescription = "",
+                // .clip(RoundedCornerShape(5.dp)) ,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier
+                    .height(135.dp)
+                    .width(100.dp)
+                    .padding(top = 8.dp , start = 8.dp , end = 8.dp)
+            )
+            Spacer(modifier = Modifier.height(3.dp))
+            Text(
+                modifier = Modifier.width(50.dp) ,
+                text = "${(bookData.progress * 100).toInt()}%" ,
+                textAlign = TextAlign.Center ,
+                style = BookAppTypography.headlineMedium
+            )
+        }
+        //glide image
+
         if (painterState is AsyncImagePainter.State.Loading) {
             CircularProgressIndicator(
                 strokeWidth = 3.dp,
@@ -1020,7 +1043,7 @@ fun BookProgressImageSection(
             progress = finalProgress.value,
             strokeCap = StrokeCap.Round,
             color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(width = 200.dp, height = 200.dp),
+            modifier = Modifier.size(width = 250.dp, height = 250.dp),
             strokeWidth = 12.dp,
             trackColor = MaterialTheme.colorScheme.onBackground
         )

@@ -33,6 +33,7 @@ import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
 import com.dev.james.booktracker.compose_ui.ui.enums.BarType
 import com.dev.james.booktracker.compose_ui.ui.utils.formatTimeToDHMS
+import com.dev.james.booktracker.compose_ui.ui.utils.splitToDHMS
 import timber.log.Timber
 
 @Composable
@@ -44,7 +45,7 @@ fun BarGraph(
     targetDuration : Long = 0L,
     height: Dp = 380.dp,
     roundType: BarType = BarType.CIRCULAR_TYPE,
-    barWidth: Dp = 38.dp,
+    barWidth: Dp = 28.dp,
     barColor: Color = MaterialTheme.colorScheme.primary,
     barArrangement: Arrangement.Horizontal = Arrangement.SpaceEvenly
 ) {
@@ -236,10 +237,12 @@ fun BarGraph(
                                         .fillMaxHeight(graphBarHeight)
                                         .background(finalBarColor)
                                 )
+                                Timber.tag("BarGraph").d("duration: ${duration.formatTimeToDHMS()}")
                                 Text(
-                                    text = duration.formatTimeToDHMS() ,
-                                    modifier = Modifier.layoutId("graph_value"),
-                                    fontSize = 12.sp
+                                    text = duration.formatTimeToDHMS().splitToDHMS() ,
+                                    modifier = Modifier.layoutId("graph_value").wrapContentWidth(),
+                                    fontSize = 12.sp ,
+                                    textAlign = TextAlign.Center
                                 )
                             }
 
