@@ -67,6 +67,7 @@ class BookTrackingViewModel @Inject constructor(
                 }
             }
         )
+        getBookStatistics(bookId = bookId)
     }
 
 }
