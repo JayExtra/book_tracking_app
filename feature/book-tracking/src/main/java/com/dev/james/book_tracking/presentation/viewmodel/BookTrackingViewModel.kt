@@ -37,9 +37,9 @@ class BookTrackingViewModel @Inject constructor(
 
     private var _goalProgressState : MutableStateFlow<GoalProgressData> = MutableStateFlow(GoalProgressData())
     val goalProgressState get() = _goalProgressState.asStateFlow()
-
+/*
     private val _trackBookScreenUiEvents : Channel<TrackBookScreenUiEvents> = Channel()
-    val trackBookScreenUiEvents get() = _trackBookScreenUiEvents.receiveAsFlow()
+    val trackBookScreenUiEvents get() = _trackBookScreenUiEvents.receiveAsFlow()*/
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun getBookStatistics(bookId : String) = viewModelScope.launch {
@@ -60,11 +60,11 @@ class BookTrackingViewModel @Inject constructor(
             chapterNumber = chapterNumber ,
             onSaveComplete = {
                 Timber.tag(TAG).d("success logging => $it")
-                viewModelScope.launch {
+               /* viewModelScope.launch {
                     _trackBookScreenUiEvents.send(
                         TrackBookScreenUiEvents.CloseLogDialog
                     )
-                }
+                }*/
             }
         )
         getBookStatistics(bookId = bookId)

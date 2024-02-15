@@ -4,4 +4,6 @@
     <string name="app_logo_desc">This is the application main logo</string>
     <string name="camera_permission_message_redirect">Camera permission is required for you to be able to take book cover images. Redirecting you to the settings screen to grant this permission.</string>
     <string name="camera_permission_message">Camera permission is required for you to be able to take book cover images.Please grant this permission then try again.</string>
+    <string name="confirm">confirm</string>
+    <string name="cancel">cancel</string>
 </resources>
