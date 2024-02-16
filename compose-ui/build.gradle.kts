@@ -68,7 +68,7 @@ dependencies {
     implementation(project(Modules.coreDi))
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.compose.ui:ui-tooling-preview-android:1.6.1")
+    //implementation("androidx.compose.ui:ui-tooling-preview-android:1.6.1")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
 
     implementation("androidx.camera:camera-camera2:${Versions.camerx_version}")

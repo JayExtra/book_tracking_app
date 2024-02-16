@@ -86,9 +86,10 @@ import com.dev.james.book_tracking.R
 import com.dev.james.domain.utilities.StopWatch
 import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
 import com.dev.james.book_tracking.presentation.viewmodel.BookTrackingViewModel
-import com.dev.james.book_tracking.presentation.viewmodel.TrackBookScreenUiEvents
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
+//import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationDialog
+import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.utils.splitToDHMS
@@ -133,24 +134,41 @@ fun TrackBookScreen(
     }
 
 
-   /* val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
-        initialValue = TrackBookScreenUiEvents.DefaultState
+    /*val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
+        initialValue = BookTrackingViewModel.TrackBookScreenUiEvents.DefaultState
     )*/
+
+    val bookCompletedDialogState = bookTrackingViewModel.showBookCompleteDialog
 
     LaunchedEffect(key1 = true) {
         bookId?.let {
             bookTrackingViewModel.getBookStatistics(it)
         }
-
-        /*when(screenEvents.value){
-            is TrackBookScreenUiEvents.DefaultState -> {}
-            is TrackBookScreenUiEvents.CloseLogDialog -> {
-                finishSessionDialogState.hide()
-            }
-        }*/
-
     }
 
+    if (bookCompletedDialogState){
+        SingleActionConfirmationPrompt(
+            title = "Congratulations" ,
+            body = "You have completed this book, great job! Do not stop here keep on reading more books." ,
+            showAnimation = true ,
+            onAccept = {
+                //close the dialog for now
+                       bookTrackingViewModel.dismissDialog()
+            } ,
+            onCancel = {
+                //close the dialog
+                bookTrackingViewModel.dismissDialog()
+            }
+        )
+    }
+
+    /*when(screenEvents.value){
+        is BookTrackingViewModel.TrackBookScreenUiEvents.DefaultState -> {}
+        is BookTrackingViewModel.TrackBookScreenUiEvents.ShowBookCompleteDialog -> {
+
+        }
+    }
+*/
     val stopWatch = remember {
         StopWatch()
     }
@@ -1019,7 +1037,7 @@ fun BookProgressImageSection(
                 modifier = Modifier
                     .height(135.dp)
                     .width(100.dp)
-                    .padding(top = 8.dp , start = 8.dp , end = 8.dp)
+                    .padding(top = 8.dp, start = 8.dp, end = 8.dp)
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
