@@ -15,6 +15,8 @@ import com.dev.james.booktracker.core.common_models.GoalProgressData
 import com.dev.james.domain.usecases.FetchActiveBookProgress
 import com.dev.james.domain.usecases.FetchGoalProgress
 import com.dev.james.domain.usecases.LogProgressUsecase
+import com.dev.james.domain.usecases.SetActiveBookUsecase
+import com.dev.james.domain.usecases.UpdateGoalUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +30,9 @@ import javax.inject.Inject
 class BookTrackingViewModel @Inject constructor(
     private val fetchActiveBookProgress : FetchActiveBookProgress ,
     private val fetchGoalProgress: FetchGoalProgress ,
-    private val logProgressUsecase: LogProgressUsecase
+    private val logProgressUsecase: LogProgressUsecase,
+    private val setActiveBookUsecase: SetActiveBookUsecase ,
+    private val updateGoalUseCase: UpdateGoalUseCase
 ) : ViewModel() {
 
     companion object {
@@ -50,6 +54,14 @@ class BookTrackingViewModel @Inject constructor(
     fun getBookStatistics(bookId : String) = viewModelScope.launch {
        _bookStatsState.value =  fetchActiveBookProgress.invoke(bookId)
         _goalProgressState.value = fetchGoalProgress.invoke()
+    }
+
+    fun setActiveBook(bookId: String) = viewModelScope.launch{
+        setActiveBookUsecase.invoke(bookId)
+    }
+
+    fun updateTotalBooksReadCount() = viewModelScope.launch {
+        updateGoalUseCase.addBooksReadTotal()
     }
 
     @SuppressLint("NewApi")

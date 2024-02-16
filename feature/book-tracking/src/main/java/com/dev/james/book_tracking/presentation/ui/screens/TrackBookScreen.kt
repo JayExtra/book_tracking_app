@@ -146,15 +146,16 @@ fun TrackBookScreen(
         }
     }
 
-    if (bookCompletedDialogState){
+    if (bookCompletedDialogState) {
         SingleActionConfirmationPrompt(
-            title = "Congratulations" ,
-            body = "You have completed this book, great job! Do not stop here keep on reading more books." ,
-            showAnimation = true ,
+            title = "Congratulations",
+            body = "You have completed this book, great job! Do not stop here keep on reading!",
+            showAnimation = true,
             onAccept = {
                 //close the dialog for now
-                       bookTrackingViewModel.dismissDialog()
-            } ,
+                bookTrackingViewModel.updateTotalBooksReadCount()
+                bookTrackingViewModel.dismissDialog()
+            },
             onCancel = {
                 //close the dialog
                 bookTrackingViewModel.dismissDialog()
@@ -237,7 +238,13 @@ fun TrackBookScreen(
                         timerRunning = isStopWatchRunning,
                         isTimerPaused = isStopWatchPaused,
                         onShowTimerText = { show ->
+
                             showTimerAndTrackCard = show
+
+                            bookId?.let {
+                                bookTrackingViewModel.setActiveBook(it)
+                            }
+
                             if (isStopWatchRunning) {
                                 isStopWatchRunning = false
                                 isStopWatchPaused = true
@@ -252,15 +259,15 @@ fun TrackBookScreen(
                             isStopWatchRunning = false
                             isStopWatchPaused = true
                             stopWatch.pause()
-                            if (stopWatch.finalTime == 0L){
+                            if (stopWatch.finalTime == 0L) {
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Reading time cannot be 0 seconds" ,
-                                        withDismissAction = true ,
+                                        message = "Reading time cannot be 0 seconds",
+                                        withDismissAction = true,
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                            }else {
+                            } else {
                                 isTimerValueZero = false
                                 finishSessionDialogState.show()
                             }
@@ -272,7 +279,7 @@ fun TrackBookScreen(
 
                     ProgressGraphSection(
                         bookLogs = bookData.value.logs,
-                        totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly ,
+                        totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly,
                         targetTime = goalData.value.goalTime
                     )
                     /*
@@ -468,8 +475,8 @@ fun MessageDialog(
 @Preview(showBackground = true)
 fun ProgressGraphSection(
     bookLogs: Map<String, Long> = mapOf(),
-    totalTimeSpentWeekly: Long = 0L ,
-    targetTime : Long = 0L
+    totalTimeSpentWeekly: Long = 0L,
+    targetTime: Long = 0L
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -494,7 +501,7 @@ fun ProgressGraphSection(
             )
             BarGraph(
                 height = 150.dp,
-                graphBarData = bookLogs ,
+                graphBarData = bookLogs,
                 targetDuration = targetTime
 
             )
@@ -533,7 +540,7 @@ fun BookProgressSection(
         }
 
         constrain(titleSet) {
-            top.linkTo(imageSet.bottom , margin = 8.dp)
+            top.linkTo(imageSet.bottom, margin = 8.dp)
             start.linkTo(imageSet.start)
             end.linkTo(imageSet.end)
         }
@@ -1026,7 +1033,7 @@ fun BookProgressImageSection(
             modifier = Modifier
                 .wrapContentHeight()
                 .wrapContentWidth(),
-            verticalArrangement = Arrangement.Center ,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
@@ -1041,9 +1048,9 @@ fun BookProgressImageSection(
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
-                modifier = Modifier.width(50.dp) ,
-                text = "${(bookData.progress * 100).toInt()}%" ,
-                textAlign = TextAlign.Center ,
+                modifier = Modifier.width(50.dp),
+                text = "${(bookData.progress * 100).toInt()}%",
+                textAlign = TextAlign.Center,
                 style = BookAppTypography.headlineMedium
             )
         }

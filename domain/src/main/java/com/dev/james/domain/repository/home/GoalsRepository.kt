@@ -16,5 +16,7 @@ interface GoalsRepository {
 
     suspend fun getAGoal(id : String) : Resource<Goal>
 
+    suspend fun updateBooksRead(goalId : String , bookCount : Int)
+
 
 }
