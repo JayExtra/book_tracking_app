@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,8 +67,11 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -275,6 +279,12 @@ fun TrackBookScreen(
                         onReset = {
                             resetClockDialogState.show()
                         }
+                    )
+
+                    TimeAndPageComponent(
+                        pagesStatText = "${bookData.value.currentPage}/${bookData.value.totalPages}" ,
+                        timeStatText = bookData.value.bestTime ,
+                        pagesPerMinStatText = "${bookData.value.pagesPerMinute} pgs/min"
                     )
 
                     ProgressGraphSection(
@@ -780,7 +790,7 @@ fun TrackSection(
                     currentPageNumber = it
                 },
                 placeholder = {
-                    Text(text = "current page number", style = BookAppTypography.labelMedium)
+                    Text(text = "page number", style = BookAppTypography.labelMedium)
                 },
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -935,6 +945,73 @@ fun CounterButtonsComponent(
         }
     }
 }*/
+
+@Composable
+@Preview
+fun TimeAndPageComponent(
+    pagesStatText : String = "" ,
+    timeStatText : String = "" ,
+    pagesPerMinStatText : String = ""
+){
+    Card(
+        modifier = Modifier.padding(8.dp) ,
+        shape = RoundedCornerShape(15.dp) , 
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        ) ,
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically ,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SingleTimeOrPageItem(
+                mainText = pagesStatText ,
+                title = "pages read"
+            )
+            SingleTimeOrPageItem(
+                mainText = pagesPerMinStatText ,
+                title = "speed"
+            )
+            SingleTimeOrPageItem(
+                mainText = timeStatText ,
+                title = "best time"
+            )
+        }
+
+    }
+}
+@Composable
+@Preview
+fun SingleTimeOrPageItem(
+    modifier : Modifier = Modifier ,
+    mainText : String = "",
+    title : String = ""
+){
+    Column(
+        modifier = modifier.padding(5.dp),
+        verticalArrangement = Arrangement.Center ,
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = mainText ,
+            style = BookAppTypography.headlineLarge ,
+            fontWeight = FontWeight.Bold ,
+            textAlign = TextAlign.Start
+        )
+        Text(
+            text = title.uppercase(),
+            style = BookAppTypography.bodySmall ,
+            fontWeight = FontWeight.Medium ,
+            color = Color.Gray ,
+            textAlign = TextAlign.Start
+        )
+
+    }
+}
 
 @Composable
 @Preview(showBackground = true)
