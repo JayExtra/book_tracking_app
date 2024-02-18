@@ -67,11 +67,15 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.toUpperCase
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -241,6 +245,7 @@ fun TrackBookScreen(
                         timerValue = stopWatch.formattedTime,
                         timerRunning = isStopWatchRunning,
                         isTimerPaused = isStopWatchPaused,
+                        isBookActive = bookData.value.progress < 1f ,
                         onShowTimerText = { show ->
 
                             showTimerAndTrackCard = show
@@ -281,10 +286,24 @@ fun TrackBookScreen(
                         }
                     )
 
+                    val pagesPerMinText = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(fontWeight = FontWeight.Bold)
+                        ){
+                            append(bookData.value.pagesPerMinute.toString())
+                        }
+                        //append(" ")
+                        withStyle(
+                            style = SpanStyle(fontWeight = FontWeight.Bold , fontSize = 12.sp)
+                        ){
+                            append("pgs/min")
+                        }
+                    }
+
                     TimeAndPageComponent(
                         pagesStatText = "${bookData.value.currentPage}/${bookData.value.totalPages}" ,
                         timeStatText = bookData.value.bestTime ,
-                        pagesPerMinStatText = "${bookData.value.pagesPerMinute} pgs/min"
+                        pagesPerMinStatText = pagesPerMinText
                     )
 
                     ProgressGraphSection(
@@ -527,6 +546,7 @@ fun BookProgressSection(
     bookData: BookProgressData = BookProgressData(),
     timerValue: String = "00:00:00",
     showTimerText: Boolean = false,
+    isBookActive : Boolean = false ,
     timerRunning: Boolean = false,
     isTimerPaused: Boolean = false,
     onShowTimerText: (Boolean) -> Unit = {},
@@ -564,6 +584,7 @@ fun BookProgressSection(
             start.linkTo(authorSet.start)
             end.linkTo(authorSet.end)
         }
+
 
         constrain(timerSet) {
             top.linkTo(chapterSet.bottom, 8.dp)
@@ -658,22 +679,22 @@ fun BookProgressSection(
             )
         }
 
-
-        ElevatedButton(
-            modifier = Modifier.layoutId("start_button"),
-            onClick = {
-                //will start timer
-                onShowTimerText(true)
-            },
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            )
-        ) {
-            val buttonText = if (timerRunning) "pause" else if (isTimerPaused) "resume" else "start"
-            Text(text = buttonText, style = BookAppTypography.labelLarge)
+        if(isBookActive){
+            ElevatedButton(
+                modifier = Modifier.layoutId("start_button"),
+                onClick = {
+                    //will start timer
+                    onShowTimerText(true)
+                },
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                val buttonText = if (timerRunning) "pause" else if (isTimerPaused) "resume" else "start"
+                Text(text = buttonText, style = BookAppTypography.labelLarge)
+            }
         }
-
 
         if (showTimerText) {
 
@@ -947,11 +968,10 @@ fun CounterButtonsComponent(
 }*/
 
 @Composable
-@Preview
 fun TimeAndPageComponent(
     pagesStatText : String = "" ,
     timeStatText : String = "" ,
-    pagesPerMinStatText : String = ""
+    pagesPerMinStatText : AnnotatedString
 ){
     Card(
         modifier = Modifier.padding(8.dp) ,
@@ -968,12 +988,14 @@ fun TimeAndPageComponent(
             verticalAlignment = Alignment.CenterVertically ,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
+
             SingleTimeOrPageItem(
                 mainText = pagesStatText ,
                 title = "pages read"
             )
-            SingleTimeOrPageItem(
-                mainText = pagesPerMinStatText ,
+
+            PageSpeedComponent(
+                annotatedText = pagesPerMinStatText ,
                 title = "speed"
             )
             SingleTimeOrPageItem(
@@ -1010,6 +1032,33 @@ fun SingleTimeOrPageItem(
             textAlign = TextAlign.Start
         )
 
+    }
+}
+
+@Composable
+fun PageSpeedComponent(
+    modifier : Modifier = Modifier ,
+    annotatedText : AnnotatedString,
+    title : String = ""
+){
+    Column(
+        modifier = modifier.padding(5.dp),
+        verticalArrangement = Arrangement.Center ,
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = annotatedText ,
+            style = BookAppTypography.headlineLarge ,
+            fontWeight = FontWeight.Bold ,
+            textAlign = TextAlign.Start
+        )
+        Text(
+            text = title.uppercase(),
+            style = BookAppTypography.bodySmall ,
+            fontWeight = FontWeight.Medium ,
+            color = Color.Gray ,
+            textAlign = TextAlign.Start
+        )
     }
 }
 
@@ -1125,7 +1174,7 @@ fun BookProgressImageSection(
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
-                modifier = Modifier.width(50.dp),
+                modifier = Modifier.wrapContentWidth(),
                 text = "${(bookData.progress * 100).toInt()}%",
                 textAlign = TextAlign.Center,
                 style = BookAppTypography.headlineMedium
