@@ -7,4 +7,5 @@
     <string name="storage_rationale_message_redirect">Storage permission is required to access saved books. Redirecting you to the settings screen to grant this permission.</string>
     <string name="storage_permission_rationale_message">Storage permission is required to access saved books in your device.Please grant to enjoy this apps features.</string>
     <string name="start_reading">start reading</string>
+    <string name="check_statistics">check statistics</string>
 </resources>

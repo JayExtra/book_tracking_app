@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.dev.james.booktracker.core.entities.GoalEntity
+import com.dev.james.booktracker.core.entities.updates.GoalUpdate
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -29,6 +31,9 @@ interface GoalsDao {
 */
     @Query("DELETE FROM goals_table WHERE id =:goalId")
     suspend fun deleteGoal(goalId: String)
+
+    @Update(entity = GoalEntity::class)
+    suspend fun updateBooksRead(goalUpdate: GoalUpdate)
 
 
 }

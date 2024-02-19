@@ -14,5 +14,7 @@ data class BookProgressData(
     val currentChapter : Int = 0,
     val currentChapterTitle : String = "",
     val currentPage : Int = 0 ,
-    val logs : Map<String , Long> = mapOf()
+    val logs : Map<String , Long> = mapOf() ,
+    val bestTime : String = "0s" ,
+    val pagesPerMinute : Int = 0
 )

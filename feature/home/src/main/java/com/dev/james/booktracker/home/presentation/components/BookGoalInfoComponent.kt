@@ -176,8 +176,20 @@ fun GoalDataComponent(
             modifier = Modifier.layoutId("best_time_section"),
             icon = R.drawable.ic_clock_24,
             title = "Total time",
-            subTitle = bookProgressData.totalTimeSpentWeekly.formatTimeToDHMS()
+            subTitle = bookProgressData.totalTimeSpent.formatTimeToDHMS()
         )
+
+        val contBtnText = when (bookProgressData.progress) {
+            0f -> {
+                stringResource(R.string.start_reading)
+            }
+            in 0.1f..0.9f -> {
+                stringResource(R.string.continue_reading)
+            }
+            else -> {
+                stringResource(R.string.check_statistics)
+            }
+        }
 
         ElevatedButton(
             modifier = Modifier
@@ -193,7 +205,7 @@ fun GoalDataComponent(
             }) {
             Text(
                // modifier = Modifier.fillMaxWidth(),
-                text = if(bookProgressData.currentChapter == 0) stringResource(R.string.start_reading) else stringResource(R.string.continue_reading) ,
+                text = contBtnText ,
                 style = BookAppTypography.labelMedium ,
                 textAlign = TextAlign.Center
             )

@@ -2,6 +2,7 @@ package com.dev.james.data.datasources.goals
 
 import com.dev.james.booktracker.core_database.room.dao.GoalsDao
 import com.dev.james.booktracker.core.entities.GoalEntity
+import com.dev.james.booktracker.core.entities.updates.GoalUpdate
 import com.dev.james.domain.datasources.home.GoalsLocalDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -24,6 +25,10 @@ class GoalsLocalDataSourceImpl @Inject constructor(
 
     override fun getCachedGoals(): Flow<List<GoalEntity>> {
         return goalsDao.getAllGoals()
+    }
+
+    override suspend fun updateBooksReadCount(goalUpdate: GoalUpdate) {
+        goalsDao.updateBooksRead(goalUpdate)
     }
 
 

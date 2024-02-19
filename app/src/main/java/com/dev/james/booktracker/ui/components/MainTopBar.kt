@@ -45,6 +45,7 @@ fun MainTopBar(
             .padding(top = 8.dp , bottom = 8.dp , end = 16.dp , start = 16.dp)
             .fillMaxWidth()
     ) {
+
         val newText = buildAnnotatedString {
             withStyle(
                 style = SpanStyle(fontWeight = FontWeight.Normal)
@@ -58,6 +59,7 @@ fun MainTopBar(
                 append(greeting)
             }
         }
+
         Text(
             modifier = Modifier.weight(0.8f) ,
             text = newText,

@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,8 +67,15 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.toUpperCase
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,9 +94,10 @@ import com.dev.james.book_tracking.R
 import com.dev.james.domain.utilities.StopWatch
 import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
 import com.dev.james.book_tracking.presentation.viewmodel.BookTrackingViewModel
-import com.dev.james.book_tracking.presentation.viewmodel.TrackBookScreenUiEvents
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
+//import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationDialog
+import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.utils.splitToDHMS
@@ -133,24 +142,42 @@ fun TrackBookScreen(
     }
 
 
-   /* val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
-        initialValue = TrackBookScreenUiEvents.DefaultState
+    /*val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
+        initialValue = BookTrackingViewModel.TrackBookScreenUiEvents.DefaultState
     )*/
+
+    val bookCompletedDialogState = bookTrackingViewModel.showBookCompleteDialog
 
     LaunchedEffect(key1 = true) {
         bookId?.let {
             bookTrackingViewModel.getBookStatistics(it)
         }
-
-        /*when(screenEvents.value){
-            is TrackBookScreenUiEvents.DefaultState -> {}
-            is TrackBookScreenUiEvents.CloseLogDialog -> {
-                finishSessionDialogState.hide()
-            }
-        }*/
-
     }
 
+    if (bookCompletedDialogState) {
+        SingleActionConfirmationPrompt(
+            title = "Congratulations",
+            body = "You have completed this book, great job! Do not stop here keep on reading!",
+            showAnimation = true,
+            onAccept = {
+                //close the dialog for now
+                bookTrackingViewModel.updateTotalBooksReadCount()
+                bookTrackingViewModel.dismissDialog()
+            },
+            onCancel = {
+                //close the dialog
+                bookTrackingViewModel.dismissDialog()
+            }
+        )
+    }
+
+    /*when(screenEvents.value){
+        is BookTrackingViewModel.TrackBookScreenUiEvents.DefaultState -> {}
+        is BookTrackingViewModel.TrackBookScreenUiEvents.ShowBookCompleteDialog -> {
+
+        }
+    }
+*/
     val stopWatch = remember {
         StopWatch()
     }
@@ -218,8 +245,15 @@ fun TrackBookScreen(
                         timerValue = stopWatch.formattedTime,
                         timerRunning = isStopWatchRunning,
                         isTimerPaused = isStopWatchPaused,
+                        isBookActive = bookData.value.progress < 1f ,
                         onShowTimerText = { show ->
+
                             showTimerAndTrackCard = show
+
+                            bookId?.let {
+                                bookTrackingViewModel.setActiveBook(it)
+                            }
+
                             if (isStopWatchRunning) {
                                 isStopWatchRunning = false
                                 isStopWatchPaused = true
@@ -234,15 +268,15 @@ fun TrackBookScreen(
                             isStopWatchRunning = false
                             isStopWatchPaused = true
                             stopWatch.pause()
-                            if (stopWatch.finalTime == 0L){
+                            if (stopWatch.finalTime == 0L) {
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Reading time cannot be 0 seconds" ,
-                                        withDismissAction = true ,
+                                        message = "Reading time cannot be 0 seconds",
+                                        withDismissAction = true,
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                            }else {
+                            } else {
                                 isTimerValueZero = false
                                 finishSessionDialogState.show()
                             }
@@ -252,9 +286,29 @@ fun TrackBookScreen(
                         }
                     )
 
+                    val pagesPerMinText = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(fontWeight = FontWeight.Bold)
+                        ){
+                            append(bookData.value.pagesPerMinute.toString())
+                        }
+                        //append(" ")
+                        withStyle(
+                            style = SpanStyle(fontWeight = FontWeight.Bold , fontSize = 12.sp)
+                        ){
+                            append("pgs/min")
+                        }
+                    }
+
+                    TimeAndPageComponent(
+                        pagesStatText = "${bookData.value.currentPage}/${bookData.value.totalPages}" ,
+                        timeStatText = bookData.value.bestTime ,
+                        pagesPerMinStatText = pagesPerMinText
+                    )
+
                     ProgressGraphSection(
                         bookLogs = bookData.value.logs,
-                        totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly ,
+                        totalTimeSpentWeekly = bookData.value.totalTimeSpentWeekly,
                         targetTime = goalData.value.goalTime
                     )
                     /*
@@ -450,8 +504,8 @@ fun MessageDialog(
 @Preview(showBackground = true)
 fun ProgressGraphSection(
     bookLogs: Map<String, Long> = mapOf(),
-    totalTimeSpentWeekly: Long = 0L ,
-    targetTime : Long = 0L
+    totalTimeSpentWeekly: Long = 0L,
+    targetTime: Long = 0L
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -476,7 +530,7 @@ fun ProgressGraphSection(
             )
             BarGraph(
                 height = 150.dp,
-                graphBarData = bookLogs ,
+                graphBarData = bookLogs,
                 targetDuration = targetTime
 
             )
@@ -492,6 +546,7 @@ fun BookProgressSection(
     bookData: BookProgressData = BookProgressData(),
     timerValue: String = "00:00:00",
     showTimerText: Boolean = false,
+    isBookActive : Boolean = false ,
     timerRunning: Boolean = false,
     isTimerPaused: Boolean = false,
     onShowTimerText: (Boolean) -> Unit = {},
@@ -515,7 +570,7 @@ fun BookProgressSection(
         }
 
         constrain(titleSet) {
-            top.linkTo(imageSet.bottom , margin = 8.dp)
+            top.linkTo(imageSet.bottom, margin = 8.dp)
             start.linkTo(imageSet.start)
             end.linkTo(imageSet.end)
         }
@@ -529,6 +584,7 @@ fun BookProgressSection(
             start.linkTo(authorSet.start)
             end.linkTo(authorSet.end)
         }
+
 
         constrain(timerSet) {
             top.linkTo(chapterSet.bottom, 8.dp)
@@ -623,22 +679,22 @@ fun BookProgressSection(
             )
         }
 
-
-        ElevatedButton(
-            modifier = Modifier.layoutId("start_button"),
-            onClick = {
-                //will start timer
-                onShowTimerText(true)
-            },
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            )
-        ) {
-            val buttonText = if (timerRunning) "pause" else if (isTimerPaused) "resume" else "start"
-            Text(text = buttonText, style = BookAppTypography.labelLarge)
+        if(isBookActive){
+            ElevatedButton(
+                modifier = Modifier.layoutId("start_button"),
+                onClick = {
+                    //will start timer
+                    onShowTimerText(true)
+                },
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                val buttonText = if (timerRunning) "pause" else if (isTimerPaused) "resume" else "start"
+                Text(text = buttonText, style = BookAppTypography.labelLarge)
+            }
         }
-
 
         if (showTimerText) {
 
@@ -755,7 +811,7 @@ fun TrackSection(
                     currentPageNumber = it
                 },
                 placeholder = {
-                    Text(text = "current page number", style = BookAppTypography.labelMedium)
+                    Text(text = "page number", style = BookAppTypography.labelMedium)
                 },
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -912,6 +968,101 @@ fun CounterButtonsComponent(
 }*/
 
 @Composable
+fun TimeAndPageComponent(
+    pagesStatText : String = "" ,
+    timeStatText : String = "" ,
+    pagesPerMinStatText : AnnotatedString
+){
+    Card(
+        modifier = Modifier.padding(8.dp) ,
+        shape = RoundedCornerShape(15.dp) , 
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        ) ,
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically ,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+
+            SingleTimeOrPageItem(
+                mainText = pagesStatText ,
+                title = "pages read"
+            )
+
+            PageSpeedComponent(
+                annotatedText = pagesPerMinStatText ,
+                title = "speed"
+            )
+            SingleTimeOrPageItem(
+                mainText = timeStatText ,
+                title = "best time"
+            )
+        }
+
+    }
+}
+@Composable
+@Preview
+fun SingleTimeOrPageItem(
+    modifier : Modifier = Modifier ,
+    mainText : String = "",
+    title : String = ""
+){
+    Column(
+        modifier = modifier.padding(5.dp),
+        verticalArrangement = Arrangement.Center ,
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = mainText ,
+            style = BookAppTypography.headlineLarge ,
+            fontWeight = FontWeight.Bold ,
+            textAlign = TextAlign.Start
+        )
+        Text(
+            text = title.uppercase(),
+            style = BookAppTypography.bodySmall ,
+            fontWeight = FontWeight.Medium ,
+            color = Color.Gray ,
+            textAlign = TextAlign.Start
+        )
+
+    }
+}
+
+@Composable
+fun PageSpeedComponent(
+    modifier : Modifier = Modifier ,
+    annotatedText : AnnotatedString,
+    title : String = ""
+){
+    Column(
+        modifier = modifier.padding(5.dp),
+        verticalArrangement = Arrangement.Center ,
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = annotatedText ,
+            style = BookAppTypography.headlineLarge ,
+            fontWeight = FontWeight.Bold ,
+            textAlign = TextAlign.Start
+        )
+        Text(
+            text = title.uppercase(),
+            style = BookAppTypography.bodySmall ,
+            fontWeight = FontWeight.Medium ,
+            color = Color.Gray ,
+            textAlign = TextAlign.Start
+        )
+    }
+}
+
+@Composable
 @Preview(showBackground = true)
 fun HoursWithEmojiComponent(
     modifier: Modifier = Modifier,
@@ -1008,7 +1159,7 @@ fun BookProgressImageSection(
             modifier = Modifier
                 .wrapContentHeight()
                 .wrapContentWidth(),
-            verticalArrangement = Arrangement.Center ,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
@@ -1019,13 +1170,13 @@ fun BookProgressImageSection(
                 modifier = Modifier
                     .height(135.dp)
                     .width(100.dp)
-                    .padding(top = 8.dp , start = 8.dp , end = 8.dp)
+                    .padding(top = 8.dp, start = 8.dp, end = 8.dp)
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
-                modifier = Modifier.width(50.dp) ,
-                text = "${(bookData.progress * 100).toInt()}%" ,
-                textAlign = TextAlign.Center ,
+                modifier = Modifier.wrapContentWidth(),
+                text = "${(bookData.progress * 100).toInt()}%",
+                textAlign = TextAlign.Center,
                 style = BookAppTypography.headlineMedium
             )
         }

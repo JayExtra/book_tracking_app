@@ -108,6 +108,27 @@ fun Long.formatTimeToDHMS() : String {
 
     return formattedTime.ifBlank { "0s" }
 }
+fun String.splitToDHMS() : String {
+    val stringArray = this.trim().split(" ")
+    Timber.tag("Extentions").d(stringArray.toString())
+    when (stringArray.size) {
+        1 -> {
+            return stringArray[0]
+        }
+        2 -> {
+            return stringArray[0]
+        }
+        3 -> {
+            return stringArray[0] + stringArray[1]
+        }
+        4 -> {
+            return stringArray[0] + stringArray[2] + stringArray[3]
+        }
+        else -> {
+            return "0s"
+        }
+    }
+}
 
 fun Long.checkDaysTaken() : Int {
     val values = this / 86400000L
