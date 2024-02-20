@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import coil.size.Scale
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.booktracker.compose_ui.R
 

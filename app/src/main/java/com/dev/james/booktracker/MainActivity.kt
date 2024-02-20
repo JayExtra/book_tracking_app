@@ -28,7 +28,7 @@ import com.dev.james.achievements.presentation.ui.screens.destinations.Achieveme
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.home.presentation.screens.destinations.HomeScreenDestination
 import com.dev.james.booktracker.ui.components.StandardScaffold
-import com.dev.james.my_library.presentation.ui.destinations.MyLibraryScreenDestination
+import com.dev.james.my_library.presentation.ui.screens.destinations.MyLibraryScreenDestination
 import com.example.core_navigation.navigation.AppNavigation
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
