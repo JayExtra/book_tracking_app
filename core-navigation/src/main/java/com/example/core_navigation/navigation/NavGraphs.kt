@@ -8,7 +8,7 @@ import com.dev.james.booktracker.home.presentation.screens.destinations.ReadGoal
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
-import com.dev.james.my_library.presentation.ui.destinations.MyLibraryScreenDestination
+import com.dev.james.my_library.presentation.ui.screens.destinations.MyLibraryScreenDestination
 import com.ramcosta.composedestinations.dynamic.routedIn
 import com.ramcosta.composedestinations.spec.DestinationSpec
 import com.ramcosta.composedestinations.spec.NavGraphSpec
@@ -64,7 +64,8 @@ object NavGraphs {
         override val destinationsByRoute =
             listOf<DestinationSpec<*>>(
                 MyLibraryScreenDestination ,
-                AddBookScreenDestination
+                AddBookScreenDestination ,
+                TrackBookScreenDestination
             ).routedIn(this)
                 .associateBy { it.route }
 

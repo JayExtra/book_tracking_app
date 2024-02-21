@@ -58,6 +58,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airbnb.lottie.compose.*
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
+import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.home.presentation.components.PdfListBottomSheetContent
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
@@ -264,7 +265,7 @@ fun HomeScreen(
                 homeNavigator.openReadGoalsScreen()
             },
             onContinueBtnClicked = { bookId ->
-                homeNavigator.openTrackingScreen(bookId)
+                homeNavigator.openTrackingScreen(bookId , PreviousScreenDestinations.HOME_SCREEN)
             },
             onProceedClicked = {
 

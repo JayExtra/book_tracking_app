@@ -359,10 +359,19 @@ fun AddBookScreen(
                 showHorizontalProgress = addBookViewModel.saveProgressBarState,
                 popBackStack = {
                     //navigate out of this screen
+                    when (previousScreenDestinations) {
+                        PreviousScreenDestinations.HOME_SCREEN -> {
+                            addBookScreenNavigator.backToHomeDestination()
+                        }
 
-                    addBookViewModel.passUiAction(
-                        action = CurrentReadFormActions.Navigate
-                    )
+                        PreviousScreenDestinations.LIBRARY_SCREEN -> {
+                            addBookScreenNavigator.backToLibraryScreen()
+                        }
+
+                        else -> {
+                            Timber.tag("AddBookScreen").d("No naviation event received!")
+                        }
+                    }
 
                 },
                 onGoogleIconClicked = {

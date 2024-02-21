@@ -64,5 +64,4 @@ class BooksLocalDataSourceImpl @Inject constructor(
     override suspend fun getCachedBook(id: String): BookEntity {
         return booksDao.getBook(id)
     }
-
 }
