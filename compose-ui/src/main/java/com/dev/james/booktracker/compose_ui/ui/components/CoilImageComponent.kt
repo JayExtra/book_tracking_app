@@ -20,6 +20,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Scale
+import coil.size.Size
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.booktracker.compose_ui.R
 
@@ -39,6 +40,7 @@ fun CoilImageComponent(
                 transformations(
                     RoundedCornersTransformation(0f)
                 )
+                size(Size.ORIGINAL)
             }).build()
     )
 

@@ -31,7 +31,6 @@ fun LibraryBookCardComponent(
 ){
     Column(
         modifier = Modifier
-            .padding(2.dp)
             .wrapContentWidth()
             .wrapContentHeight()
             .clickable {
@@ -43,7 +42,7 @@ fun LibraryBookCardComponent(
         CoilImageComponent(
             modifier = Modifier
                 .width(104.dp)
-                .height(149.dp) ,
+                .height(144.dp) ,
             image = book.image
         )
         Text(
@@ -52,7 +51,7 @@ fun LibraryBookCardComponent(
             style = BookAppTypography.labelSmall ,
             fontSize = 13.sp ,
             textAlign = TextAlign.Start ,
-            maxLines = 1,
+            maxLines = 2,
             softWrap = true,
             overflow = TextOverflow.Ellipsis
         )

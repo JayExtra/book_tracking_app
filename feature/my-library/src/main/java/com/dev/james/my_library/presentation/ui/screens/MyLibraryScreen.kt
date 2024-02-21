@@ -147,8 +147,7 @@ fun CurrentlyReadingComponent(
         }
 
         LazyRow(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight().background(Color.Yellow),
-            contentPadding = PaddingValues(2.dp),
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(items = bookList) { book ->
