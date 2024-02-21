@@ -99,6 +99,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldCompo
 //import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationDialog
 import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
+import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.utils.splitToDHMS
 import com.dev.james.booktracker.core.common_models.BookProgressData
@@ -121,6 +122,7 @@ import timber.log.Timber
 fun TrackBookScreen(
     navigation: BookTrackNavigation,
     bookTrackingViewModel: BookTrackingViewModel = hiltViewModel(),
+    previousScreenDestinations: PreviousScreenDestinations ,
     bookId: String?
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -214,7 +216,15 @@ fun TrackBookScreen(
                     Text(text = "Track your progress", style = BookAppTypography.headlineSmall)
                 },
                 navigate = {
-                    navigation.backToHomeScreen()
+                    when (previousScreenDestinations) {
+                        PreviousScreenDestinations.HOME_SCREEN -> {
+                            navigation.backToHomeScreen()
+                        }
+                        PreviousScreenDestinations.LIBRARY_SCREEN -> {
+                            navigation.backToMyLibraryScreen()
+                        }
+                        else -> {}
+                    }
                 }
             )
         },

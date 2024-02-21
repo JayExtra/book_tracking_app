@@ -73,9 +73,9 @@ class CoreFeatureNavigator(
         )
     }
 
-    override fun openTrackingScreen(id : String) {
+    override fun openTrackingScreen(id : String , currentDestination : PreviousScreenDestinations) {
         navController.navigate(
-            TrackBookScreenDestination(bookId = id) within navGraph
+            TrackBookScreenDestination(bookId = id , previousScreenDestinations = currentDestination ) within navGraph
         )
     }
 
@@ -118,6 +118,14 @@ class CoreFeatureNavigator(
         navController.navigate(HomeScreenDestination within navGraph)
     }
 
+    override fun openAddBookScreenDestination() {
+        navController.navigate(AddBookScreenDestination(previousScreenDestinations = PreviousScreenDestinations.LIBRARY_SCREEN) within navGraph)
+    }
+
+    override fun openBookTrackingScreenDestination(bookId: String , currentDestination: PreviousScreenDestinations) {
+        navController.navigate(TrackBookScreenDestination(bookId = bookId , previousScreenDestinations = currentDestination) within navGraph)
+    }
+
     override fun backToHomeScreen() {
         navController.navigate(
             HomeScreenDestination within navGraph ,
@@ -125,6 +133,18 @@ class CoreFeatureNavigator(
             popUpTo(
                route =  NavGraphs.root ,
 
+            ){
+                inclusive = true
+            }
+        }
+    }
+
+    override fun backToMyLibraryScreen() {
+        navController.navigate(
+            MyLibraryScreenDestination within navGraph
+        ) {
+            popUpTo(
+                route = NavGraphs.root
             ){
                 inclusive = true
             }

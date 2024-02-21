@@ -52,7 +52,7 @@ fun LibraryBookCardComponent(
             style = BookAppTypography.labelSmall ,
             fontSize = 13.sp ,
             textAlign = TextAlign.Start ,
-            maxLines = 2,
+            maxLines = 1,
             softWrap = true,
             overflow = TextOverflow.Ellipsis
         )

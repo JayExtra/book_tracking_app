@@ -64,7 +64,8 @@ object NavGraphs {
         override val destinationsByRoute =
             listOf<DestinationSpec<*>>(
                 MyLibraryScreenDestination ,
-                AddBookScreenDestination
+                AddBookScreenDestination ,
+                TrackBookScreenDestination
             ).routedIn(this)
                 .associateBy { it.route }
 
