@@ -6,15 +6,21 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -22,13 +28,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
+import com.dev.james.booktracker.compose_ui.ui.enums.DefaultColors
 import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.LibraryBookData
@@ -147,7 +158,9 @@ fun CurrentlyReadingComponent(
         }
 
         LazyRow(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(items = bookList) { book ->
@@ -189,6 +202,73 @@ fun CurrentlyReadingComponent(
             }
 
         }
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+@Preview
+fun SuggestionCardComponent(
+    cardColor : Long = DefaultColors.DEFAULT_CARD_COLOR
+){
+    Card(
+        modifier = Modifier
+            .width(222.dp)
+            .height(129.dp) ,
+        shape = RoundedCornerShape(15.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) ,
+        colors = CardDefaults.cardColors(
+            containerColor = Color(cardColor)
+        ),
+        onClick = {}
+    ) {
+        val constraintsSet = ConstraintSet {
+            val bookImage = createRefFor("book_image")
+            val bookDetails = createRefFor("book_details")
+            val wishlistBtn = createRefFor("wishlist_button")
+            val decorator = createRefFor("decorator")
+
+            constrain(bookImage){
+                start.linkTo(parent.start)
+                top.linkTo(parent.top)
+            }
+
+            constrain(bookDetails){
+                start.linkTo(bookImage.end , 2.dp)
+                top.linkTo(bookImage.top)
+            }
+
+            constrain(wishlistBtn){
+                top.linkTo(bookDetails.bottom , margin = 8.dp)
+                start.linkTo(bookDetails.end , 2.dp)
+
+            }
+
+            constrain(decorator){
+                bottom.linkTo(parent.bottom)
+                end.linkTo(parent.end)
+            }
+        }
+
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp) ,
+            constraintSet = constraintsSet
+        ) {
+
+            CoilImageComponent(
+                modifier = Modifier.layoutId("book_image")
+                    .width(48.dp)
+                    .height(75.dp)
+            )
+
+
+
+
+        }
+
     }
 
 }
