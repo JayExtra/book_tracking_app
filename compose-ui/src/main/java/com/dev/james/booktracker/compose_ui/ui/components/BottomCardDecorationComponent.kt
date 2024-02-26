@@ -29,7 +29,7 @@ fun BottomCardDecorationComponent(
     color: Long = DefaultColors.CARD_DECORATOR_DEFAULT_COLOR
 ) {
     Canvas(
-        modifier = modifier.size(155.dp).background(color = Color.Transparent),
+        modifier = modifier.background(color = Color.Transparent),
         contentDescription = ""
     ) {
         val canvasWidth = size.width
