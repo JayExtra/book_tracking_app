@@ -1,6 +1,5 @@
 package com.dev.james.my_library.presentation.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -31,15 +30,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
 import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.my_library.presentation.navigation.MyLibraryScreenNavigator
+import com.dev.james.my_library.presentation.ui.components.SuggestedBookCardComponent
 import com.dev.james.my_library.presentation.ui.viewmodel.MyLibraryViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
 @Destination
 fun MyLibraryScreen(
-    myLibraryScreenNavigator: MyLibraryScreenNavigator ,
+    myLibraryScreenNavigator: MyLibraryScreenNavigator,
     myLibraryViewModel: MyLibraryViewModel = hiltViewModel()
 ) {
     Box(
@@ -49,21 +50,24 @@ fun MyLibraryScreen(
 
         val myBooksList = myLibraryViewModel.booksWithProgress.collectAsStateWithLifecycle()
 
-        if(myLibraryViewModel.isLoading){
+        if (myLibraryViewModel.isLoading) {
             CircularProgressIndicator(
-                strokeWidth = 4.dp ,
-                strokeCap = StrokeCap.Round ,
+                strokeWidth = 4.dp,
+                strokeCap = StrokeCap.Round,
                 color = MaterialTheme.colorScheme.secondary
             )
-        }else{
-         //show our screen
+        } else {
+            //show our screen
             MyLibraryStatelessScreen(
-                booksList = myBooksList.value ,
+                booksList = myBooksList.value,
                 onAddMoreBookClicked = {
                     myLibraryScreenNavigator.openAddBookScreenDestination()
-                } ,
+                },
                 onSeeAllBookSelected = { bookId ->
-                    myLibraryScreenNavigator.openBookTrackingScreenDestination(bookId , PreviousScreenDestinations.LIBRARY_SCREEN)
+                    myLibraryScreenNavigator.openBookTrackingScreenDestination(
+                        bookId,
+                        PreviousScreenDestinations.LIBRARY_SCREEN
+                    )
                 }
             )
         }
@@ -78,7 +82,7 @@ fun MyLibraryStatelessScreen(
     modifier: Modifier = Modifier,
     booksList: List<LibraryBookData> = listOf(LibraryBookData()),
     onCurrentlyReadingSeeAll: () -> Unit = {},
-    onSeeAllBookSelected: (String) -> Unit = {} ,
+    onSeeAllBookSelected: (String) -> Unit = {},
     onAddMoreBookClicked: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
@@ -91,17 +95,26 @@ fun MyLibraryStatelessScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CurrentlyReadingComponent(
-            modifier = Modifier.fillMaxWidth() ,
-            bookList = booksList ,
+        CurrentlyReadingSection(
+            modifier = Modifier.fillMaxWidth(),
+            bookList = booksList,
             onSeeAllClicked = {
                 onCurrentlyReadingSeeAll()
-            } ,
-            onBookSelected = {id ->
+            },
+            onBookSelected = { id ->
                 onSeeAllBookSelected(id)
-            } ,
+            },
             onAddMoreClicked = {
                 onAddMoreBookClicked()
+            }
+        )
+
+        SuggestedForYouSection(
+            onSeeAllClicked = {
+
+            } ,
+            onAddToWishlist = {
+
             }
         )
 
@@ -111,7 +124,7 @@ fun MyLibraryStatelessScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun CurrentlyReadingComponent(
+fun CurrentlyReadingSection(
     modifier: Modifier = Modifier,
     bookList: List<LibraryBookData> = listOf(LibraryBookData()),
     onSeeAllClicked: () -> Unit = {},
@@ -147,7 +160,9 @@ fun CurrentlyReadingComponent(
         }
 
         LazyRow(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(items = bookList) { book ->
@@ -192,3 +207,71 @@ fun CurrentlyReadingComponent(
     }
 
 }
+
+@Composable
+fun SuggestedForYouSection(
+    modifier: Modifier = Modifier,
+    bookList: List<Book> = listOf(Book()),
+    onSeeAllClicked: () -> Unit = {},
+    onAddToWishlist : (String) -> Unit = {}
+){
+    Column(
+        modifier = modifier.height(254.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.wrapContentWidth(),
+                text = "currently reading",
+                style = BookAppTypography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+            TextButton(
+                onClick = { onSeeAllClicked() }
+            ) {
+                Text(
+                    text = "see more",
+                    style = BookAppTypography.labelSmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Icon(imageVector = Icons.Rounded.KeyboardArrowRight, contentDescription = "")
+            }
+        }
+
+        val colorsList = listOf(
+            0xFF34E363 ,
+            0xFFFCFF3B ,
+            0xFFff7d45 ,
+            0xFF45e0ff ,
+            0xFF4f52ff ,
+            0xFFf25bfc ,
+            0xFFfa4b5a ,
+
+        )
+
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(items = bookList) { book ->
+                SuggestedBookCardComponent(
+                    cardColor = colorsList.random() ,
+                    book = book ,
+                    onAddToWishlistSelected = { bookDets ->
+                        bookDets.bookId?.let { onAddToWishlist(it) }
+                    }
+                )
+            }
+
+        }
+    }
+
+}
+

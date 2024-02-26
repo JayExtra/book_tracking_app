@@ -25,10 +25,11 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BackgroundLightColor
 @Preview()
 @Composable
 fun BottomCardDecorationComponent(
+    modifier: Modifier = Modifier ,
     color: Long = DefaultColors.CARD_DECORATOR_DEFAULT_COLOR
 ) {
     Canvas(
-        modifier = Modifier.size(155.dp).background(color = Color.Transparent),
+        modifier = modifier.background(color = Color.Transparent),
         contentDescription = ""
     ) {
         val canvasWidth = size.width
