@@ -1,6 +1,12 @@
 package com.dev.james.booktracker.compose_ui.ui.utils
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.ColorInt
+import androidx.annotation.RequiresApi
+import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.toColorLong
 import timber.log.Timber
 import java.security.SecureRandom
 import java.util.UUID
@@ -45,3 +51,13 @@ fun String.splitToDHMS() : String {
         }
     }
 }
+
+
+fun Color.getDarkerColor(factor: Float): Color {
+    val red = this.red * (1 - factor)
+    val green = this.green * (1 - factor)
+    val blue = this.blue * (1 - factor)
+    return Color(red, green, blue)
+}
+
+
