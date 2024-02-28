@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -112,8 +113,68 @@ fun CurrentReadForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        val pagesTextFieldState : TextFieldState = currentReadFormState.getState("pages_count")
+        val descriptionFieldState : TextFieldState = currentReadFormState.getState("description")
 
+        OutlinedTextFieldComponent(
+            modifier = Modifier.fillMaxWidth(),
+            label = "Description",
+            text = descriptionFieldState.value,
+            hasError = descriptionFieldState.hasError,
+            onTextChanged = { fieldValue ->
+                descriptionFieldState.change(fieldValue)
+            } ,
+            trailingIcon = Icons.Default.Close,
+            onTrailingIconClicked = {
+                //clear the text field
+                descriptionFieldState.change("")
+            },
+            isSingleLine = false ,
+            maxLines = 4
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        val categoryFieldState : TextFieldState = currentReadFormState.getState("category")
+        val categoriesList = listOf(
+            "biography & autobiography" ,
+            "comics & graphic novels" ,
+            "business & economics" ,
+            "drama" ,
+            "thriller",
+            "true crime" ,
+            "fiction",
+            "travel" ,
+            "nature" ,
+            "music" ,
+            "mathematics" ,
+            "pets" ,
+            "philosophy",
+            "self-help" ,
+            "technology & engineering",
+            "computers" ,
+            "young adult fiction" ,
+            "young adult non-fiction",
+            "literary criticism" ,
+            "body, mind & spirit"
+        )
+
+        DropDownComponent(
+            modifier = Modifier.fillMaxWidth(),
+            label = "category",
+            selectedText = categoryFieldState.value,
+            dropDownItems = categoriesList ,
+            hasError = categoryFieldState.hasError,
+            onListItemSelected = { chapter ->
+                Timber.tag("ReadGoalsScreen").d(chapter)
+                categoryFieldState.change(chapter)
+                //update chapter count
+            },
+            canUserFill = false
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        val pagesTextFieldState : TextFieldState = currentReadFormState.getState("pages_count")
         OutlinedTextFieldComponent(
             modifier = Modifier.fillMaxWidth(),
             label = "Pages count",
@@ -127,35 +188,30 @@ fun CurrentReadForm(
                 //clear the text field
                 pagesTextFieldState.change("")
             },
-            isSingleLine = true
+            isSingleLine = true ,
+            keyBoardType = KeyboardType.Number
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        val chapterDropDownState: TextFieldState = currentReadFormState.getState("chapters")
-        /*val currentChapterDropDownState: TextFieldState =
-            currentReadFormState.getState("current chapter")*/
+        val chapterFieldState: TextFieldState = currentReadFormState.getState("chapters")
 
-        val chapterCount = mutableListOf<String>()
-        for (chapter in 1..50) {
-            chapterCount.add(
-                chapter.toString()
-            )
-        }
-
-        DropDownComponent(
+        OutlinedTextFieldComponent(
             modifier = Modifier.fillMaxWidth(),
             label = "Chapters count",
-            selectedText = chapterDropDownState.value,
-            dropDownItems = chapterCount.toList(),
-            hasError = chapterDropDownState.hasError,
-            onListItemSelected = { chapter ->
-                Timber.tag("ReadGoalsScreen").d(chapter)
-                chapterDropDownState.change(chapter)
-                //update chapter count
+            text = chapterFieldState.value,
+            hasError = chapterFieldState.hasError,
+            onTextChanged = { fieldValue ->
+                chapterFieldState.change(fieldValue)
+            } ,
+            trailingIcon = Icons.Default.Close,
+            onTrailingIconClicked = {
+                //clear the text field
+                chapterFieldState.change("")
             },
-            canUserFill = true
+            isSingleLine = true ,
+            keyBoardType = KeyboardType.Number
         )
 
         /*       Row(

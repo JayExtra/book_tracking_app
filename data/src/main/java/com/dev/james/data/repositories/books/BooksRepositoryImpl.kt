@@ -50,6 +50,7 @@ class BooksRepositoryImpl
                     withContext(dispatcher) {
                         booksApiDataSource.getQueriedBook(query = bookTitle, author = bookAuthor)
                     }
+                Timber.tag(TAG).d("Books => %s", booksFromApi.toString())
                 emit(Resource.Success(data = booksFromApi))
 
             } catch (e: HttpException) {

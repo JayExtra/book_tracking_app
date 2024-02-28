@@ -39,7 +39,6 @@ import com.dev.james.booktracker.compose_ui.ui.enums.DefaultColors
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.utils.getDarkerColor
 import com.dev.james.booktracker.core.common_models.Book
-import com.dev.james.booktracker.core.utilities.convertToAuthorsString
 
 
 @Preview
@@ -137,8 +136,7 @@ fun SuggestedBookCardComponent(
                 modifier = Modifier
                     .layoutId("book_image")
                     .width(48.dp)
-                    .height(75.dp) ,
-                image = book.bookImage!!
+                    .height(75.dp)
             )
             BookDescriptionTextSection(
                 modifier = Modifier
@@ -146,11 +144,6 @@ fun SuggestedBookCardComponent(
                     .width(135.dp)
                     .wrapContentHeight() ,
                 cardColor = cardColor ,
-                title = book.bookTitle!! ,
-                author = book.bookAuthors!!.convertToAuthorsString() ,
-                publisher = book.publisher!! ,
-                date = book.publishedDate!! ,
-                pages = book.bookPagesCount!!
             )
 
             Button(

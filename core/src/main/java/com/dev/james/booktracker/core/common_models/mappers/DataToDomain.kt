@@ -11,6 +11,8 @@ fun BookDto.mapToBookUiObject(): Book {
         bookTitle = volumeInfo?.title,
         bookPagesCount = volumeInfo?.pageCount,
         publishedDate = volumeInfo?.published_date,
-        publisher = volumeInfo?.publisher
+        publisher = volumeInfo?.publisher ,
+        description = volumeInfo?.description ,
+        category = volumeInfo?.categories
     )
 }

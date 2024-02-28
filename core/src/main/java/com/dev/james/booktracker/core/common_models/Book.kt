@@ -7,6 +7,8 @@ data class Book(
     val bookImage : String? = null,
     val bookTitle : String? = null,
     val bookAuthors : List<String>? = null,
+    val description : String? = null ,
+    val category : List<String>? = null ,
     val bookPagesCount : Int? = null ,
     val publisher : String? = null ,
     val publishedDate : String? = null ,

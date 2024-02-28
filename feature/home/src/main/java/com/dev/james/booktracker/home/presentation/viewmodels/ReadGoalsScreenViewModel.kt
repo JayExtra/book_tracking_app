@@ -4,14 +4,10 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
-import com.dev.james.booktracker.core.common_models.BookGoal
 import com.dev.james.booktracker.core.common_models.Goal
-import com.dev.james.booktracker.core.common_models.SpecificGoal
 import com.dev.james.booktracker.core.common_models.BookSave
-import com.dev.james.booktracker.core.common_models.mappers.mapToPresentation
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core.utilities.calculateTimeToLong
-import com.dev.james.booktracker.core.utilities.convertToAuthorsString
 import com.dev.james.booktracker.core.utilities.generateRandomId
 import com.dev.james.booktracker.core.utilities.prepareGoalString
 import com.dev.james.booktracker.core.dto.BookDto
@@ -24,19 +20,10 @@ import com.dsc.form_builder.TextFieldState
 import com.dsc.form_builder.Validators
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -73,12 +60,12 @@ class ReadGoalsScreenViewModel @Inject constructor(
     )
     val readGoalsScreenUiState get() = _readGoalsScreenUiState.asStateFlow()
 
-    private val searchQueryMutableStateFlow: MutableStateFlow<String> =
+    /*private val searchQueryMutableStateFlow: MutableStateFlow<String> =
         MutableStateFlow("Think Big")
 
     private var _googleBottomSheetSearchState: MutableStateFlow<GoogleBottomSheetUiState> =
         MutableStateFlow(GoogleBottomSheetUiState.StandbyState)
-    val googleBottomSheetSearchState get() = _googleBottomSheetSearchState.asStateFlow()
+    val googleBottomSheetSearchState get() = _googleBottomSheetSearchState.asStateFlow()*/
 
     private var _readGoalsScreenUiEvents: Channel<ReadGoalsUiEvents> = Channel()
     val readGoalsScreenUiEvents get() = _readGoalsScreenUiEvents.receiveAsFlow()
@@ -195,7 +182,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
         )
     )
 
-    val bottomSheetSearchFieldState = FormState(
+  /*  val bottomSheetSearchFieldState = FormState(
         fields = listOf(
             TextFieldState(
                 name = "search_field",
@@ -209,7 +196,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
     private val currentReadFormAuthorFieldState: TextFieldState =
         currentReadFormState.getState("author")
     private val currentReadFormPagesFieldState: TextFieldState =
-        currentReadFormState.getState("pages_count")
+        currentReadFormState.getState("pages_count")*/
 
     private val overallGoalTimeFieldState: TextFieldState = overallGoalFormState.getState("time")
     private val overallGoalFrequencyFieldState: ChoiceState =
@@ -437,7 +424,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
 
     }
 
-    fun getCachedBooks() {
+ /*   fun getCachedBooks() {
         viewModelScope.launch {
             booksRepository.getSavedBooks()
                 .map { booksSaveList ->
@@ -451,9 +438,9 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 }
         }
 
-    }
+    }*/
 
-    fun onBookSelected(book: Book) {
+ /*   fun onBookSelected(book: Book) {
         //update various states
         _imageSelectorState.value = imageSelectorUiState.value.copy(
             imageUrl = book.bookImage!!,
@@ -467,10 +454,10 @@ class ReadGoalsScreenViewModel @Inject constructor(
         currentReadFormPagesFieldState.change(book.bookPagesCount.toString())
         _selectedBookState.value = book
 
-    }
+    }*/
 
     //google search functionality action
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+ /*   @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     fun searchForBook(searchQuery: String) {
         queryJob = viewModelScope.launch {
             searchQueryMutableStateFlow.value = searchQuery
@@ -530,7 +517,7 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 }
 
         }
-    }
+    }*/
 
     fun cancelQueryJob() {
         queryJob?.cancel()

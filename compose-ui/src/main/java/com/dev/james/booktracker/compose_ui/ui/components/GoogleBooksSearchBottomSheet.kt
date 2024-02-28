@@ -49,7 +49,7 @@ import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmode
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.GoogleBottomSheetUiState
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.Book
-import com.dev.james.booktracker.core.utilities.convertToAuthorsString
+import com.dev.james.booktracker.core.utilities.convertToOrganisedString
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
 import timber.log.Timber
@@ -277,7 +277,7 @@ fun BookInformationCard(
             )
 
             Text(
-                text = book.bookAuthors?.convertToAuthorsString() ?: "No authors found",
+                text = book.bookAuthors?.convertToOrganisedString() ?: "No authors found",
                 style = BookAppTypography.bodySmall ,
                 maxLines = 2
             )

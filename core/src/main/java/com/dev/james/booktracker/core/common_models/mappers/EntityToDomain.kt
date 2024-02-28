@@ -47,8 +47,8 @@ fun BookEntity.mapToBookDomainObject(): BookSave {
         bookPagesCount = bookPagesCount,
         publisher = publisher,
         publishedDate = publishedDate,
-       // currentChapterTitle = currentChapterTitle,
-        chapters = chapters
-        //currentChapter = currentChapter
+        chapters = chapters ,
+        category = category ,
+        bookDescription = bookDescription
     )
 }
