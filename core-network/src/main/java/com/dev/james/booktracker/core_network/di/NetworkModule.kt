@@ -2,6 +2,7 @@ package com.dev.james.booktracker.core_network.di
 
 import com.dev.james.booktracker.core_network.BuildConfig
 import com.dev.james.booktracker.core_network.api_service.BooksApi
+import com.dev.james.booktracker.core_network.interceptors.ApiKeyInterceptor
 import com.dev.james.booktracker.core_network.utilities.Endpoints.BASE_URL
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -9,6 +10,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -29,11 +31,20 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofitClient() : OkHttpClient {
+    fun provideApiKeyInterceptor() : Interceptor =
+        ApiKeyInterceptor()
+
+
+    @Provides
+    @Singleton
+    fun provideRetrofitClient(
+        apiKeyInterceptor: ApiKeyInterceptor
+    ) : OkHttpClient {
         val client = OkHttpClient.Builder()
             .connectTimeout(5 , TimeUnit.SECONDS)
             .readTimeout(5 , TimeUnit.SECONDS)
             .writeTimeout(5 , TimeUnit.SECONDS)
+            .addInterceptor(apiKeyInterceptor)
 
         if(BuildConfig.DEBUG) client.addInterceptor(loggingInterceptor)
 

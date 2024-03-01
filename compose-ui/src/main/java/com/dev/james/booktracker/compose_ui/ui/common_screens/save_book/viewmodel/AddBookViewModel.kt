@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookSave
-import com.dev.james.booktracker.core.common_models.mappers.mapToBookUiObject
+import com.dev.james.booktracker.core.common_models.mappers.mapToDomainObject
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core.utilities.convertToOrganisedString
 import com.dev.james.booktracker.core.utilities.generateSecureUUID
@@ -398,7 +398,7 @@ class AddBookViewModel @Inject constructor(
                             if (!booksList.isNullOrEmpty()) {
                                 _googleBottomSheetSearchState.value =
                                     GoogleBottomSheetUiState.HasFetched(
-                                        booksList = booksList.map { bookDto -> bookDto.mapToBookUiObject() }
+                                        booksList = booksList.map { bookDto -> bookDto.mapToDomainObject() }
                                     )
                             } else {
                                 _googleBottomSheetSearchState.value = GoogleBottomSheetUiState

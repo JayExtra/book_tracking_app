@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.LibraryBookData
+import com.dev.james.domain.usecases.FetchSuggestedBooksUsecase
 import com.dev.james.domain.usecases.GetBooksAndProgressUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyLibraryViewModel @Inject constructor(
-    private val getBooksAndProgressUsecase: GetBooksAndProgressUsecase
+    private val getBooksAndProgressUsecase: GetBooksAndProgressUsecase ,
+    private val fetchSuggestedBooksUsecase: FetchSuggestedBooksUsecase
 ) : ViewModel() {
 
     private var _booksWithProgress : MutableStateFlow<List<LibraryBookData>> = MutableStateFlow(value = listOf(LibraryBookData()))
@@ -31,6 +33,11 @@ class MyLibraryViewModel @Inject constructor(
     init {
         isLoading = true
         getBooksWithProgress()
+        getSuggestedBooks()
+    }
+
+    private fun getSuggestedBooks() = viewModelScope.launch {
+        fetchSuggestedBooksUsecase.invoke()
     }
 
     private fun getBooksWithProgress() = viewModelScope.launch {
@@ -38,5 +45,6 @@ class MyLibraryViewModel @Inject constructor(
             isLoading = false
             _booksWithProgress.value = booksList
         }
+
     }
 }

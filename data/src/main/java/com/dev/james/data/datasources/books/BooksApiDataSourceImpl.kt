@@ -16,4 +16,11 @@ class BooksApiDataSourceImpl @Inject constructor(
             author = author
         )
     }
+
+    override suspend fun queryByCategory(query: String): BookVolumeDto {
+        return booksApi.queryByCategory(
+            query = query ,
+            maxResult = 30
+        )
+    }
 }

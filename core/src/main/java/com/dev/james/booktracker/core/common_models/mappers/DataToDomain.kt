@@ -3,7 +3,7 @@ package com.dev.james.booktracker.core.common_models.mappers
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.dto.BookDto
 
-fun BookDto.mapToBookUiObject(): Book {
+fun BookDto.mapToDomainObject(): Book {
     return Book(
         bookId = id,
         bookImage = volumeInfo?.image_links?.thumbnail,
