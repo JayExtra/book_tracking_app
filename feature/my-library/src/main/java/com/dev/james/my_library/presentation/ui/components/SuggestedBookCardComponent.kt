@@ -39,20 +39,21 @@ import com.dev.james.booktracker.compose_ui.ui.enums.DefaultColors
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.utils.getDarkerColor
 import com.dev.james.booktracker.core.common_models.Book
+import com.dev.james.booktracker.core.common_models.SuggestedBook
 
 
 @Preview
 @Composable
 fun SuggestedBookCardComponent(
     cardColor: Long = DefaultColors.DEFAULT_CARD_COLOR,
-    book : Book = Book(),
-    onAddToWishlistSelected : (Book) -> Unit = {}
+    book : SuggestedBook = SuggestedBook(),
+    onAddToWishlistSelected : (SuggestedBook) -> Unit = {}
 ) {
 
     Card(
         modifier = Modifier
-            .width(222.dp)
-            .height(129.dp),
+            .width(242.dp)
+            .height(139.dp),
         shape = RoundedCornerShape(15.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
@@ -109,10 +110,10 @@ fun SuggestedBookCardComponent(
 
                     drawCircle(
                         color = Color(cardColor).getDarkerColor(0.3f),
-                        radius = 22f,
+                        radius = 27f,
                         center = Offset(
-                            canvasWidth - circleRadius.toPx() / 1.1f,
-                            canvasHeight - circleRadius.toPx() / 1.3f
+                            canvasWidth - circleRadius.toPx() / 0.8f,
+                            canvasHeight - circleRadius.toPx() / 1.0f
                         )
                     )
 
@@ -124,8 +125,8 @@ fun SuggestedBookCardComponent(
                         sweepAngle = 180f,
                         style = Stroke(5.dp.toPx()),
                         topLeft = Offset(
-                            canvasWidth - arcRadiusSmall.toPx() / 2.5f,
-                            canvasHeight - arcRadiusSmall.toPx() / 2.5f
+                            canvasWidth - arcRadiusSmall.toPx() / 2.0f,
+                            canvasHeight - arcRadiusSmall.toPx() / 2.1f
                         )
                     )
                 },
@@ -135,8 +136,9 @@ fun SuggestedBookCardComponent(
             CoilImageComponent(
                 modifier = Modifier
                     .layoutId("book_image")
-                    .width(48.dp)
-                    .height(75.dp)
+                    .width(57.dp)
+                    .height(89.dp) ,
+                image = book.image
             )
             BookDescriptionTextSection(
                 modifier = Modifier
@@ -144,12 +146,17 @@ fun SuggestedBookCardComponent(
                     .width(135.dp)
                     .wrapContentHeight() ,
                 cardColor = cardColor ,
+                title = book.title ,
+                publisher = book.publisher ,
+                date = book.publishedDate ,
+                pages = book.pages ,
+                author = book.authors
             )
 
             Button(
                 modifier = Modifier
                     .layoutId("wishlist_button")
-                    .width(66.dp)
+                    .width(70.dp)
                     .height(20.dp),
                 onClick = { onAddToWishlistSelected(book) } ,
                 contentPadding = PaddingValues(2.dp) ,
@@ -198,7 +205,7 @@ fun BookDescriptionTextSection(
             text = title ,
             style = BookAppTypography.labelMedium ,
             fontWeight = FontWeight.Bold,
-            fontSize = 14.sp ,
+            fontSize = 16.sp ,
             maxLines = 2 ,
             overflow = TextOverflow.Ellipsis
         )
@@ -208,7 +215,7 @@ fun BookDescriptionTextSection(
             color = Color(cardColor).getDarkerColor(0.3f) ,
             style = BookAppTypography.labelMedium ,
             fontWeight = FontWeight.Bold,
-            fontSize = 8.sp ,
+            fontSize = 10.sp ,
             maxLines = 1 ,
             overflow = TextOverflow.Ellipsis
         )
@@ -218,7 +225,7 @@ fun BookDescriptionTextSection(
             color = Color(cardColor).getDarkerColor(0.3f) ,
             style = BookAppTypography.labelMedium ,
             fontWeight = FontWeight.Bold,
-            fontSize = 8.sp ,
+            fontSize = 10.sp ,
             maxLines = 1 ,
             overflow = TextOverflow.Ellipsis
         )
@@ -227,7 +234,7 @@ fun BookDescriptionTextSection(
             text = "$pages pgs",
             style = BookAppTypography.labelSmall ,
             fontWeight = FontWeight.Bold,
-            fontSize = 6.sp
+            fontSize = 8.sp
         )
     }
 }

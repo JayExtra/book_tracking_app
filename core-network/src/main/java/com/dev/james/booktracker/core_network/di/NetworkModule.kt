@@ -41,9 +41,9 @@ object NetworkModule {
         apiKeyInterceptor: ApiKeyInterceptor
     ) : OkHttpClient {
         val client = OkHttpClient.Builder()
-            .connectTimeout(5 , TimeUnit.SECONDS)
-            .readTimeout(5 , TimeUnit.SECONDS)
-            .writeTimeout(5 , TimeUnit.SECONDS)
+            .connectTimeout(10 , TimeUnit.SECONDS)
+            .readTimeout(10 , TimeUnit.SECONDS)
+            .writeTimeout(10 , TimeUnit.SECONDS)
             .addInterceptor(apiKeyInterceptor)
 
         if(BuildConfig.DEBUG) client.addInterceptor(loggingInterceptor)

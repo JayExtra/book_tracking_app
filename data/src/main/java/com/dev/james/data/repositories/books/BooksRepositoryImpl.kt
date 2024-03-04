@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 class BooksRepositoryImpl
@@ -63,6 +64,10 @@ class BooksRepositoryImpl
                         )
                     )
                 }
+            }
+            catch (e : SocketTimeoutException){
+                Timber.tag(TAG).e("getBookByCategory Error => %s", e.toString())
+                emit(Resource.Error(message = "Oops! The server took to long to respond. Please try again."))
             }
         } else {
             emit(
@@ -165,6 +170,9 @@ class BooksRepositoryImpl
             } catch (e: HttpException) {
                 Timber.tag(TAG).e("getBookByCategory Error => %s", e.toString())
                 Resource.Error(message = "Oops , seems the problem is in our side. Please be patient as we try to fix.")
+            } catch (e : SocketTimeoutException){
+                Timber.tag(TAG).e("getBookByCategory Error => %s", e.toString())
+                Resource.Error(message = "Oops! The server took to long to respond. Please try again.")
             }
         }else {
             Timber.tag(TAG).d("Books => %s", "Please reconnect your device network and try again." )
