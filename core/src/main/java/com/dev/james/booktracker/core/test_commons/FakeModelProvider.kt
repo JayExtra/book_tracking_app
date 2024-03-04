@@ -19,7 +19,8 @@ fun getTestBookEntity() = BookEntity(
     bookPagesCount = 122,
     publisher = "somepublisher",
     publishedDate = "12/10/2023",
-    //currentChapter = 11,
+    category = "action",
+    bookDescription = "some description",
     chapters = 22,
     //currentChapterTitle = "Some chapter title"
 )

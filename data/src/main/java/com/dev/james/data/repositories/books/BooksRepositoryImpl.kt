@@ -1,13 +1,13 @@
 package com.dev.james.data.repositories.books
 
 import android.database.sqlite.SQLiteException
-import androidx.datastore.preferences.core.Preferences
+import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.mappers.mapToBookDomainObject
 import com.dev.james.booktracker.core.common_models.mappers.mapToBookEntity
+import com.dev.james.booktracker.core.common_models.mappers.mapToDomainObject
 import com.dev.james.domain.utilities.ConnectivityManager
 import com.dev.james.booktracker.core.utilities.Resource
-import com.dev.james.booktracker.core.entities.BookEntity
 import com.dev.james.booktracker.core.dto.BookVolumeDto
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStorePreferenceKeys
@@ -24,6 +24,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 class BooksRepositoryImpl
@@ -50,6 +51,7 @@ class BooksRepositoryImpl
                     withContext(dispatcher) {
                         booksApiDataSource.getQueriedBook(query = bookTitle, author = bookAuthor)
                     }
+                Timber.tag(TAG).d("Books => %s", booksFromApi.toString())
                 emit(Resource.Success(data = booksFromApi))
 
             } catch (e: HttpException) {
@@ -62,6 +64,10 @@ class BooksRepositoryImpl
                         )
                     )
                 }
+            }
+            catch (e : SocketTimeoutException){
+                Timber.tag(TAG).e("getBookByCategory Error => %s", e.toString())
+                emit(Resource.Error(message = "Oops! The server took to long to respond. Please try again."))
             }
         } else {
             emit(
@@ -150,6 +156,27 @@ class BooksRepositoryImpl
         }catch (e : IOException){
             Timber.e("Could not unset active book into datastore : ${e.message}")
             onFailure("Could not get active book into datastore : ${e.message}")
+        }
+    }
+
+    override suspend fun getBookByCategory(category: String): Resource<List<Book>> {
+        return if(connectivityManager.getNetworkStatus()){
+            try {
+                val query = "subject:$category"
+                val booksFromApi = booksApiDataSource.queryByCategory(query)
+
+                Timber.tag(TAG).d("Books => %s", booksFromApi.toString())
+                Resource.Success(data = booksFromApi.items?.map { it.mapToDomainObject() })
+            } catch (e: HttpException) {
+                Timber.tag(TAG).e("getBookByCategory Error => %s", e.toString())
+                Resource.Error(message = "Oops , seems the problem is in our side. Please be patient as we try to fix.")
+            } catch (e : SocketTimeoutException){
+                Timber.tag(TAG).e("getBookByCategory Error => %s", e.toString())
+                Resource.Error(message = "Oops! The server took to long to respond. Please try again.")
+            }
+        }else {
+            Timber.tag(TAG).d("Books => %s", "Please reconnect your device network and try again." )
+            Resource.Error(message = "Please reconnect your device network and try again.")
         }
     }
 }

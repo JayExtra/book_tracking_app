@@ -1,6 +1,5 @@
 package com.dev.james.booktracker.compose_ui.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,17 +18,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dev.james.booktracker.compose_ui.R
 import com.dev.james.booktracker.compose_ui.ui.enums.Orientation
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.Book
-import com.dev.james.booktracker.core.utilities.convertToAuthorsString
+import com.dev.james.booktracker.core.utilities.convertToOrganisedString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +79,7 @@ fun BookCardComponent(
                         )
                         Spacer(modifier = Modifier.height(3.dp))
                         Text(
-                            text = book.bookAuthors?.convertToAuthorsString() ?: "No author found",
+                            text = book.bookAuthors?.convertToOrganisedString() ?: "No author found",
                             style = BookAppTypography.labelSmall,
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Start,
@@ -120,7 +116,7 @@ fun BookCardComponent(
                         )
                         Spacer(modifier = Modifier.height(3.dp))
                         Text(
-                            text = book.bookAuthors?.convertToAuthorsString() ?: "No author found",
+                            text = book.bookAuthors?.convertToOrganisedString() ?: "No author found",
                             style = BookAppTypography.labelSmall,
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Start,

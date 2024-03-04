@@ -1,5 +1,6 @@
 package com.dev.james.domain.repository.home
 
+import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core.dto.BookVolumeDto
@@ -23,5 +24,7 @@ interface BooksRepository {
     suspend fun getActiveBookId(onSuccess: (String) -> Unit , onFailure: (String) -> Unit)
 
     suspend fun unsetActiveBook(onSuccess : (Boolean) -> Unit , onFailure : (String) -> Unit)
+
+    suspend fun getBookByCategory(category : String) : Resource<List<Book>>
 
 }

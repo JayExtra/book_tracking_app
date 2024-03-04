@@ -9,9 +9,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookSave
-import com.dev.james.booktracker.core.common_models.mappers.mapToBookUiObject
+import com.dev.james.booktracker.core.common_models.mappers.mapToDomainObject
 import com.dev.james.booktracker.core.utilities.Resource
-import com.dev.james.booktracker.core.utilities.convertToAuthorsString
+import com.dev.james.booktracker.core.utilities.convertToOrganisedString
 import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dsc.form_builder.FormState
@@ -93,15 +93,15 @@ class AddBookViewModel @Inject constructor(
                 transform = { it.toInt() },
                 validators = listOf(Validators.Required(message = "Please specify the number of chapters."))
             ),
-           /* TextFieldState(
-                name = "current chapter",
-                validators = listOf(Validators.Required(message = "Please specify the current chapter you are in."))
+            TextFieldState(
+                name = "description",
+                validators = listOf(Validators.Required(message = "Please give a small description of book."))
             ),
             TextFieldState(
-                name = "chapter title",
+                name = "category",
                 transform = { it.toInt() },
-                validators = listOf(Validators.Required(message = "Please specify the current chapter title."))
-            ),*/
+                validators = listOf(Validators.Required(message = "Please specify category of book"))
+            ),
             TextFieldState(
                 name = "pages_count",
                 validators = listOf(Validators.Required(message = "Please specify the number of pages in the book."))
@@ -118,10 +118,10 @@ class AddBookViewModel @Inject constructor(
 
     private val currentReadFormChaptersState: TextFieldState =
         currentReadFormState.getState("chapters")
-    /*private val currentReadFormCurrentChapter: TextFieldState =
-        currentReadFormState.getState("current chapter")
-    private val currentReadFormCurChaptTitleState: TextFieldState =
-        currentReadFormState.getState("chapter title")*/
+    private val currentReadFormCategory: TextFieldState =
+        currentReadFormState.getState("category")
+    private val currentReadFormDescription: TextFieldState =
+        currentReadFormState.getState("description")
 
     val bottomSheetSearchFieldState = FormState(
         fields = listOf(
@@ -223,8 +223,9 @@ class AddBookViewModel @Inject constructor(
                         val title = currentReadFormTitleFieldState.value
                         val pages = currentReadFormPagesFieldState.value
                         val chapters = currentReadFormChaptersState.value
-                       /* val currentChapter = currentReadFormCurrentChapter.value
-                        val chapterTitle = currentReadFormCurChaptTitleState.value*/
+                        val description = currentReadFormDescription.value
+                        val category = currentReadFormCategory.value
+
 
                         val bookId = if (_imageSelectorState.value.imageSelectedUri != Uri.EMPTY)
                             generateSecureUUID()
@@ -251,8 +252,8 @@ class AddBookViewModel @Inject constructor(
                             publishedDate = publishedDate ?: "n/a",
                             isUri = isUri,
                             chapters = chapters.toInt(),
-                            /*currentChapter = currentChapter.toInt(),
-                            currentChapterTitle = chapterTitle*/
+                            bookDescription = description ,
+                            category = category
                         )
 
                         saveBookToDb(bookSave)
@@ -284,6 +285,7 @@ class AddBookViewModel @Inject constructor(
     private fun saveBookToDb(bookSave: BookSave) = viewModelScope.launch {
         Timber.tag(TAG).d("Save action triggered")
         if (booksRepository.saveBookToDatabase(bookSave)) {
+            //we update this state for the Snackbar so that user can cancel save any time
             savedBookState.value = bookSave
 
             //set as currently active book
@@ -303,10 +305,7 @@ class AddBookViewModel @Inject constructor(
                     isSaving = true
                 )
             )
-            //for testing, if it does not work please remove
-           /* _addBookScreenUiEvents.send(
-                AddBookScreenUiEvents.HideSaveProgressBar
-            )*/
+
             saveProgressBarState = false
 
             Timber.tag(TAG).d("Book successfully added to database")
@@ -355,9 +354,14 @@ class AddBookViewModel @Inject constructor(
 
         currentReadFormTitleFieldState.change(book.bookTitle ?: "No title found")
         currentReadFormAuthorFieldState.change(
-            book.bookAuthors?.convertToAuthorsString() ?: "No author(s) found."
+            book.bookAuthors?.convertToOrganisedString() ?: "No author(s) found."
         )
         currentReadFormPagesFieldState.change(book.bookPagesCount.toString())
+
+        book.category?.convertToOrganisedString()?.let { currentReadFormCategory.change(it) }
+            ?: currentReadFormCategory.change("")
+
+        currentReadFormDescription.change( book.description ?: "No description found" )
         _selectedBookState.value = book
 
     }
@@ -394,7 +398,7 @@ class AddBookViewModel @Inject constructor(
                             if (!booksList.isNullOrEmpty()) {
                                 _googleBottomSheetSearchState.value =
                                     GoogleBottomSheetUiState.HasFetched(
-                                        booksList = booksList.map { bookDto -> bookDto.mapToBookUiObject() }
+                                        booksList = booksList.map { bookDto -> bookDto.mapToDomainObject() }
                                     )
                             } else {
                                 _googleBottomSheetSearchState.value = GoogleBottomSheetUiState

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id(Plugins.androidLibrary)
     id(Plugins.kotlinPlugin)
@@ -19,6 +21,11 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+
+        buildConfigField("String" , "GOOGLE_API_KEY" ,"\"${properties.getProperty("GOOGLE_API_KEY")}\"")
     }
 
     buildTypes {

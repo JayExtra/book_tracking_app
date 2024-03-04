@@ -16,7 +16,7 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.util.UUID
 
-fun <T> List<T>.convertToAuthorsString() : String {
+fun <T> List<T>.convertToOrganisedString() : String {
     return this.toString().drop(1).dropLast(1)
 }
 

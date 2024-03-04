@@ -7,4 +7,8 @@ interface BooksApiDataSource {
         query : String ,
         author : String
     ) : BookVolumeDto
+
+    suspend fun queryByCategory(
+        query : String
+    ) : BookVolumeDto
 }

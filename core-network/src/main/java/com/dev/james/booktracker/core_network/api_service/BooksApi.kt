@@ -12,4 +12,10 @@ interface BooksApi {
         @Query("inauthor") author : String
     ) : BookVolumeDto
 
+    @GET(VOLUME_ENDPOINT)
+    suspend fun queryByCategory(
+        @Query("q") query : String ,
+        @Query("maxResults") maxResult : Int
+    ) : BookVolumeDto
+
 }

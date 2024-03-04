@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
@@ -35,6 +37,8 @@ fun OutlinedTextFieldComponent(
     isSingleLine : Boolean = false,
     startingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
+    maxLines : Int = 1,
+    keyBoardType : KeyboardType = KeyboardType.Text,
     onTrailingIconClicked: () -> Unit = {},
     onTextChanged: (String) -> Unit = {}
 ) {
@@ -112,7 +116,11 @@ fun OutlinedTextFieldComponent(
                     }
                 }
 
-            }
+            } ,
+            maxLines = maxLines ,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyBoardType
+            )
         )
 
     }
