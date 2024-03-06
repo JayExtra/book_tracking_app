@@ -188,7 +188,7 @@ fun CurrentlyReadingSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = if(bookList.isEmpty()) Arrangement.Center else Arrangement.spacedBy(12.dp)
         ) {
             if(bookList.isEmpty()){
                 item {
@@ -198,19 +198,18 @@ fun CurrentlyReadingSection(
                             .wrapContentHeight()
                             .padding(6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally ,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.spacedBy(space = 5.dp , alignment = Alignment.CenterVertically)
                     ) {
                         Text(
-                            modifier = Modifier.width(150.dp) ,
-                            text = "No reading progress currently selected. Please add a book to start tracking your progress!" ,
+                            modifier = Modifier.width(200.dp) ,
+                            text = "There are no books you are currently reading. Proceed to add one?" ,
                             style = BookAppTypography.bodyMedium ,
                             fontSize = 12.sp ,
-                            maxLines = 2 ,
                             textAlign = TextAlign.Center
                         )
 
                         Button(
-                            modifier = Modifier.width(100.dp) ,
+                            modifier = Modifier.wrapContentWidth() ,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary
                             ),
@@ -233,37 +232,39 @@ fun CurrentlyReadingSection(
                         }
                     )
                 }
-            }
 
-
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .wrapContentWidth()
-                        .padding(start = 10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    FloatingActionButton(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        shape = CircleShape,
-                        elevation = FloatingActionButtonDefaults.elevation(
-                            defaultElevation = 0.dp
-                        ),
-                        onClick = { onAddMoreClicked() }
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .wrapContentWidth()
+                            .padding(start = 10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "")
+                        FloatingActionButton(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            shape = CircleShape,
+                            elevation = FloatingActionButtonDefaults.elevation(
+                                defaultElevation = 0.dp
+                            ),
+                            onClick = { onAddMoreClicked() }
+                        ) {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = "")
+                        }
+                        Text(
+                            modifier = Modifier.padding(top = 4.dp),
+                            text = "add more",
+                            style = BookAppTypography.labelSmall,
+                            textAlign = TextAlign.Center
+                        )
                     }
-                    Text(
-                        modifier = Modifier.padding(top = 4.dp),
-                        text = "add more",
-                        style = BookAppTypography.labelSmall,
-                        textAlign = TextAlign.Center
-                    )
-                }
 
+                }
             }
+
+
+
 
         }
     }
