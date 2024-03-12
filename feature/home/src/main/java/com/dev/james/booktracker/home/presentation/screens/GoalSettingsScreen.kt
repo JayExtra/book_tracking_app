@@ -24,10 +24,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +40,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
@@ -66,6 +69,8 @@ import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.home.R
 import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
+import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
+import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.home.presentation.forms.OverallGoalsForm
 import com.dev.james.booktracker.home.presentation.viewmodels.ImageSelectorUiState
 import com.dev.james.booktracker.home.presentation.viewmodels.ReadGoalsScreenViewModel
@@ -98,6 +103,7 @@ import java.io.File
 @Destination
 fun ReadGoalScreen(
     homeNavigator: HomeNavigator,
+    goalId : String? = null ,
     readGoalsScreenViewModel: ReadGoalsScreenViewModel = hiltViewModel()
 ) {
 
@@ -113,6 +119,8 @@ fun ReadGoalScreen(
     val specificGoalsFormState by remember { mutableStateOf(readGoalsScreenViewModel.specificGoalsFormState) }
 
     var shouldShowCameraScreen by remember { mutableStateOf(false) }
+
+    var showConfirmationDialog by remember { mutableStateOf(false) }
 
 
     val imageSelectorState = readGoalsScreenViewModel.imageSelectorUiState
@@ -215,8 +223,12 @@ fun ReadGoalScreen(
 
                         }
                     }
-                    is ReadGoalsScreenViewModel.ReadGoalsUiEvents.navigateToHome -> {
+                    is ReadGoalsScreenViewModel.ReadGoalsUiEvents.NavigateToHome -> {
                         homeNavigator.openHomeScreen()
+                    }
+
+                    is ReadGoalsScreenViewModel.ReadGoalsUiEvents.ShowGoToAddBookDialog -> {
+                        showConfirmationDialog = true
                     }
 
                     else -> {}
@@ -225,6 +237,18 @@ fun ReadGoalScreen(
 
     }
 
+    if(showConfirmationDialog){
+        SingleActionConfirmationPrompt(
+            title = "Great Job!",
+            body = "Congratulations! Your goal is set. Time to fuel your journey. What book will be your guide? Tap 'Add Book' to explore." ,
+            onAccept = {
+                homeNavigator.openAddBookScreen(
+                    previousDestination = PreviousScreenDestinations.SET_GOAL_SCREEN
+                )
+            } ,
+            confirmationText = "Add Book"
+        )
+    }
 
 
         BottomSheetScaffold(
@@ -290,6 +314,7 @@ fun ReadGoalScreen(
 
 
             StatelessReadGoalScreen(
+                showBackArrow = goalId != null,
                 currentReadFormState = currentReadFormState,
                 uiState = readGoalsScreenUiState.value,
                 overallGoalsFormState = overallGoalsFormState,
@@ -587,12 +612,16 @@ fun ReadGoalScreen(
                         if (supportedDays.contains(freqFieldState.value)) {
                             if (daysSelectedState.validate()) {
                                 readGoalsScreenViewModel.passMainScreenActions(
-                                    action = ReadGoalsScreenViewModel.ReadGoalsUiActions.SaveGoalToDatabase
+                                    action = ReadGoalsScreenViewModel.ReadGoalsUiActions.SaveGoalToDatabase(
+                                        isEdit = goalId != null
+                                    )
                                 )
                             }
                         } else {
                             readGoalsScreenViewModel.passMainScreenActions(
-                                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.SaveGoalToDatabase
+                                action = ReadGoalsScreenViewModel.ReadGoalsUiActions.SaveGoalToDatabase(
+                                    isEdit = goalId != null
+                                )
                             )
                         }
                     }
@@ -671,6 +700,7 @@ fun ReadGoalScreen(
 @Composable
 @Preview(name = "ReadGoalScreen", showBackground = true)
 fun StatelessReadGoalScreen(
+    showBackArrow : Boolean = false ,
     context: Context = LocalContext.current,
     currentReadFormState: FormState<TextFieldState> = FormState(fields = listOf()),
     overallGoalsFormState: FormState<BaseState<out Any>> = FormState(fields = listOf()),
@@ -695,6 +725,7 @@ fun StatelessReadGoalScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         StandardToolBar(
+            showBackArrow = showBackArrow ,
             /*navActions = {
                 //control visibility depending on where we are
                 if (uiState.currentPosition == 0) {

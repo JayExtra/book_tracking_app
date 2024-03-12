@@ -10,7 +10,6 @@ import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core.utilities.calculateTimeToLong
 import com.dev.james.booktracker.core.utilities.generateRandomId
 import com.dev.james.booktracker.core.utilities.prepareGoalString
-import com.dev.james.booktracker.core.dto.BookDto
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.home.GoalsRepository
 import com.dsc.form_builder.ChoiceState
@@ -345,7 +344,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
                 )
 
                 saveUserGoals(
-                    goal
+                    goal ,
+                    action.isEdit
                 )
             }
 
@@ -400,7 +400,8 @@ class ReadGoalsScreenViewModel @Inject constructor(
     }
 
     private fun saveUserGoals(
-        goal: Goal
+        goal: Goal ,
+        isEdit: Boolean
     ) = viewModelScope.launch {
         Timber.tag(TAG).d("Saving user goals in db")
         //save user goals
@@ -408,10 +409,17 @@ class ReadGoalsScreenViewModel @Inject constructor(
         when (val result = goalsRepository.saveGoals(goal)) {
             is Resource.Success -> {
                 if (result.data == true) {
+
                     Timber.tag(TAG).d("goals successfully added to database")
-                    _readGoalsScreenUiEvents.send(
-                        ReadGoalsUiEvents.navigateToHome
-                    )
+                    if(isEdit){
+                        _readGoalsScreenUiEvents.send(
+                            ReadGoalsUiEvents.NavigateToHome
+                        )
+                    }else{
+                        _readGoalsScreenUiEvents.send(
+                            ReadGoalsUiEvents.ShowGoToAddBookDialog
+                        )
+                    }
                 }
             }
 
@@ -553,12 +561,14 @@ class ReadGoalsScreenViewModel @Inject constructor(
         data class MovePrevious(val currentPosition: Int) : ReadGoalsUiActions()
         object UndoBookSave : ReadGoalsUiActions()
 
-        object SaveGoalToDatabase : ReadGoalsUiActions()
+        data class SaveGoalToDatabase(val isEdit : Boolean) : ReadGoalsUiActions()
     }
 
     sealed class ReadGoalsUiEvents {
         data class ShowSnackBar(val message: String, val isSaving: Boolean) : ReadGoalsUiEvents()
-        object navigateToHome : ReadGoalsUiEvents()
+        object NavigateToHome : ReadGoalsUiEvents()
+
+        object ShowGoToAddBookDialog : ReadGoalsUiEvents()
 
     }
 
@@ -590,14 +600,3 @@ data class ImageSelectorUiState(
     val isError: Boolean = false
 )
 
-fun BookDto.mapToBookUiObject(): Book {
-    return Book(
-        bookId = id,
-        bookImage = volumeInfo?.image_links?.thumbnail,
-        bookAuthors = volumeInfo?.authors,
-        bookTitle = volumeInfo?.title,
-        bookPagesCount = volumeInfo?.pageCount,
-        publishedDate = volumeInfo?.published_date,
-        publisher = volumeInfo?.publisher
-    )
-}
