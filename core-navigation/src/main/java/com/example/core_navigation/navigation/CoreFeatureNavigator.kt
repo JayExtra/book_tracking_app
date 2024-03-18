@@ -151,7 +151,15 @@ class CoreFeatureNavigator(
 
     override fun backToHomeDestination() {
         //navigate to home from add book
-        navController.popBackStack()
+        navController.navigate(
+            HomeScreenDestination within navGraph
+        ) {
+            popUpTo(
+                route = NavGraphs.root
+            ){
+                inclusive = true
+            }
+        }
     }
 
     override fun backToLibraryScreen() {

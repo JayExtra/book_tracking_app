@@ -209,9 +209,7 @@ fun AddBookScreen(
                                         addBookViewModel.passUiAction(
                                             action = CurrentReadFormActions.Navigate
                                         )
-
                                     }
-
                                     SnackbarResult.ActionPerformed -> {
                                         addBookViewModel.passUiAction(
                                             CurrentReadFormActions
@@ -372,7 +370,6 @@ fun AddBookScreen(
                         PreviousScreenDestinations.LIBRARY_SCREEN -> {
                             addBookScreenNavigator.backToLibraryScreen()
                         }
-
                         else -> {
                             Timber.tag("AddBookScreen").d("No naviation event received!")
                         }

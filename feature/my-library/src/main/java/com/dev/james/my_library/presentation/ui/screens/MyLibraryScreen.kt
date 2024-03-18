@@ -1,6 +1,7 @@
 package com.dev.james.my_library.presentation.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -340,49 +341,89 @@ fun SuggestedForYouSection(
                         strokeCap = StrokeCap.Round
                     )
                 }
-            }
-
-            if(hasError){
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(8.dp) ,
-                        horizontalAlignment = Alignment.CenterHorizontally ,
-                        verticalArrangement = Arrangement.spacedBy(6.dp , Alignment.CenterVertically)
-                    ) {
-                        Image(
+            } else {
+                if(hasError){
+                    item {
+                        Column(
                             modifier = Modifier
-                                .width(70.dp)
-                                .height(70.dp) ,
-                            painter = painterResource(id = R.drawable.ic_no_internet),
-                            contentDescription = "" ,
-                            colorFilter = ColorFilter.tint(Color.Gray)
-                        )
-                        Text(modifier = Modifier.fillMaxWidth(), text = errorMessage , textAlign = TextAlign.Center , style = BookAppTypography.labelMedium)
-                        Button(
-                            modifier = Modifier.width(100.dp) ,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
-                            ),
-                            onClick = { retry() }
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(8.dp) ,
+                            horizontalAlignment = Alignment.CenterHorizontally ,
+                            verticalArrangement = Arrangement.spacedBy(6.dp , Alignment.CenterVertically)
                         ) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = "" , tint = MaterialTheme.colorScheme.onBackground )
-                            Text(modifier = Modifier.padding(start = 3.dp),text = "Retry" , style = BookAppTypography.labelMedium , fontSize = 10.sp)
+                            Image(
+                                modifier = Modifier
+                                    .width(70.dp)
+                                    .height(70.dp) ,
+                                painter = painterResource(id = R.drawable.ic_no_internet),
+                                contentDescription = "" ,
+                                colorFilter = ColorFilter.tint(Color.Gray)
+                            )
+                            Text(modifier = Modifier.fillMaxWidth(), text = errorMessage , textAlign = TextAlign.Center , style = BookAppTypography.labelMedium)
+                            Button(
+                                modifier = Modifier.width(100.dp) ,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary
+                                ),
+                                onClick = { retry() }
+                            ) {
+                                Icon(imageVector = Icons.Default.Refresh, contentDescription = "" , tint = MaterialTheme.colorScheme.onBackground )
+                                Text(modifier = Modifier.padding(start = 3.dp),text = "Retry" , style = BookAppTypography.labelMedium , fontSize = 10.sp)
+                            }
                         }
                     }
                 }
-            }else {
-                items(items = bookList) { book ->
-                    if (book.id.isNotEmpty()){
-                        SuggestedBookCardComponent(
-                            cardColor = colorsList.random() ,
-                            book = book ,
-                            onAddToWishlistSelected = { bookDets ->
-                                onAddToWishlist(bookDets.id)
+                if(bookList.isEmpty()){
+
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
+                            horizontalAlignment = Alignment.CenterHorizontally ,
+                            verticalArrangement = Arrangement.spacedBy(6.dp , Alignment.CenterVertically)
+                        ) {
+                            /* Image(
+                                 modifier = Modifier
+                                     .width(70.dp)
+                                     .height(70.dp) ,
+                                 painter = painterResource(id = R.drawable.ic_no_internet),
+                                 contentDescription = "" ,
+                                 colorFilter = ColorFilter.tint(Color.Gray)
+                             )*/
+                            Text(
+                                modifier = Modifier.width(250.dp),
+                                text = "Oops! We could not get any suggestions at the moment" ,
+                                textAlign = TextAlign.Center ,
+                                style = BookAppTypography.labelMedium ,
+                                maxLines = 2
+                            )
+                            Button(
+                                modifier = Modifier.width(110.dp) ,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary
+                                ),
+                                onClick = { retry() }
+                            ) {
+                                Icon(imageVector = Icons.Default.Refresh, contentDescription = "" , tint = MaterialTheme.colorScheme.onBackground )
+                                Text(modifier = Modifier.padding(start = 3.dp),text = "refresh" , style = BookAppTypography.labelMedium , fontSize = 10.sp)
                             }
-                        )
+                        }
+                    }
+
+
+                }else{
+                    items(items = bookList) { book ->
+                        if (book.id.isNotEmpty()){
+                            SuggestedBookCardComponent(
+                                cardColor = colorsList.random() ,
+                                book = book ,
+                                onAddToWishlistSelected = { bookDets ->
+                                    onAddToWishlist(bookDets.id)
+                                }
+                            )
+                        }
                     }
                 }
             }
