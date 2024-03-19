@@ -3,6 +3,7 @@ package com.dev.james.my_library.presentation.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -11,6 +12,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -18,6 +21,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
 import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
@@ -428,6 +435,140 @@ fun SuggestedForYouSection(
                 }
             }
 
+        }
+    }
+
+}
+
+@Composable
+@Preview(showBackground = true)
+fun BookListSection(
+    onFilterList : () -> Unit = {} ,
+    onCreateNewWishlist : () -> Unit = {}
+){
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight() ,
+        horizontalAlignment = Alignment.CenterHorizontally ,
+        verticalArrangement = Arrangement.spacedBy(space = 8.dp , alignment = Alignment.CenterVertically )
+        
+    ) {
+        
+        Row(
+            modifier = Modifier.fillMaxWidth() ,
+            verticalAlignment = Alignment.CenterVertically ,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(
+                modifier = Modifier.weight(0.5f),
+                text = "My reading list" ,
+                style = BookAppTypography.labelLarge
+            )
+
+            IconButton(
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.Transparent
+                ),
+                onClick = { onCreateNewWishlist() }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "add icon" ,
+                    tint = MaterialTheme.colorScheme.secondary
+                )
+
+            }
+
+            IconButton(
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.Transparent
+                ),
+                onClick = { onFilterList() }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_filter),
+                    contentDescription = "add icon" ,
+                    tint = MaterialTheme.colorScheme.secondary
+                )
+
+            }
+        }
+
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth() ,
+            contentPadding = PaddingValues(8.dp) ,
+            verticalArrangement = Arrangement.Top ,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+
+        }
+    }
+    
+}
+
+@Composable
+@Preview(showBackground = true)
+fun ReadingListItem(
+    modifier: Modifier = Modifier ,
+    isFavourite : Boolean = false ,
+    onStarred : (String) -> Unit = {}
+){
+    Row(
+        modifier = modifier.padding(4.dp)
+    ) {
+        CoilImageComponent(
+            modifier = Modifier
+                .width(57.dp)
+                .height(61.dp)
+        )
+        
+        Column(
+            modifier = Modifier.weight(0.5f)
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth() ,
+                text = "My reading list title" ,
+                style = BookAppTypography.labelMedium ,
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth() ,
+                text = "0/0 books read" ,
+                style = BookAppTypography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth() ,
+                text = "created 01/01/2024" ,
+                style = BookAppTypography.labelSmall ,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+            
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth() ,
+               // trackColor = Color.Gray ,
+                strokeCap = StrokeCap.Round ,
+                progress = 0.5f
+            )
+
+        }
+        
+        val icon = if(isFavourite) Icons.Filled.Star else Icons.Outlined.Star
+
+        IconButton(
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = Color.Transparent
+            ),
+            onClick = { onStarred("") }
+        ) {
+            Icon(
+                modifier = Modifier.size(28.dp),
+                imageVector = icon,
+                contentDescription = "" ,
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 
