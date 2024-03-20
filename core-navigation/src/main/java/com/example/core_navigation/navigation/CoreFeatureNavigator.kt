@@ -1,7 +1,6 @@
 package com.example.core_navigation.navigation
 
 import androidx.navigation.NavController
-import androidx.navigation.navOptions
 import com.dev.james.achievements.presentation.navigation.AchievementsScreenNavigator
 import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
 import com.dev.james.book_tracking.presentation.ui.screens.destinations.TrackBookScreenDestination
@@ -19,7 +18,6 @@ import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPrefere
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
 import com.dev.james.my_library.presentation.navigation.MyLibraryScreenNavigator
 import com.dev.james.my_library.presentation.ui.screens.destinations.MyLibraryScreenDestination
-import com.example.core_navigation.navigation.NavGraphs
 import com.ramcosta.composedestinations.dynamic.within
 import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.navigation.popUpTo
@@ -67,9 +65,9 @@ class CoreFeatureNavigator(
         }
     }
 
-    override fun openReadGoalsScreen() {
+    override fun openReadGoalsScreen(goalId : String?) {
         navController.navigate(
-            ReadGoalScreenDestination within navGraph
+            ReadGoalScreenDestination(goalId = goalId) within navGraph
         )
     }
 
@@ -85,9 +83,9 @@ class CoreFeatureNavigator(
        )
     }
 
-    override fun openAddBookScreen() {
+    override fun openAddBookScreen(previousDestination: PreviousScreenDestinations) {
         navController.navigate(
-            AddBookScreenDestination(previousScreenDestinations = PreviousScreenDestinations.HOME_SCREEN) within navGraph
+            AddBookScreenDestination(previousScreenDestinations = previousDestination) within navGraph
         )
     }
 
@@ -153,7 +151,15 @@ class CoreFeatureNavigator(
 
     override fun backToHomeDestination() {
         //navigate to home from add book
-        navController.popBackStack()
+        navController.navigate(
+            HomeScreenDestination within navGraph
+        ) {
+            popUpTo(
+                route = NavGraphs.root
+            ){
+                inclusive = true
+            }
+        }
     }
 
     override fun backToLibraryScreen() {

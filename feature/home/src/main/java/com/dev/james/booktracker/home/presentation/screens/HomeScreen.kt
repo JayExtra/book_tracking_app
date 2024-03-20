@@ -47,11 +47,17 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextIndent
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -93,16 +99,15 @@ fun HomeScreen(
 
     val context = LocalContext.current
 
-    LaunchedEffect(key1 = true ){
+    LaunchedEffect(key1 = true) {
         homeScreenViewModel.fetchData()
     }
 
     val homeScreenState = homeScreenViewModel.homeScreenUiState.collectAsStateWithLifecycle()
     val homeScreeEvents = homeScreenViewModel.homeScreenUiEvent.collectAsStateWithLifecycle(
-        initialValue = HomeScreenViewModel.HomeScreenUiEvent.NoEvent ,
+        initialValue = HomeScreenViewModel.HomeScreenUiEvent.NoEvent,
         lifecycleOwner = LocalLifecycleOwner.current
     )
-
 
 
     var isGrid by rememberSaveable {
@@ -136,7 +141,7 @@ fun HomeScreen(
         mutableStateOf("")
     }
 
-    if(isExpandBottomSheet) {
+    if (isExpandBottomSheet) {
         Toast.makeText(context, "Expand bottom sheet", Toast.LENGTH_SHORT).show()
 
         if (checkPermission(context)) {
@@ -147,7 +152,6 @@ fun HomeScreen(
             storagePermissionDialogRationaleState.show()
         }
     }
-
 
 
     val requestPermmisionLauncher = rememberLauncherForActivityResult(
@@ -161,16 +165,18 @@ fun HomeScreen(
         }
     }
 
-    when(val event = homeScreeEvents.value){
+    when (val event = homeScreeEvents.value) {
         is HomeScreenViewModel.HomeScreenUiEvent.ShowStreakResetDialog -> {
             //show streak reset dialog
             streakDialogMessage = event.message
             streakResetDialogState.show()
 
         }
+
         is HomeScreenViewModel.HomeScreenUiEvent.NoEvent -> {
 
         }
+
         else -> {}
     }
 
@@ -249,7 +255,7 @@ fun HomeScreen(
                 //call our google bottom sheet here
                 PdfListBottomSheetContent(
                     isGrid = isGrid,
-                    isExpanded = sheetState.currentValue == SheetValue.Expanded ,
+                    isExpanded = sheetState.currentValue == SheetValue.Expanded,
                     onPdfBookSelected = { book ->
                         //add pdf to db
                     }
@@ -262,16 +268,20 @@ fun HomeScreen(
             homeScreenState = homeScreenState.value,
             onAddButtonClick = {
                 // Toast.makeText(context , "add button clicked", Toast.LENGTH_SHORT).show()
-                homeNavigator.openReadGoalsScreen()
+                homeNavigator.openReadGoalsScreen(
+                    goalId = null
+                )
             },
             onContinueBtnClicked = { bookId ->
-                homeNavigator.openTrackingScreen(bookId , PreviousScreenDestinations.HOME_SCREEN)
+                homeNavigator.openTrackingScreen(bookId, PreviousScreenDestinations.HOME_SCREEN)
             },
             onProceedClicked = {
 
-               //open dialog
+                //open dialog
                 // /*pdfOrPhysicalDialogState.show()*/
-                homeNavigator.openAddBookScreen()
+                homeNavigator.openAddBookScreen(
+                    previousDestination = PreviousScreenDestinations.HOME_SCREEN
+                )
 
                 /*
                 //check if storage permission has been granted
@@ -285,17 +295,17 @@ fun HomeScreen(
 
                   */
 
-           /*     if(storagePermissionState.status.isGranted){*/
-           /*         coroutineScope.launch {*/
-           /*             sheetState.expand()*/
-           /*         }*/
-           /*     }else{*/
-           /*         if(storagePermissionState.status.shouldShowRationale){*/
-           /*             storagePermissionDialogRationaleState.show()*/
-           /*         }else {*/
-           /*             storagePermissionState.launchPermissionRequest()*/
-           /*         }*/
-           /*     }*/
+                /*     if(storagePermissionState.status.isGranted){*/
+                /*         coroutineScope.launch {*/
+                /*             sheetState.expand()*/
+                /*         }*/
+                /*     }else{*/
+                /*         if(storagePermissionState.status.shouldShowRationale){*/
+                /*             storagePermissionDialogRationaleState.show()*/
+                /*         }else {*/
+                /*             storagePermissionState.launchPermissionRequest()*/
+                /*         }*/
+                /*     }*/
                 /*when {
                      storagePermissionState.allPermissionsGranted -> {
                         coroutineScope.launch {
@@ -352,7 +362,12 @@ fun HomeScreen(
                         val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
                         intent.addCategory("android.intent.category.DEFAULT")
                         intent.data =
-                            Uri.parse(String.format("package:%s", context.applicationContext.packageName))
+                            Uri.parse(
+                                String.format(
+                                    "package:%s",
+                                    context.applicationContext.packageName
+                                )
+                            )
                         context.startActivity(intent)
                     } else {
 
@@ -371,9 +386,9 @@ fun HomeScreen(
 
     // pdf or physical book dialog
     MaterialDialog(
-        dialogState = pdfOrPhysicalDialogState ,
+        dialogState = pdfOrPhysicalDialogState,
         backgroundColor = MaterialTheme.colorScheme.background,
-        shape = RoundedCornerShape(10.dp) ,
+        shape = RoundedCornerShape(10.dp),
         elevation = 5.dp
     ) {
         Column(
@@ -381,7 +396,7 @@ fun HomeScreen(
                 .padding(8.dp)
                 .fillMaxWidth()
                 .height(250.dp),
-            horizontalAlignment = Alignment.CenterHorizontally ,
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Box(
@@ -390,14 +405,18 @@ fun HomeScreen(
                     .padding(bottom = 4.dp, top = 2.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "Start reading a book." , style = BookAppTypography.headlineMedium , fontWeight = FontWeight.Bold)
+                Text(
+                    text = "Start reading a book.",
+                    style = BookAppTypography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 4.dp, end = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween ,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
@@ -407,7 +426,7 @@ fun HomeScreen(
                         .wrapContentHeight()
                     //.border(width = 3.dp, color = MaterialTheme.colorScheme.primary)
                     ,
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) ,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                     onClick = {
                         isExpandBottomSheet = true
@@ -423,9 +442,9 @@ fun HomeScreen(
                         Icon(
                             modifier = Modifier
                                 .height(90.dp)
-                                .width(90.dp) ,
+                                .width(90.dp),
                             painter = painterResource(id = com.dev.james.booktracker.home.R.drawable.pdf_icon),
-                            contentDescription = "pdf icon" ,
+                            contentDescription = "pdf icon",
                             tint = MaterialTheme.colorScheme.secondary
                         )
                     }
@@ -435,7 +454,7 @@ fun HomeScreen(
                             .padding(4.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Pdf book" , style = BookAppTypography.labelMedium)
+                        Text(text = "Pdf book", style = BookAppTypography.labelMedium)
                     }
                 }
 
@@ -443,12 +462,14 @@ fun HomeScreen(
                     modifier = Modifier
                         .width(100.dp)
                         .wrapContentHeight()
-                        //.border(width = 3.dp, color = MaterialTheme.colorScheme.primary)
-                            ,
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) ,
+                    //.border(width = 3.dp, color = MaterialTheme.colorScheme.primary)
+                    ,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                     onClick = {
-                        homeNavigator.openAddBookScreen()
+                        homeNavigator.openAddBookScreen(
+                            previousDestination = PreviousScreenDestinations.HOME_SCREEN
+                        )
                         pdfOrPhysicalDialogState.hide()
                     }
                 ) {
@@ -461,9 +482,9 @@ fun HomeScreen(
                         Icon(
                             modifier = Modifier
                                 .height(90.dp)
-                                .width(90.dp) ,
+                                .width(90.dp),
                             painter = painterResource(id = com.dev.james.booktracker.home.R.drawable.baseline_book_24),
-                            contentDescription = "book icon" ,
+                            contentDescription = "book icon",
                             tint = MaterialTheme.colorScheme.secondary
                         )
                     }
@@ -473,7 +494,7 @@ fun HomeScreen(
                             .padding(4.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "Physical book" , style = BookAppTypography.labelMedium)
+                        Text(text = "Physical book", style = BookAppTypography.labelMedium)
                     }
                 }
             }
@@ -481,14 +502,14 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Box(
-                modifier = Modifier.fillMaxWidth() ,
+                modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 RoundedBrownButton(
                     modifier = Modifier.width(100.dp),
-                    label = "Dismiss" ,
-                    textColor = MaterialTheme.colorScheme.onPrimary ,
-                    color = MaterialTheme.colorScheme.primary ,
+                    label = "Dismiss",
+                    textColor = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     onClick = {
                         pdfOrPhysicalDialogState.hide()
                     }
@@ -499,39 +520,38 @@ fun HomeScreen(
     }
 
     MaterialDialog(
-        dialogState = streakResetDialogState ,
+        dialogState = streakResetDialogState,
         backgroundColor = MaterialTheme.colorScheme.background,
-        shape = RoundedCornerShape(10.dp) ,
+        shape = RoundedCornerShape(10.dp),
         elevation = 5.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .padding(8.dp)
-            ,
-            verticalArrangement = Arrangement.Center ,
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp) ,
+                    .height(100.dp),
                 contentAlignment = Alignment.Center
-            ){
+            ) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = streakDialogMessage ,
-                    style = BookAppTypography.bodyMedium ,
+                    text = streakDialogMessage,
+                    style = BookAppTypography.bodyMedium,
                     fontSize = 18.sp
                 )
             }
             Spacer(modifier = Modifier.height(6.dp))
             RoundedBrownButton(
                 modifier = Modifier.width(100.dp),
-                label = "Dismiss" ,
-                textColor = MaterialTheme.colorScheme.onPrimary ,
-                color = MaterialTheme.colorScheme.primary ,
+                label = "Dismiss",
+                textColor = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 onClick = {
                     streakResetDialogState.hide()
                 }
@@ -541,14 +561,16 @@ fun HomeScreen(
     }
 
 
-
 }
 
-fun checkPermission(context: Context) : Boolean{
-    return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+fun checkPermission(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         Environment.isExternalStorageManager()
     } else {
-        ContextCompat.checkSelfPermission(context , Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
     }
 }
 
@@ -559,7 +581,7 @@ fun checkPermission(context: Context) : Boolean{
 fun StatelessHomeScreen(
     homeScreenState: HomeScreenViewModel.HomeScreenUiState = HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData(
         BookProgressData(),
-        GoalProgressData() ,
+        GoalProgressData(),
         0
     ),
     context: Context = LocalContext.current,
@@ -589,40 +611,17 @@ fun StatelessHomeScreen(
 
             when (homeScreenState) {
                 is HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData -> {
-                    Timber.tag("HomeScreen").d("HomeScreen: book progress data=> ${homeScreenState.bookProgressData} , goal progress data=> ${homeScreenState.goalProgressData}")
+                    Timber.tag("HomeScreen")
+                        .d("HomeScreen: book progress data=> ${homeScreenState.bookProgressData} , goal progress data=> ${homeScreenState.goalProgressData}")
                     if (homeScreenState.bookProgressData.bookId.isBlank() && homeScreenState.goalProgressData.goalId.isBlank()) {
-                        EmptyAnimationSection(
-                            animation = LottieCompositionSpec.RawRes(R.raw.shake_a_empty_box),
-                            shouldShow = true,
-                            message = "No goals currently set. Click the button below to set a reading goal."
+
+                        NoDataRecordedDialog(
+                            onAdd = {
+                                onAddButtonClick()
+                            },
+                            onDismiss = { }
                         )
 
-                        ElevatedButton(
-                            onClick = { onAddButtonClick() },
-                            shape = BookAppShapes.medium,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer
-                            ),
-                            contentPadding = PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 8.dp,
-                                bottom = 8.dp
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add button icon",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-
-                            Text(
-                                text = "Add goals and current read",
-                                style = BookAppTypography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-
-                        }
                     } else {
 
                         /*Toast.makeText(
@@ -648,6 +647,8 @@ fun StatelessHomeScreen(
                             }
                         )
                         Spacer(modifier = Modifier.height(10.dp))
+                        Timber.tag("HomeScreen")
+                            .d("goal id : ${homeScreenState.goalProgressData.goalId}")
 
                         if (homeScreenState.goalProgressData.goalId.isNotBlank()) {
 
@@ -660,11 +661,11 @@ fun StatelessHomeScreen(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             MyGoalsCardComponent(
-                                goalInfo = homeScreenState.goalProgressData.goalInfo ,
+                                goalInfo = homeScreenState.goalProgressData.goalInfo,
                                 onEditGoalClicked = {
-                                   //navigate to edit goal screen
-                                } ,
-                                graphData = homeScreenState.goalProgressData.weeklyLogData ,
+                                    //navigate to edit goal screen
+                                },
+                                graphData = homeScreenState.goalProgressData.weeklyLogData,
                                 target = homeScreenState.goalProgressData.goalTime
                             )
                         }
@@ -709,11 +710,93 @@ fun StatelessHomeScreen(
 }
 
 @Composable
-fun ProgressComponent(modifier: Modifier = Modifier){
+fun NoDataRecordedDialog(
+    onDismiss: () -> Unit = {},
+    onAdd: () -> Unit = {}
+) {
+    Dialog(
+        onDismissRequest = { onDismiss() })
+    {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(
+                    space = 10.dp,
+                    alignment = Alignment.CenterVertically
+                ),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val bullet = "\u2022"
+                val bodyMessage = listOf(
+                    "Set some goals: What do you want to achieve with this app? Setting goals will help you stay motivated.",
+                    "Add books you're reading: Track your progress and see how far you've come!",
+                )
+                val paragraphStyle = ParagraphStyle(textIndent = TextIndent(restLine = 12.sp))
+                EmptyAnimationSection(
+                    animation = LottieCompositionSpec.RawRes(R.raw.shake_a_empty_box),
+                    shouldShow = true,
+                    message = "Congratulations on starting your reading journey! Let's start by setting a goal and adding a book to your virtual library. Don't worry, it's easy to get started! Here is why you need to do this:",
+                    body = buildAnnotatedString {
+                        bodyMessage.forEach {
+                            withStyle(style = paragraphStyle) {
+                                append(bullet)
+                                append("\t\t")
+                                append(it)
+                            }
+                        }
+                    }
+                )
 
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .height(100.dp) , contentAlignment = Alignment.Center) {
+                ElevatedButton(
+                    onClick = { onAdd() },
+                    shape = BookAppShapes.medium,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 8.dp,
+                        bottom = 8.dp
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add button icon",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+
+                    Text(
+                        text = "Add goals and current book",
+                        style = BookAppTypography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                }
+            }
+
+        }
+
+    }
+}
+
+@Composable
+fun ProgressComponent(modifier: Modifier = Modifier) {
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp), contentAlignment = Alignment.Center
+    ) {
         CircularProgressIndicator(
             color = MaterialTheme.colorScheme.primary
         )
@@ -728,7 +811,8 @@ fun EmptyAnimationSection(
     modifier: Modifier = Modifier,
     shouldShow: Boolean = false,
     animation: LottieCompositionSpec.RawRes,
-    message: String = ""
+    message: String = "" ,
+    body : AnnotatedString = buildAnnotatedString {  }
 ) {
 
     AnimatedVisibility(
@@ -784,7 +868,17 @@ fun EmptyAnimationSection(
                 text = message,
                 style = BookAppTypography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+            )
+            
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = body,
+                style = BookAppTypography.bodyMedium,
+                color = MaterialTheme.colorScheme.secondary,
+                textAlign = TextAlign.Start,
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp)
             )
 

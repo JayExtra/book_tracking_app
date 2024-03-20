@@ -209,9 +209,7 @@ fun AddBookScreen(
                                         addBookViewModel.passUiAction(
                                             action = CurrentReadFormActions.Navigate
                                         )
-
                                     }
-
                                     SnackbarResult.ActionPerformed -> {
                                         addBookViewModel.passUiAction(
                                             CurrentReadFormActions
@@ -242,6 +240,10 @@ fun AddBookScreen(
 
                             PreviousScreenDestinations.LIBRARY_SCREEN -> {
                                 addBookScreenNavigator.backToLibraryScreen()
+                            }
+
+                            PreviousScreenDestinations.SET_GOAL_SCREEN -> {
+                                addBookScreenNavigator.backToHomeDestination()
                             }
 
                             else -> {
@@ -357,6 +359,7 @@ fun AddBookScreen(
                 currentReadFormState = currentReadFormState,
                 imageSelectorState = imageSelectorState.value,
                 showHorizontalProgress = addBookViewModel.saveProgressBarState,
+                previousScreenDestination = previousScreenDestinations,
                 popBackStack = {
                     //navigate out of this screen
                     when (previousScreenDestinations) {
@@ -367,7 +370,6 @@ fun AddBookScreen(
                         PreviousScreenDestinations.LIBRARY_SCREEN -> {
                             addBookScreenNavigator.backToLibraryScreen()
                         }
-
                         else -> {
                             Timber.tag("AddBookScreen").d("No naviation event received!")
                         }
@@ -500,6 +502,7 @@ fun AddBookScreen(
 fun StatelessAddBookScreen(
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
+    previousScreenDestination: PreviousScreenDestinations ,
     showHorizontalProgress: Boolean = false,
     currentReadFormState: FormState<TextFieldState>,
     imageSelectorState: ImageSelectorUiState,
@@ -552,7 +555,7 @@ fun StatelessAddBookScreen(
                 //navigate back to home screen
                 popBackStack()
             },
-            showBackArrow = true
+            showBackArrow = previousScreenDestination != PreviousScreenDestinations.SET_GOAL_SCREEN
         )
         if (showHorizontalProgress) {
             LinearProgressIndicator(

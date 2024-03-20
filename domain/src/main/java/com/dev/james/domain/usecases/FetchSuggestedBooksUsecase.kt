@@ -22,7 +22,7 @@ class FetchSuggestedBooksUsecase @Inject constructor(
 
         val frequentCategory = getFrequentCategory() ?: getDefaultCategory()
 
-        Timber.tag(TAG).d("invoked!")
+        Timber.tag(TAG).d("invoked! ,  frequent category: $frequentCategory")
 
         when (val result = booksRepository.getBookByCategory(frequentCategory)) {
             is Resource.Success -> {
