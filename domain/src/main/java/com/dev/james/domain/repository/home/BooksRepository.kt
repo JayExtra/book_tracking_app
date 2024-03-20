@@ -27,4 +27,8 @@ interface BooksRepository {
 
     suspend fun getBookByCategory(category : String) : Resource<List<Book>>
 
+    suspend fun addBookToReadingList( readingListId : String , bookId : String) : Resource<String>
+
+    suspend fun removeBookFromReadingList(readingListId: String , bookId: String) : Resource<String>
+
 }

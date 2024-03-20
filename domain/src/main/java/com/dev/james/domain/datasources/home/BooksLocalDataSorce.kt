@@ -1,5 +1,6 @@
 package com.dev.james.domain.datasources.home
 import com.dev.james.booktracker.core.entities.BookEntity
+import com.dev.james.booktracker.core.entities.updates.ReadingListBookUpdate
 import kotlinx.coroutines.flow.Flow
 
 interface BooksLocalDataSource {
@@ -8,4 +9,6 @@ interface BooksLocalDataSource {
     fun getAllBooks() : Flow<List<BookEntity>>
 
     suspend fun getCachedBook(id : String) : BookEntity
+
+    suspend fun addBookToReadingList(readingListBookUpdate: ReadingListBookUpdate)
 }

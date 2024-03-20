@@ -41,7 +41,7 @@ class FetchActiveBookProgress @Inject constructor(
 
         return if (requiredBookId.trim().isEmpty()) {
             // this situation happens if you launch the app for the very first time
-            //however this will not work well if user already previously used the app , will replace this
+            //however this will not work well if user already previously used the app then uninstalled , will replace this
             // with api call to fetch last book being read.
             Timber.tag(TAG).d("book id is null or empty not fetching")
             BookProgressData()

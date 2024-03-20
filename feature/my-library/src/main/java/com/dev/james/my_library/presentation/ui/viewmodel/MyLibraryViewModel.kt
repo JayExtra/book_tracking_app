@@ -1,5 +1,8 @@
 package com.dev.james.my_library.presentation.ui.viewmodel
 
+import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,26 +10,38 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.LibraryBookData
+import com.dev.james.booktracker.core.common_models.ReadingListItem
+import com.dev.james.booktracker.core.common_models.ReadingLists
 import com.dev.james.booktracker.core.common_models.SuggestedBook
 import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.core.utilities.generateSecureUUID
+import com.dev.james.booktracker.core.utilities.getCurrentDateAndTime
+import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
 import com.dev.james.domain.usecases.FetchSuggestedBooksUsecase
 import com.dev.james.domain.usecases.GetBooksAndProgressUsecase
+import com.dev.james.domain.usecases.ReadingListUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.Calendar
 import javax.inject.Inject
+
 
 
 @HiltViewModel
 class MyLibraryViewModel @Inject constructor(
     private val getBooksAndProgressUsecase: GetBooksAndProgressUsecase ,
-    private val fetchSuggestedBooksUsecase: FetchSuggestedBooksUsecase
+    private val fetchSuggestedBooksUsecase: FetchSuggestedBooksUsecase ,
+    private val readingListUsecase: ReadingListUsecase ,
+    private val readingListsRepository: ReadingListsRepository
 ) : ViewModel() {
 
     companion object {
@@ -49,10 +64,16 @@ class MyLibraryViewModel @Inject constructor(
     var isFetchingSuggestions by mutableStateOf(value = false)
         private set
 
+    private var _readingLists : MutableStateFlow<List<ReadingLists>> = MutableStateFlow(listOf(
+        ReadingLists()
+    ))
+    val readingLists get() = _readingLists.asStateFlow()
+
     init {
         isLoading = true
         getBooksWithProgress()
         getSuggestedBooks()
+        fetchReadingList()
     }
 
     /*private fun populateScreen() = viewModelScope.launch {
@@ -61,6 +82,31 @@ class MyLibraryViewModel @Inject constructor(
 
     }
 */
+
+    fun fetchReadingList() = viewModelScope.launch {
+        readingListUsecase.fetch().collect {
+            _readingLists.value = it
+        }
+    }
+
+    @SuppressLint("NewApi")
+    fun createReadingList(image : String, name : String, description : String) = viewModelScope.launch {
+        val readingListItem = ReadingListItem(
+            id = generateSecureUUID() ,
+            name = name ,
+            description = description ,
+            image = image ,
+            readingList = emptyList() ,
+            date = getCurrentDateAndTime() ,
+            starred = false
+        )
+        readingListsRepository.createReadingList(readingListItem)
+    }
+
+    fun deleteReadingList(readingListId : String) = viewModelScope.launch{
+        readingListsRepository.deleteReadingList(readingListId)
+    }
+
    fun getSuggestedBooks() = viewModelScope.launch{
         isFetchingSuggestions = true
         suggestionsErrorMessage = ""

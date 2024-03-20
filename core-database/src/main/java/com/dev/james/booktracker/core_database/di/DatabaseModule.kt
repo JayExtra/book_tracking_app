@@ -56,5 +56,11 @@ object DatabaseModule {
         db : BookTrackerDatabase
     ) = db.getLogsDao()
 
+    @Provides
+    @Singleton
+    fun provideReadingListDao(
+        db : BookTrackerDatabase
+    ) = db.getReadingListDao()
+
 
 }
