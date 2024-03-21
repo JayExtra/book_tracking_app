@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 
@@ -38,6 +39,7 @@ fun OutlinedTextFieldComponent(
     startingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
     maxLines : Int = 1,
+    roundedCornerSize : Dp = 0.dp ,
     keyBoardType : KeyboardType = KeyboardType.Text,
     onTrailingIconClicked: () -> Unit = {},
     onTextChanged: (String) -> Unit = {}
@@ -65,8 +67,8 @@ fun OutlinedTextFieldComponent(
             modifier = modifier
                 .padding(top = 8.dp)
                 .border(
-                    width = 2.dp,
-                    shape = RoundedCornerShape(0.dp),
+                    width = 1.dp,
+                    shape = RoundedCornerShape(roundedCornerSize),
                     //if error is available , change the color of border to error color
                     color = if (hasError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                 ),
@@ -84,7 +86,7 @@ fun OutlinedTextFieldComponent(
                 errorCursorColor = MaterialTheme.colorScheme.error
             ),
             textStyle = BookAppTypography.bodyMedium,
-            shape = RoundedCornerShape(0.dp),
+            shape = RoundedCornerShape(roundedCornerSize),
             //adjust error depending if error is available
             isError = hasError,
             leadingIcon = {

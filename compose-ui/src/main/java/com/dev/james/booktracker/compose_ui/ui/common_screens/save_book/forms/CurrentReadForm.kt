@@ -57,6 +57,9 @@ fun CurrentReadForm(
     ) {
 
         ImageSelectorComponent(
+            height = 191.dp,
+            width = 140.dp,
+           // isCircular = false
             onSelect = {
                 //start the image picker
                 imageSelectorClicked()
@@ -65,7 +68,6 @@ fun CurrentReadForm(
             onClear = {
                 onClearImage()
             }
-
         )
 
         Spacer(modifier = Modifier.height(24.dp))

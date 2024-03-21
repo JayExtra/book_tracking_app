@@ -22,12 +22,14 @@ import com.dev.james.domain.usecases.GetBooksAndProgressUsecase
 import com.dev.james.domain.usecases.ReadingListUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -69,6 +71,9 @@ class MyLibraryViewModel @Inject constructor(
     ))
     val readingLists get() = _readingLists.asStateFlow()
 
+    private val _uiEvents : Channel<MyLibraryScreenUiEvents> = Channel<MyLibraryScreenUiEvents>()
+    val uiEvents get() = _uiEvents.receiveAsFlow()
+
     init {
         isLoading = true
         getBooksWithProgress()
@@ -101,6 +106,9 @@ class MyLibraryViewModel @Inject constructor(
             starred = false
         )
         readingListsRepository.createReadingList(readingListItem)
+        _uiEvents.send(
+            MyLibraryScreenUiEvents.DismissReadListDialog
+        )
     }
 
     fun deleteReadingList(readingListId : String) = viewModelScope.launch{
@@ -130,5 +138,10 @@ class MyLibraryViewModel @Inject constructor(
             isLoading = false
             _booksWithProgress.value = booksList
         }
+    }
+
+    sealed class MyLibraryScreenUiEvents {
+        object DismissReadListDialog : MyLibraryScreenUiEvents()
+        object DefaultState : MyLibraryScreenUiEvents()
     }
 }
