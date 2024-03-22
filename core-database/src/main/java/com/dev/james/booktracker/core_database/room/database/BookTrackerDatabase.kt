@@ -15,11 +15,13 @@ import com.dev.james.booktracker.core.entities.BookEntity
 import com.dev.james.booktracker.core.entities.BookLogsEntity
 import com.dev.james.booktracker.core.entities.GoalEntity
 import com.dev.james.booktracker.core.entities.GoalLogsEntity
+import com.dev.james.booktracker.core.entities.ReadingListEntity
+import com.dev.james.booktracker.core_database.room.dao.ReadingListDao
 
 @Database(
     entities = [UserDetailsEntity::class , BookEntity::class , BookLogsEntity::class ,
-    GoalEntity::class , GoalLogsEntity::class ] ,
-    version = 11 ,
+    GoalEntity::class , GoalLogsEntity::class , ReadingListEntity::class ] ,
+    version = 12 ,
     exportSchema = false
 )
 @TypeConverters(ListTypeConverter::class , DateTypeConverter::class)
@@ -32,4 +34,6 @@ abstract class BookTrackerDatabase : RoomDatabase() {
     abstract fun getGoalsDao() : GoalsDao
 
     abstract fun getLogsDao() : LogsDao
+
+    abstract fun getReadingListDao() : ReadingListDao
 }

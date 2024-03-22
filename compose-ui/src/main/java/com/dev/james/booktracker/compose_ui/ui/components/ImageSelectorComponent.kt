@@ -30,6 +30,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.dev.james.booktracker.compose_ui.R
@@ -39,6 +40,11 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 @Composable
 @Preview("ImageSelectorComponent")
 fun ImageSelectorComponent(
+    modifier : Modifier = Modifier,
+    height : Dp = 191.dp,
+    width : Dp = 140.dp ,
+   /* size : Dp = 100.dp ,
+    isCircular : Boolean = false ,*/
     imageSelectorState: ImageSelectorUiState = ImageSelectorUiState(),
     onSelect: () -> Unit = {},
     onClear : () -> Unit = {}
@@ -46,15 +52,16 @@ fun ImageSelectorComponent(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .width(140.dp)
-            .height(191.dp)
-            .clip(shape = RoundedCornerShape(10.dp))
+        modifier = modifier
+          //  .size(if(isCircular) size else 0.dp )
+            .width( /*if (isCircular) 0.dp else*/ width)
+            .height( /*if(isCircular) 0.dp else*/ height)
+            .clip(shape = /*if(isCircular) CircleShape else */RoundedCornerShape(10.dp))
             .background(color = MaterialTheme.colorScheme.secondaryContainer)
             .border(
                 width = if (imageSelectorState.isError) 2.dp else 0.dp,
                 color = if (imageSelectorState.isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondaryContainer,
-                shape = RoundedCornerShape(10.dp)
+                shape = /*if(isCircular) CircleShape else */RoundedCornerShape(10.dp)
             )
             .clickable {
                 //starts the image picking flow

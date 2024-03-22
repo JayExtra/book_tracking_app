@@ -238,3 +238,10 @@ fun String.toAppropriateDay() : String {
         }
     }
 }
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun getCurrentDateAndTime() : String {
+    val dateTime = LocalDateTime.now()
+    val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+    return dateTime.format(formatter)
+}

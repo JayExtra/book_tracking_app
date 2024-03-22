@@ -6,10 +6,12 @@ import com.dev.james.booktracker.core.common_models.BookLog
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.Goal
 import com.dev.james.booktracker.core.common_models.GoalLog
+import com.dev.james.booktracker.core.common_models.ReadingListItem
 import com.dev.james.booktracker.core.entities.BookEntity
 import com.dev.james.booktracker.core.entities.BookLogsEntity
 import com.dev.james.booktracker.core.entities.GoalEntity
 import com.dev.james.booktracker.core.entities.GoalLogsEntity
+import com.dev.james.booktracker.core.entities.ReadingListEntity
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAmount
@@ -69,6 +71,12 @@ fun BookSave.mapToBookEntity(): BookEntity {
         chapters = chapters ,
         category = category ,
         bookDescription = bookDescription
+    )
+}
+
+fun ReadingListItem.toEntity() : ReadingListEntity {
+    return ReadingListEntity(
+        id, name, image, description, readingList, date, starred
     )
 }
 

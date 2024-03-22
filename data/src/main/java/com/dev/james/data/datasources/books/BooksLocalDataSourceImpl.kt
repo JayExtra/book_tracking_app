@@ -2,6 +2,7 @@ package com.dev.james.data.datasources.books
 
 import com.dev.james.booktracker.core_database.room.dao.BooksDao
 import com.dev.james.booktracker.core.entities.BookEntity
+import com.dev.james.booktracker.core.entities.updates.ReadingListBookUpdate
 import com.dev.james.domain.datasources.home.BooksLocalDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -63,5 +64,9 @@ class BooksLocalDataSourceImpl @Inject constructor(
 
     override suspend fun getCachedBook(id: String): BookEntity {
         return booksDao.getBook(id)
+    }
+
+    override suspend fun addBookToReadingList(readingListBookUpdate: ReadingListBookUpdate) {
+        booksDao.addBookToReadingList(readingListBookUpdate)
     }
 }

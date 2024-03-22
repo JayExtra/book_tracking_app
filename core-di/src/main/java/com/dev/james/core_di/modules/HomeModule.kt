@@ -4,6 +4,7 @@ package com.dev.james.core_di.modules
 import com.dev.james.booktracker.core_database.room.dao.BooksDao
 import com.dev.james.booktracker.core_database.room.dao.GoalsDao
 import com.dev.james.booktracker.core_database.room.dao.LogsDao
+import com.dev.james.booktracker.core_database.room.dao.ReadingListDao
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import com.dev.james.booktracker.core_network.api_service.BooksApi
 import com.dev.james.domain.utilities.ConnectivityManager
@@ -11,6 +12,8 @@ import com.dev.james.data.datasources.books.BooksApiDataSourceImpl
 import com.dev.james.data.datasources.books.BooksLocalDataSourceImpl
 import com.dev.james.data.datasources.goals.GoalsLocalDataSourceImpl
 import com.dev.james.data.datasources.logs.LogsLocalDataSourceImpl
+import com.dev.james.data.datasources.reading_lists.ReadingListLocalDatasourceImpl
+import com.dev.james.data.repositories.reading_lists.ReadingListRepositoryImpl
 import com.dev.james.data.repositories.books.BooksRepositoryImpl
 import com.dev.james.data.repositories.goals.GoalsRepositoryImpl
 import com.dev.james.data.repositories.logs.LogsRepositoryImpl
@@ -18,9 +21,11 @@ import com.dev.james.domain.datasources.home.BooksApiDataSource
 import com.dev.james.domain.datasources.home.BooksLocalDataSource
 import com.dev.james.domain.datasources.home.GoalsLocalDataSource
 import com.dev.james.domain.datasources.home.LogsLocalDataSource
+import com.dev.james.domain.datasources.reading_lists.ReadingListLocalDatasource
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.home.GoalsRepository
 import com.dev.james.domain.repository.home.LogsRepository
+import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
 
 import dagger.Module
 import dagger.Provides
@@ -79,13 +84,15 @@ object HomeModule {
         booksApiDataSource: BooksApiDataSource,
         booksLocalDataSource: BooksLocalDataSource,
         dataStoreManager: DataStoreManager ,
+        readingListLocalDatasource: ReadingListLocalDatasource ,
         connectivityManager: ConnectivityManager
     ) : BooksRepository {
         return BooksRepositoryImpl(
             booksApiDataSource,
             booksLocalDataSource,
             dataStoreManager ,
-            connectivityManager
+            connectivityManager ,
+            readingListLocalDatasource
         )
     }
 
@@ -110,4 +117,16 @@ object HomeModule {
             logsLocalDataSource
         )
     }
+
+    @Provides
+    @Singleton
+    fun provideReadingListLocalDatasource(
+        readingListDao: ReadingListDao
+    ) : ReadingListLocalDatasource = ReadingListLocalDatasourceImpl(readingListDao)
+
+    @Provides
+    @Singleton
+    fun provideReadingListRepository(
+        readingListLocalDatasource: ReadingListLocalDatasource
+    ) : ReadingListsRepository = ReadingListRepositoryImpl(readingListLocalDatasource)
 }
