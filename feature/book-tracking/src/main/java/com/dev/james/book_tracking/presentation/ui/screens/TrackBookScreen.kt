@@ -1,9 +1,12 @@
 package com.dev.james.book_tracking.presentation.ui.screens
 
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -12,6 +15,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,8 +35,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -74,6 +80,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -109,6 +116,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
+import org.w3c.dom.Text
 import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -127,11 +135,11 @@ fun TrackBookScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    var finishSessionDialogState = rememberMaterialDialogState(false)
+    val finishSessionDialogState = rememberMaterialDialogState(false)
 
-    var resetClockDialogState = rememberMaterialDialogState(false)
+    val resetClockDialogState = rememberMaterialDialogState(false)
 
-    var proceedToSaveDialogState = rememberMaterialDialogState(false)
+    val proceedToSaveDialogState = rememberMaterialDialogState(false)
 
     var chapterTitleFieldState by rememberSaveable {
         mutableStateOf("")
@@ -294,6 +302,10 @@ fun TrackBookScreen(
                         onReset = {
                             resetClockDialogState.show()
                         }
+                    )
+
+                    ExpandableDescriptionCard(
+                        description = bookData.value.description
                     )
 
                     val pagesPerMinText = buildAnnotatedString {
@@ -627,6 +639,9 @@ fun BookProgressSection(
 
     }
 
+    Timber.tag("BookProgressSection").d(bookData.toString())
+   // Toast.makeText( LocalContext.current ,bookData.authors , Toast.LENGTH_LONG).show()
+
     ConstraintLayout(
         constraintSet = constraints,
         modifier = Modifier.fillMaxWidth()
@@ -650,15 +665,17 @@ fun BookProgressSection(
             fontSize = 15.sp
         )
 
-        Row(modifier = Modifier.layoutId("chapter_title")) {
+        if(bookData.currentChapter > 0){
+            Row(modifier = Modifier.layoutId("chapter_title")) {
 
-            Icon(painter = painterResource(id = R.drawable.ic_bookmark_24), contentDescription = "")
-            Text(
-                text = "chapter ${bookData.currentChapter}: ${bookData.currentChapterTitle}",
-                style = BookAppTypography.bodySmall,
-                fontSize = 13.sp,
-                modifier = Modifier.padding(top = 2.dp, start = 2.dp)
-            )
+                Icon(painter = painterResource(id = R.drawable.ic_bookmark_24), contentDescription = "")
+                Text(
+                    text = "chapter ${bookData.currentChapter}: ${bookData.currentChapterTitle}",
+                    style = BookAppTypography.bodySmall,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(top = 2.dp, start = 2.dp)
+                )
+            }
         }
 
         AnimatedVisibility(
@@ -737,6 +754,70 @@ fun BookProgressSection(
                 Text(text = buttonText, style = BookAppTypography.labelLarge)
             }
         }
+    }
+
+}
+
+@Composable
+fun ExpandableDescriptionCard(description: String) {
+    var expanded by remember { mutableStateOf (false) }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .animateContentSize(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = LinearOutSlowInEasing
+                )
+            )
+            .clickable(
+                onClick = { expanded = !expanded }
+            ),
+        shape = RoundedCornerShape(10.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        )
+    ) {
+        Column (
+            modifier = Modifier.fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Row {
+                Text(
+                    modifier = Modifier.weight(6f) ,
+                    text = "Description" ,
+                    style = BookAppTypography.headlineSmall ,
+                    maxLines = 1
+                )
+
+                val icon = if(expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
+
+                Icon(
+                    modifier = Modifier.size(30.dp) ,
+                    imageVector = icon,
+                    contentDescription = "" ,
+                    tint = MaterialTheme.colorScheme.secondary
+                )
+            }
+
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            if(expanded){
+                Text(
+                    modifier = Modifier.fillMaxWidth() ,
+                    text = description ,
+                    style = BookAppTypography.bodyMedium ,
+                    textAlign = TextAlign.Justify ,
+                    maxLines = 10,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+        }
+
     }
 }
 

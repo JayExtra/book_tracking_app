@@ -6,10 +6,13 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,6 +54,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -82,6 +86,7 @@ import com.dev.james.my_library.presentation.navigation.MyLibraryScreenNavigator
 import com.dev.james.my_library.presentation.ui.components.SuggestedBookCardComponent
 import com.dev.james.my_library.presentation.ui.viewmodel.MyLibraryViewModel
 import com.ramcosta.composedestinations.annotation.Destination
+import timber.log.Timber
 
 @Composable
 @Destination
@@ -97,15 +102,15 @@ fun MyLibraryScreen(
         val myBooksList = myLibraryViewModel.booksWithProgress.collectAsStateWithLifecycle()
         val suggestedBooksList = myLibraryViewModel.suggestedBooksList.collectAsStateWithLifecycle()
         val readingList = myLibraryViewModel.readingLists.collectAsStateWithLifecycle()
-        val uiEvents = myLibraryViewModel.uiEvents.collectAsStateWithLifecycle(
+        /*val uiEvents = myLibraryViewModel.uiEvents.collectAsStateWithLifecycle(
             initialValue = MyLibraryViewModel.MyLibraryScreenUiEvents.DefaultState
-        )
+        )*/
 
         var shouldShowCreateReadingListDialog by rememberSaveable {
             mutableStateOf(false)
         }
 
-        LaunchedEffect(key1 = true) {
+       /* LaunchedEffect(key1 = true) {
             when (uiEvents.value) {
                 is MyLibraryViewModel.MyLibraryScreenUiEvents.DefaultState -> {}
                 is MyLibraryViewModel.MyLibraryScreenUiEvents.DismissReadListDialog -> {
@@ -114,7 +119,7 @@ fun MyLibraryScreen(
 
                 else -> {}
             }
-        }
+        }*/
 
         if (shouldShowCreateReadingListDialog) {
             CreateReadingListDialog(
@@ -588,6 +593,7 @@ fun BookListSection(
     onDeleteList: (String) -> Unit = {},
     onListSelected: (String) -> Unit = {}
 ) {
+    Timber.tag("BookListSection").d("reading list : ${readingList.toString()}")
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -607,7 +613,7 @@ fun BookListSection(
         ) {
             Text(
                 modifier = Modifier.weight(0.5f),
-                text = "My reading list",
+                text = "My reading lists",
                 style = BookAppTypography.labelLarge
             )
 
@@ -640,12 +646,28 @@ fun BookListSection(
                         }*/
         }
 
+
+        val state = rememberLazyListState()
+
+        LaunchedEffect(readingList) {
+            snapshotFlow { state.firstVisibleItemIndex }
+                .collect {
+                    // Scroll to the top if a new item is added.
+                    // (But only if user is scrolled to the top already.)
+                    if (it <= 1) {
+                        state.scrollToItem(0)
+                    }
+                }
+        }
+
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().height(150.dp),
+            state = state,
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
             contentPadding = PaddingValues(bottom = 8.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
 
             if (readingList.isEmpty()) {
 
@@ -662,17 +684,19 @@ fun BookListSection(
                 }
 
             } else {
+
                 items(readingList, key = {
                     it.id
                 }) {
                     val dismissState = rememberDismissState()
 
-                    if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+                    if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
                         //perform delete action here
                         onDeleteList(it.id)
                     }
                     SwipeToDismiss(
                         state = dismissState,
+                        directions = setOf(DismissDirection.StartToEnd),
                         background = {
                             val color by animateColorAsState(
                                 when (dismissState.targetValue) {
@@ -680,7 +704,7 @@ fun BookListSection(
                                     else -> Color.Red
                                 }, label = ""
                             )
-                            val alignment = Alignment.CenterEnd
+                            val alignment = Alignment.CenterStart
                             val icon = Icons.Default.Delete
 
                             val scale by animateFloatAsState(

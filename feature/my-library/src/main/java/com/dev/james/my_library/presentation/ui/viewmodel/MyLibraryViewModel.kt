@@ -88,8 +88,8 @@ class MyLibraryViewModel @Inject constructor(
     }
 */
 
-    fun fetchReadingList() = viewModelScope.launch {
-        readingListUsecase.fetch().collect {
+    private fun fetchReadingList() = viewModelScope.launch {
+        readingListUsecase.fetch().collectLatest {
             _readingLists.value = it
         }
     }
@@ -106,9 +106,7 @@ class MyLibraryViewModel @Inject constructor(
             starred = false
         )
         readingListsRepository.createReadingList(readingListItem)
-        _uiEvents.send(
-            MyLibraryScreenUiEvents.DismissReadListDialog
-        )
+        fetchReadingList()
     }
 
     fun deleteReadingList(readingListId : String) = viewModelScope.launch{

@@ -48,6 +48,7 @@ class FetchActiveBookProgress @Inject constructor(
         } else {
             Timber.tag(TAG)
                 .d("book id is not null or empty , fetching book with id : $requiredBookId!")
+
             fetchBookProgressData(requiredBookId)
         }
 
@@ -87,6 +88,7 @@ class FetchActiveBookProgress @Inject constructor(
                 authors = cachedBook.bookAuthors,
                 isUri = cachedBook.isUri,
                 totalPages = cachedBook.bookPagesCount,
+                description = cachedBook.bookDescription,
                 totalTimeSpentWeekly = totalTimeSpentWeekly,
                 totalTimeSpent = totalTimeSpentOverall,
                 totalPagesRead = mostRecentLog.pagesRead,
@@ -106,6 +108,8 @@ class FetchActiveBookProgress @Inject constructor(
                 bookId = requiredBookId,
                 bookImage = cachedBook.bookImage,
                 bookTitle = cachedBook.bookTitle,
+                authors = cachedBook.bookAuthors,
+                description = cachedBook.bookDescription,
                 isUri = cachedBook.isUri,
                 totalPages = cachedBook.bookPagesCount,
                 currentChapterTitle = "",
