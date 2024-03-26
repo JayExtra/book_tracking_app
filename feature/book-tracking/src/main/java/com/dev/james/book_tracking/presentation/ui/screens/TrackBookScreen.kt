@@ -30,23 +30,36 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -55,7 +68,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -86,6 +101,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
@@ -101,7 +117,10 @@ import com.dev.james.book_tracking.R
 import com.dev.james.domain.utilities.StopWatch
 import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
 import com.dev.james.book_tracking.presentation.viewmodel.BookTrackingViewModel
+import com.dev.james.book_tracking.presentation.viewmodel.ReadingListUiItem
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
+import com.dev.james.booktracker.compose_ui.ui.components.ImageSelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 //import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationDialog
 import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
@@ -115,6 +134,7 @@ import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.w3c.dom.Text
 import timber.log.Timber
@@ -130,7 +150,7 @@ import timber.log.Timber
 fun TrackBookScreen(
     navigation: BookTrackNavigation,
     bookTrackingViewModel: BookTrackingViewModel = hiltViewModel(),
-    previousScreenDestinations: PreviousScreenDestinations ,
+    previousScreenDestinations: PreviousScreenDestinations,
     bookId: String?
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -161,6 +181,8 @@ fun TrackBookScreen(
     LaunchedEffect(key1 = true) {
         bookId?.let {
             bookTrackingViewModel.getBookStatistics(it)
+            bookTrackingViewModel.fetchReadingLists(it)
+
         }
     }
 
@@ -207,12 +229,31 @@ fun TrackBookScreen(
     var isTimerValueZero by rememberSaveable {
         mutableStateOf(false)
     }
+    var shouldShowReadingListDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
 
 
     val bookData = bookTrackingViewModel.bookStatsState.collectAsStateWithLifecycle()
     val goalData = bookTrackingViewModel.goalProgressState.collectAsStateWithLifecycle()
+    val readingLists = bookTrackingViewModel.readingLists.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+    if (shouldShowReadingListDialog) {
+        AddToReadingListDialog(
+            readingList = readingLists.value,
+            onDismiss = {
+                shouldShowReadingListDialog = false
+            },
+            onListSelected = {
+                //add/remove from reading list
+            },
+            createNewPlayList = {
+                //create reading list if empty
+            }
+        )
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -228,10 +269,32 @@ fun TrackBookScreen(
                         PreviousScreenDestinations.HOME_SCREEN -> {
                             navigation.backToHomeScreen()
                         }
+
                         PreviousScreenDestinations.LIBRARY_SCREEN -> {
                             navigation.backToMyLibraryScreen()
                         }
+
                         else -> {}
+                    }
+                },
+                navActions = {
+                    IconButton(
+                        onClick = {
+                            /*opens playlist dialog*/
+                            //show dialog
+                            shouldShowReadingListDialog = true
+                        },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                id = com.dev.james.booktracker.compose_ui.R.drawable.ic_playlist_add
+                            ),
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
                     }
                 }
             )
@@ -263,7 +326,7 @@ fun TrackBookScreen(
                         timerValue = stopWatch.formattedTime,
                         timerRunning = isStopWatchRunning,
                         isTimerPaused = isStopWatchPaused,
-                        isBookActive = bookData.value.progress < 1f ,
+                        isBookActive = bookData.value.progress < 1f,
                         onShowTimerText = { show ->
 
                             showTimerAndTrackCard = show
@@ -311,20 +374,20 @@ fun TrackBookScreen(
                     val pagesPerMinText = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(fontWeight = FontWeight.Bold)
-                        ){
+                        ) {
                             append(bookData.value.pagesPerMinute.toString())
                         }
                         //append(" ")
                         withStyle(
-                            style = SpanStyle(fontWeight = FontWeight.Bold , fontSize = 12.sp)
-                        ){
+                            style = SpanStyle(fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        ) {
                             append("pgs/min")
                         }
                     }
 
                     TimeAndPageComponent(
-                        pagesStatText = "${bookData.value.currentPage}/${bookData.value.totalPages}" ,
-                        timeStatText = bookData.value.bestTime ,
+                        pagesStatText = "${bookData.value.currentPage}/${bookData.value.totalPages}",
+                        timeStatText = bookData.value.bestTime,
                         pagesPerMinStatText = pagesPerMinText
                     )
 
@@ -465,6 +528,174 @@ fun TrackBookScreen(
 }
 
 @Composable
+fun AddToReadingListDialog(
+    readingList: List<ReadingListUiItem> = listOf(),
+    onDismiss: () -> Unit = {},
+    onListSelected: (String) -> Unit = {},
+    createNewPlayList: () -> Unit = {}
+) {
+    Dialog(
+        onDismissRequest = { onDismiss() }
+    ) {
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(8.dp),
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.weight(4f),
+                        text = "Save To Reading List",
+                        style = BookAppTypography.labelLarge,
+                        textAlign = TextAlign.Start
+                    )
+                    TextButton(
+                        modifier = Modifier.wrapContentWidth(),
+                        onClick = { createNewPlayList() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                        Text(
+                            text = "create",
+                            style = BookAppTypography.labelMedium,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+
+                    }
+                }
+
+                Divider(
+                    modifier = Modifier.fillMaxWidth(),
+                    thickness = 2.dp
+                )
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (readingList.isEmpty()) {
+                        item {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = "No list available",
+                                style = BookAppTypography.labelSmall,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                    }
+                    items(
+                        items = readingList,
+                        key = {
+                            it.id
+                        }
+                    ) {
+                        ListItem(
+                            readingListUiItem = it,
+                            onItemChecked = { id ->
+                                onListSelected(id)
+                            }
+                        )
+                    }
+                }
+                
+                Divider(
+                    modifier = Modifier.fillMaxWidth(),
+                    thickness = 2.dp
+                )
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    TextButton(
+                        modifier = Modifier.wrapContentWidth(),
+                        onClick = { onDismiss() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                        Text(
+                            text = "Done",
+                            style = BookAppTypography.labelMedium,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+
+                    }
+                }
+
+            }
+
+        }
+
+
+    }
+
+}
+
+@Composable
+fun ListItem(
+    readingListUiItem: ReadingListUiItem = ReadingListUiItem(),
+    onItemChecked: (String) -> Unit = {}
+) {
+    Row(
+        modifier = Modifier.clickable(
+            onClick = {
+                onItemChecked(readingListUiItem.id)
+            }
+        ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Checkbox(
+            checked = readingListUiItem.isInList,
+            onCheckedChange = {},
+            colors = CheckboxDefaults.colors(
+                checkedColor = MaterialTheme.colorScheme.secondary
+            ) ,
+            enabled = false
+        )
+
+        Text(
+            modifier = Modifier.weight(5f),
+            text = readingListUiItem.name,
+            style = BookAppTypography.bodyMedium,
+            textAlign = TextAlign.Start,
+            color = MaterialTheme.colorScheme.secondary
+        )
+
+    }
+}
+
+@Composable
 fun MessageDialog(
     message: String,
     onDismiss: () -> Unit,
@@ -568,7 +799,7 @@ fun BookProgressSection(
     bookData: BookProgressData = BookProgressData(),
     timerValue: String = "00:00:00",
     showTimerText: Boolean = false,
-    isBookActive : Boolean = false ,
+    isBookActive: Boolean = false,
     timerRunning: Boolean = false,
     isTimerPaused: Boolean = false,
     onShowTimerText: (Boolean) -> Unit = {},
@@ -640,7 +871,7 @@ fun BookProgressSection(
     }
 
     Timber.tag("BookProgressSection").d(bookData.toString())
-   // Toast.makeText( LocalContext.current ,bookData.authors , Toast.LENGTH_LONG).show()
+    // Toast.makeText( LocalContext.current ,bookData.authors , Toast.LENGTH_LONG).show()
 
     ConstraintLayout(
         constraintSet = constraints,
@@ -665,10 +896,13 @@ fun BookProgressSection(
             fontSize = 15.sp
         )
 
-        if(bookData.currentChapter > 0){
+        if (bookData.currentChapter > 0) {
             Row(modifier = Modifier.layoutId("chapter_title")) {
 
-                Icon(painter = painterResource(id = R.drawable.ic_bookmark_24), contentDescription = "")
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_bookmark_24),
+                    contentDescription = ""
+                )
                 Text(
                     text = "chapter ${bookData.currentChapter}: ${bookData.currentChapterTitle}",
                     style = BookAppTypography.bodySmall,
@@ -706,7 +940,7 @@ fun BookProgressSection(
             )
         }
 
-        if(isBookActive){
+        if (isBookActive) {
             ElevatedButton(
                 modifier = Modifier.layoutId("start_button"),
                 onClick = {
@@ -718,7 +952,8 @@ fun BookProgressSection(
                     containerColor = MaterialTheme.colorScheme.secondary
                 )
             ) {
-                val buttonText = if (timerRunning) "pause" else if (isTimerPaused) "resume" else "start"
+                val buttonText =
+                    if (timerRunning) "pause" else if (isTimerPaused) "resume" else "start"
                 Text(text = buttonText, style = BookAppTypography.labelLarge)
             }
         }
@@ -760,7 +995,7 @@ fun BookProgressSection(
 
 @Composable
 fun ExpandableDescriptionCard(description: String) {
-    var expanded by remember { mutableStateOf (false) }
+    var expanded by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -780,24 +1015,26 @@ fun ExpandableDescriptionCard(description: String) {
             containerColor = MaterialTheme.colorScheme.background
         )
     ) {
-        Column (
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(8.dp)
         ) {
             Row {
                 Text(
-                    modifier = Modifier.weight(6f) ,
-                    text = "Description" ,
-                    style = BookAppTypography.headlineSmall ,
+                    modifier = Modifier.weight(6f),
+                    text = "Description",
+                    style = BookAppTypography.headlineSmall,
                     maxLines = 1
                 )
 
-                val icon = if(expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
+                val icon =
+                    if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
 
                 Icon(
-                    modifier = Modifier.size(30.dp) ,
+                    modifier = Modifier.size(30.dp),
                     imageVector = icon,
-                    contentDescription = "" ,
+                    contentDescription = "",
                     tint = MaterialTheme.colorScheme.secondary
                 )
             }
@@ -805,15 +1042,23 @@ fun ExpandableDescriptionCard(description: String) {
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            if(expanded){
-                Text(
-                    modifier = Modifier.fillMaxWidth() ,
-                    text = description ,
-                    style = BookAppTypography.bodyMedium ,
-                    textAlign = TextAlign.Justify ,
-                    maxLines = 10,
-                    overflow = TextOverflow.Ellipsis
-                )
+            if (expanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp)
+                        .verticalScroll(
+                            state = rememberScrollState()
+                        )
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxSize(),
+                        text = description,
+                        style = BookAppTypography.bodyMedium,
+                        textAlign = TextAlign.Justify,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
         }
@@ -1060,66 +1305,67 @@ fun CounterButtonsComponent(
 
 @Composable
 fun TimeAndPageComponent(
-    pagesStatText : String = "" ,
-    timeStatText : String = "" ,
-    pagesPerMinStatText : AnnotatedString
-){
+    pagesStatText: String = "",
+    timeStatText: String = "",
+    pagesPerMinStatText: AnnotatedString
+) {
     Card(
-        modifier = Modifier.padding(8.dp) ,
-        shape = RoundedCornerShape(15.dp) , 
+        modifier = Modifier.padding(8.dp),
+        shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background
-        ) ,
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically ,
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
 
             SingleTimeOrPageItem(
-                mainText = pagesStatText ,
+                mainText = pagesStatText,
                 title = "pages read"
             )
 
             PageSpeedComponent(
-                annotatedText = pagesPerMinStatText ,
+                annotatedText = pagesPerMinStatText,
                 title = "speed"
             )
             SingleTimeOrPageItem(
-                mainText = timeStatText ,
+                mainText = timeStatText,
                 title = "best time"
             )
         }
 
     }
 }
+
 @Composable
 @Preview
 fun SingleTimeOrPageItem(
-    modifier : Modifier = Modifier ,
-    mainText : String = "",
-    title : String = ""
-){
+    modifier: Modifier = Modifier,
+    mainText: String = "",
+    title: String = ""
+) {
     Column(
         modifier = modifier.padding(5.dp),
-        verticalArrangement = Arrangement.Center ,
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = mainText ,
-            style = BookAppTypography.headlineLarge ,
-            fontWeight = FontWeight.Bold ,
+            text = mainText,
+            style = BookAppTypography.headlineLarge,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Start
         )
         Text(
             text = title.uppercase(),
-            style = BookAppTypography.bodySmall ,
-            fontWeight = FontWeight.Medium ,
-            color = Color.Gray ,
+            style = BookAppTypography.bodySmall,
+            fontWeight = FontWeight.Medium,
+            color = Color.Gray,
             textAlign = TextAlign.Start
         )
 
@@ -1128,26 +1374,26 @@ fun SingleTimeOrPageItem(
 
 @Composable
 fun PageSpeedComponent(
-    modifier : Modifier = Modifier ,
-    annotatedText : AnnotatedString,
-    title : String = ""
-){
+    modifier: Modifier = Modifier,
+    annotatedText: AnnotatedString,
+    title: String = ""
+) {
     Column(
         modifier = modifier.padding(5.dp),
-        verticalArrangement = Arrangement.Center ,
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = annotatedText ,
-            style = BookAppTypography.headlineLarge ,
-            fontWeight = FontWeight.Bold ,
+            text = annotatedText,
+            style = BookAppTypography.headlineLarge,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Start
         )
         Text(
             text = title.uppercase(),
-            style = BookAppTypography.bodySmall ,
-            fontWeight = FontWeight.Medium ,
-            color = Color.Gray ,
+            style = BookAppTypography.bodySmall,
+            fontWeight = FontWeight.Medium,
+            color = Color.Gray,
             textAlign = TextAlign.Start
         )
     }

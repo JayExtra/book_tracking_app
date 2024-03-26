@@ -278,8 +278,8 @@ fun CurrentlyReadingSection(
         ) {
             Text(
                 modifier = Modifier.wrapContentWidth(),
-                text = "My books",
-                style = BookAppTypography.labelLarge,
+                text = "My Books",
+                style = BookAppTypography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             TextButton(
@@ -416,8 +416,8 @@ fun SuggestedForYouSection(
         ) {
             Text(
                 modifier = Modifier.wrapContentWidth(),
-                text = "Suggested for you",
-                style = BookAppTypography.labelLarge,
+                text = "You May Also Like",
+                style = BookAppTypography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             /* TextButton(
@@ -613,8 +613,9 @@ fun BookListSection(
         ) {
             Text(
                 modifier = Modifier.weight(0.5f),
-                text = "My reading lists",
-                style = BookAppTypography.labelLarge
+                text = "My Reading Lists",
+                style = BookAppTypography.headlineSmall ,
+                fontWeight = FontWeight.Bold
             )
 
             TextButton(
