@@ -881,7 +881,8 @@ fun CreateReadingListDialog(
 
                 ImageSelectorComponent(
                     imageSelectorState = ImageSelectorUiState(),
-                    width = 260.dp ,
+                    modifier = Modifier.fillMaxWidth(),
+                    width = 0.dp ,
                     height = 140.dp ,
                    /* isCircular = true,
                     size = 100.dp,*/

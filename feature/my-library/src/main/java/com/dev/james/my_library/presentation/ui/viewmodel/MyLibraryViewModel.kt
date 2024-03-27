@@ -89,7 +89,9 @@ class MyLibraryViewModel @Inject constructor(
 */
 
     private fun fetchReadingList() = viewModelScope.launch {
+
         readingListUsecase.fetch().collectLatest {
+            Timber.tag(TAG).d("my reading lists : ${it.toString()}")
             _readingLists.value = it
         }
     }

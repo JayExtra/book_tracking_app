@@ -184,15 +184,24 @@ class BooksRepositoryImpl
         }
     }
 
-    override suspend fun addBookToReadingList(readingListId: String, bookId: String): Resource<String> {
+    override suspend fun addOrRemoveBookFromReadingList(readingListId: String, bookId: String): Resource<String> {
         return try {
-            val cachedReadingList = readingListLocalDatasource.getAReadingList(id = readingListId).readingList
-            val copiedList = cachedReadingList.toMutableList()
-            when {
-                cachedReadingList.contains(bookId) -> {
-                    return Resource.Error(message = "exists")
-                }
-                else -> {
+            val cachedReadingList = readingListLocalDatasource.getAReadingList(id = readingListId)
+            val copiedList = cachedReadingList.readingList.toMutableList()
+
+            if (copiedList.contains(bookId)){
+                    Timber.tag(TAG).d("Book $bookId exists in $readingListId reading list , removing it")
+                    val bookIndex = copiedList.indexOf(bookId)
+                    copiedList.removeAt(bookIndex)
+                    booksLocalDataSource.addBookToReadingList(
+                        ReadingListBookUpdate(
+                            id = readingListId ,
+                            readingList = copiedList.toImmutableList()
+                        )
+                    )
+                    return Resource.Success(data = "removed:$bookId")
+                } else {
+                    Timber.tag(TAG).d("Book $bookId does not exist in $readingListId reading list , adding it")
                     copiedList.add(bookId)
                     booksLocalDataSource.addBookToReadingList(
                         ReadingListBookUpdate(
@@ -200,39 +209,12 @@ class BooksRepositoryImpl
                             readingList = copiedList.toImmutableList()
                         )
                     )
-                    return Resource.Success(data = "Book added successfully.")
+                    return Resource.Success(data = "added:$bookId")
                 }
-            }
-        }catch (e : SQLiteException){
-            Timber.tag(TAG).d("Error on adding book to reading list: ${e.stackTrace}")
-            Resource.Error("could not add book to playlist: ${e.localizedMessage}")
-        }
-    }
 
-    override suspend fun removeBookFromReadingList(
-        readingListId: String,
-        bookId: String
-    ): Resource<String> {
-        return try {
-            val cachedReadingList = readingListLocalDatasource.getAReadingList(id = readingListId).readingList
-            val copiedList = cachedReadingList.toMutableList()
-            when {
-                cachedReadingList.contains(bookId) -> {
-                    val bookIndex = copiedList.indexOf(bookId)
-                    copiedList.removeAt(bookIndex)
-                    ReadingListBookUpdate(
-                        id = readingListId ,
-                        readingList = copiedList.toImmutableList()
-                    )
-                    return Resource.Success(data = "Book removed successfully")
-                }
-                else -> {
-                    return Resource.Error(message = "not found")
-                }
-            }
         }catch (e : SQLiteException){
-            Timber.tag(TAG).d("Error on adding book to reading list: ${e.stackTrace}")
-            Resource.Error("could not add book to playlist: ${e.localizedMessage}")
+            Timber.tag(TAG).d("Error on adding or removing book to reading list: ${e.stackTrace}")
+            Resource.Error("could not add or remove book from playlist: ${e.localizedMessage}")
         }
     }
 }

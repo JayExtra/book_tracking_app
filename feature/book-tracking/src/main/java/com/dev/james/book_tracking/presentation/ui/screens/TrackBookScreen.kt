@@ -1,7 +1,6 @@
 package com.dev.james.book_tracking.presentation.ui.screens
 
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -19,7 +18,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,24 +31,18 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -61,9 +53,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -82,7 +72,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
@@ -94,15 +83,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
@@ -111,16 +97,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import coil.size.Scale
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.book_tracking.R
 import com.dev.james.domain.utilities.StopWatch
 import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigation
 import com.dev.james.book_tracking.presentation.viewmodel.BookTrackingViewModel
 import com.dev.james.book_tracking.presentation.viewmodel.ReadingListUiItem
-import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
-import com.dev.james.booktracker.compose_ui.ui.components.ImageSelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 //import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationDialog
 import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
@@ -129,14 +112,11 @@ import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.utils.splitToDHMS
 import com.dev.james.booktracker.core.common_models.BookProgressData
-import com.dev.james.booktracker.core.common_models.BookStatsData
 import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import org.w3c.dom.Text
 import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -172,9 +152,9 @@ fun TrackBookScreen(
     }
 
 
-    /*val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
+    val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
         initialValue = BookTrackingViewModel.TrackBookScreenUiEvents.DefaultState
-    )*/
+    )
 
     val bookCompletedDialogState = bookTrackingViewModel.showBookCompleteDialog
 
@@ -182,7 +162,6 @@ fun TrackBookScreen(
         bookId?.let {
             bookTrackingViewModel.getBookStatistics(it)
             bookTrackingViewModel.fetchReadingLists(it)
-
         }
     }
 
@@ -203,13 +182,6 @@ fun TrackBookScreen(
         )
     }
 
-    /*when(screenEvents.value){
-        is BookTrackingViewModel.TrackBookScreenUiEvents.DefaultState -> {}
-        is BookTrackingViewModel.TrackBookScreenUiEvents.ShowBookCompleteDialog -> {
-
-        }
-    }
-*/
     val stopWatch = remember {
         StopWatch()
     }
@@ -240,14 +212,37 @@ fun TrackBookScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    when (val events = screenEvents.value) {
+        is BookTrackingViewModel.TrackBookScreenUiEvents.DefaultState -> {
+            Timber.tag("TrackBookScreen").d("ui event: Default state")
+        }
+        is BookTrackingViewModel.TrackBookScreenUiEvents.ShowSnackbar -> {
+            Timber.tag("TrackBookScreen").d("ui event: show snackbar")
+
+            LaunchedEffect(key1 = Unit) {
+                snackbarHostState.showSnackbar(
+                    message = events.message
+                )
+            }
+        }
+    }
+
     if (shouldShowReadingListDialog) {
         AddToReadingListDialog(
             readingList = readingLists.value,
             onDismiss = {
                 shouldShowReadingListDialog = false
             },
-            onListSelected = {
-                //add/remove from reading list
+            onListSelected = { item ->
+                // add/remove from reading list
+
+                bookTrackingViewModel.addOrRemoveFromReadingList(
+                    bookId = bookId!!,
+                    readingListId = item.id,
+                    readingListName = item.name
+                )
+
+
             },
             createNewPlayList = {
                 //create reading list if empty
@@ -531,7 +526,7 @@ fun TrackBookScreen(
 fun AddToReadingListDialog(
     readingList: List<ReadingListUiItem> = listOf(),
     onDismiss: () -> Unit = {},
-    onListSelected: (String) -> Unit = {},
+    onListSelected: (ReadingListUiItem) -> Unit = {},
     createNewPlayList: () -> Unit = {}
 ) {
     Dialog(
@@ -615,13 +610,13 @@ fun AddToReadingListDialog(
                     ) {
                         ListItem(
                             readingListUiItem = it,
-                            onItemChecked = { id ->
-                                onListSelected(id)
+                            onItemChecked = { readingList ->
+                                onListSelected(readingList)
                             }
                         )
                     }
                 }
-                
+
                 Divider(
                     modifier = Modifier.fillMaxWidth(),
                     thickness = 2.dp
@@ -664,12 +659,12 @@ fun AddToReadingListDialog(
 @Composable
 fun ListItem(
     readingListUiItem: ReadingListUiItem = ReadingListUiItem(),
-    onItemChecked: (String) -> Unit = {}
+    onItemChecked: (ReadingListUiItem) -> Unit = {}
 ) {
     Row(
         modifier = Modifier.clickable(
             onClick = {
-                onItemChecked(readingListUiItem.id)
+                onItemChecked(readingListUiItem)
             }
         ),
         verticalAlignment = Alignment.CenterVertically
@@ -680,7 +675,7 @@ fun ListItem(
             onCheckedChange = {},
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.colorScheme.secondary
-            ) ,
+            ),
             enabled = false
         )
 
@@ -1046,7 +1041,7 @@ fun ExpandableDescriptionCard(description: String) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(250.dp)
+                        .height(200.dp)
                         .verticalScroll(
                             state = rememberScrollState()
                         )
