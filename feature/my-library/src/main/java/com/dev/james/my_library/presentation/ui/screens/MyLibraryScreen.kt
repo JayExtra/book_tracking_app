@@ -1,5 +1,6 @@
 package com.dev.james.my_library.presentation.ui.screens
 
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -62,6 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import com.dev.james.booktracker.compose_ui.R
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -109,17 +111,19 @@ fun MyLibraryScreen(
         var shouldShowCreateReadingListDialog by rememberSaveable {
             mutableStateOf(false)
         }
+       // Toast.makeText(LocalContext.current , readingList.value.toString() , Toast.LENGTH_LONG).show()
 
-       /* LaunchedEffect(key1 = true) {
-            when (uiEvents.value) {
+        LaunchedEffect(key1 = true) {
+            myLibraryViewModel.fetchReadingList()
+           /* when (uiEvents.value) {
                 is MyLibraryViewModel.MyLibraryScreenUiEvents.DefaultState -> {}
                 is MyLibraryViewModel.MyLibraryScreenUiEvents.DismissReadListDialog -> {
                     //shouldShowCreateReadingListDialog = false
                 }
 
                 else -> {}
-            }
-        }*/
+            }*/
+        }
 
         if (shouldShowCreateReadingListDialog) {
             CreateReadingListDialog(
@@ -787,14 +791,14 @@ fun ReadingListItem(
                 color = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+         /*   Spacer(modifier = Modifier.height(6.dp))
 
             LinearProgressIndicator(
                 modifier = Modifier.width(250.dp),
                 // trackColor = Color.Gray ,
                 strokeCap = StrokeCap.Round,
                 progress = 0.5f
-            )
+            )*/
 
         }
     }

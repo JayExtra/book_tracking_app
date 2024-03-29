@@ -32,8 +32,10 @@ class ReadingListRepositoryImpl @Inject constructor(
             }
 
         return if(readingListFlow.first().isEmpty()){
+            Timber.tag(TAG).e("No reading lists available")
             flow { emit(emptyList()) }
         }else{
+            Timber.tag(TAG).e("Reading lists available : ${readingListFlow.first().toString()}")
             readingListFlow
         }
     }

@@ -69,6 +69,7 @@ class BookTrackingViewModel @Inject constructor(
 
     fun fetchReadingLists(bookId : String) = viewModelScope.launch {
         readingListsRepository.getReadingLists().collectLatest {
+            Timber.tag(TAG).d("Reading lists: ${it.toString()}")
            val readingListUiItem =  it.map { readingList ->
                    ReadingListUiItem(
                        id = readingList.id ,

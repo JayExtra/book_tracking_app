@@ -13,15 +13,19 @@ import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingListItem
 import com.dev.james.booktracker.core.common_models.ReadingLists
 import com.dev.james.booktracker.core.common_models.SuggestedBook
+import com.dev.james.booktracker.core.common_models.mappers.mapToLibraryData
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.dev.james.booktracker.core.utilities.getCurrentDateAndTime
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
+import com.dev.james.domain.usecases.FetchActiveBookProgress
 import com.dev.james.domain.usecases.FetchSuggestedBooksUsecase
 import com.dev.james.domain.usecases.GetBooksAndProgressUsecase
 import com.dev.james.domain.usecases.ReadingListUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,9 +33,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.Calendar
 import javax.inject.Inject
@@ -40,11 +47,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyLibraryViewModel @Inject constructor(
-    private val getBooksAndProgressUsecase: GetBooksAndProgressUsecase ,
-    private val fetchSuggestedBooksUsecase: FetchSuggestedBooksUsecase ,
-    private val readingListUsecase: ReadingListUsecase ,
-    private val readingListsRepository: ReadingListsRepository
-) : ViewModel() {
+    private val getBooksAndProgressUsecase: GetBooksAndProgressUsecase,
+    private val fetchSuggestedBooksUsecase: FetchSuggestedBooksUsecase,
+    private val readingListUsecase: ReadingListUsecase,
+    private val readingListsRepository: ReadingListsRepository,
+    private val fetchActiveBookProgress: FetchActiveBookProgress,
+    ) : ViewModel() {
 
     companion object {
         const val TAG = "MyLibraryViewModel"
@@ -66,9 +74,7 @@ class MyLibraryViewModel @Inject constructor(
     var isFetchingSuggestions by mutableStateOf(value = false)
         private set
 
-    private var _readingLists : MutableStateFlow<List<ReadingLists>> = MutableStateFlow(listOf(
-        ReadingLists()
-    ))
+    private var _readingLists : MutableStateFlow<List<ReadingLists>> = MutableStateFlow(listOf())
     val readingLists get() = _readingLists.asStateFlow()
 
     private val _uiEvents : Channel<MyLibraryScreenUiEvents> = Channel<MyLibraryScreenUiEvents>()
@@ -78,7 +84,7 @@ class MyLibraryViewModel @Inject constructor(
         isLoading = true
         getBooksWithProgress()
         getSuggestedBooks()
-        fetchReadingList()
+        //fetchReadingList()
     }
 
     /*private fun populateScreen() = viewModelScope.launch {
@@ -88,12 +94,40 @@ class MyLibraryViewModel @Inject constructor(
     }
 */
 
-    private fun fetchReadingList() = viewModelScope.launch {
+   @SuppressLint("NewApi")
+   fun fetchReadingList() = viewModelScope.launch {
+       Timber.tag(TAG).d("fetchReadingList triggered")
+        /*  val readingListFlow =  withContext(Dispatchers.Main) {
+               readingListUsecase.fetch()
+           }
+       readingListFlow.collectLatest { readingLists ->
+            _readingLists.value = readingLists
+       }*/
+       val readingLists = readingListsRepository.getReadingLists()
+       Timber.tag(TAG).d(readingLists.first().toString())
+       readingLists.map { list ->
+           list.map { item ->
+               val differedBooks = item.readingList.map {
+                   async { fetchActiveBookProgress.invoke(it) }
+               }
+               val booksListWithData = differedBooks.awaitAll().map {
+                   it.mapToLibraryData()
+               }
 
-        readingListUsecase.fetch().collectLatest {
-            Timber.tag(TAG).d("my reading lists : ${it.toString()}")
-            _readingLists.value = it
-        }
+               ReadingLists(
+                   id = item.id ,
+                   name = item.name ,
+                   image = item.image ,
+                   description = item.description ,
+                   readingList = booksListWithData ,
+                   date = item.date ,
+                   starred = item.starred
+               )
+           }
+       }.collectLatest { newList ->
+           _readingLists.value = newList
+       }
+
     }
 
     @SuppressLint("NewApi")
