@@ -76,6 +76,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
 import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
+import com.dev.james.booktracker.compose_ui.ui.components.CreateReadingListDialog
 import com.dev.james.booktracker.compose_ui.ui.components.ImageSelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
@@ -130,9 +131,9 @@ fun MyLibraryScreen(
                 onDismissRequest = {
                     shouldShowCreateReadingListDialog = false
                 },
-                onSaveReadingList = { image, name, description ->
+                onSaveReadingList = {  name, description ->
                     myLibraryViewModel.createReadingList(
-                        image = image,
+                        image = "",
                         name = name,
                         description = description
                     )
@@ -805,186 +806,4 @@ fun ReadingListItem(
 
 }
 
-@Composable
-@Preview()
-fun CreateReadingListDialog(
-    imageSelectorUiState: ImageSelectorUiState = ImageSelectorUiState(),
-    onSaveReadingList: (String, String, String) -> Unit = { _, _, _ -> },
-    onAddImage: () -> Unit = {},
-    onDismissRequest: () -> Unit = {}
-) {
-
-    var nameText by rememberSaveable {
-        mutableStateOf("")
-    }
-    var nameFieldError by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var descriptionText by rememberSaveable {
-        mutableStateOf("")
-    }
-    var descriptionFieldError by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    Dialog(
-        onDismissRequest = { onDismissRequest() }
-    ) {
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(8.dp),
-            tonalElevation = AlertDialogDefaults.TonalElevation,
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .size(70.dp)
-                            .padding(4.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.onBackground
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(30.dp),
-                                painter = painterResource(id = R.drawable.ic_playlist_add),
-                                contentDescription = "",
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                        }
-                    }
-
-                }
-                //Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = "create new reading list",
-                    style = BookAppTypography.labelLarge,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-
-                ImageSelectorComponent(
-                    imageSelectorState = ImageSelectorUiState(),
-                    modifier = Modifier.fillMaxWidth(),
-                    width = 0.dp ,
-                    height = 140.dp ,
-                   /* isCircular = true,
-                    size = 100.dp,*/
-                    onSelect = {
-                        onAddImage()
-                    },
-                    onClear = {
-
-                    }
-                )
-
-                OutlinedTextFieldComponent(
-                    modifier = Modifier.fillMaxWidth(),
-                    hint = "name",
-                    text = nameText,
-                    onTextChanged = {
-                        nameText = it
-                    },
-                    isSingleLine = true,
-                    hasError = nameFieldError,
-                    roundedCornerSize = 5.dp
-                )
-
-                OutlinedTextFieldComponent(
-                    modifier = Modifier.fillMaxWidth().height(150.dp),
-                    hint = "description",
-                    text = descriptionText,
-                    onTextChanged = {
-                        descriptionText = it
-                    },
-                    isSingleLine = false,
-                    hasError = descriptionFieldError,
-                    roundedCornerSize = 5.dp ,
-                    maxLines = 5
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                    // .padding(5.dp)
-                    ,
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-
-                    OutlinedButton(
-                        modifier = Modifier.wrapContentWidth(),
-                        onClick = { onDismissRequest() }
-                        /*colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )*/
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Text(text = "cancel", style = BookAppTypography.labelMedium)
-                    }
-
-                    Button(
-                        modifier = Modifier.wrapContentWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        onClick = {
-                            /*save reading list*/
-                            if (nameText.isBlank()) {
-                                nameFieldError = true
-                            } else if (descriptionText.isBlank()) {
-                                descriptionFieldError = true
-                            } else {
-                                onSaveReadingList(
-                                    imageSelectorUiState.imageSelectedUri.toString(),
-                                    nameText,
-                                    descriptionText
-                                )
-                            }
-                        })
-                    {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                        Text(text = "create list", style = BookAppTypography.labelMedium)
-                    }
-                }
-
-
-            }
-
-        }
-
-
-    }
-
-}
 

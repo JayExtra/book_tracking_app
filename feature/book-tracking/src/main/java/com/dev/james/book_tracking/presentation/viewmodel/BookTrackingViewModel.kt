@@ -10,7 +10,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.BookProgressData
 import com.dev.james.booktracker.core.common_models.GoalProgressData
+import com.dev.james.booktracker.core.common_models.ReadingListItem
 import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.core.utilities.generateSecureUUID
+import com.dev.james.booktracker.core.utilities.getCurrentDateAndTime
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
 import com.dev.james.domain.usecases.FetchActiveBookProgress
@@ -80,6 +83,20 @@ class BookTrackingViewModel @Inject constructor(
             _readingLists.value = readingListUiItem
         }
 
+    }
+
+    @SuppressLint("NewApi")
+    fun createReadingList(image : String, name : String, description : String) = viewModelScope.launch {
+        val readingListItem = ReadingListItem(
+            id = generateSecureUUID() ,
+            name = name ,
+            description = description ,
+            image = image ,
+            readingList = emptyList() ,
+            date = getCurrentDateAndTime() ,
+            starred = false
+        )
+        readingListsRepository.createReadingList(readingListItem)
     }
 
 

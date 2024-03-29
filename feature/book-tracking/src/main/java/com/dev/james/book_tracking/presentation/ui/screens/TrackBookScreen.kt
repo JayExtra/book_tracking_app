@@ -39,7 +39,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -53,15 +52,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -88,7 +88,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
@@ -104,6 +103,7 @@ import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigatio
 import com.dev.james.book_tracking.presentation.viewmodel.BookTrackingViewModel
 import com.dev.james.book_tracking.presentation.viewmodel.ReadingListUiItem
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
+import com.dev.james.booktracker.compose_ui.ui.components.CreateReadingListDialog
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 //import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationDialog
 import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
@@ -119,6 +119,7 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 /*@Preview(
@@ -201,9 +202,7 @@ fun TrackBookScreen(
     var isTimerValueZero by rememberSaveable {
         mutableStateOf(false)
     }
-    var shouldShowReadingListDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
+
 
 
     val bookData = bookTrackingViewModel.bookStatsState.collectAsStateWithLifecycle()
@@ -211,6 +210,13 @@ fun TrackBookScreen(
     val readingLists = bookTrackingViewModel.readingLists.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val sheetState = rememberModalBottomSheetState()
+    var showReadinglistSheet by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var showCreateReadingListDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     when (val events = screenEvents.value) {
         is BookTrackingViewModel.TrackBookScreenUiEvents.DefaultState -> {
@@ -227,25 +233,20 @@ fun TrackBookScreen(
         }
     }
 
-    if (shouldShowReadingListDialog) {
-        AddToReadingListDialog(
-            readingList = readingLists.value,
-            onDismiss = {
-                shouldShowReadingListDialog = false
-            },
-            onListSelected = { item ->
-                // add/remove from reading list
-
-                bookTrackingViewModel.addOrRemoveFromReadingList(
-                    bookId = bookId!!,
-                    readingListId = item.id,
-                    readingListName = item.name
+    if (showCreateReadingListDialog) {
+       //show create reading list dialog
+        CreateReadingListDialog(
+            onDismissRequest = {
+                showCreateReadingListDialog = false
+            } ,
+            onSaveReadingList = { name , description ->
+                //create new reading list
+                bookTrackingViewModel.createReadingList(
+                    image = "",
+                    name = name ,
+                    description = description
                 )
-
-
-            },
-            createNewPlayList = {
-                //create reading list if empty
+                showCreateReadingListDialog = false
             }
         )
     }
@@ -277,7 +278,7 @@ fun TrackBookScreen(
                         onClick = {
                             /*opens playlist dialog*/
                             //show dialog
-                            shouldShowReadingListDialog = true
+                            showReadinglistSheet = true
                         },
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = Color.Transparent
@@ -300,6 +301,42 @@ fun TrackBookScreen(
             )
         },
         content = { paddingValues ->
+
+            if(showReadinglistSheet){
+                ModalBottomSheet(
+                    modifier = Modifier.padding(8.dp),
+                    onDismissRequest = {
+                        showReadinglistSheet = false
+                    } ,
+                    sheetState = sheetState
+                ) {
+                    AddToReadingListDialog(
+                        readingList = readingLists.value ,
+                        onDismiss = {
+                            coroutineScope.launch {
+                                sheetState.hide()
+                                showReadinglistSheet = false
+                            }
+                        } ,
+                        onListSelected = { item ->
+                            // add/remove from reading list
+                            bookTrackingViewModel.addOrRemoveFromReadingList(
+                                bookId = bookId!!,
+                                readingListId = item.id,
+                                readingListName = item.name
+                            )
+                        } ,
+                        createNewPlayList = {
+                            coroutineScope.launch {
+                                sheetState.hide()
+                                showReadinglistSheet = false
+                            }
+                            showCreateReadingListDialog = true
+                        }
+                    )
+                }
+
+            }
 
             Column(
                 modifier = Modifier
@@ -529,130 +566,115 @@ fun AddToReadingListDialog(
     onListSelected: (ReadingListUiItem) -> Unit = {},
     createNewPlayList: () -> Unit = {}
 ) {
-    Dialog(
-        onDismissRequest = { onDismiss() }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(8.dp),
-            tonalElevation = AlertDialogDefaults.TonalElevation,
-            shape = RoundedCornerShape(10.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Text(
+                modifier = Modifier.weight(4f),
+                text = "Save To Reading List",
+                style = BookAppTypography.labelLarge,
+                textAlign = TextAlign.Start
+            )
+            TextButton(
+                modifier = Modifier.wrapContentWidth(),
+                onClick = { createNewPlayList() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent
+                )
             ) {
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        modifier = Modifier.weight(4f),
-                        text = "Save To Reading List",
-                        style = BookAppTypography.labelLarge,
-                        textAlign = TextAlign.Start
-                    )
-                    TextButton(
-                        modifier = Modifier.wrapContentWidth(),
-                        onClick = { createNewPlayList() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                        Text(
-                            text = "create",
-                            style = BookAppTypography.labelMedium,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-
-                    }
-                }
-
-                Divider(
-                    modifier = Modifier.fillMaxWidth(),
-                    thickness = 2.dp
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.secondary
                 )
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (readingList.isEmpty()) {
-                        item {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = "No list available",
-                                style = BookAppTypography.labelSmall,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        }
-                    }
-                    items(
-                        items = readingList,
-                        key = {
-                            it.id
-                        }
-                    ) {
-                        ListItem(
-                            readingListUiItem = it,
-                            onItemChecked = { readingList ->
-                                onListSelected(readingList)
-                            }
-                        )
-                    }
-                }
-
-                Divider(
-                    modifier = Modifier.fillMaxWidth(),
-                    thickness = 2.dp
+                Text(
+                    text = "create",
+                    style = BookAppTypography.labelMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.secondary
                 )
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    TextButton(
-                        modifier = Modifier.wrapContentWidth(),
-                        onClick = { onDismiss() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                        Text(
-                            text = "Done",
-                            style = BookAppTypography.labelMedium,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-
-                    }
-                }
 
             }
-
         }
 
+        Divider(
+            modifier = Modifier.fillMaxWidth(),
+            thickness = 2.dp
+        )
+
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (readingList.isEmpty()) {
+                item {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "No list available",
+                        style = BookAppTypography.labelSmall,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
+            items(
+                items = readingList,
+                key = {
+                    it.id
+                }
+            ) {
+                ListItem(
+                    readingListUiItem = it,
+                    onItemChecked = { readingList ->
+                        onListSelected(readingList)
+                    }
+                )
+            }
+        }
+
+        Divider(
+            modifier = Modifier.fillMaxWidth(),
+            thickness = 2.dp
+        )
+        Box(
+            modifier = Modifier.fillMaxWidth()
+                .padding(bottom = 20.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            TextButton(
+                modifier = Modifier.wrapContentWidth(),
+                onClick = { onDismiss() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.secondary
+                )
+                Text(
+                    text = "Done",
+                    style = BookAppTypography.labelMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+
+            }
+        }
 
     }
+
 
 }
 
