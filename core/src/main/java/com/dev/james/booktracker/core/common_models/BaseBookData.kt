@@ -1,9 +1,13 @@
 package com.dev.james.booktracker.core.common_models
 
-data class SuggestedBook(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class BaseBookData(
     val id : String = "" ,
     val image : String = "",
     val title : String = "" ,
+    val description : String= "" ,
     val authors : String = "" ,
     val publisher : String = "" ,
     val publishedDate : String = "" ,

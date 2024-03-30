@@ -1,9 +1,6 @@
 package com.dev.james.my_library.presentation.ui.viewmodel
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,35 +9,29 @@ import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingListItem
 import com.dev.james.booktracker.core.common_models.ReadingLists
-import com.dev.james.booktracker.core.common_models.SuggestedBook
+import com.dev.james.booktracker.core.common_models.BaseBookData
 import com.dev.james.booktracker.core.common_models.mappers.mapToLibraryData
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.dev.james.booktracker.core.utilities.getCurrentDateAndTime
+import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
 import com.dev.james.domain.usecases.FetchActiveBookProgress
 import com.dev.james.domain.usecases.FetchSuggestedBooksUsecase
 import com.dev.james.domain.usecases.GetBooksAndProgressUsecase
 import com.dev.james.domain.usecases.ReadingListUsecase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.util.Calendar
 import javax.inject.Inject
 
 
@@ -52,6 +43,7 @@ class MyLibraryViewModel @Inject constructor(
     private val readingListUsecase: ReadingListUsecase,
     private val readingListsRepository: ReadingListsRepository,
     private val fetchActiveBookProgress: FetchActiveBookProgress,
+    private val booksRepository: BooksRepository
     ) : ViewModel() {
 
     companion object {
@@ -61,10 +53,10 @@ class MyLibraryViewModel @Inject constructor(
     private var _booksWithProgress : MutableStateFlow<List<LibraryBookData>> = MutableStateFlow(value = listOf(LibraryBookData()))
     val booksWithProgress get() = _booksWithProgress.asStateFlow()
 
-    private var _suggestedBooksList : MutableStateFlow<List<SuggestedBook>> = MutableStateFlow(value = listOf(
-        SuggestedBook()
+    private var m_baseBooksListData : MutableStateFlow<List<BaseBookData>> = MutableStateFlow(value = listOf(
+        BaseBookData()
     ))
-    val suggestedBooksList get() = _suggestedBooksList.asStateFlow()
+    val suggestedBooksList get() = m_baseBooksListData.asStateFlow()
 
     var isLoading by mutableStateOf(value = false)
         private set
@@ -156,7 +148,7 @@ class MyLibraryViewModel @Inject constructor(
             is Resource.Success -> {
                 suggestionsErrorMessage = ""
                 isFetchingSuggestions = false
-                _suggestedBooksList.value = booksResource.data ?: emptyList()
+                m_baseBooksListData.value = booksResource.data ?: emptyList()
             }
             is Resource.Error -> {
                 isFetchingSuggestions = false
@@ -165,6 +157,11 @@ class MyLibraryViewModel @Inject constructor(
             }
             else ->{}
         }
+    }
+
+    fun addOrRemoveFromWishList(baseBookData: BaseBookData) = viewModelScope.launch {
+        val result = booksRepository.addOrRemoveFromWishList(baseBookData)
+        Timber.tag(TAG).d(result)
     }
 
     private fun getBooksWithProgress() = viewModelScope.launch {

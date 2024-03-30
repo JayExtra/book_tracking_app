@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dev.james.booktracker.core.common_models.BookProgressData
+import com.dev.james.booktracker.core.common_models.BookStatisticsData
 import com.dev.james.booktracker.core.common_models.GoalProgressData
 import com.dev.james.booktracker.core.common_models.ReadingListItem
 import com.dev.james.booktracker.core.utilities.Resource
@@ -46,8 +46,8 @@ class BookTrackingViewModel @Inject constructor(
         const val TAG = "BookTrackingViewModel"
     }
 
-    private var _bookStatsState: MutableStateFlow<BookProgressData> =
-        MutableStateFlow(BookProgressData())
+    private var _bookStatsState: MutableStateFlow<BookStatisticsData> =
+        MutableStateFlow(BookStatisticsData())
     val bookStatsState get() = _bookStatsState.asStateFlow()
 
     private var _goalProgressState: MutableStateFlow<GoalProgressData> =

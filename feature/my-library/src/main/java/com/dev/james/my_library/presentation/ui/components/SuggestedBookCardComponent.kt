@@ -38,16 +38,15 @@ import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.enums.DefaultColors
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.utils.getDarkerColor
-import com.dev.james.booktracker.core.common_models.Book
-import com.dev.james.booktracker.core.common_models.SuggestedBook
+import com.dev.james.booktracker.core.common_models.BaseBookData
 
 
 @Preview
 @Composable
 fun SuggestedBookCardComponent(
     cardColor: Long = DefaultColors.DEFAULT_CARD_COLOR,
-    book : SuggestedBook = SuggestedBook(),
-    onAddToWishlistSelected : (SuggestedBook) -> Unit = {}
+    book : BaseBookData = BaseBookData(),
+    onAddToWishlistSelected : (BaseBookData) -> Unit = {}
 ) {
 
     Card(

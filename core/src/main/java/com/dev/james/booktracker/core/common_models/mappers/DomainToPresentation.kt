@@ -1,11 +1,10 @@
 package com.dev.james.booktracker.core.common_models.mappers
 
 import com.dev.james.booktracker.core.common_models.Book
-import com.dev.james.booktracker.core.common_models.BookProgressData
-import com.dev.james.booktracker.core.common_models.BookSave
+import com.dev.james.booktracker.core.common_models.BookStatisticsData
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.PdfBookItem
-import com.dev.james.booktracker.core.common_models.SuggestedBook
+import com.dev.james.booktracker.core.common_models.BaseBookData
 import com.dev.james.booktracker.core.utilities.convertToOrganisedString
 
 /*fun BookSave.mapToPresentation() : Book {
@@ -34,12 +33,13 @@ fun PdfBookItem.mapToPresentation() : Book {
     )
 }
 
-fun Book.mapToPresentation() : SuggestedBook {
-    return SuggestedBook(
+fun Book.mapToPresentation() : BaseBookData {
+    return BaseBookData(
         id = bookId ?: "" ,
         image = bookImage ?: "" ,
         title = bookTitle ?: "" ,
         authors = bookAuthors?.convertToOrganisedString() ?: "" ,
+        description = description ?: "",
         publisher = publisher ?: ""  ,
         publishedDate = publishedDate ?: "" ,
         pages = bookPagesCount ?: 0 ,
@@ -47,7 +47,7 @@ fun Book.mapToPresentation() : SuggestedBook {
     )
 }
 
-fun BookProgressData.mapToLibraryData() : LibraryBookData {
+fun BookStatisticsData.mapToLibraryData() : LibraryBookData {
    return LibraryBookData(
        id = this.bookId ,
        image = this.bookImage ,

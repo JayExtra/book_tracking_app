@@ -142,4 +142,8 @@ dependencies{
     implementation ("com.tom-roush:pdfbox-android:2.0.27.0")
     implementation ("com.itextpdf:itextpdf:5.5.13.3")
 
+    //kotlin x serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinXSerialization}")
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:${Versions.kotlinXCollections}")
+
 }

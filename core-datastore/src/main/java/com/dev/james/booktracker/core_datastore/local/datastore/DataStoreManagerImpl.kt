@@ -3,10 +3,15 @@ package com.dev.james.booktracker.core_datastore.local.datastore
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
+import com.dev.james.booktracker.core.common_models.BaseBookData
+import com.dev.james.booktracker.core.datastore.proto.WishlistItems
+import com.dev.james.booktracker.core_datastore.local.datastore.proto.WishListSerializer
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.collections.immutable.mutate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -20,6 +25,8 @@ class DataStoreManagerImpl @Inject constructor(
 ) : DataStoreManager {
     companion object {
         private val Context.datastore : DataStore<Preferences> by preferencesDataStore(name = Constants.STORE_NAME)
+        private val Context.protoDatastore by dataStore(fileName = Constants.FILE_NAME , WishListSerializer )
+        const val TAG = "DataStoreManagerImpl"
     }
 
     override suspend fun storeStringValue(key: Preferences.Key<String>, value: String) {
@@ -87,5 +94,36 @@ class DataStoreManagerImpl @Inject constructor(
         }
     }
 
+    override suspend fun addToWishList(wishlistItem: BaseBookData) {
+        context.protoDatastore.updateData { wishlistItems ->
+            wishlistItems.copy(
+                wishlist = wishlistItems.wishlist.mutate {
+                    it.add(wishlistItem)
+                }
+            )
+        }
+    }
+
+    override fun getWishList(): Flow<WishlistItems> {
+        return context.protoDatastore.data
+    }
+
+    override suspend fun removeFromWishList(bookId: String) {
+        Timber.tag(TAG).d("removing $bookId")
+        context.protoDatastore.updateData { wishlistItems ->
+            val list = wishlistItems.wishlist
+            Timber.tag(TAG).d("actual list ${list.toString()}")
+            val book = list.find {
+                it.id == bookId
+            }
+            val bookIndex = list.indexOf(book)
+            Timber.tag(TAG).d("book found ${book.toString()} at index : $bookIndex")
+            wishlistItems.copy(
+                wishlist = list.mutate {
+                    it.remove(book)
+                }
+            )
+        }
+    }
 
 }

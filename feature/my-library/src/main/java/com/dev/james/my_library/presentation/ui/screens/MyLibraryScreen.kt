@@ -1,14 +1,10 @@
 package com.dev.james.my_library.presentation.ui.screens
 
-import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.FlingBehavior
-import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,20 +12,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,12 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -63,7 +46,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import com.dev.james.booktracker.compose_ui.R
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -71,20 +53,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
 import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.CreateReadingListDialog
-import com.dev.james.booktracker.compose_ui.ui.components.ImageSelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
-import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingLists
-import com.dev.james.booktracker.core.common_models.SuggestedBook
+import com.dev.james.booktracker.core.common_models.BaseBookData
 import com.dev.james.my_library.presentation.navigation.MyLibraryScreenNavigator
 import com.dev.james.my_library.presentation.ui.components.SuggestedBookCardComponent
 import com.dev.james.my_library.presentation.ui.viewmodel.MyLibraryViewModel
@@ -155,7 +133,7 @@ fun MyLibraryScreen(
             //show our screen
             MyLibraryStatelessScreen(
                 booksList = myBooksList.value,
-                suggestedBooksList = suggestedBooksList.value,
+                baseBooksListData = suggestedBooksList.value,
                 readingLists = readingList.value,
                 isFetchingSuggestions = myLibraryViewModel.isFetchingSuggestions,
                 suggestionsErrorMessage = myLibraryViewModel.suggestionsErrorMessage,
@@ -179,6 +157,9 @@ fun MyLibraryScreen(
                 } ,
                 onListSelected = {
                     //navigate to reading list screen
+                } ,
+                addToWishList = {
+                    myLibraryViewModel.addOrRemoveFromWishList(it)
                 }
             )
         }
@@ -192,10 +173,11 @@ fun MyLibraryScreen(
 fun MyLibraryStatelessScreen(
     modifier: Modifier = Modifier,
     booksList: List<LibraryBookData> = listOf(LibraryBookData()),
-    suggestedBooksList: List<SuggestedBook> = listOf(SuggestedBook()),
+    baseBooksListData: List<BaseBookData> = listOf(BaseBookData()),
     readingLists: List<ReadingLists> = listOf(ReadingLists()),
     isFetchingSuggestions: Boolean = false,
     suggestionsErrorMessage: String = "",
+    addToWishList : (BaseBookData) -> Unit ,
     retryNetCall: () -> Unit = {},
     onCurrentlyReadingSeeAll: () -> Unit = {},
     onSeeAllBookSelected: (String) -> Unit = {},
@@ -229,7 +211,7 @@ fun MyLibraryStatelessScreen(
         )
 
         SuggestedForYouSection(
-            bookList = suggestedBooksList,
+            bookList = baseBooksListData,
             hasError = suggestionsErrorMessage.isNotEmpty(),
             isLoading = isFetchingSuggestions,
             errorMessage = suggestionsErrorMessage,
@@ -238,6 +220,7 @@ fun MyLibraryStatelessScreen(
             },
             onAddToWishlist = {
                 //add to wishlist of reading
+                              addToWishList(it)
             },
             retry = {
                 retryNetCall()
@@ -401,13 +384,13 @@ fun CurrentlyReadingSection(
 @Composable
 fun SuggestedForYouSection(
     modifier: Modifier = Modifier,
-    bookList: List<SuggestedBook> = listOf(SuggestedBook()),
+    bookList: List<BaseBookData> = listOf(BaseBookData()),
     hasError: Boolean = false,
     errorMessage: String = "",
     isLoading: Boolean = false,
     retry: () -> Unit = {},
     onSeeAllClicked: () -> Unit = {},
-    onAddToWishlist: (String) -> Unit = {}
+    onAddToWishlist: (BaseBookData) -> Unit = {}
 ) {
     Column(
         modifier = modifier.height(170.dp),
@@ -575,7 +558,7 @@ fun SuggestedForYouSection(
                                 cardColor = colorsList.random(),
                                 book = book,
                                 onAddToWishlistSelected = { bookDets ->
-                                    onAddToWishlist(bookDets.id)
+                                    onAddToWishlist(bookDets)
                                 }
                             )
                         }

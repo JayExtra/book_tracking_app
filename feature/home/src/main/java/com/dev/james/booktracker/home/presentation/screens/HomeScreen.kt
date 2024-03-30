@@ -18,10 +18,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,7 +56,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airbnb.lottie.compose.*
@@ -69,8 +65,7 @@ import com.dev.james.booktracker.home.presentation.components.PdfListBottomSheet
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppShapes
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.R
-import com.dev.james.booktracker.core.common_models.Book
-import com.dev.james.booktracker.core.common_models.BookProgressData
+import com.dev.james.booktracker.core.common_models.BookStatisticsData
 import com.dev.james.booktracker.core.common_models.GoalProgressData
 import com.dev.james.booktracker.home.presentation.components.BookGoalInfoComponent
 import com.dev.james.booktracker.home.presentation.components.MyGoalsCardComponent
@@ -78,12 +73,8 @@ import com.dev.james.booktracker.home.presentation.components.StreakComponent
 import com.dev.james.booktracker.home.presentation.navigation.HomeNavigator
 import com.dev.james.booktracker.home.presentation.viewmodels.HomeScreenViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
-import com.vanpra.composematerialdialogs.MaterialDialogState
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -580,7 +571,7 @@ fun checkPermission(context: Context): Boolean {
 @Preview("Home Screen", showBackground = true)
 fun StatelessHomeScreen(
     homeScreenState: HomeScreenViewModel.HomeScreenUiState = HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData(
-        BookProgressData(),
+        BookStatisticsData(),
         GoalProgressData(),
         0
     ),
@@ -612,8 +603,8 @@ fun StatelessHomeScreen(
             when (homeScreenState) {
                 is HomeScreenViewModel.HomeScreenUiState.HasFetchedScreenData -> {
                     Timber.tag("HomeScreen")
-                        .d("HomeScreen: book progress data=> ${homeScreenState.bookProgressData} , goal progress data=> ${homeScreenState.goalProgressData}")
-                    if (homeScreenState.bookProgressData.bookId.isBlank() && homeScreenState.goalProgressData.goalId.isBlank()) {
+                        .d("HomeScreen: book progress data=> ${homeScreenState.bookStatisticsData} , goal progress data=> ${homeScreenState.goalProgressData}")
+                    if (homeScreenState.bookStatisticsData.bookId.isBlank() && homeScreenState.goalProgressData.goalId.isBlank()) {
 
                         NoDataRecordedDialog(
                             onAdd = {
@@ -630,16 +621,16 @@ fun StatelessHomeScreen(
                             Toast.LENGTH_SHORT
                         ).show()*/
 
-                        Timber.tag("HomeScreen").d("data => ${homeScreenState.bookProgressData}")
+                        Timber.tag("HomeScreen").d("data => ${homeScreenState.bookStatisticsData}")
 
                         Spacer(modifier = Modifier.height(6.dp))
 
                         BookGoalInfoComponent(
-                            shouldNotShowBlankMessage = homeScreenState.bookProgressData.bookId.isNotBlank(),
-                            bookProgressData = homeScreenState.bookProgressData,
+                            shouldNotShowBlankMessage = homeScreenState.bookStatisticsData.bookId.isNotBlank(),
+                            bookStatisticsData = homeScreenState.bookStatisticsData,
                             onContinueClicked = {
                                 onContinueBtnClicked(
-                                    homeScreenState.bookProgressData.bookId
+                                    homeScreenState.bookStatisticsData.bookId
                                 )
                             },
                             onProceedToMyLibrary = {

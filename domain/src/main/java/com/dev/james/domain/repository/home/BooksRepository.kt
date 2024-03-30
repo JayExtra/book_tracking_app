@@ -1,7 +1,9 @@
 package com.dev.james.domain.repository.home
 
+import com.dev.james.booktracker.core.common_models.BaseBookData
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookSave
+import com.dev.james.booktracker.core.datastore.proto.WishlistItems
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core.dto.BookVolumeDto
 import kotlinx.coroutines.flow.Flow
@@ -28,5 +30,9 @@ interface BooksRepository {
     suspend fun getBookByCategory(category : String) : Resource<List<Book>>
 
     suspend fun addOrRemoveBookFromReadingList(readingListId : String, bookId : String) : Resource<String>
+
+    suspend fun addOrRemoveFromWishList(baseBookData: BaseBookData) : String
+
+    fun getWishList() : Flow<List<BaseBookData>>
 
 }
