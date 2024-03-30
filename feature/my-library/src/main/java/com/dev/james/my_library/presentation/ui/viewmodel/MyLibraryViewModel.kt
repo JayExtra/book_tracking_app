@@ -25,11 +25,13 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -71,6 +73,14 @@ class MyLibraryViewModel @Inject constructor(
 
     private val _uiEvents : Channel<MyLibraryScreenUiEvents> = Channel<MyLibraryScreenUiEvents>()
     val uiEvents get() = _uiEvents.receiveAsFlow()
+
+
+    val myWishList = booksRepository.getWishList()
+        .stateIn(
+            scope = viewModelScope ,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000L) ,
+            initialValue = listOf()
+        )
 
     init {
         isLoading = true
@@ -163,6 +173,7 @@ class MyLibraryViewModel @Inject constructor(
         val result = booksRepository.addOrRemoveFromWishList(baseBookData)
         Timber.tag(TAG).d(result)
     }
+
 
     private fun getBooksWithProgress() = viewModelScope.launch {
         getBooksAndProgressUsecase.invoke().collectLatest { booksList ->

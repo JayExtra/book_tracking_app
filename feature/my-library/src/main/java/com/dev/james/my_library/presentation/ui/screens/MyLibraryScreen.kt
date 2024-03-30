@@ -83,6 +83,7 @@ fun MyLibraryScreen(
         val myBooksList = myLibraryViewModel.booksWithProgress.collectAsStateWithLifecycle()
         val suggestedBooksList = myLibraryViewModel.suggestedBooksList.collectAsStateWithLifecycle()
         val readingList = myLibraryViewModel.readingLists.collectAsStateWithLifecycle()
+        val wishList = myLibraryViewModel.myWishList.collectAsStateWithLifecycle()
         /*val uiEvents = myLibraryViewModel.uiEvents.collectAsStateWithLifecycle(
             initialValue = MyLibraryViewModel.MyLibraryScreenUiEvents.DefaultState
         )*/
@@ -135,6 +136,7 @@ fun MyLibraryScreen(
                 booksList = myBooksList.value,
                 baseBooksListData = suggestedBooksList.value,
                 readingLists = readingList.value,
+                wishlist = wishList.value,
                 isFetchingSuggestions = myLibraryViewModel.isFetchingSuggestions,
                 suggestionsErrorMessage = myLibraryViewModel.suggestionsErrorMessage,
                 retryNetCall = {
@@ -160,6 +162,9 @@ fun MyLibraryScreen(
                 } ,
                 addToWishList = {
                     myLibraryViewModel.addOrRemoveFromWishList(it)
+                } ,
+                onWishListBookSelected = {
+                    //open dialog wish book information
                 }
             )
         }
@@ -172,12 +177,14 @@ fun MyLibraryScreen(
 @Composable
 fun MyLibraryStatelessScreen(
     modifier: Modifier = Modifier,
-    booksList: List<LibraryBookData> = listOf(LibraryBookData()),
-    baseBooksListData: List<BaseBookData> = listOf(BaseBookData()),
-    readingLists: List<ReadingLists> = listOf(ReadingLists()),
+    booksList: List<LibraryBookData> = listOf(),
+    baseBooksListData: List<BaseBookData> = listOf(),
+    readingLists: List<ReadingLists> = listOf(),
+    wishlist: List<BaseBookData> = listOf() ,
     isFetchingSuggestions: Boolean = false,
     suggestionsErrorMessage: String = "",
-    addToWishList : (BaseBookData) -> Unit ,
+    addToWishList : (BaseBookData) -> Unit = {} ,
+    onWishListBookSelected : (BaseBookData) -> Unit = {} ,
     retryNetCall: () -> Unit = {},
     onCurrentlyReadingSeeAll: () -> Unit = {},
     onSeeAllBookSelected: (String) -> Unit = {},
@@ -220,7 +227,7 @@ fun MyLibraryStatelessScreen(
             },
             onAddToWishlist = {
                 //add to wishlist of reading
-                              addToWishList(it)
+                addToWishList(it)
             },
             retry = {
                 retryNetCall()
@@ -242,7 +249,123 @@ fun MyLibraryStatelessScreen(
             }
         )
 
+        MyWishListSection(
+            modifier = Modifier.fillMaxWidth() ,
+            wishlist = wishlist ,
+            onBookSelected = {
+                onWishListBookSelected(it)
+            }
+        )
+
     }
+}
+
+@Composable
+fun MyWishListSection(
+    modifier : Modifier = Modifier,
+    wishlist : List<BaseBookData> = emptyList() ,
+    onBookSelected : (BaseBookData) -> Unit = {}
+){
+
+    Column(
+        modifier = modifier.height(254.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.wrapContentWidth(),
+                text = "My Wishlist",
+                style = BookAppTypography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+           /* TextButton(
+                onClick = { onSeeAllClicked() }
+            ) {
+                Text(
+                    text = "see more",
+                    style = BookAppTypography.labelSmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Icon(imageVector = Icons.Rounded.KeyboardArrowRight, contentDescription = "")
+            }*/
+        }
+
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            horizontalArrangement = if (wishlist.isEmpty()) Arrangement.Center else Arrangement.spacedBy(
+                12.dp
+            ) ,
+            contentPadding = PaddingValues(top = 8.dp)
+        ) {
+            if (wishlist.isEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(
+                            space = 5.dp,
+                            alignment = Alignment.CenterVertically
+                        )
+                    ) {
+                        Text(
+                            modifier = Modifier.width(200.dp),
+                            text = "There are no books you are currently reading. Proceed to add one?",
+                            style = BookAppTypography.bodyMedium,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center
+                        )
+                        /*Button(
+                            modifier = Modifier.wrapContentWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            ),
+                            onClick = {  }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+
+                            Text(
+                                modifier = Modifier.padding(start = 3.dp),
+                                text = "add a book",
+                                style = BookAppTypography.labelMedium,
+                                fontSize = 10.sp
+                            )
+                        }*/
+                    }
+                }
+
+            } else {
+
+                items(items = wishlist) { book ->
+                    LibraryBookCardComponent(
+                        image = book.image,
+                        title = book.title,
+                        author = book.authors,
+                        shouldShowProgress = false,
+                        onItemSelected = {
+                            onBookSelected(book)
+                        }
+                    )
+                }
+            }
+
+        }
+    }
+
+
 }
 
 @Preview(showBackground = true)
@@ -338,7 +461,11 @@ fun CurrentlyReadingSection(
 
                 items(items = bookList) { book ->
                     LibraryBookCardComponent(
-                        book = book,
+                        image = book.image,
+                        title = book.title,
+                        author = book.author,
+                        shouldShowProgress = true,
+                        progress = book.progress,
                         onItemSelected = {
                             onBookSelected(book.id)
                         }
@@ -651,7 +778,9 @@ fun BookListSection(
 
         LazyColumn(
             state = state,
-            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
             contentPadding = PaddingValues(bottom = 8.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
