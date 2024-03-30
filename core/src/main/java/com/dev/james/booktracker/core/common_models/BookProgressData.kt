@@ -5,6 +5,7 @@ data class BookProgressData(
     val bookImage : String = "",
     val bookTitle : String = "",
     val authors : String = "",
+    val description : String = "" ,
     val isUri : Boolean = false,
     val totalPages : Int = 0,
     val totalTimeSpentWeekly : Long = 0L,

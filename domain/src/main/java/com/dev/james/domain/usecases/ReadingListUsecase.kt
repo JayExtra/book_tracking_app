@@ -12,8 +12,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 class ReadingListUsecase @Inject constructor(
@@ -22,11 +24,15 @@ class ReadingListUsecase @Inject constructor(
    // private val defaultDispatcher : CoroutineDispatcher = Dispatchers.IO
 ) {
 
+    companion object {
+        const val TAG = "ReadingListUsecase"
+    }
 
     @SuppressLint("NewApi")
     suspend fun fetch() : Flow<List<ReadingLists>> = withContext(Dispatchers.IO) {
-        return@withContext readingListsRepository.getReadingLists()
-            .map { list ->
+        val readingLists = readingListsRepository.getReadingLists()
+        Timber.tag(TAG).d(readingLists.first().toString())
+        val mappedReadingList = readingLists.map { list ->
                 list.map { item ->
                     val differedBooks = item.readingList.map {
                         async { fetchActiveBookProgress.invoke(it) }
@@ -46,5 +52,9 @@ class ReadingListUsecase @Inject constructor(
                     )
                 }
             }
+
+        Timber.tag(TAG).d("new list : %s", mappedReadingList.first().toString())
+
+        return@withContext mappedReadingList
     }
 }

@@ -1,15 +1,19 @@
 package com.dev.james.my_library.presentation.ui.screens
 
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,6 +55,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -58,6 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import com.dev.james.booktracker.compose_ui.R
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,6 +76,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
 import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
+import com.dev.james.booktracker.compose_ui.ui.components.CreateReadingListDialog
 import com.dev.james.booktracker.compose_ui.ui.components.ImageSelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
@@ -82,6 +89,7 @@ import com.dev.james.my_library.presentation.navigation.MyLibraryScreenNavigator
 import com.dev.james.my_library.presentation.ui.components.SuggestedBookCardComponent
 import com.dev.james.my_library.presentation.ui.viewmodel.MyLibraryViewModel
 import com.ramcosta.composedestinations.annotation.Destination
+import timber.log.Timber
 
 @Composable
 @Destination
@@ -97,23 +105,25 @@ fun MyLibraryScreen(
         val myBooksList = myLibraryViewModel.booksWithProgress.collectAsStateWithLifecycle()
         val suggestedBooksList = myLibraryViewModel.suggestedBooksList.collectAsStateWithLifecycle()
         val readingList = myLibraryViewModel.readingLists.collectAsStateWithLifecycle()
-        val uiEvents = myLibraryViewModel.uiEvents.collectAsStateWithLifecycle(
+        /*val uiEvents = myLibraryViewModel.uiEvents.collectAsStateWithLifecycle(
             initialValue = MyLibraryViewModel.MyLibraryScreenUiEvents.DefaultState
-        )
+        )*/
 
         var shouldShowCreateReadingListDialog by rememberSaveable {
             mutableStateOf(false)
         }
+       // Toast.makeText(LocalContext.current , readingList.value.toString() , Toast.LENGTH_LONG).show()
 
         LaunchedEffect(key1 = true) {
-            when (uiEvents.value) {
+            myLibraryViewModel.fetchReadingList()
+           /* when (uiEvents.value) {
                 is MyLibraryViewModel.MyLibraryScreenUiEvents.DefaultState -> {}
                 is MyLibraryViewModel.MyLibraryScreenUiEvents.DismissReadListDialog -> {
                     //shouldShowCreateReadingListDialog = false
                 }
 
                 else -> {}
-            }
+            }*/
         }
 
         if (shouldShowCreateReadingListDialog) {
@@ -121,9 +131,9 @@ fun MyLibraryScreen(
                 onDismissRequest = {
                     shouldShowCreateReadingListDialog = false
                 },
-                onSaveReadingList = { image, name, description ->
+                onSaveReadingList = {  name, description ->
                     myLibraryViewModel.createReadingList(
-                        image = image,
+                        image = "",
                         name = name,
                         description = description
                     )
@@ -273,8 +283,8 @@ fun CurrentlyReadingSection(
         ) {
             Text(
                 modifier = Modifier.wrapContentWidth(),
-                text = "My books",
-                style = BookAppTypography.labelLarge,
+                text = "My Books",
+                style = BookAppTypography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             TextButton(
@@ -411,8 +421,8 @@ fun SuggestedForYouSection(
         ) {
             Text(
                 modifier = Modifier.wrapContentWidth(),
-                text = "Suggested for you",
-                style = BookAppTypography.labelLarge,
+                text = "You May Also Like",
+                style = BookAppTypography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             /* TextButton(
@@ -588,6 +598,7 @@ fun BookListSection(
     onDeleteList: (String) -> Unit = {},
     onListSelected: (String) -> Unit = {}
 ) {
+    Timber.tag("BookListSection").d("reading list : ${readingList.toString()}")
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -607,8 +618,9 @@ fun BookListSection(
         ) {
             Text(
                 modifier = Modifier.weight(0.5f),
-                text = "My reading list",
-                style = BookAppTypography.labelLarge
+                text = "My Reading Lists",
+                style = BookAppTypography.headlineSmall ,
+                fontWeight = FontWeight.Bold
             )
 
             TextButton(
@@ -640,12 +652,28 @@ fun BookListSection(
                         }*/
         }
 
+
+        val state = rememberLazyListState()
+
+        LaunchedEffect(readingList) {
+            snapshotFlow { state.firstVisibleItemIndex }
+                .collect {
+                    // Scroll to the top if a new item is added.
+                    // (But only if user is scrolled to the top already.)
+                    if (it <= 1) {
+                        state.scrollToItem(0)
+                    }
+                }
+        }
+
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().height(150.dp),
+            state = state,
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
             contentPadding = PaddingValues(bottom = 8.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
 
             if (readingList.isEmpty()) {
 
@@ -662,17 +690,19 @@ fun BookListSection(
                 }
 
             } else {
+
                 items(readingList, key = {
                     it.id
                 }) {
                     val dismissState = rememberDismissState()
 
-                    if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+                    if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
                         //perform delete action here
                         onDeleteList(it.id)
                     }
                     SwipeToDismiss(
                         state = dismissState,
+                        directions = setOf(DismissDirection.StartToEnd),
                         background = {
                             val color by animateColorAsState(
                                 when (dismissState.targetValue) {
@@ -680,7 +710,7 @@ fun BookListSection(
                                     else -> Color.Red
                                 }, label = ""
                             )
-                            val alignment = Alignment.CenterEnd
+                            val alignment = Alignment.CenterStart
                             val icon = Icons.Default.Delete
 
                             val scale by animateFloatAsState(
@@ -762,199 +792,18 @@ fun ReadingListItem(
                 color = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+         /*   Spacer(modifier = Modifier.height(6.dp))
 
             LinearProgressIndicator(
                 modifier = Modifier.width(250.dp),
                 // trackColor = Color.Gray ,
                 strokeCap = StrokeCap.Round,
                 progress = 0.5f
-            )
+            )*/
 
         }
     }
 
 }
 
-@Composable
-@Preview()
-fun CreateReadingListDialog(
-    imageSelectorUiState: ImageSelectorUiState = ImageSelectorUiState(),
-    onSaveReadingList: (String, String, String) -> Unit = { _, _, _ -> },
-    onAddImage: () -> Unit = {},
-    onDismissRequest: () -> Unit = {}
-) {
-
-    var nameText by rememberSaveable {
-        mutableStateOf("")
-    }
-    var nameFieldError by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var descriptionText by rememberSaveable {
-        mutableStateOf("")
-    }
-    var descriptionFieldError by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    Dialog(
-        onDismissRequest = { onDismissRequest() }
-    ) {
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(8.dp),
-            tonalElevation = AlertDialogDefaults.TonalElevation,
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .size(70.dp)
-                            .padding(4.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.onBackground
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(30.dp),
-                                painter = painterResource(id = R.drawable.ic_playlist_add),
-                                contentDescription = "",
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                        }
-                    }
-
-                }
-                //Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = "create new reading list",
-                    style = BookAppTypography.labelLarge,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-
-                ImageSelectorComponent(
-                    imageSelectorState = ImageSelectorUiState(),
-                    width = 260.dp ,
-                    height = 140.dp ,
-                   /* isCircular = true,
-                    size = 100.dp,*/
-                    onSelect = {
-                        onAddImage()
-                    },
-                    onClear = {
-
-                    }
-                )
-
-                OutlinedTextFieldComponent(
-                    modifier = Modifier.fillMaxWidth(),
-                    hint = "name",
-                    text = nameText,
-                    onTextChanged = {
-                        nameText = it
-                    },
-                    isSingleLine = true,
-                    hasError = nameFieldError,
-                    roundedCornerSize = 5.dp
-                )
-
-                OutlinedTextFieldComponent(
-                    modifier = Modifier.fillMaxWidth().height(150.dp),
-                    hint = "description",
-                    text = descriptionText,
-                    onTextChanged = {
-                        descriptionText = it
-                    },
-                    isSingleLine = false,
-                    hasError = descriptionFieldError,
-                    roundedCornerSize = 5.dp ,
-                    maxLines = 5
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                    // .padding(5.dp)
-                    ,
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-
-                    OutlinedButton(
-                        modifier = Modifier.wrapContentWidth(),
-                        onClick = { onDismissRequest() }
-                        /*colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )*/
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Text(text = "cancel", style = BookAppTypography.labelMedium)
-                    }
-
-                    Button(
-                        modifier = Modifier.wrapContentWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        onClick = {
-                            /*save reading list*/
-                            if (nameText.isBlank()) {
-                                nameFieldError = true
-                            } else if (descriptionText.isBlank()) {
-                                descriptionFieldError = true
-                            } else {
-                                onSaveReadingList(
-                                    imageSelectorUiState.imageSelectedUri.toString(),
-                                    nameText,
-                                    descriptionText
-                                )
-                            }
-                        })
-                    {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                        Text(text = "create list", style = BookAppTypography.labelMedium)
-                    }
-                }
-
-
-            }
-
-        }
-
-
-    }
-
-}
 
