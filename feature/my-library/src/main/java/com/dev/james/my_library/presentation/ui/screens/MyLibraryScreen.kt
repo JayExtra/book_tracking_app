@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -55,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dev.james.booktracker.compose_ui.ui.components.BookDetailsDialog
 import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.CreateReadingListDialog
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
@@ -91,6 +93,12 @@ fun MyLibraryScreen(
         var shouldShowCreateReadingListDialog by rememberSaveable {
             mutableStateOf(false)
         }
+        var showBookDetailsDialog by rememberSaveable {
+            mutableStateOf(false)
+        }
+        var selectedBookData by remember {
+            mutableStateOf(BaseBookData())
+        }
        // Toast.makeText(LocalContext.current , readingList.value.toString() , Toast.LENGTH_LONG).show()
 
         LaunchedEffect(key1 = true) {
@@ -120,6 +128,22 @@ fun MyLibraryScreen(
                 },
                 onAddImage = {
                     //open image selector ui
+                }
+            )
+        }
+
+        if(showBookDetailsDialog){
+            BookDetailsDialog(
+                book = selectedBookData ,
+                addOrRemoveFromWishlist = {
+
+                } ,
+                addBook = {
+
+                } ,
+                onDismiss = {
+                    showBookDetailsDialog = false
+                    selectedBookData = BaseBookData()
                 }
             )
         }
@@ -165,6 +189,8 @@ fun MyLibraryScreen(
                 } ,
                 onWishListBookSelected = {
                     //open dialog wish book information
+                    showBookDetailsDialog = true
+                    selectedBookData = it
                 }
             )
         }
