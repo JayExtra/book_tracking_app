@@ -1,6 +1,8 @@
 package com.dev.james.booktracker.core_datastore.local.datastore
 
 import androidx.datastore.preferences.core.Preferences
+import com.dev.james.booktracker.core.common_models.BaseBookData
+import com.dev.james.booktracker.core.datastore.proto.WishlistItems
 import kotlinx.coroutines.flow.Flow
 
 
@@ -18,4 +20,9 @@ interface DataStoreManager {
     suspend fun readStringValueOnce(key : Preferences.Key<String>) : String
 
     fun getSelectedThemeStream(key : Preferences.Key<Int>) : Flow<Int>
+
+    suspend fun addToWishList(wishlistItem: BaseBookData)
+    fun getWishList() : Flow<WishlistItems>
+
+    suspend fun removeFromWishList(bookId : String)
 }

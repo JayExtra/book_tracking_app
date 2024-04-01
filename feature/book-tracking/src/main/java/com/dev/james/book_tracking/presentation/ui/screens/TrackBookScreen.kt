@@ -111,7 +111,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.utils.splitToDHMS
-import com.dev.james.booktracker.core.common_models.BookProgressData
+import com.dev.james.booktracker.core.common_models.BookStatisticsData
 import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 import com.ramcosta.composedestinations.annotation.Destination
 import com.vanpra.composematerialdialogs.MaterialDialog
@@ -813,7 +813,7 @@ fun ProgressGraphSection(
 @Composable
 @Preview(showBackground = true)
 fun BookProgressSection(
-    bookData: BookProgressData = BookProgressData(),
+    bookData: BookStatisticsData = BookStatisticsData(),
     timerValue: String = "00:00:00",
     showTimerText: Boolean = false,
     isBookActive: Boolean = false,
@@ -1470,7 +1470,7 @@ fun HoursWithEmojiComponent(
 @Preview(showBackground = true)
 fun BookProgressImageSection(
     modifier: Modifier = Modifier,
-    bookData: BookProgressData = BookProgressData(),
+    bookData: BookStatisticsData = BookStatisticsData(),
 ) {
     var animationTriggered by remember {
         mutableStateOf(false)

@@ -25,8 +25,12 @@ import com.dev.james.booktracker.core.common_models.LibraryBookData
 @Preview(showBackground = true)
 @Composable
 fun LibraryBookCardComponent(
-    modifier : Modifier = Modifier ,
-    book : LibraryBookData = LibraryBookData() ,
+    modifier : Modifier = Modifier,
+    image : String  =  "" ,
+    title : String  = "" ,
+    author : String = "" ,
+    progress : Int = 0 ,
+    shouldShowProgress : Boolean = false ,
     onItemSelected : () -> Unit = {}
 ){
     Column(
@@ -43,11 +47,11 @@ fun LibraryBookCardComponent(
             modifier = Modifier
                 .width(104.dp)
                 .height(144.dp) ,
-            image = book.image
+            image = image
         )
         Text(
             modifier = Modifier.width(104.dp),
-            text = book.title ,
+            text = title ,
             style = BookAppTypography.labelSmall ,
             fontSize = 13.sp ,
             textAlign = TextAlign.Start ,
@@ -57,7 +61,7 @@ fun LibraryBookCardComponent(
         )
         Text(
             modifier = Modifier.width(104.dp),
-            text = book.author ,
+            text = author ,
             style = BookAppTypography.labelMedium ,
             fontSize = 10.sp ,
             textAlign = TextAlign.Start ,
@@ -65,13 +69,15 @@ fun LibraryBookCardComponent(
             color = MaterialTheme.colorScheme.primary ,
             overflow = TextOverflow.Ellipsis
         )
-        Text(
-            text = "${book.progress}%" ,
-            style = BookAppTypography.labelMedium ,
-            fontSize = 16.sp ,
-            textAlign = TextAlign.Start ,
-            color = MaterialTheme.colorScheme.secondary
-        )
+        if(shouldShowProgress){
+            Text(
+                text = "$progress%" ,
+                style = BookAppTypography.labelMedium ,
+                fontSize = 16.sp ,
+                textAlign = TextAlign.Start ,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
     }
 
 }

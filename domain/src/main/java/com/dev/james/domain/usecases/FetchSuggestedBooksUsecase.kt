@@ -1,6 +1,6 @@
 package com.dev.james.domain.usecases
 
-import com.dev.james.booktracker.core.common_models.SuggestedBook
+import com.dev.james.booktracker.core.common_models.BaseBookData
 import com.dev.james.booktracker.core.common_models.mappers.mapToPresentation
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.domain.repository.home.BooksRepository
@@ -18,7 +18,7 @@ class FetchSuggestedBooksUsecase @Inject constructor(
         const val TAG = "FetchSuggestedBooksUsecase"
     }
 
-    suspend operator fun invoke(): Resource<List<SuggestedBook>> {
+    suspend operator fun invoke(): Resource<List<BaseBookData>> {
 
         val frequentCategory = getFrequentCategory() ?: getDefaultCategory()
 
@@ -30,7 +30,8 @@ class FetchSuggestedBooksUsecase @Inject constructor(
                     bookItem.mapToPresentation()
                 }?.filter { book ->
                     book.category.contains(frequentCategory)
-                } ?: listOf(SuggestedBook())
+                } ?: listOf()
+
                 Timber.tag(TAG).d("Suggested books => ${list.toString()}")
                 return Resource.Success(data = list)
             }

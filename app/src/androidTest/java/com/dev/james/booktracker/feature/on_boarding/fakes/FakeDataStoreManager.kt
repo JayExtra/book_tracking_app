@@ -1,6 +1,8 @@
-package com.dev.james.booktracker.core.test_commons
+package com.dev.james.booktracker.feature.on_boarding.fakes
 
 import androidx.datastore.preferences.core.Preferences
+import com.dev.james.booktracker.core.common_models.BaseBookData
+import com.dev.james.booktracker.core.datastore.proto.WishlistItems
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -43,5 +45,17 @@ class FakeDataStoreManager : DataStoreManager {
 
     override fun getSelectedThemeStream(key: Preferences.Key<Int>): Flow<Int> {
         return flow { intMap[key] }
+    }
+
+    override suspend fun addToWishList(wishlistItem: BaseBookData) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getWishList(): Flow<WishlistItems> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun removeFromWishList(bookId: String) {
+        TODO("Not yet implemented")
     }
 }

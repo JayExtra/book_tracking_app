@@ -1,6 +1,7 @@
 package com.dev.james.data.repositories.books
 
 import android.database.sqlite.SQLiteException
+import com.dev.james.booktracker.core.common_models.BaseBookData
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.mappers.mapToBookDomainObject
@@ -20,6 +21,8 @@ import com.dev.james.domain.repository.home.BooksRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -216,6 +219,42 @@ class BooksRepositoryImpl
             Timber.tag(TAG).d("Error on adding or removing book to reading list: ${e.stackTrace}")
             Resource.Error("could not add or remove book from playlist: ${e.localizedMessage}")
         }
+    }
+
+    override suspend fun addOrRemoveFromWishList(baseBookData: BaseBookData): String {
+        val currentWishList = dataStoreManager.getWishList().first().wishlist
+        Timber.tag(TAG).d("current wish list => ${currentWishList.toString()}")
+
+        return if(currentWishList.contains(baseBookData)){
+            Timber.tag(TAG).d("removing => ${baseBookData.title}")
+            dataStoreManager.removeFromWishList(baseBookData.id)
+            if (!dataStoreManager.getWishList().first().wishlist.contains(baseBookData)) {
+                Timber.tag(TAG).d("removed => ${baseBookData.title}")
+                "removed:${baseBookData.title}"
+            }else {
+                Timber.tag(TAG).d("fail to remove => ${baseBookData.title}")
+                "failed:${baseBookData.title}"
+            }
+        }else {
+            Timber.tag(TAG).d("adding => ${baseBookData.title}")
+            dataStoreManager.addToWishList(baseBookData)
+            if (dataStoreManager.getWishList().first().wishlist.contains(baseBookData)) {
+                Timber.tag(TAG).d("added => ${baseBookData.title}")
+                "added:${baseBookData.title}"
+            }else {
+                Timber.tag(TAG).d("failed to add => ${baseBookData.title}")
+                "failed:${baseBookData.title}"
+            }
+        }
+    }
+
+    override fun getWishList(): Flow<List<BaseBookData>> {
+        return dataStoreManager.getWishList()
+            .map {
+                it.wishlist
+            }.catch { e ->
+                Timber.tag(TAG).e(e.stackTrace.toString())
+            }
     }
 }
 

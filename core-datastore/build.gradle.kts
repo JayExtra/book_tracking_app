@@ -3,6 +3,7 @@ plugins {
     id(Plugins.kotlinPlugin)
     id(Plugins.daggerHilt)
     id(Plugins.kapt)
+    id(Plugins.kotlinXSerialization)
 }
 
 apply {
@@ -45,5 +46,5 @@ android {
 }
 
 dependencies {
-    //implementation(project(Modules.composeUi))
+    implementation(project(Modules.core))
 }

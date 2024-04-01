@@ -55,6 +55,7 @@ object Plugins {
     const val kapt = "kotlin-kapt"
     const val kotlinJvm = "org.jetbrains.kotlin.jvm"
     const val daggerHilt = "com.google.dagger.hilt.android"
+    const val kotlinXSerialization = "org.jetbrains.kotlin.plugin.serialization"
 }
 
 object Versions{
@@ -64,6 +65,9 @@ object Versions{
     const val jvmTargetVersion = "1.8"
     const val spotlessVersion = "6.13.0"
     const val ktlintVersion = "11.0.0"
+    const val kotlinXSerializationPluginVersion = "1.7.20"
+    const val kotlinXSerialization = "1.3.2"
+    const val kotlinXCollections = "0.3.5"
 
     const val navDestinations = "1.7.32-beta"
     const val daggerHiltVersion = "2.44"

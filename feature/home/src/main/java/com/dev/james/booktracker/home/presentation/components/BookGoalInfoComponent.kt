@@ -51,7 +51,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.core.common_models.BookProgressData
+import com.dev.james.booktracker.core.common_models.BookStatisticsData
 import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
 import com.dev.james.booktracker.home.R
 
@@ -59,8 +59,8 @@ import com.dev.james.booktracker.home.R
 @Preview(showBackground = true)
 fun BookGoalInfoComponent(
     shouldNotShowBlankMessage : Boolean = false,
-    bookProgressData: BookProgressData = BookProgressData(),
-    onContinueClicked : () -> Unit = {} ,
+    bookStatisticsData: BookStatisticsData = BookStatisticsData(),
+    onContinueClicked : () -> Unit = {},
     onProceedToMyLibrary : () -> Unit = {}
 ) {
 
@@ -85,7 +85,7 @@ fun BookGoalInfoComponent(
                     textAlign = TextAlign.Start
                 )
                 GoalDataComponent(
-                    bookProgressData = bookProgressData ,
+                    bookStatisticsData = bookStatisticsData ,
                     onContinue = {
                         onContinueClicked()
                     }
@@ -118,7 +118,7 @@ fun BookGoalInfoComponent(
 @Composable
 @Preview(showBackground = true)
 fun GoalDataComponent(
-    bookProgressData: BookProgressData = BookProgressData(),
+    bookStatisticsData: BookStatisticsData = BookStatisticsData(),
     onContinue : () -> Unit = {}
 ) {
     //use constraint layout
@@ -158,28 +158,28 @@ fun GoalDataComponent(
     ) {
         BookImageComponent(
             modifier = Modifier.layoutId("image_section"),
-            image = bookProgressData.bookImage,
-            isUri = bookProgressData.isUri
+            image = bookStatisticsData.bookImage,
+            isUri = bookStatisticsData.isUri
         )
         ProgressComponent(
             modifier = Modifier.layoutId("progress_section"),
-            progress = bookProgressData.progress
+            progress = bookStatisticsData.progress
         )
 
         ReadProgressComponent(
             modifier = Modifier.layoutId("chapter_section"),
             icon = R.drawable.ic_bookmark_24,
-            title = "Chapter ${bookProgressData.currentChapter}",
-            subTitle = bookProgressData.currentChapterTitle
+            title = "Chapter ${bookStatisticsData.currentChapter}",
+            subTitle = bookStatisticsData.currentChapterTitle
         )
         ReadProgressComponent(
             modifier = Modifier.layoutId("best_time_section"),
             icon = R.drawable.ic_clock_24,
             title = "Total time",
-            subTitle = bookProgressData.totalTimeSpent.formatTimeToDHMS()
+            subTitle = bookStatisticsData.totalTimeSpent.formatTimeToDHMS()
         )
 
-        val contBtnText = when (bookProgressData.progress) {
+        val contBtnText = when (bookStatisticsData.progress) {
             0f -> {
                 stringResource(R.string.start_reading)
             }

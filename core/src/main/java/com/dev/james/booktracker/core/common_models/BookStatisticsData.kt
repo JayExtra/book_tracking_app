@@ -1,6 +1,6 @@
 package com.dev.james.booktracker.core.common_models
 
-data class BookProgressData(
+data class BookStatisticsData(
     val bookId : String = "",
     val bookImage : String = "",
     val bookTitle : String = "",

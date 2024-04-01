@@ -1,5 +1,3 @@
-import java.net.URI
-
 buildscript {
     extra.apply{
         set("compose_ui_version" , "1.3.2")
@@ -20,6 +18,7 @@ plugins {
     id(Plugins.daggerHilt) version (Versions.daggerHiltVersion) apply false
     id (Plugins.spotlessPlugin) version (Versions.spotlessVersion)
     id (Plugins.ktlintPlugin) version (Versions.ktlintVersion)
+    id(Plugins.kotlinXSerialization) version (Versions.kotlinXSerializationPluginVersion)
 }
 
 subprojects{

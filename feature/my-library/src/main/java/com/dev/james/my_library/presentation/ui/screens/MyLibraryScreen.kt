@@ -1,14 +1,10 @@
 package com.dev.james.my_library.presentation.ui.screens
 
-import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.FlingBehavior
-import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,20 +12,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,12 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -63,7 +46,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import com.dev.james.booktracker.compose_ui.R
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -71,20 +53,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.ImageSelectorUiState
 import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.CreateReadingListDialog
-import com.dev.james.booktracker.compose_ui.ui.components.ImageSelectorComponent
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
-import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingLists
-import com.dev.james.booktracker.core.common_models.SuggestedBook
+import com.dev.james.booktracker.core.common_models.BaseBookData
 import com.dev.james.my_library.presentation.navigation.MyLibraryScreenNavigator
 import com.dev.james.my_library.presentation.ui.components.SuggestedBookCardComponent
 import com.dev.james.my_library.presentation.ui.viewmodel.MyLibraryViewModel
@@ -105,6 +83,7 @@ fun MyLibraryScreen(
         val myBooksList = myLibraryViewModel.booksWithProgress.collectAsStateWithLifecycle()
         val suggestedBooksList = myLibraryViewModel.suggestedBooksList.collectAsStateWithLifecycle()
         val readingList = myLibraryViewModel.readingLists.collectAsStateWithLifecycle()
+        val wishList = myLibraryViewModel.myWishList.collectAsStateWithLifecycle()
         /*val uiEvents = myLibraryViewModel.uiEvents.collectAsStateWithLifecycle(
             initialValue = MyLibraryViewModel.MyLibraryScreenUiEvents.DefaultState
         )*/
@@ -155,8 +134,9 @@ fun MyLibraryScreen(
             //show our screen
             MyLibraryStatelessScreen(
                 booksList = myBooksList.value,
-                suggestedBooksList = suggestedBooksList.value,
+                baseBooksListData = suggestedBooksList.value,
                 readingLists = readingList.value,
+                wishlist = wishList.value,
                 isFetchingSuggestions = myLibraryViewModel.isFetchingSuggestions,
                 suggestionsErrorMessage = myLibraryViewModel.suggestionsErrorMessage,
                 retryNetCall = {
@@ -179,6 +159,12 @@ fun MyLibraryScreen(
                 } ,
                 onListSelected = {
                     //navigate to reading list screen
+                } ,
+                addToWishList = {
+                    myLibraryViewModel.addOrRemoveFromWishList(it)
+                } ,
+                onWishListBookSelected = {
+                    //open dialog wish book information
                 }
             )
         }
@@ -191,11 +177,14 @@ fun MyLibraryScreen(
 @Composable
 fun MyLibraryStatelessScreen(
     modifier: Modifier = Modifier,
-    booksList: List<LibraryBookData> = listOf(LibraryBookData()),
-    suggestedBooksList: List<SuggestedBook> = listOf(SuggestedBook()),
-    readingLists: List<ReadingLists> = listOf(ReadingLists()),
+    booksList: List<LibraryBookData> = listOf(),
+    baseBooksListData: List<BaseBookData> = listOf(),
+    readingLists: List<ReadingLists> = listOf(),
+    wishlist: List<BaseBookData> = listOf() ,
     isFetchingSuggestions: Boolean = false,
     suggestionsErrorMessage: String = "",
+    addToWishList : (BaseBookData) -> Unit = {} ,
+    onWishListBookSelected : (BaseBookData) -> Unit = {} ,
     retryNetCall: () -> Unit = {},
     onCurrentlyReadingSeeAll: () -> Unit = {},
     onSeeAllBookSelected: (String) -> Unit = {},
@@ -229,7 +218,7 @@ fun MyLibraryStatelessScreen(
         )
 
         SuggestedForYouSection(
-            bookList = suggestedBooksList,
+            bookList = baseBooksListData,
             hasError = suggestionsErrorMessage.isNotEmpty(),
             isLoading = isFetchingSuggestions,
             errorMessage = suggestionsErrorMessage,
@@ -238,6 +227,7 @@ fun MyLibraryStatelessScreen(
             },
             onAddToWishlist = {
                 //add to wishlist of reading
+                addToWishList(it)
             },
             retry = {
                 retryNetCall()
@@ -259,7 +249,123 @@ fun MyLibraryStatelessScreen(
             }
         )
 
+        MyWishListSection(
+            modifier = Modifier.fillMaxWidth() ,
+            wishlist = wishlist ,
+            onBookSelected = {
+                onWishListBookSelected(it)
+            }
+        )
+
     }
+}
+
+@Composable
+fun MyWishListSection(
+    modifier : Modifier = Modifier,
+    wishlist : List<BaseBookData> = emptyList() ,
+    onBookSelected : (BaseBookData) -> Unit = {}
+){
+
+    Column(
+        modifier = modifier.height(254.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.wrapContentWidth(),
+                text = "My Wishlist",
+                style = BookAppTypography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+           /* TextButton(
+                onClick = { onSeeAllClicked() }
+            ) {
+                Text(
+                    text = "see more",
+                    style = BookAppTypography.labelSmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Icon(imageVector = Icons.Rounded.KeyboardArrowRight, contentDescription = "")
+            }*/
+        }
+
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            horizontalArrangement = if (wishlist.isEmpty()) Arrangement.Center else Arrangement.spacedBy(
+                12.dp
+            ) ,
+            contentPadding = PaddingValues(top = 8.dp)
+        ) {
+            if (wishlist.isEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(
+                            space = 5.dp,
+                            alignment = Alignment.CenterVertically
+                        )
+                    ) {
+                        Text(
+                            modifier = Modifier.width(200.dp),
+                            text = "There are no books you are currently reading. Proceed to add one?",
+                            style = BookAppTypography.bodyMedium,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center
+                        )
+                        /*Button(
+                            modifier = Modifier.wrapContentWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            ),
+                            onClick = {  }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+
+                            Text(
+                                modifier = Modifier.padding(start = 3.dp),
+                                text = "add a book",
+                                style = BookAppTypography.labelMedium,
+                                fontSize = 10.sp
+                            )
+                        }*/
+                    }
+                }
+
+            } else {
+
+                items(items = wishlist) { book ->
+                    LibraryBookCardComponent(
+                        image = book.image,
+                        title = book.title,
+                        author = book.authors,
+                        shouldShowProgress = false,
+                        onItemSelected = {
+                            onBookSelected(book)
+                        }
+                    )
+                }
+            }
+
+        }
+    }
+
+
 }
 
 @Preview(showBackground = true)
@@ -355,7 +461,11 @@ fun CurrentlyReadingSection(
 
                 items(items = bookList) { book ->
                     LibraryBookCardComponent(
-                        book = book,
+                        image = book.image,
+                        title = book.title,
+                        author = book.author,
+                        shouldShowProgress = true,
+                        progress = book.progress,
                         onItemSelected = {
                             onBookSelected(book.id)
                         }
@@ -401,13 +511,13 @@ fun CurrentlyReadingSection(
 @Composable
 fun SuggestedForYouSection(
     modifier: Modifier = Modifier,
-    bookList: List<SuggestedBook> = listOf(SuggestedBook()),
+    bookList: List<BaseBookData> = listOf(BaseBookData()),
     hasError: Boolean = false,
     errorMessage: String = "",
     isLoading: Boolean = false,
     retry: () -> Unit = {},
     onSeeAllClicked: () -> Unit = {},
-    onAddToWishlist: (String) -> Unit = {}
+    onAddToWishlist: (BaseBookData) -> Unit = {}
 ) {
     Column(
         modifier = modifier.height(170.dp),
@@ -575,7 +685,7 @@ fun SuggestedForYouSection(
                                 cardColor = colorsList.random(),
                                 book = book,
                                 onAddToWishlistSelected = { bookDets ->
-                                    onAddToWishlist(bookDets.id)
+                                    onAddToWishlist(bookDets)
                                 }
                             )
                         }
@@ -668,7 +778,9 @@ fun BookListSection(
 
         LazyColumn(
             state = state,
-            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
             contentPadding = PaddingValues(bottom = 8.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally

@@ -5,10 +5,8 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.core.common_models.Book
-import com.dev.james.booktracker.core.common_models.BookProgressData
-import com.dev.james.booktracker.core.common_models.Goal
+import com.dev.james.booktracker.core.common_models.BookStatisticsData
 import com.dev.james.booktracker.core.common_models.GoalProgressData
-import com.dev.james.booktracker.core.common_models.PdfBookItem
 import com.dev.james.booktracker.core.common_models.mappers.mapToPresentation
 import com.dev.james.domain.usecases.FetchActiveBookProgress
 import com.dev.james.domain.usecases.FetchGoalProgress
@@ -19,14 +17,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -70,7 +64,7 @@ class HomeScreenViewModel @Inject constructor(
       }
     )
     _homeScreenUiState.value = HomeScreenUiState.HasFetchedScreenData(
-      bookProgressData = bookGoal ,
+      bookStatisticsData = bookGoal ,
       goalProgressData = goalProgress ,
       streakCount = readingStreak
     )
@@ -97,9 +91,9 @@ class HomeScreenViewModel @Inject constructor(
 
   sealed class HomeScreenUiState {
     data class HasFetchedScreenData(
-      val bookProgressData: BookProgressData ,
-      val goalProgressData: GoalProgressData ,
-      val streakCount : Int
+        val bookStatisticsData: BookStatisticsData,
+        val goalProgressData: GoalProgressData,
+        val streakCount : Int
     ) : HomeScreenUiState()
 
     object DefaultState : HomeScreenUiState()

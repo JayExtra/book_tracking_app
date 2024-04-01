@@ -3,7 +3,7 @@ package com.dev.james.booktracker.feature_e2e_tests.on_boarding.di
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import com.dev.james.booktracker.core.test_commons.FakeDataStoreManager
+import com.dev.james.booktracker.feature.on_boarding.fakes.FakeDataStoreManager
 import com.dev.james.booktracker.core_database.room.dao.OnBoardingDao
 import com.dev.james.booktracker.core_database.room.database.BookTrackerDatabase
 import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager

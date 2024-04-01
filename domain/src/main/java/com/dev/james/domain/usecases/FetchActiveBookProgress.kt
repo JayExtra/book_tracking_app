@@ -3,7 +3,7 @@ package com.dev.james.domain.usecases
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.dev.james.booktracker.core.common_models.BookProgressData
+import com.dev.james.booktracker.core.common_models.BookStatisticsData
 import com.dev.james.booktracker.core.common_models.BookLog
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
@@ -33,7 +33,7 @@ class FetchActiveBookProgress @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.N)
     suspend operator fun invoke(
         bookId: String?
-    ): BookProgressData {
+    ): BookStatisticsData {
 
         Timber.tag(TAG).d("invoke triggered!")
         val requiredBookId = bookId
@@ -44,7 +44,7 @@ class FetchActiveBookProgress @Inject constructor(
             //however this will not work well if user already previously used the app then uninstalled , will replace this
             // with api call to fetch last book being read.
             Timber.tag(TAG).d("book id is null or empty not fetching")
-            BookProgressData()
+            BookStatisticsData()
         } else {
             Timber.tag(TAG)
                 .d("book id is not null or empty , fetching book with id : $requiredBookId!")
@@ -56,7 +56,7 @@ class FetchActiveBookProgress @Inject constructor(
 
     @SuppressLint("NewApi")
     @RequiresApi(Build.VERSION_CODES.N)
-    private suspend fun fetchBookProgressData(requiredBookId: String): BookProgressData {
+    private suspend fun fetchBookProgressData(requiredBookId: String): BookStatisticsData {
 
         val cachedBook = getCachedBook(requiredBookId)
         val allBookLogs = getAllBookLogs(requiredBookId)
@@ -81,7 +81,7 @@ class FetchActiveBookProgress @Inject constructor(
             }
 
 
-            BookProgressData(
+            BookStatisticsData(
                 bookId = requiredBookId,
                 bookImage = cachedBook.bookImage,
                 bookTitle = cachedBook.bookTitle,
@@ -104,7 +104,7 @@ class FetchActiveBookProgress @Inject constructor(
                 pagesPerMinute = pagesPerMinute
             )
         } else {
-            BookProgressData(
+            BookStatisticsData(
                 bookId = requiredBookId,
                 bookImage = cachedBook.bookImage,
                 bookTitle = cachedBook.bookTitle,
