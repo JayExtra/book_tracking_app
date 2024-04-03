@@ -21,6 +21,8 @@ interface LogsRepository {
 
     suspend fun deleteBookLog(id : String) : Resource<Boolean>
 
+    suspend fun deleteAllBookLogs(bookId:String) : Resource<Boolean>
+
     suspend fun addGoalLog(goalLog : GoalLog) : Resource<Boolean>
 
     suspend fun getWeeklyGoalLogs(parentLogId : String, startDate : String, endDate : String) : List<GoalLog>
@@ -30,6 +32,8 @@ interface LogsRepository {
     suspend fun getGoalLog(id : String) : Resource<GoalLog>
 
     suspend fun deleteGoalLog(id : String) : Resource<Boolean>
+
+    suspend fun deleteAllGoalLogs(parentGoalId: String) : Resource<Boolean>
 
     suspend fun getRecentGoalLog(parentGoalId : String) : GoalLog
 

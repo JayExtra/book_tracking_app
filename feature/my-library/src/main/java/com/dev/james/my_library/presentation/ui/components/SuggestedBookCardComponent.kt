@@ -152,31 +152,32 @@ fun SuggestedBookCardComponent(
                 author = book.authors
             )
 
-            Button(
-                modifier = Modifier
-                    .layoutId("wishlist_button")
-                    .width(70.dp)
-                    .height(20.dp),
-                onClick = { onAddToWishlistSelected(book) } ,
-                contentPadding = PaddingValues(2.dp) ,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(cardColor).getDarkerColor(0.3f)
-                )
-            ) {
-
-                Icon(
+                Button(
                     modifier = Modifier
-                        .width(9.dp)
-                        .height(18.dp),
-                    imageVector = Icons.Default.Add,
-                    contentDescription = ""
-                )
-                Text(
-                    text = "wishlist" ,
-                    style = BookAppTypography.labelSmall ,
-                    fontSize = 8.sp
-                )
-            }
+                        .layoutId("wishlist_button")
+                        .width(70.dp)
+                        .height(20.dp),
+                    onClick = { onAddToWishlistSelected(book) } ,
+                    contentPadding = PaddingValues(2.dp) ,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(cardColor).getDarkerColor(0.3f)
+                    )
+                ) {
+
+                    Icon(
+                        modifier = Modifier
+                            .width(9.dp)
+                            .height(18.dp),
+                        imageVector = Icons.Default.Add,
+                        contentDescription = ""
+                    )
+                    Text(
+                        text = "wishlist" ,
+                        style = BookAppTypography.labelSmall ,
+                        fontSize = 8.sp
+                    )
+                }
+
 
         }
 

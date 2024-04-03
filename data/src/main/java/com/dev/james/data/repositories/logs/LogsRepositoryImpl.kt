@@ -133,6 +133,21 @@ class LogsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteAllBookLogs(bookId: String): Resource<Boolean> {
+        return try {
+            logsLocalDataSource.deleteAllBookLogs(bookId)
+            val allBookLogs = logsLocalDataSource.getAllBookLogs(bookId)
+            return if(allBookLogs.isEmpty()){
+                Resource.Success(data = true)
+            }else{
+                Resource.Error(message = "no data:no logs exist for this book")
+            }
+        }catch (e  :SQLiteException){
+            Timber.tag(TAG).e("deleteAllBookLogs ${e.printStackTrace()}")
+            Resource.Error(message = "failure:Could not delete this book logs => ${e.localizedMessage}")
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun addGoalLog(goalLog: GoalLog): Resource<Boolean> {
         return try {
@@ -206,6 +221,21 @@ class LogsRepositoryImpl @Inject constructor(
         } catch (e: SQLiteException) {
             Timber.tag(TAG).e("deleteGoalLog $e")
             Resource.Error(data = false, message = "Could not delete this log! Reason: $e ")
+        }
+    }
+
+    override suspend fun deleteAllGoalLogs(parentGoalId: String): Resource<Boolean> {
+        return try {
+            logsLocalDataSource.deleteAllGoalLogs(parentGoalId)
+            val allBookLogs = logsLocalDataSource.getAllGoalLogs(parentGoalId)
+            return if(allBookLogs.isEmpty()){
+                Resource.Success(data = true)
+            }else{
+                Resource.Error(message = "no data:no logs exist for this goal")
+            }
+        }catch (e  :SQLiteException){
+            Timber.tag(TAG).e("deleteAllGoalLogs ${e.printStackTrace()}")
+            Resource.Error(message = "failure:Could not delete this goal logs => ${e.localizedMessage}")
         }
     }
 

@@ -558,7 +558,7 @@ fun CurrentlyReadingSection(
 @Composable
 fun SuggestedForYouSection(
     modifier: Modifier = Modifier,
-    bookList: List<BaseBookData> = listOf(BaseBookData()),
+    bookList: List<BaseBookData> = listOf(),
     hasError: Boolean = false,
     errorMessage: String = "",
     isLoading: Boolean = false,
@@ -566,6 +566,7 @@ fun SuggestedForYouSection(
     onSeeAllClicked: () -> Unit = {},
     onAddToWishlist: (BaseBookData) -> Unit = {}
 ) {
+
     Column(
         modifier = modifier.height(170.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -726,6 +727,7 @@ fun SuggestedForYouSection(
 
 
                 } else {
+
                     items(items = bookList) { book ->
                         if (book.id.isNotEmpty()) {
                             SuggestedBookCardComponent(

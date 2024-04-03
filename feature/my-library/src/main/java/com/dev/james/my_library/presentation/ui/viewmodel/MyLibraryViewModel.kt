@@ -160,7 +160,8 @@ class MyLibraryViewModel @Inject constructor(
             is Resource.Success -> {
                 suggestionsErrorMessage = ""
                 isFetchingSuggestions = false
-                m_baseBooksListData.value = booksResource.data ?: emptyList()
+                val suggestedBooks = booksResource.data
+                m_baseBooksListData.value = suggestedBooks ?: emptyList()
             }
             is Resource.Error -> {
                 isFetchingSuggestions = false

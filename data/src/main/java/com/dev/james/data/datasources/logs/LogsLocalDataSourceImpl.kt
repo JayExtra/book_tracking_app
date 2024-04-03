@@ -34,6 +34,10 @@ class LogsLocalDataSourceImpl @Inject constructor(
         logsDao.deleteBookLog(id)
     }
 
+    override suspend fun deleteAllBookLogs(bookId: String) {
+        logsDao.deleteAllBookLogs(bookId)
+    }
+
     override suspend fun addGoalLogToDatabase(goalLogsEntity: GoalLogsEntity) {
         logsDao.addGoalLog(goalLogsEntity)
     }
@@ -55,6 +59,10 @@ class LogsLocalDataSourceImpl @Inject constructor(
 
     override suspend fun deleteGoalLog(id: String) {
         logsDao.deleteGoalLog(id)
+    }
+
+    override suspend fun deleteAllGoalLogs(parentGoalId: String) {
+        logsDao.deleteAllGoalLogs(parentGoalId)
     }
 
     override suspend fun fetchLatestBookLog(bookId: String): List<BookLogsEntity> {

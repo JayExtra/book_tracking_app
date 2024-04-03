@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +20,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -34,11 +39,16 @@ fun ConfirmationPrompt(
     modifier : Modifier = Modifier,
     title : String = "",
     body : String = "",
-    onAccept : () -> Unit = {},
+    showCheckBox : Boolean = false ,
+    checkBoxMessage : String = "",
+    onAccept : (Boolean) -> Unit = {},
     onCancel : () -> Unit = {},
     confirmationText : String = stringResource(R.string.confirm),
     cancelText : String = stringResource(R.string.cancel)
 ){
+    var checkBoxState by remember {
+        mutableStateOf(false )
+    }
     AlertDialog(
         modifier = modifier,
         onDismissRequest = { onCancel() }
@@ -65,10 +75,25 @@ fun ConfirmationPrompt(
                     textAlign = TextAlign.Center
                 )
 
+                if(showCheckBox){
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically ,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Checkbox(
+                            checked = checkBoxState,
+                            onCheckedChange = {
+                                checkBoxState = !checkBoxState
+                            }
+                        )
+                        Text(modifier = Modifier.weight(3f),text = checkBoxMessage , style = BookAppTypography.labelSmall)
+                    }
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth() ,
                     verticalAlignment = Alignment.CenterVertically ,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ){
                     OutlinedButton(
                         onClick = { onCancel() } ,
@@ -79,7 +104,9 @@ fun ConfirmationPrompt(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary
                         ),
-                        onClick = { onAccept() }
+                        onClick = { onAccept(
+                            checkBoxState
+                        ) }
                     ) {
                         Text(text = confirmationText)
                     }

@@ -24,6 +24,9 @@ interface LogsDao {
     @Query("DELETE FROM book_logs WHERE log_id = :id")
     suspend fun deleteBookLog(id : String)
 
+    @Query("DELETE FROM book_logs WHERE book_id = :bookId")
+    suspend fun deleteAllBookLogs(bookId: String)
+
     @Query("SELECT * FROM book_logs WHERE log_id = :id ")
     suspend fun getABookLog(id : String) : BookLogsEntity
 
@@ -40,6 +43,9 @@ interface LogsDao {
 
     @Query("DELETE FROM daily_goal_logs WHERE id = :id")
     suspend fun deleteGoalLog(id : String)
+
+    @Query("DELETE FROM daily_goal_logs WHERE parent_goal_id = :parentGoalId")
+    suspend fun deleteAllGoalLogs(parentGoalId: String)
 
     @Query("DELETE FROM daily_goal_logs WHERE parent_goal_id =:parentGoalId")
     suspend fun deleteAllGoalLogsByParentId(parentGoalId: String)

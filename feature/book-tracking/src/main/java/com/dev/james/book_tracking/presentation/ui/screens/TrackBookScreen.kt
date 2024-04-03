@@ -164,7 +164,6 @@ fun TrackBookScreen(
     )
 
     val bookCompletedDialogState = bookTrackingViewModel.showBookCompleteDialog
-    val bookDeletedDialogState = bookTrackingViewModel.showBookDeletedDialog
 
     LaunchedEffect(key1 = true) {
         bookId?.let {
@@ -195,9 +194,12 @@ fun TrackBookScreen(
             title = "Delete this book." ,
             body = "You are about to delete this book and all data associated with it. Do you wish to proceed?" ,
             confirmationText = "Delete" ,
-            onAccept = {
+            checkBoxMessage = "Keep all logs associated with this book?",
+            showCheckBox = true,
+            onAccept = { checkBoxState ->
                 if (bookId != null) {
-                    bookTrackingViewModel.deleteBook(bookId)
+                    bookTrackingViewModel.deleteBook(bookId = bookId , keepLogs = checkBoxState)
+                    showDeleteDialog = false
                 }
             } ,
             onCancel = {
@@ -247,7 +249,7 @@ fun TrackBookScreen(
             title = "Success!" ,
             body = "${bookData.value.bookTitle} deleted from your collection." ,
             showAnimation = true ,
-            onCancel = {
+            onAccept = {
                 when (previousScreenDestinations) {
                     PreviousScreenDestinations.HOME_SCREEN -> {
                         navigation.backToHomeScreen()
