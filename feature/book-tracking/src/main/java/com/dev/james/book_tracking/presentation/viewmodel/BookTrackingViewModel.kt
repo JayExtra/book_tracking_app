@@ -26,6 +26,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -62,6 +63,9 @@ class BookTrackingViewModel @Inject constructor(
     private val _trackBookScreenUiEvents : Channel<TrackBookScreenUiEvents> = Channel()
     val trackBookScreenUiEvents get() = _trackBookScreenUiEvents.receiveAsFlow()
     var showBookCompleteDialog by mutableStateOf(false)
+        private set
+
+    var showBookDeletedDialog by mutableStateOf(false)
         private set
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -184,6 +188,27 @@ class BookTrackingViewModel @Inject constructor(
                  TrackBookScreenUiEvents.ShowBookCompleteDialog
              )*/
             showBookCompleteDialog = true
+        }
+    }
+
+    fun deleteBook(bookId : String) = viewModelScope.launch {
+        val result = booksRepository.deleteBookInDatabase(bookId)
+        if(result){
+            Timber.tag(TAG).d("book data deleted")
+            val booksList = booksRepository.getSavedBooks().first()
+            if(booksList.isNotEmpty()){
+                booksRepository.setAsActiveBook(bookId = booksList[0].bookId
+                    , onFailure = {
+                        Timber.tag(TAG).d("active book could not be set")
+                    }
+                    , onSuccess = {
+                        Timber.tag(TAG).d("active book set")
+                    }
+                )
+            }
+            showBookDeletedDialog = true
+        }else{
+            Timber.tag(TAG).d("could not delete book data")
         }
     }
 

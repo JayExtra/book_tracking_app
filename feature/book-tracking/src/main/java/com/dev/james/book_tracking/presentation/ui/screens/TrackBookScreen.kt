@@ -37,6 +37,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ButtonDefaults
@@ -93,6 +94,7 @@ import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -103,6 +105,7 @@ import com.dev.james.book_tracking.presentation.ui.navigation.BookTrackNavigatio
 import com.dev.james.book_tracking.presentation.viewmodel.BookTrackingViewModel
 import com.dev.james.book_tracking.presentation.viewmodel.ReadingListUiItem
 import com.dev.james.booktracker.compose_ui.ui.components.BarGraph
+import com.dev.james.booktracker.compose_ui.ui.components.ConfirmationPrompt
 import com.dev.james.booktracker.compose_ui.ui.components.CreateReadingListDialog
 import com.dev.james.booktracker.compose_ui.ui.components.OutlinedTextFieldComponent
 //import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationDialog
@@ -151,6 +154,9 @@ fun TrackBookScreen(
     var pageNumberFieldState by rememberSaveable {
         mutableStateOf("")
     }
+    var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
 
 
     val screenEvents = bookTrackingViewModel.trackBookScreenUiEvents.collectAsStateWithLifecycle(
@@ -158,6 +164,7 @@ fun TrackBookScreen(
     )
 
     val bookCompletedDialogState = bookTrackingViewModel.showBookCompleteDialog
+    val bookDeletedDialogState = bookTrackingViewModel.showBookDeletedDialog
 
     LaunchedEffect(key1 = true) {
         bookId?.let {
@@ -179,6 +186,22 @@ fun TrackBookScreen(
             onCancel = {
                 //close the dialog
                 bookTrackingViewModel.dismissDialog()
+            }
+        )
+    }
+
+    if(showDeleteDialog){
+        ConfirmationPrompt(
+            title = "Delete this book." ,
+            body = "You are about to delete this book and all data associated with it. Do you wish to proceed?" ,
+            confirmationText = "Delete" ,
+            onAccept = {
+                if (bookId != null) {
+                    bookTrackingViewModel.deleteBook(bookId)
+                }
+            } ,
+            onCancel = {
+                showDeleteDialog = false
             }
         )
     }
@@ -209,6 +232,7 @@ fun TrackBookScreen(
     val goalData = bookTrackingViewModel.goalProgressState.collectAsStateWithLifecycle()
     val readingLists = bookTrackingViewModel.readingLists.collectAsStateWithLifecycle()
 
+
     val snackbarHostState = remember { SnackbarHostState() }
     val sheetState = rememberModalBottomSheetState()
     var showReadinglistSheet by rememberSaveable {
@@ -216,6 +240,27 @@ fun TrackBookScreen(
     }
     var showCreateReadingListDialog by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    if(bookTrackingViewModel.showBookDeletedDialog){
+        SingleActionConfirmationPrompt(
+            title = "Success!" ,
+            body = "${bookData.value.bookTitle} deleted from your collection." ,
+            showAnimation = true ,
+            onCancel = {
+                when (previousScreenDestinations) {
+                    PreviousScreenDestinations.HOME_SCREEN -> {
+                        navigation.backToHomeScreen()
+                    }
+
+                    PreviousScreenDestinations.LIBRARY_SCREEN -> {
+                        navigation.backToMyLibraryScreen()
+                    }
+
+                    else -> {}
+                }
+            }
+        )
     }
 
     when (val events = screenEvents.value) {
@@ -274,6 +319,24 @@ fun TrackBookScreen(
                     }
                 },
                 navActions = {
+
+                    IconButton(
+                        onClick = {
+                            /*opens playlist dialog*/
+                            //show dialog
+                            showDeleteDialog = true
+                        },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+
                     IconButton(
                         onClick = {
                             /*opens playlist dialog*/
@@ -292,6 +355,8 @@ fun TrackBookScreen(
                             tint = MaterialTheme.colorScheme.secondary
                         )
                     }
+
+
                 }
             )
         },
@@ -647,7 +712,8 @@ fun AddToReadingListDialog(
             thickness = 2.dp
         )
         Box(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(bottom = 20.dp),
             contentAlignment = Alignment.CenterStart
         ) {
