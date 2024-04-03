@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dev.james.booktracker.compose_ui.ui.components.BookChaptersDialog
 import com.dev.james.booktracker.compose_ui.ui.components.BookDetailsDialog
 import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.CreateReadingListDialog
@@ -90,10 +91,13 @@ fun MyLibraryScreen(
             initialValue = MyLibraryViewModel.MyLibraryScreenUiEvents.DefaultState
         )*/
 
-        var shouldShowCreateReadingListDialog by rememberSaveable {
+        var shouldShowCreateReadingListDialog by remember {
             mutableStateOf(false)
         }
-        var showBookDetailsDialog by rememberSaveable {
+        var showBookDetailsDialog by remember {
+            mutableStateOf(false)
+        }
+        var showBookChaptersDialog by remember {
             mutableStateOf(false)
         }
         var selectedBookData by remember {
@@ -135,15 +139,32 @@ fun MyLibraryScreen(
         if(showBookDetailsDialog){
             BookDetailsDialog(
                 book = selectedBookData ,
-                addOrRemoveFromWishlist = {
-
+                removeFromWishlist = {
+                    myLibraryViewModel.addOrRemoveFromWishList(it)
+                    showBookDetailsDialog = false
                 } ,
                 addBook = {
-
+                    showBookChaptersDialog = true
                 } ,
                 onDismiss = {
                     showBookDetailsDialog = false
                     selectedBookData = BaseBookData()
+                }
+            )
+        }
+
+        if(showBookChaptersDialog){
+            BookChaptersDialog(
+                onSave = { chapters ->
+                    myLibraryViewModel.saveBookToDatabase(
+                        baseBookData = selectedBookData ,
+                        chapters = chapters
+                    )
+                    showBookChaptersDialog =  false
+                    showBookDetailsDialog = false
+                } ,
+                onDismiss = {
+                    showBookChaptersDialog = false
                 }
             )
         }

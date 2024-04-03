@@ -10,8 +10,10 @@ import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingListItem
 import com.dev.james.booktracker.core.common_models.ReadingLists
 import com.dev.james.booktracker.core.common_models.BaseBookData
+import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.mappers.mapToLibraryData
 import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.core.utilities.convertToOrganisedString
 import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.dev.james.booktracker.core.utilities.getCurrentDateAndTime
 import com.dev.james.domain.repository.home.BooksRepository
@@ -175,12 +177,43 @@ class MyLibraryViewModel @Inject constructor(
     }
 
 
+    fun saveBookToDatabase(
+        baseBookData: BaseBookData ,
+        chapters : Int
+    ) = viewModelScope.launch {
+        val bookSave = BookSave(
+            bookId = baseBookData.id ,
+            bookImage = baseBookData.image ,
+            bookTitle = baseBookData.title ,
+            bookAuthors = baseBookData.authors ,
+            bookDescription = baseBookData.description ,
+            bookSmallThumbnail = "",
+            bookPagesCount = baseBookData.pages ,
+            publisher = baseBookData.publisher ,
+            publishedDate = baseBookData.publishedDate ,
+            isUri = false ,
+            category = baseBookData.category.convertToOrganisedString() ,
+            chapters = chapters
+        )
+        val result = booksRepository.saveBookToDatabase(bookSave)
+        if(result){
+            Timber.tag(TAG).d("Book saved to database.")
+            addOrRemoveFromWishList(baseBookData)
+        }else {
+            Timber.tag(TAG).d("Could not save to db.")
+
+        }
+    }
+
+
     private fun getBooksWithProgress() = viewModelScope.launch {
         getBooksAndProgressUsecase.invoke().collectLatest { booksList ->
             isLoading = false
             _booksWithProgress.value = booksList
         }
     }
+
+
 
     sealed class MyLibraryScreenUiEvents {
         object DismissReadListDialog : MyLibraryScreenUiEvents()
