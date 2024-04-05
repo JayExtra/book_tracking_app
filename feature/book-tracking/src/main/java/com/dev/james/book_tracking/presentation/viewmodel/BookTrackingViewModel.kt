@@ -15,6 +15,7 @@ import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.booktracker.core.utilities.generateSecureUUID
 import com.dev.james.booktracker.core.utilities.getCurrentDateAndTime
 import com.dev.james.domain.repository.home.BooksRepository
+import com.dev.james.domain.repository.home.LogsRepository
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
 import com.dev.james.domain.usecases.FetchActiveBookProgress
 import com.dev.james.domain.usecases.FetchGoalProgress
@@ -26,6 +27,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -39,7 +41,8 @@ class BookTrackingViewModel @Inject constructor(
     private val setActiveBookUsecase: SetActiveBookUsecase,
     private val updateGoalUseCase: UpdateGoalUseCase,
     private val readingListsRepository: ReadingListsRepository ,
-    private val booksRepository: BooksRepository
+    private val booksRepository: BooksRepository,
+    private val logsRepository: LogsRepository
 ) : ViewModel() {
 
     companion object {
@@ -62,6 +65,9 @@ class BookTrackingViewModel @Inject constructor(
     private val _trackBookScreenUiEvents : Channel<TrackBookScreenUiEvents> = Channel()
     val trackBookScreenUiEvents get() = _trackBookScreenUiEvents.receiveAsFlow()
     var showBookCompleteDialog by mutableStateOf(false)
+        private set
+
+    var showBookDeletedDialog by mutableStateOf(false)
         private set
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -184,6 +190,54 @@ class BookTrackingViewModel @Inject constructor(
                  TrackBookScreenUiEvents.ShowBookCompleteDialog
              )*/
             showBookCompleteDialog = true
+        }
+    }
+
+    fun deleteBook(
+        bookId : String ,
+        keepLogs : Boolean
+    ) = viewModelScope.launch {
+        val result = booksRepository.deleteBookInDatabase(bookId)
+        if(result){
+            Timber.tag(TAG).d("book data deleted")
+            if(!keepLogs){
+                deleteAllBookLogs(
+                    bookId = bookId
+                )
+            }else {
+               setActiveBookShowDialog()
+            }
+        }else{
+            Timber.tag(TAG).d("could not delete book data")
+        }
+    }
+    private fun deleteAllBookLogs(bookId: String) = viewModelScope.launch{
+        when(val result = logsRepository.deleteAllBookLogs(bookId)){
+            is Resource.Success -> {
+                Timber.tag(TAG).d("all book logs deleted")
+                setActiveBookShowDialog()
+            }
+            is Resource.Error -> {
+                val message = result.message ?: "Oops! Something went wrong, please try again."
+                Timber.tag(TAG).d("failed to delete book logs => $message")
+            }
+
+            else -> {}
+        }
+    }
+
+    private suspend fun setActiveBookShowDialog(){
+        val booksList = booksRepository.getSavedBooks().first()
+        if(booksList.isNotEmpty()){
+            booksRepository.setAsActiveBook(bookId = booksList[0].bookId
+                , onFailure = {
+                    Timber.tag(TAG).d("active book could not be set")
+                }
+                , onSuccess = {
+                    Timber.tag(TAG).d("active book set")
+                    showBookDeletedDialog = true
+                }
+            )
         }
     }
 

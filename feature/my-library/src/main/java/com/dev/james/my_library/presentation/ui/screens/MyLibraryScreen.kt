@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -55,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dev.james.booktracker.compose_ui.ui.components.BookChaptersDialog
+import com.dev.james.booktracker.compose_ui.ui.components.BookDetailsDialog
 import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.CreateReadingListDialog
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
@@ -88,8 +91,17 @@ fun MyLibraryScreen(
             initialValue = MyLibraryViewModel.MyLibraryScreenUiEvents.DefaultState
         )*/
 
-        var shouldShowCreateReadingListDialog by rememberSaveable {
+        var shouldShowCreateReadingListDialog by remember {
             mutableStateOf(false)
+        }
+        var showBookDetailsDialog by remember {
+            mutableStateOf(false)
+        }
+        var showBookChaptersDialog by remember {
+            mutableStateOf(false)
+        }
+        var selectedBookData by remember {
+            mutableStateOf(BaseBookData())
         }
        // Toast.makeText(LocalContext.current , readingList.value.toString() , Toast.LENGTH_LONG).show()
 
@@ -120,6 +132,39 @@ fun MyLibraryScreen(
                 },
                 onAddImage = {
                     //open image selector ui
+                }
+            )
+        }
+
+        if(showBookDetailsDialog){
+            BookDetailsDialog(
+                book = selectedBookData ,
+                removeFromWishlist = {
+                    myLibraryViewModel.addOrRemoveFromWishList(it)
+                    showBookDetailsDialog = false
+                } ,
+                addBook = {
+                    showBookChaptersDialog = true
+                } ,
+                onDismiss = {
+                    showBookDetailsDialog = false
+                    selectedBookData = BaseBookData()
+                }
+            )
+        }
+
+        if(showBookChaptersDialog){
+            BookChaptersDialog(
+                onSave = { chapters ->
+                    myLibraryViewModel.saveBookToDatabase(
+                        baseBookData = selectedBookData ,
+                        chapters = chapters
+                    )
+                    showBookChaptersDialog =  false
+                    showBookDetailsDialog = false
+                } ,
+                onDismiss = {
+                    showBookChaptersDialog = false
                 }
             )
         }
@@ -165,6 +210,8 @@ fun MyLibraryScreen(
                 } ,
                 onWishListBookSelected = {
                     //open dialog wish book information
+                    showBookDetailsDialog = true
+                    selectedBookData = it
                 }
             )
         }
@@ -511,7 +558,7 @@ fun CurrentlyReadingSection(
 @Composable
 fun SuggestedForYouSection(
     modifier: Modifier = Modifier,
-    bookList: List<BaseBookData> = listOf(BaseBookData()),
+    bookList: List<BaseBookData> = listOf(),
     hasError: Boolean = false,
     errorMessage: String = "",
     isLoading: Boolean = false,
@@ -519,6 +566,7 @@ fun SuggestedForYouSection(
     onSeeAllClicked: () -> Unit = {},
     onAddToWishlist: (BaseBookData) -> Unit = {}
 ) {
+
     Column(
         modifier = modifier.height(170.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -679,6 +727,7 @@ fun SuggestedForYouSection(
 
 
                 } else {
+
                     items(items = bookList) { book ->
                         if (book.id.isNotEmpty()) {
                             SuggestedBookCardComponent(

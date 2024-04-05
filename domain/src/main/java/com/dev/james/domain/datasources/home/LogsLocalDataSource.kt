@@ -19,6 +19,8 @@ interface LogsLocalDataSource {
 
     suspend fun deleteBookLog(id : String)
 
+    suspend fun deleteAllBookLogs(bookId : String)
+
     suspend fun addGoalLogToDatabase(goalLogsEntity: GoalLogsEntity)
 
     suspend fun updateGoalLog(goalLogUpdate: GoalLogUpdate)
@@ -29,6 +31,8 @@ interface LogsLocalDataSource {
     suspend fun getGoalLog(id: String) : GoalLogsEntity
 
     suspend fun deleteGoalLog(id : String)
+
+    suspend fun deleteAllGoalLogs(parentGoalId: String)
 
     suspend fun fetchLatestBookLog(bookId: String) : List<BookLogsEntity>
 
