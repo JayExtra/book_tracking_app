@@ -47,7 +47,8 @@ class GetBooksAndProgressUsecase @Inject constructor(
                         progress = calculateProgress(
                             totalPages = book.bookPagesCount ,
                             totalPagesRead = latestLog.currentPage
-                        ).calculatePercentageProgress()
+                        ).calculatePercentageProgress() ,
+                        pagesRead = latestLog.currentPage
                     )
                 }
             }.catch { t ->
