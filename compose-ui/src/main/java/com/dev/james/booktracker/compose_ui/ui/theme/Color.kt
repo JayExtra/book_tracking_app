@@ -51,3 +51,5 @@ val ErrorColor60 = Color(0xFFF93939)
 val ErrorColor70 = Color(0xFFFA6B6B)
 val ErrorColor80 = Color(0xFFFB9D9D)
 val OnErrorColor = Color(0xFF000000)
+
+val SuccessColor = Color(0xFF3DDC84)

@@ -5,5 +5,7 @@ data class LibraryBookData(
     val image: String = "",
     val title: String = "" ,
     val author: String = "",
-    val progress: Int = 0
+    val progress: Int = 0 ,
+    val pagesRead : Int = 0 ,
+    val pages : Int = 0
 )

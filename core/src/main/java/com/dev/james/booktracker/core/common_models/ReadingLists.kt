@@ -5,7 +5,7 @@ data class ReadingLists(
     val name : String = "",
     val image : String = "",
     val description : String = "",
-    val readingList : List<LibraryBookData> = emptyList<LibraryBookData>(),
+    val readingList : List<LibraryBookData> = emptyList(),
     val date : String = "",
     val starred : Boolean = false
 )

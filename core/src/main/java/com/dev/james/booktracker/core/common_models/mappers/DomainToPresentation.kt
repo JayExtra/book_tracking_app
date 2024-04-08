@@ -53,6 +53,8 @@ fun BookStatisticsData.mapToLibraryData() : LibraryBookData {
        image = this.bookImage ,
        title = this.bookTitle ,
        author = this.authors ,
-       progress = (this.progress * 100).toInt()
+       progress = (this.progress * 100).toInt() ,
+       pagesRead = this.currentPage ,
+       pages = this.totalPages
     )
 }
