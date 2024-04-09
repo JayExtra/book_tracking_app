@@ -67,19 +67,29 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingLists
+import com.dev.james.my_library.presentation.navigation.ReadingListScreenNavigator
 import com.dev.james.my_library.presentation.ui.viewmodel.ReadingListScreenViewModel
+import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
+@Destination
 fun ReadingListScreen(
     readingListId : String ,
+    readingListScreenNavigator: ReadingListScreenNavigator ,
     viewModel : ReadingListScreenViewModel = hiltViewModel()
 ){
-
+    StatelessReadingListScreen(
+        onNavigate = {
+            readingListScreenNavigator.navBackToLibraryScreen()
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StatelessReadingListScreen(){
+fun StatelessReadingListScreen(
+    onNavigate : () -> Unit = {}
+){
     val scrollState = rememberScrollState()
     Scaffold(
         modifier = Modifier.fillMaxSize() ,
@@ -88,11 +98,15 @@ fun StatelessReadingListScreen(){
                 title = {
                     Text(text = "Dummy Title")
                 },
+                navigate = {
+                    onNavigate()
+                },
+
                 showBackArrow = true,
                 navActions = {
                     IconButton(
                         modifier = Modifier.clip(CircleShape) ,
-                        onClick = { /*TODO 1 : Delete reading list action*/ }
+                        onClick = {  }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -121,7 +135,6 @@ fun StatelessReadingListScreen(){
                     Divider()
                     Spacer(modifier = Modifier.height(4.dp))
                     BooksSection()
-
                 }
             }
         }

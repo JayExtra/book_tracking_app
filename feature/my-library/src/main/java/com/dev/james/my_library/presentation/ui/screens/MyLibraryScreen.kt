@@ -204,6 +204,9 @@ fun MyLibraryScreen(
                 } ,
                 onListSelected = {
                     //navigate to reading list screen
+                    myLibraryScreenNavigator.openReadingListScreenDestination(
+                        readingListId = it
+                    )
                 } ,
                 addToWishList = {
                     myLibraryViewModel.addOrRemoveFromWishList(it)

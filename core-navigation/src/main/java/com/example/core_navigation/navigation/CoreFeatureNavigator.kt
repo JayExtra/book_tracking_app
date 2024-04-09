@@ -17,7 +17,9 @@ import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingW
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
 import com.dev.james.my_library.presentation.navigation.MyLibraryScreenNavigator
+import com.dev.james.my_library.presentation.navigation.ReadingListScreenNavigator
 import com.dev.james.my_library.presentation.ui.screens.destinations.MyLibraryScreenDestination
+import com.dev.james.my_library.presentation.ui.screens.destinations.ReadingListScreenDestination
 import com.ramcosta.composedestinations.dynamic.within
 import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.navigation.popUpTo
@@ -33,7 +35,8 @@ class CoreFeatureNavigator(
         AchievementsScreenNavigator ,
         MyLibraryScreenNavigator ,
         BookTrackNavigation ,
-        AddBookScreenNavigator
+        AddBookScreenNavigator ,
+        ReadingListScreenNavigator
 {
 
     override fun openOnBoardingWelcomeScreen() {
@@ -124,6 +127,12 @@ class CoreFeatureNavigator(
         navController.navigate(TrackBookScreenDestination(bookId = bookId , previousScreenDestinations = currentDestination) within navGraph)
     }
 
+    override fun openReadingListScreenDestination(readingListId: String) {
+        navController.navigate(
+            ReadingListScreenDestination(readingListId) within navGraph
+        )
+    }
+
     override fun backToHomeScreen() {
         navController.navigate(
             HomeScreenDestination within navGraph ,
@@ -169,6 +178,16 @@ class CoreFeatureNavigator(
 
     override fun openPdfScreen() {
         //will open pdf screen
+    }
+
+    override fun navBackToLibraryScreen() {
+        navController.navigate(
+            MyLibraryScreenDestination within navGraph
+        ) {
+            popUpTo(route = NavGraphs.root){
+                inclusive = true
+            }
+        }
     }
 
 }
