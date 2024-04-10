@@ -6,23 +6,39 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.AddBookViewModel
+import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
+import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingLists
+import com.dev.james.booktracker.core.common_models.mappers.mapToDomainObject
 import com.dev.james.booktracker.core.common_models.mappers.mapToLibraryData
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
 import com.dev.james.domain.usecases.FetchActiveBookProgress
+import com.dsc.form_builder.FormState
+import com.dsc.form_builder.TextFieldState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,7 +49,8 @@ import javax.inject.Inject
 class ReadingListScreenViewModel @Inject constructor(
     private val readingListsRepository: ReadingListsRepository,
     private val fetchActiveBookProgress: FetchActiveBookProgress ,
-    private val booksRepository: BooksRepository
+    private val booksRepository: BooksRepository ,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     companion object {
@@ -54,6 +71,28 @@ class ReadingListScreenViewModel @Inject constructor(
 
     var bookDeletedDialogState by mutableStateOf(false)
         private set
+
+    private val searchQueryStateFlow = savedStateHandle.getStateFlow("search_query" ,
+        AddBookViewModel.DEFAULT_SEARCH_QUERY
+    )
+
+    private var queryJob: Job? = null
+
+
+    var selectedBookState by mutableStateOf(Book())
+        private set
+
+    val bottomSheetSearchFieldState = FormState(
+        fields = listOf(
+            TextFieldState(
+                name = "search_field",
+                initial = ""
+            )
+        )
+    )
+    private var _googleBottomSheetSearchState: MutableStateFlow<GoogleBottomSheetUiState> =
+        MutableStateFlow(GoogleBottomSheetUiState.StandbyState)
+    val googleBottomSheetSearchState get() = _googleBottomSheetSearchState.asStateFlow()
 
     /*var selectedBookState by mutableStateOf(LibraryBookData())
         private set*/
@@ -171,6 +210,74 @@ class ReadingListScreenViewModel @Inject constructor(
                     )
                 }
             }
+    }
+
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    fun searchForBook(searchQuery: String) {
+        queryJob = viewModelScope.launch {
+            //searchQueryStateFlow.value = searchQuery
+            savedStateHandle["search_query"] = searchQuery
+            searchQueryStateFlow
+                .debounce(200)
+                .filter { query ->
+                    if (query.isEmpty()) {
+                        val searchViewState =
+                            bottomSheetSearchFieldState.getState<TextFieldState>("search_field")
+                        searchViewState.change("")
+                        return@filter false
+                    } else {
+                        return@filter true
+                    }
+                }
+                .distinctUntilChanged()
+                .flatMapLatest { query ->
+                    booksRepository.getBooksFromApi(bookTitle = query, bookAuthor = "")
+                }
+                .flowOn(Dispatchers.Default)
+                .collect { resource ->
+                    when (resource) {
+                        is Resource.Success -> {
+
+                            val booksList = resource.data?.items
+
+                            if (!booksList.isNullOrEmpty()) {
+                                _googleBottomSheetSearchState.value =
+                                    GoogleBottomSheetUiState.HasFetched(
+                                        booksList = booksList.map { bookDto -> bookDto.mapToDomainObject() }
+                                    )
+                            } else {
+                                _googleBottomSheetSearchState.value = GoogleBottomSheetUiState
+                                    .HasFetched(
+                                        booksList = emptyList()
+                                    )
+                            }
+                            Timber.tag(AddBookViewModel.TAG).d(booksList.toString())
+
+                        }
+
+                        is Resource.Error -> {
+                            val errorMessage = resource.message ?: "Oops! Something went wrong"
+                            _googleBottomSheetSearchState.value =
+                                GoogleBottomSheetUiState.HasFailed(
+                                    errorMessage = errorMessage
+                                )
+                        }
+
+                        is Resource.Loading -> {
+                            _googleBottomSheetSearchState.value = GoogleBottomSheetUiState.IsLoading
+                        }
+
+                        else -> {}
+                    }
+
+                }
+
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        queryJob?.cancel()
     }
 
 

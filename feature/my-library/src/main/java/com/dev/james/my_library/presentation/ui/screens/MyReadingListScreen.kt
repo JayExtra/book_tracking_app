@@ -1,6 +1,9 @@
 package com.dev.james.my_library.presentation.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -25,6 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +43,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,16 +69,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.ConfirmationPrompt
+import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
 import com.dev.james.booktracker.compose_ui.ui.components.HorizontalBookCardComponent
 import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
+import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
+import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingLists
 import com.dev.james.my_library.presentation.navigation.ReadingListScreenNavigator
 import com.dev.james.my_library.presentation.ui.viewmodel.ReadingListScreenViewModel
+import com.dsc.form_builder.FormState
+import com.dsc.form_builder.TextFieldState
+import com.itextpdf.text.pdf.TextField
 import com.ramcosta.composedestinations.annotation.Destination
 
 @Composable
@@ -88,19 +106,20 @@ fun ReadingListScreen(
         mutableStateOf(LibraryBookData())
     }
 
+    val googleBottomSheetUiState by viewModel.googleBottomSheetSearchState.collectAsStateWithLifecycle()
 
-    if(viewModel.deleteReadingListDialogState){
+    if (viewModel.deleteReadingListDialogState) {
         ConfirmationPrompt(
-            title = "Delete Reading List" ,
-            showCheckBox = false ,
-            body = "Do you wish to delete ${state.value.readingList.name}?" ,
+            title = "Delete Reading List",
+            showCheckBox = false,
+            body = "Do you wish to delete ${state.value.readingList.name}?",
             confirmationText = "Delete",
             onAccept = {
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
                         .DeleteReadingList(readingListId)
                 )
-            } ,
+            },
             onCancel = {
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
@@ -112,12 +131,12 @@ fun ReadingListScreen(
         )
     }
 
-    if(viewModel.deleteConfirmationDialogState){
+    if (viewModel.deleteConfirmationDialogState) {
         SingleActionConfirmationPrompt(
             title = "Success",
-            body = "${state.value.readingList.name} deleted!" ,
-            showAnimation = true ,
-            confirmationText = "Done" ,
+            body = "${state.value.readingList.name} deleted!",
+            showAnimation = true,
+            confirmationText = "Done",
             onAccept = {
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
@@ -130,21 +149,21 @@ fun ReadingListScreen(
         )
     }
 
-    if(viewModel.deleteBookConfirmationDialogState){
+    if (viewModel.deleteBookConfirmationDialogState) {
         ConfirmationPrompt(
-            title = "Remove This Book?" ,
-            showCheckBox = false ,
-            body = "Do you wish to remove ${selectedBook.title} from this list? " ,
+            title = "Remove This Book?",
+            showCheckBox = false,
+            body = "Do you wish to remove ${selectedBook.title} from this list? ",
             confirmationText = "Remove",
             onAccept = {
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
                         .DeleteBook(
-                            book = selectedBook ,
+                            book = selectedBook,
                             readingListId = readingListId
                         )
                 )
-            } ,
+            },
             onCancel = {
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
@@ -156,12 +175,12 @@ fun ReadingListScreen(
         )
     }
 
-    if(viewModel.bookDeletedDialogState){
+    if (viewModel.bookDeletedDialogState) {
         SingleActionConfirmationPrompt(
             title = "Success!",
-            body = "${selectedBook.title} successfully removed!" ,
-            showAnimation = true ,
-            confirmationText = "Done" ,
+            body = "${selectedBook.title} successfully removed!",
+            showAnimation = true,
+            confirmationText = "Done",
             onAccept = {
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
@@ -174,9 +193,11 @@ fun ReadingListScreen(
     }
     StatelessReadingListScreen(
         state = state.value,
+        googleBottomSheetUiState = googleBottomSheetUiState,
+        searchFieldState = viewModel.bottomSheetSearchFieldState,
         onNavigate = {
             readingListScreenNavigator.navBackToLibraryScreen()
-        } ,
+        },
         onDeleteList = {
             viewModel.onAction(
                 action = ReadingListScreenViewModel.ReadingListScreenAction
@@ -184,7 +205,7 @@ fun ReadingListScreen(
                         dialogType = ReadingListScreenViewModel.DialogType.CONFIRM_DELETE_READING_LIST_DIALOG
                     )
             )
-        } ,
+        },
         onDeleteBook = {
             selectedBook = it
             viewModel.onAction(
@@ -194,6 +215,12 @@ fun ReadingListScreen(
                             .CONFIRM_BOOK_DELETE_DIALOG
                     )
             )
+        } ,
+        onBookSelected = {
+            //Save book to db
+        } ,
+        onSearchBook = { query ->
+            viewModel.searchForBook(query)
         }
     )
 }
@@ -202,17 +229,35 @@ fun ReadingListScreen(
 @Composable
 fun StatelessReadingListScreen(
     state: ReadingListScreenViewModel.ReadingListScreenState = ReadingListScreenViewModel.ReadingListScreenState(),
-    onNavigate: () -> Unit = {} ,
-    onDeleteList : () -> Unit = {} ,
-    onDeleteBook : (LibraryBookData) -> Unit = {}
+    googleBottomSheetUiState: GoogleBottomSheetUiState = GoogleBottomSheetUiState.StandbyState,
+    searchFieldState: FormState<TextFieldState> = FormState(fields = listOf()),
+    sheetOptions : BookSheetOptions = BookSheetOptions.ALL ,
+    onNavigate: () -> Unit = {},
+    onDeleteList: () -> Unit = {},
+    onDeleteBook: (LibraryBookData) -> Unit = {},
+    onBookSelected: (Book) -> Unit = {},
+    onSearchBook: (String) -> Unit = {}
 ) {
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
-    Scaffold(
+    val sheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        skipHiddenState = false,
+        confirmValueChange = {
+            it != SheetValue.Hidden
+        }
+    )
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = sheetState
+    )
+
+    BottomSheetScaffold(
         modifier = Modifier.fillMaxSize(),
+        scaffoldState = scaffoldState,
         topBar = {
             StandardToolBar(
                 title = {
-                    Text(text = state.readingList.name , style = BookAppTypography.labelLarge)
+                    Text(text = state.readingList.name, style = BookAppTypography.labelLarge)
                 },
                 navigate = {
                     onNavigate()
@@ -222,7 +267,7 @@ fun StatelessReadingListScreen(
                 navActions = {
                     IconButton(
                         modifier = Modifier.clip(CircleShape),
-                        onClick = { onDeleteList()}
+                        onClick = { onDeleteList() }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -233,9 +278,47 @@ fun StatelessReadingListScreen(
                 }
             )
         },
+        sheetContent = {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(600.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                when(sheetOptions){
+                    BookSheetOptions.ALL -> {
+                        BookImportOptions(
+                            modifier = Modifier.fillMaxWidth() ,
+                            onOptionSelected = {
+                                //update state
+                            }
+                        )
+                    }
+                    BookSheetOptions.GOOGLE_SEARCH -> {
+                        GoogleBooksSearchBottomSheet(
+                            context = context,
+                            googleSearchBottomSheetUiState = googleBottomSheetUiState,
+                            searchFieldState = searchFieldState,
+                            onBookSelected = {
+                                onBookSelected(it)
+                            },
+                            searchForBook = {
+                                onSearchBook(it)
+                            }
+                        )
+                    }
+                    BookSheetOptions.SAVED_BOOKS -> {
+
+                    }
+                }
+            }
+
+
+        },
         content = { paddingValues ->
 
-           val alignment =  if(state.isLoading) Alignment.Center else Alignment.TopCenter
+            val alignment = if (state.isLoading) Alignment.Center else Alignment.TopCenter
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -262,7 +345,7 @@ fun StatelessReadingListScreen(
                         Divider()
                         Spacer(modifier = Modifier.height(4.dp))
                         BooksSection(
-                            books = state.readingList.books ,
+                            books = state.readingList.books,
                             onDelete = {
                                 onDeleteBook(it)
                             }
@@ -408,11 +491,11 @@ private fun BooksSection(
                     }
                 ) { book ->
                     HorizontalBookCardComponent(
-                        bookData = book ,
+                        bookData = book,
                         onDeleteBook = {
                             //delete book from vm
-                             onDelete(book)
-                        } ,
+                            onDelete(book)
+                        },
                         onViewBook = {
                             //view book
                         }
@@ -504,6 +587,89 @@ private fun ImageSection(
         }
     }
 
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BookImportOptions(
+    modifier: Modifier = Modifier ,
+    onOptionSelected : (BookSheetOptions) -> Unit = {}
+){
+    Surface(modifier = modifier.wrapContentHeight()) {
+        Row(
+            modifier = Modifier.padding(6.dp),
+            verticalAlignment = Alignment.CenterVertically ,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Surface(
+                modifier = Modifier
+                    .size(100.dp)
+                    .border(
+                        width = 2.dp,
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    .clickable(
+                        onClick = {
+                            onOptionSelected(BookSheetOptions.SAVED_BOOKS)
+                        }
+                    ),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center ,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        modifier = Modifier.size(70.dp),
+                        painter = painterResource(id = R.drawable.ic_saved_book),
+                        contentDescription = "" ,
+                        tint = MaterialTheme.colorScheme.secondary
+                        )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(text = "Saved books" , style = BookAppTypography.labelMedium , color = MaterialTheme.colorScheme.secondary)
+                }
+            }
+
+            Surface(
+                modifier = Modifier
+                    .size(100.dp)
+                    .border(
+                        width = 2.dp,
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    .clickable(
+                        onClick = {
+                            onOptionSelected(BookSheetOptions.GOOGLE_SEARCH)
+                        }
+                    ),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center ,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        modifier = Modifier.size(70.dp),
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "" ,
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(text = "Search Online" , style = BookAppTypography.labelMedium , color = MaterialTheme.colorScheme.secondary)
+                }
+            }
+        }
+    }
+
+}
+
+
+enum class BookSheetOptions{
+    ALL ,
+    SAVED_BOOKS ,
+    GOOGLE_SEARCH
 }
 
 

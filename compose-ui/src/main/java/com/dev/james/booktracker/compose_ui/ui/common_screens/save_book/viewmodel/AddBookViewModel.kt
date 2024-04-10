@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.mappers.mapToDomainObject
@@ -455,18 +456,6 @@ sealed class AddBookScreenUiEvents {
     data class ShowSnackBar(val message: String, val isSaving: Boolean) : AddBookScreenUiEvents()
 
     object Navigate : AddBookScreenUiEvents()
-
-}
-
-
-sealed class GoogleBottomSheetUiState {
-    object IsLoading : GoogleBottomSheetUiState()
-
-    object StandbyState : GoogleBottomSheetUiState()
-
-    data class HasFetched(val booksList: List<Book>) : GoogleBottomSheetUiState()
-
-    data class HasFailed(val errorMessage: String) : GoogleBottomSheetUiState()
 
 }
 

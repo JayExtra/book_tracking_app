@@ -82,6 +82,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBotto
 import com.dev.james.booktracker.compose_ui.ui.components.RoundedBrownButton
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
+import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
@@ -155,6 +156,16 @@ fun AddBookScreen(
 
 
     val keyboardController = LocalSoftwareKeyboardController.current
+
+
+    //google bottom sheet
+
+    val searchFieldState by remember { mutableStateOf(addBookViewModel.bottomSheetSearchFieldState) }
+
+    val googleSearchBottomSheetUiState: GoogleBottomSheetUiState by addBookViewModel.googleBottomSheetSearchState
+        .collectAsStateWithLifecycle()
+
+
 
     LaunchedEffect(key1 = !isCameraButtonClicked) {
         //check if user has granted permission
@@ -259,6 +270,8 @@ fun AddBookScreen(
     }
 
 
+
+
     if (shouldShowCameraScreen) {
         CameraView(
             outputDirectory = outputDirectory,
@@ -287,6 +300,7 @@ fun AddBookScreen(
         )
 
     } else {
+
 
         BottomSheetScaffold(
             modifier = Modifier
@@ -349,7 +363,17 @@ fun AddBookScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     //call our google bottom sheet here
-                    GoogleBooksSearchBottomSheet()
+                    GoogleBooksSearchBottomSheet(
+                        context = context ,
+                        googleSearchBottomSheetUiState = googleSearchBottomSheetUiState ,
+                        searchFieldState = searchFieldState ,
+                        onBookSelected = {
+                            addBookViewModel.onBookSelected(it)
+                        } ,
+                        searchForBook = {
+                            addBookViewModel.searchForBook(it)
+                        }
+                    )
                 }
             }
         ) {
