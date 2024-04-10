@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -44,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -85,6 +84,9 @@ fun ReadingListScreen(
     }
 
     val state = viewModel.state.collectAsStateWithLifecycle()
+    var selectedBook by remember {
+        mutableStateOf(LibraryBookData())
+    }
 
 
     if(viewModel.deleteReadingListDialogState){
@@ -103,7 +105,7 @@ fun ReadingListScreen(
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
                         .DismissDialog(
-                            dialogType = ReadingListScreenViewModel.DialogType.CONFIRM_DELETE_DIALOG
+                            dialogType = ReadingListScreenViewModel.DialogType.CONFIRM_DELETE_READING_LIST_DIALOG
                         )
                 )
             }
@@ -120,10 +122,53 @@ fun ReadingListScreen(
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
                         .DismissDialog(
-                            dialogType = ReadingListScreenViewModel.DialogType.DELETED_DIALOG
+                            dialogType = ReadingListScreenViewModel.DialogType.READING_LIST_DELETED_DIALOG
                         )
                 )
                 readingListScreenNavigator.navBackToLibraryScreen()
+            }
+        )
+    }
+
+    if(viewModel.deleteBookConfirmationDialogState){
+        ConfirmationPrompt(
+            title = "Remove This Book?" ,
+            showCheckBox = false ,
+            body = "Do you wish to remove ${selectedBook.title} from this list? " ,
+            confirmationText = "Remove",
+            onAccept = {
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .DeleteBook(
+                            book = selectedBook ,
+                            readingListId = readingListId
+                        )
+                )
+            } ,
+            onCancel = {
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .DismissDialog(
+                            dialogType = ReadingListScreenViewModel.DialogType.CONFIRM_BOOK_DELETE_DIALOG
+                        )
+                )
+            }
+        )
+    }
+
+    if(viewModel.bookDeletedDialogState){
+        SingleActionConfirmationPrompt(
+            title = "Success!",
+            body = "${selectedBook.title} successfully removed!" ,
+            showAnimation = true ,
+            confirmationText = "Done" ,
+            onAccept = {
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .DismissDialog(
+                            dialogType = ReadingListScreenViewModel.DialogType.BOOK_DELETED_DIALOG
+                        )
+                )
             }
         )
     }
@@ -136,7 +181,17 @@ fun ReadingListScreen(
             viewModel.onAction(
                 action = ReadingListScreenViewModel.ReadingListScreenAction
                     .ShowDialog(
-                        dialogType = ReadingListScreenViewModel.DialogType.CONFIRM_DELETE_DIALOG
+                        dialogType = ReadingListScreenViewModel.DialogType.CONFIRM_DELETE_READING_LIST_DIALOG
+                    )
+            )
+        } ,
+        onDeleteBook = {
+            selectedBook = it
+            viewModel.onAction(
+                action = ReadingListScreenViewModel.ReadingListScreenAction
+                    .ShowDialog(
+                        dialogType = ReadingListScreenViewModel.DialogType
+                            .CONFIRM_BOOK_DELETE_DIALOG
                     )
             )
         }
@@ -148,7 +203,8 @@ fun ReadingListScreen(
 fun StatelessReadingListScreen(
     state: ReadingListScreenViewModel.ReadingListScreenState = ReadingListScreenViewModel.ReadingListScreenState(),
     onNavigate: () -> Unit = {} ,
-    onDeleteList : () -> Unit = {}
+    onDeleteList : () -> Unit = {} ,
+    onDeleteBook : (LibraryBookData) -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
     Scaffold(
@@ -156,7 +212,7 @@ fun StatelessReadingListScreen(
         topBar = {
             StandardToolBar(
                 title = {
-                    Text(text = "Dummy Title")
+                    Text(text = state.readingList.name , style = BookAppTypography.labelLarge)
                 },
                 navigate = {
                     onNavigate()
@@ -206,7 +262,10 @@ fun StatelessReadingListScreen(
                         Divider()
                         Spacer(modifier = Modifier.height(4.dp))
                         BooksSection(
-                            books = state.readingList.books
+                            books = state.readingList.books ,
+                            onDelete = {
+                                onDeleteBook(it)
+                            }
                         )
                     }
                 }
@@ -283,7 +342,7 @@ private fun BookDetailsSection(
 private fun BooksSection(
     modifier: Modifier = Modifier,
     books: List<LibraryBookData> = emptyList(),
-    onDelete: (String) -> Unit = {},
+    onDelete: (LibraryBookData) -> Unit = {},
     onAddBook: () -> Unit = {}
 ) {
     Column(
@@ -349,7 +408,14 @@ private fun BooksSection(
                     }
                 ) { book ->
                     HorizontalBookCardComponent(
-                        bookData = book
+                        bookData = book ,
+                        onDeleteBook = {
+                            //delete book from vm
+                             onDelete(book)
+                        } ,
+                        onViewBook = {
+                            //view book
+                        }
                     )
                 }
 
@@ -439,6 +505,9 @@ private fun ImageSection(
     }
 
 }
+
+
+//data class YOffset(val value : Dp)
 
 @Preview
 @Composable

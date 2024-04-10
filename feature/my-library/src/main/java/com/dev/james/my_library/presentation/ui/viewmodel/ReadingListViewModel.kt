@@ -5,12 +5,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingLists
 import com.dev.james.booktracker.core.common_models.mappers.mapToLibraryData
+import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
 import com.dev.james.domain.usecases.FetchActiveBookProgress
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +32,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ReadingListScreenViewModel @Inject constructor(
     private val readingListsRepository: ReadingListsRepository,
-    private val fetchActiveBookProgress: FetchActiveBookProgress
+    private val fetchActiveBookProgress: FetchActiveBookProgress ,
+    private val booksRepository: BooksRepository
 ) : ViewModel() {
 
     companion object {
@@ -45,6 +48,15 @@ class ReadingListScreenViewModel @Inject constructor(
         private set
     var deleteReadingListDialogState by mutableStateOf(false)
         private set
+
+    var deleteBookConfirmationDialogState by mutableStateOf(false)
+        private set
+
+    var bookDeletedDialogState by mutableStateOf(false)
+        private set
+
+    /*var selectedBookState by mutableStateOf(LibraryBookData())
+        private set*/
 
     @SuppressLint("NewApi")
     fun onAction(action: ReadingListScreenAction) = viewModelScope.launch {
@@ -69,21 +81,50 @@ class ReadingListScreenViewModel @Inject constructor(
                     deleteConfirmationDialogState = true
                 }
             }
+            is ReadingListScreenAction.DeleteBook -> {
+               /* selectedBookState = action.book*/
+                val result = booksRepository.addOrRemoveBookFromReadingList(
+                    bookId = action.book.id ,
+                    readingListId = action.readingListId
+                )
+                when(result){
+                    is Resource.Success -> {
+                        val message = result.data?.split(":")!!
+                        if(message[0] == "removed"){
+                            bookDeletedDialogState = true
+                            deleteBookConfirmationDialogState = false
+                        }
+                    }
+                    is Resource.Error -> {
+                        Timber.tag(TAG).d("ERROR : ${result.message}")
+                    }
+                    else -> {}
+                }
+            }
             is ReadingListScreenAction.DismissDialog -> {
                 when(action.dialogType){
-                     DialogType.DELETED_DIALOG -> {
+                     DialogType.READING_LIST_DELETED_DIALOG -> {
                         deleteConfirmationDialogState = false
                      }
-                    DialogType.CONFIRM_DELETE_DIALOG -> {
+                    DialogType.CONFIRM_DELETE_READING_LIST_DIALOG -> {
                         deleteReadingListDialogState = false
+                    }
+                    DialogType.BOOK_DELETED_DIALOG -> {
+                        bookDeletedDialogState = false
+                    }
+                    DialogType.CONFIRM_BOOK_DELETE_DIALOG -> {
+                        deleteBookConfirmationDialogState = false
                     }
                 }
             }
 
             is ReadingListScreenAction.ShowDialog -> {
                 when(action.dialogType){
-                    DialogType.CONFIRM_DELETE_DIALOG -> {
+                    DialogType.CONFIRM_DELETE_READING_LIST_DIALOG -> {
                         deleteReadingListDialogState = true
+                    }
+                    DialogType.CONFIRM_BOOK_DELETE_DIALOG -> {
+                        deleteBookConfirmationDialogState = true
                     }
                     else -> {}
                 }
@@ -137,6 +178,8 @@ class ReadingListScreenViewModel @Inject constructor(
         data class FetchReadingList(val readingListId: String) : ReadingListScreenAction()
         data class DeleteReadingList(val readingListId :String) : ReadingListScreenAction()
 
+        data class DeleteBook(val book : LibraryBookData , val readingListId: String) : ReadingListScreenAction()
+
         data class DismissDialog(val dialogType : DialogType) : ReadingListScreenAction()
 
         data class ShowDialog(val dialogType: DialogType) : ReadingListScreenAction()
@@ -149,7 +192,9 @@ class ReadingListScreenViewModel @Inject constructor(
     )
 
     enum class DialogType {
-        DELETED_DIALOG ,
-        CONFIRM_DELETE_DIALOG
+        READING_LIST_DELETED_DIALOG ,
+        BOOK_DELETED_DIALOG ,
+        CONFIRM_DELETE_READING_LIST_DIALOG ,
+        CONFIRM_BOOK_DELETE_DIALOG
     }
 }

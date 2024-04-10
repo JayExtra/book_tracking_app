@@ -217,7 +217,7 @@ class BooksRepositoryImpl
 
         }catch (e : SQLiteException){
             Timber.tag(TAG).d("Error on adding or removing book to reading list: ${e.stackTrace}")
-            Resource.Error("could not add or remove book from playlist: ${e.localizedMessage}")
+            Resource.Error("error:could not add or remove book from playlist =>${e.localizedMessage}")
         }
     }
 
