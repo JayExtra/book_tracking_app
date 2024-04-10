@@ -208,6 +208,7 @@ fun ReadingListScreen(
         googleBottomSheetUiState = googleBottomSheetUiState,
         searchFieldState = viewModel.bottomSheetSearchFieldState,
         sheetOptionsState = sheetOptionsState ,
+        savedBooks = savedBooksState.value,
         onSheetOptionSelected = {
                 sheetOptionsState = it
         },
@@ -279,6 +280,11 @@ fun StatelessReadingListScreen(
     BottomSheetScaffold(
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
+        sheetPeekHeight = 0.dp,
+        sheetShape = RoundedCornerShape(0.dp),
+        sheetTonalElevation = 3.dp,
+        sheetSwipeEnabled = false ,
+        sheetContainerColor = MaterialTheme.colorScheme.background,
         topBar = {
             StandardToolBar(
                 title = {
@@ -327,13 +333,14 @@ fun StatelessReadingListScreen(
                             "Your saved books"
                         }
                     }
-                    Text(barText, style = BookAppTypography.headlineMedium , textAlign = TextAlign.Start)
+                    Text(barText, style = BookAppTypography.headlineSmall , textAlign = TextAlign.Start)
                     IconButton(
                         onClick = {
                             keyboardController?.hide()
-                            cancelQuery()
                             coroutineScope.launch {
                                 sheetState.hide()
+                                onSheetOptionSelected(BookSheetOptions.ALL)
+                                cancelQuery()
                             }
                         },
                         colors = IconButtonDefaults.iconButtonColors(
@@ -360,7 +367,9 @@ fun StatelessReadingListScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(600.dp),
+                    .background(color = MaterialTheme.colorScheme.background)
+                    //.height(600.dp)
+                ,
                 contentAlignment = Alignment.Center
             ) {
                 when(sheetOptionsState){
@@ -775,7 +784,7 @@ private fun SavedBooksSection(
                modifier = Modifier.fillMaxWidth() ,
                columns = GridCells.Fixed(3) ,
                contentPadding = PaddingValues(6.dp) ,
-               verticalArrangement = Arrangement.Top ,
+               verticalArrangement = Arrangement.spacedBy(10.dp) ,
                horizontalArrangement = Arrangement.Center
            ){
                items(items = books , key = { it.bookId }){ book ->
