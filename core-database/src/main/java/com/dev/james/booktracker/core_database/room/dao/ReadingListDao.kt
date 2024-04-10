@@ -14,7 +14,7 @@ interface ReadingListDao {
     fun getReadingLists() : Flow<List<ReadingListEntity>>
 
     @Query("SELECT * FROM reading_lists WHERE id=:id")
-    suspend fun getAReadingList(id : String) : ReadingListEntity
+    fun getAReadingList(id : String) : Flow<ReadingListEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addReadingList(readingListEntity: ReadingListEntity)

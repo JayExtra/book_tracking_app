@@ -1,13 +1,9 @@
 package com.dev.james.domain.usecases
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
-import com.dev.james.booktracker.core.common_models.ReadingListItem
 import com.dev.james.booktracker.core.common_models.ReadingLists
 import com.dev.james.booktracker.core.common_models.mappers.mapToLibraryData
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -46,7 +42,7 @@ class ReadingListUsecase @Inject constructor(
                         name = item.name ,
                         image = item.image ,
                         description = item.description ,
-                        readingList = booksListWithData ,
+                        books = booksListWithData ,
                         date = item.date ,
                         starred = item.starred
                     )

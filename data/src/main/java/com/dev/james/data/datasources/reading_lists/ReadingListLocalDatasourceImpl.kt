@@ -21,7 +21,7 @@ class ReadingListLocalDatasourceImpl @Inject constructor(
         readingListDao.deleteReadingList(id)
     }
 
-    override suspend fun getAReadingList(id: String): ReadingListEntity {
+    override fun getAReadingList(id: String): Flow<ReadingListEntity> {
         return readingListDao.getAReadingList(id)
     }
 }

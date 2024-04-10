@@ -9,4 +9,6 @@ interface ReadingListsRepository {
     suspend fun createReadingList(readingListItem: ReadingListItem)
 
     suspend fun deleteReadingList(id : String)
+
+    fun getSingleReadingList(id : String) : Flow<ReadingListItem>
 }

@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteException
 import com.dev.james.booktracker.core.common_models.ReadingListItem
 import com.dev.james.booktracker.core.common_models.mappers.toDomain
 import com.dev.james.booktracker.core.common_models.mappers.toEntity
+import com.dev.james.booktracker.core.entities.ReadingListEntity
 import com.dev.james.domain.datasources.reading_lists.ReadingListLocalDatasource
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -56,5 +57,12 @@ class ReadingListRepositoryImpl @Inject constructor(
         }catch ( e : SQLiteException){
             Timber.tag(TAG).e("Error on deleting reading list : ${e.stackTrace}")
         }
+    }
+
+    override fun getSingleReadingList(id: String): Flow<ReadingListItem> {
+        return readingListLocalDatasource.getAReadingList(id)
+            .map { readingListEntity ->
+                readingListEntity.toDomain()
+            }
     }
 }

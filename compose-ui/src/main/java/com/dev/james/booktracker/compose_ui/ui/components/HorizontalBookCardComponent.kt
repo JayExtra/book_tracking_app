@@ -1,6 +1,5 @@
 package com.dev.james.booktracker.compose_ui.ui.components
 
-import android.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,13 +7,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.compose_ui.ui.theme.SuccessColor
@@ -39,28 +40,28 @@ import com.dev.james.booktracker.core.common_models.LibraryBookData
 @Preview(showBackground = true)
 @Composable
 fun HorizontalBookCardComponent(
-    bookData: LibraryBookData = LibraryBookData() ,
-    onBookSelected : () -> Unit = {} ,
-    onRemoveBook : () -> Unit = {}
+    bookData: LibraryBookData = LibraryBookData(),
+    onBookSelected : () -> Unit = {},
+    onShowOptions : () -> Unit = {}
 ){
     Surface(
         color = MaterialTheme.colorScheme.background
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically ,
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top ,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             CoilImageComponent(
                 modifier = Modifier
-                    .width(70.dp)
-                    .height(100.dp) ,
+                    .width(50.dp)
+                    .height(80.dp) ,
                 image = bookData.image
             )
 
             Column(
                 modifier = Modifier.weight(1f) ,
-                verticalArrangement = Arrangement.spacedBy(5.dp) ,
+                verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
@@ -81,13 +82,14 @@ fun HorizontalBookCardComponent(
                     modifier = Modifier.width(230.dp) ,
                     text = "${bookData.pagesRead}/${bookData.pages} pages" ,
                     style = BookAppTypography.bodySmall ,
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.Start
                 )
                 LinearProgressIndicator(
                     modifier = Modifier.width(230.dp) ,
-                    progress = (bookData.progress / 100).toFloat()
+                    progress = bookData.progress.toFloat() / 100 ,
+                    color = MaterialTheme.colorScheme.primary
                 )
-                Spacer(modifier = Modifier.height(3.dp))
+                Spacer(modifier = Modifier.height(5.dp))
                 DoneOrReading(
                     isDone = bookData.progress >= 100
                 )
@@ -97,10 +99,10 @@ fun HorizontalBookCardComponent(
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = androidx.compose.ui.graphics.Color.Transparent
                 ),
-                onClick = { onRemoveBook() }
+                onClick = { onShowOptions() }
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.Delete,
+                    imageVector = Icons.Rounded.MoreVert,
                     contentDescription = "" ,
                     tint = MaterialTheme.colorScheme.secondary
                 )
@@ -131,13 +133,19 @@ private fun DoneOrReading(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if(isDone){
-                Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "" , tint = SurfaceLight)
+                Icon(
+                    modifier = Modifier.size(14.dp),
+                    imageVector = Icons.Rounded.CheckCircle,
+                    contentDescription = "" ,
+                    tint = SurfaceLight
+                )
             }
             Text(
                 text = text ,
                 style = BookAppTypography.bodySmall ,
                 textAlign = TextAlign.End ,
-                color = SurfaceLight
+                color = SurfaceLight ,
+                fontSize = 10.sp
             )
 
         }

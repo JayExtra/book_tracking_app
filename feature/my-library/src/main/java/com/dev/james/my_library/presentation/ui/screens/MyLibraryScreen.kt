@@ -37,7 +37,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -945,7 +944,7 @@ fun ReadingListItem(
             )
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = "0/${readingLists.readingList.size} books read",
+                text = "0/${readingLists.books.size} books read",
                 style = BookAppTypography.labelSmall,
                 color = MaterialTheme.colorScheme.primary
             )
