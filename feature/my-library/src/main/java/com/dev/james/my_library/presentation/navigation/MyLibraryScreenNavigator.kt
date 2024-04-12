@@ -8,4 +8,6 @@ interface MyLibraryScreenNavigator {
     fun openAddBookScreenDestination()
 
     fun openBookTrackingScreenDestination(bookId : String , currentDestination: PreviousScreenDestinations)
+
+    fun openReadingListScreenDestination(readingListId : String)
 }

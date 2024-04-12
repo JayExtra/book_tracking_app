@@ -9,5 +9,5 @@ interface ReadingListLocalDatasource {
 
     suspend fun deleteReadingList(id : String)
 
-    suspend fun getAReadingList(id : String) : ReadingListEntity
+    fun getAReadingList(id : String) : Flow<ReadingListEntity>
 }

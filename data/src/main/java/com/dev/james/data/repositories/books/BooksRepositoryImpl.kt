@@ -190,7 +190,7 @@ class BooksRepositoryImpl
     override suspend fun addOrRemoveBookFromReadingList(readingListId: String, bookId: String): Resource<String> {
         return try {
             val cachedReadingList = readingListLocalDatasource.getAReadingList(id = readingListId)
-            val copiedList = cachedReadingList.readingList.toMutableList()
+            val copiedList = cachedReadingList.first().readingList.toMutableList()
 
             if (copiedList.contains(bookId)){
                     Timber.tag(TAG).d("Book $bookId exists in $readingListId reading list , removing it")
@@ -217,7 +217,7 @@ class BooksRepositoryImpl
 
         }catch (e : SQLiteException){
             Timber.tag(TAG).d("Error on adding or removing book to reading list: ${e.stackTrace}")
-            Resource.Error("could not add or remove book from playlist: ${e.localizedMessage}")
+            Resource.Error("error:could not add or remove book from playlist =>${e.localizedMessage}")
         }
     }
 

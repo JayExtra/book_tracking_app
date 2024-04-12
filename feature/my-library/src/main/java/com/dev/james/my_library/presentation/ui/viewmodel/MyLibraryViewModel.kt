@@ -123,7 +123,7 @@ class MyLibraryViewModel @Inject constructor(
                    name = item.name ,
                    image = item.image ,
                    description = item.description ,
-                   readingList = booksListWithData ,
+                   books = booksListWithData ,
                    date = item.date ,
                    starred = item.starred
                )

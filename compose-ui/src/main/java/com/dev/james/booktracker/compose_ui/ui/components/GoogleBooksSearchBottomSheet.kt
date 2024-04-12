@@ -46,7 +46,7 @@ import coil.transform.RoundedCornersTransformation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.dev.james.booktracker.compose_ui.R
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.AddBookViewModel
-import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.GoogleBottomSheetUiState
+import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.utilities.convertToOrganisedString
@@ -56,13 +56,17 @@ import timber.log.Timber
 
 @Composable
 fun GoogleBooksSearchBottomSheet(
-    addBookViewModel : AddBookViewModel = hiltViewModel()
+    context : Context,
+    googleSearchBottomSheetUiState: GoogleBottomSheetUiState,
+    searchFieldState: FormState<TextFieldState>,
+    onBookSelected: (Book) -> Unit,
+    searchForBook : (String) -> Unit
 ) {
-    val context = LocalContext.current
+    /*val context = LocalContext.current
     val searchFieldState by remember { mutableStateOf(addBookViewModel.bottomSheetSearchFieldState) }
 
     val googleSearchBottomSheetUiState: GoogleBottomSheetUiState by addBookViewModel.googleBottomSheetSearchState
-        .collectAsStateWithLifecycle()
+        .collectAsStateWithLifecycle()*/
 
    StateLessGoogleBooksSearchBottomSheet(
         searchFieldState = searchFieldState,
@@ -70,12 +74,12 @@ fun GoogleBooksSearchBottomSheet(
         context = context,
         onBookSelected = { book ->
             // update the view model image state and also pass the book selected data to various required fields
-            addBookViewModel.onBookSelected(book = book)
+            onBookSelected(book)
 
         },
         onSearchTextChanged = { query ->
             // update the search query
-            addBookViewModel.searchForBook(query)
+            searchForBook(query)
         }
     )
 
@@ -83,7 +87,7 @@ fun GoogleBooksSearchBottomSheet(
 
 @Composable
 @Preview("GoogleSearchBottomSheet", showBackground = true)
-fun StateLessGoogleBooksSearchBottomSheet(
+private fun StateLessGoogleBooksSearchBottomSheet(
     context: Context = LocalContext.current,
     searchFieldState: FormState<TextFieldState> = FormState(fields = listOf()),
     googleSearchBottomSheetUiState: GoogleBottomSheetUiState = GoogleBottomSheetUiState.IsLoading,

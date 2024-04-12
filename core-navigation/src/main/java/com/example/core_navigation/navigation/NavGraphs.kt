@@ -9,6 +9,7 @@ import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingW
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
 import com.dev.james.my_library.presentation.ui.screens.destinations.MyLibraryScreenDestination
+import com.dev.james.my_library.presentation.ui.screens.destinations.ReadingListScreenDestination
 import com.ramcosta.composedestinations.dynamic.routedIn
 import com.ramcosta.composedestinations.spec.DestinationSpec
 import com.ramcosta.composedestinations.spec.NavGraphSpec
@@ -65,7 +66,8 @@ object NavGraphs {
             listOf<DestinationSpec<*>>(
                 MyLibraryScreenDestination ,
                 AddBookScreenDestination ,
-                TrackBookScreenDestination
+                TrackBookScreenDestination ,
+                ReadingListScreenDestination
             ).routedIn(this)
                 .associateBy { it.route }
 
