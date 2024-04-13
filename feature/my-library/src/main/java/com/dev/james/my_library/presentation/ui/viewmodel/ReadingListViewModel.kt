@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.AddBookViewModel
 import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
 import com.dev.james.booktracker.core.common_models.Book
+import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingLists
 import com.dev.james.booktracker.core.common_models.mappers.mapToDomainObject
@@ -30,6 +31,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -40,6 +42,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -77,6 +80,13 @@ class ReadingListScreenViewModel @Inject constructor(
     )
 
     private var queryJob: Job? = null
+
+    val savedBooks = booksRepository.getSavedBooks()
+        .stateIn(
+            viewModelScope ,
+            started = SharingStarted.WhileSubscribed(5000) ,
+            emptyList()
+        )
 
 
     var selectedBookState by mutableStateOf(Book())
@@ -277,6 +287,10 @@ class ReadingListScreenViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        queryJob?.cancel()
+    }
+
+    fun cancelQueryJob() {
         queryJob?.cancel()
     }
 

@@ -127,6 +127,7 @@ private fun StateLessGoogleBooksSearchBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
+                .background(color = MaterialTheme.colorScheme.background)
                 .padding(top = 16.dp),
             contentAlignment = Alignment.TopCenter
         ) {

@@ -40,6 +40,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.layoutId
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.compose_ui.ui.theme.SurfaceDark70
 import com.dev.james.booktracker.home.R
 import kotlin.math.roundToInt
 
@@ -269,7 +270,7 @@ fun BookCounterComponent(
                 color = MaterialTheme.colorScheme.primary ,
                 modifier = Modifier.size(70.dp) ,
                 strokeCap = StrokeCap.Round ,
-                trackColor = MaterialTheme.colorScheme.onBackground
+                trackColor = SurfaceDark70
             )
 
 

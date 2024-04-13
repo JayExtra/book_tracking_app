@@ -278,8 +278,7 @@ fun ProgressComponent(
                 .height(5.dp),
             color = MaterialTheme.colorScheme.primary,
             progress = progressBarLength ,
-            strokeCap = StrokeCap.Round ,
-            trackColor = MaterialTheme.colorScheme.onBackground
+            strokeCap = StrokeCap.Round
         )
         Box(
             contentAlignment = Alignment.Center, modifier =

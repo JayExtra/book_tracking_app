@@ -1,12 +1,12 @@
 package com.dev.james.my_library.presentation.ui.screens
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
@@ -42,7 +43,6 @@ import com.dev.james.booktracker.compose_ui.R
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -53,13 +53,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -71,6 +75,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.ConfirmationPrompt
 import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
 import com.dev.james.booktracker.compose_ui.ui.components.HorizontalBookCardComponent
+import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
 import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
@@ -78,14 +83,15 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
 import com.dev.james.booktracker.core.common_models.Book
+import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingLists
 import com.dev.james.my_library.presentation.navigation.ReadingListScreenNavigator
 import com.dev.james.my_library.presentation.ui.viewmodel.ReadingListScreenViewModel
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
-import com.itextpdf.text.pdf.TextField
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlinx.coroutines.launch
 
 @Composable
 @Destination
@@ -102,11 +108,17 @@ fun ReadingListScreen(
     }
 
     val state = viewModel.state.collectAsStateWithLifecycle()
+    val savedBooksState = viewModel.savedBooks.collectAsStateWithLifecycle()
+
     var selectedBook by remember {
         mutableStateOf(LibraryBookData())
     }
 
     val googleBottomSheetUiState by viewModel.googleBottomSheetSearchState.collectAsStateWithLifecycle()
+
+    var sheetOptionsState by rememberSaveable {
+        mutableStateOf(BookSheetOptions.ALL)
+    }
 
     if (viewModel.deleteReadingListDialogState) {
         ConfirmationPrompt(
@@ -195,6 +207,14 @@ fun ReadingListScreen(
         state = state.value,
         googleBottomSheetUiState = googleBottomSheetUiState,
         searchFieldState = viewModel.bottomSheetSearchFieldState,
+        sheetOptionsState = sheetOptionsState ,
+        savedBooks = savedBooksState.value,
+        onSheetOptionSelected = {
+                sheetOptionsState = it
+        },
+        cancelQuery = {
+              viewModel.cancelQueryJob()
+        },
         onNavigate = {
             readingListScreenNavigator.navBackToLibraryScreen()
         },
@@ -225,13 +245,16 @@ fun ReadingListScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun StatelessReadingListScreen(
     state: ReadingListScreenViewModel.ReadingListScreenState = ReadingListScreenViewModel.ReadingListScreenState(),
+    savedBooks : List<BookSave> = emptyList() ,
     googleBottomSheetUiState: GoogleBottomSheetUiState = GoogleBottomSheetUiState.StandbyState,
     searchFieldState: FormState<TextFieldState> = FormState(fields = listOf()),
-    sheetOptions : BookSheetOptions = BookSheetOptions.ALL ,
+    sheetOptionsState : BookSheetOptions = BookSheetOptions.ALL ,
+    onSheetOptionSelected : (BookSheetOptions) -> Unit = {},
+    cancelQuery : () -> Unit = {} ,
     onNavigate: () -> Unit = {},
     onDeleteList: () -> Unit = {},
     onDeleteBook: (LibraryBookData) -> Unit = {},
@@ -250,10 +273,18 @@ fun StatelessReadingListScreen(
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = sheetState
     )
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val coroutineScope = rememberCoroutineScope()
+
 
     BottomSheetScaffold(
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
+        sheetPeekHeight = 0.dp,
+        sheetShape = RoundedCornerShape(0.dp),
+        sheetTonalElevation = 3.dp,
+        sheetSwipeEnabled = false ,
+        sheetContainerColor = MaterialTheme.colorScheme.background,
         topBar = {
             StandardToolBar(
                 title = {
@@ -278,20 +309,76 @@ fun StatelessReadingListScreen(
                 }
             )
         },
+        sheetDragHandle = {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 8.dp, start = 8.dp, bottom = 8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+
+                ) {
+                    val barText = when(sheetOptionsState){
+                        BookSheetOptions.ALL -> {
+                            "Select where to add from"
+                        }
+                        BookSheetOptions.GOOGLE_SEARCH -> {
+                            "Search"
+                        }
+                        BookSheetOptions.SAVED_BOOKS -> {
+                            "Your saved books"
+                        }
+                    }
+                    Text(barText, style = BookAppTypography.headlineSmall , textAlign = TextAlign.Start)
+                    IconButton(
+                        onClick = {
+                            keyboardController?.hide()
+                            coroutineScope.launch {
+                                sheetState.hide()
+                                onSheetOptionSelected(BookSheetOptions.ALL)
+                                cancelQuery()
+                            }
+                        },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.Transparent
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "close bottom sheet ",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+                Divider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+        },
         sheetContent = {
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(600.dp),
+                    .background(color = MaterialTheme.colorScheme.background)
+                    //.height(600.dp)
+                ,
                 contentAlignment = Alignment.Center
             ) {
-                when(sheetOptions){
+                when(sheetOptionsState){
                     BookSheetOptions.ALL -> {
                         BookImportOptions(
                             modifier = Modifier.fillMaxWidth() ,
                             onOptionSelected = {
                                 //update state
+                                onSheetOptionSelected(it)
                             }
                         )
                     }
@@ -309,7 +396,12 @@ fun StatelessReadingListScreen(
                         )
                     }
                     BookSheetOptions.SAVED_BOOKS -> {
+                        SavedBooksSection(
+                            books = savedBooks,
+                            onSavedBookSelected = {
 
+                            }
+                        )
                     }
                 }
             }
@@ -348,6 +440,11 @@ fun StatelessReadingListScreen(
                             books = state.readingList.books,
                             onDelete = {
                                 onDeleteBook(it)
+                            } ,
+                            onAddBook = {
+                                coroutineScope.launch {
+                                    sheetState.expand()
+                                }
                             }
                         )
                     }
@@ -663,6 +760,48 @@ private fun BookImportOptions(
         }
     }
 
+}
+
+@Composable
+private fun SavedBooksSection(
+    modifier: Modifier = Modifier ,
+    books : List<BookSave> = emptyList() ,
+    onSavedBookSelected : (BookSave) -> Unit = {}
+){
+    val alignment = if(books.isEmpty()) Alignment.Center else Alignment.TopCenter
+    Box(
+        modifier = modifier.padding(8.dp),
+        contentAlignment = alignment
+    ) {
+       if(books.isEmpty()){
+           Text(
+               modifier = Modifier.fillMaxWidth() ,
+               text = "No books currently added." ,
+               style = BookAppTypography.labelMedium ,
+               )
+       }else {
+           LazyVerticalGrid(
+               modifier = Modifier.fillMaxWidth() ,
+               columns = GridCells.Fixed(3) ,
+               contentPadding = PaddingValues(6.dp) ,
+               verticalArrangement = Arrangement.spacedBy(10.dp) ,
+               horizontalArrangement = Arrangement.Center
+           ){
+               items(items = books , key = { it.bookId }){ book ->
+                   LibraryBookCardComponent(
+                       image = book.bookImage ,
+                       title = book.bookTitle,
+                       author = book.bookAuthors,
+                       shouldShowProgress = false ,
+                       onItemSelected = {
+                           onSavedBookSelected(book)
+                       }
+                   )
+               }
+
+           }
+       }
+    }
 }
 
 

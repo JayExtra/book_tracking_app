@@ -113,6 +113,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmati
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.compose_ui.ui.theme.SurfaceDark70
 import com.dev.james.booktracker.compose_ui.ui.utils.splitToDHMS
 import com.dev.james.booktracker.core.common_models.BookStatisticsData
 import com.dev.james.booktracker.core.utilities.formatTimeToDHMS
@@ -1615,10 +1616,10 @@ fun BookProgressImageSection(
         CircularProgressIndicator(
             progress = finalProgress.value,
             strokeCap = StrokeCap.Round,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(width = 250.dp, height = 250.dp),
-            strokeWidth = 12.dp,
-            trackColor = MaterialTheme.colorScheme.onBackground
+            strokeWidth = 12.dp ,
+            trackColor = SurfaceDark70
         )
     }
 }
