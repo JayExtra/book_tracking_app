@@ -20,5 +20,5 @@ interface ReadingListsRepository {
 
     suspend fun addToPendingList(readingListId : String , book: BaseBookData) : Resource<Boolean>
 
-    suspend fun removeFromPendingList(readingListId: String , book: BaseBookData) : Resource<Boolean>
+    suspend fun removeFromPendingList(readingListId: String , bookId: String) : Resource<Boolean>
 }

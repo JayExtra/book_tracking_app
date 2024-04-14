@@ -109,19 +109,19 @@ class ReadingListRepositoryImpl @Inject constructor(
 
     override suspend fun removeFromPendingList(
         readingListId: String,
-        book: BaseBookData
+        bookId: String
     ): Resource<Boolean> {
         return try {
             readingListLocalDatasource.removeFromPendingList(
                 readingListId ,
-                book.id
+                bookId
             )
-            val readingList = readingListLocalDatasource.getPendingReadingListItem()
+            val books = readingListLocalDatasource.getPendingReadingListItem()
                 .first().find {
                     it.readingListId == readingListId
-                }!!
+                }!!.books.map { it.id }
 
-            return if (!readingList.books.contains(book)){
+            return if (!books.contains(bookId)){
                 Timber.tag(TAG).e("successfully removed from pending list")
                 Resource.Success(data = true)
             }else {
