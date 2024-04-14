@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -201,7 +202,8 @@ class ReadingListScreenViewModel @Inject constructor(
                     date = item.date,
                     starred = item.starred
                 )
-            }.catch { t ->
+            }
+            .catch { t ->
                 Timber.tag(TAG).e("Error fetching reading list => ${t.printStackTrace()}")
                 _state.update { screenState ->
                     screenState.copy(

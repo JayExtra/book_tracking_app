@@ -2,6 +2,7 @@ package com.dev.james.booktracker.core_datastore.local.datastore
 
 import androidx.datastore.preferences.core.Preferences
 import com.dev.james.booktracker.core.common_models.BaseBookData
+import com.dev.james.booktracker.core.datastore.proto.PendingReadingListItems
 import com.dev.james.booktracker.core.datastore.proto.WishlistItems
 import kotlinx.coroutines.flow.Flow
 
@@ -25,4 +26,11 @@ interface DataStoreManager {
     fun getWishList() : Flow<WishlistItems>
 
     suspend fun removeFromWishList(bookId : String)
+
+    fun pendingReadingListItems() : Flow<List<PendingReadingListItems>>
+
+    suspend fun removeFromPendingList(readingListId : String, bookId : String)
+
+    suspend fun addToPendingReadingList(readingListId : String, book : BaseBookData)
+
 }

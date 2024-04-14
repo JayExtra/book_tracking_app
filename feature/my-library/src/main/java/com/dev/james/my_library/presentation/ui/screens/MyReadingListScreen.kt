@@ -367,7 +367,8 @@ fun StatelessReadingListScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(color = MaterialTheme.colorScheme.background)
+                    .background(color = MaterialTheme.colorScheme.background
+                    )
                     //.height(600.dp)
                 ,
                 contentAlignment = Alignment.Center
