@@ -7,6 +7,7 @@ import com.dev.james.booktracker.core.common_models.mappers.toDomain
 import com.dev.james.booktracker.core.common_models.mappers.toEntity
 import com.dev.james.booktracker.core.datastore.proto.PendingReadingListItems
 import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.core_datastore.local.datastore.DataStoreManager
 import com.dev.james.domain.datasources.reading_lists.ReadingListLocalDatasource
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -50,6 +51,8 @@ class ReadingListRepositoryImpl @Inject constructor(
             readingListLocalDatasource.createReadingList(
                 readingListItem.toEntity()
             )
+            readingListLocalDatasource.createPendingReadingList(readingListItem.id)
+
         } catch (e: SQLiteException) {
             Timber.tag(TAG).e("Error on adding reading list : ${e.stackTrace}")
         }

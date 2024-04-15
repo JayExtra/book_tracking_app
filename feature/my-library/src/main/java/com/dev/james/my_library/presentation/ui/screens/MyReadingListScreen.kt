@@ -91,6 +91,7 @@ import com.dev.james.my_library.presentation.ui.viewmodel.ReadingListScreenViewM
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -145,6 +146,7 @@ fun ReadingListScreen(
             showAnimation = true,
             confirmationText = "Done",
             onAccept = {
+                selectedBook = LibraryBookData()
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
                         .DismissDialog(
@@ -472,6 +474,9 @@ fun StatelessReadingListScreen(
                             searchFieldState = searchFieldState,
                             onBookSelected = {
                                 onBookSelected(it)
+                                coroutineScope.launch {
+                                    sheetState.hide()
+                                }
                             },
                             searchForBook = {
                                 onSearchBook(it)
@@ -515,7 +520,8 @@ fun StatelessReadingListScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         BookDetailsSection(
-                            readingListItem = state.readingList
+                            readingListItem = state.readingList ,
+                            pendingBooks = state.pendingBooks
                         )
                         Divider()
                         Spacer(modifier = Modifier.height(4.dp))
@@ -554,7 +560,8 @@ fun StatelessReadingListScreen(
 @Composable
 private fun BookDetailsSection(
     modifier: Modifier = Modifier,
-    readingListItem: ReadingLists = ReadingLists(),
+    readingListItem: ReadingLists = ReadingLists() ,
+    pendingBooks : List<LibraryBookData> = emptyList() ,
     onAddImage: () -> Unit = {}
 ) {
     val completedBooks =
@@ -562,7 +569,7 @@ private fun BookDetailsSection(
             it.progress >= 100
         }.size
 
-    val totalBooks = readingListItem.books.size
+    val totalBooks = readingListItem.books.size + pendingBooks.size
 
     val pluralText = if (totalBooks == 1) "book" else "books"
 
@@ -623,6 +630,7 @@ private fun PendingBooksSection(
 ){
     Box(
         modifier = modifier.fillMaxWidth()
+            .height(400.dp)
     ) {
         if(errorMessage.isNotEmpty()){
             Text(text = errorMessage , style = BookAppTypography.bodySmall , textAlign = TextAlign.Center)

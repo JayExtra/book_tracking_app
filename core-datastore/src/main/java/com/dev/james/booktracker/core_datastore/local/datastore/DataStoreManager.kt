@@ -33,4 +33,6 @@ interface DataStoreManager {
 
     suspend fun addToPendingReadingList(readingListId : String, book : BaseBookData)
 
+    suspend fun createPendingReadingList(readingListId: String)
+
 }

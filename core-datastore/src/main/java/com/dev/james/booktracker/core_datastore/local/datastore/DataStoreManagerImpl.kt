@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.dev.james.booktracker.core.common_models.BaseBookData
+import com.dev.james.booktracker.core.datastore.proto.PendingReadingList
 import com.dev.james.booktracker.core.datastore.proto.PendingReadingListItems
 import com.dev.james.booktracker.core.datastore.proto.WishlistItems
 import com.dev.james.booktracker.core_datastore.local.datastore.proto.PendingReadingListItemsSerializer
@@ -168,6 +169,8 @@ class DataStoreManagerImpl @Inject constructor(
         }
     }
 
+
+
     override suspend fun addToPendingReadingList(readingListId: String, book: BaseBookData) {
         context.readingListProtoDataStore.updateData { pendingReadingList ->
 
@@ -193,6 +196,21 @@ class DataStoreManagerImpl @Inject constructor(
             }
             pendingReadingList.copy(
                 pendingItems = newPendingItemList
+            )
+        }
+    }
+
+    override suspend fun createPendingReadingList(readingListId: String) {
+        context.readingListProtoDataStore.updateData { list ->
+           val newList = list.pendingItems.mutate {
+               it.add(
+                   PendingReadingListItems(
+                      readingListId = readingListId
+                   )
+               )
+           }
+            list.copy(
+                pendingItems = newList
             )
         }
     }

@@ -105,9 +105,10 @@ fun HorizontalBookCardComponent(
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(2.dp))
+                val pagesText = if(bookData.isPending) "${bookData.pages} pages" else "${bookData.pagesRead}/${bookData.pages} pages"
                 Text(
                     modifier = Modifier.width(230.dp),
-                    text = "${bookData.pagesRead}/${bookData.pages} pages",
+                    text = pagesText ,
                     style = BookAppTypography.bodySmall,
                     textAlign = TextAlign.Start
                 )
@@ -132,7 +133,7 @@ fun HorizontalBookCardComponent(
                     visible = showPopupMenuState,
                     enter = fadeIn(
                         animationSpec = tween(
-                            durationMillis = 2000
+                            durationMillis = 500
                         )
                     ) + expandHorizontally(
                         animationSpec =
@@ -143,7 +144,11 @@ fun HorizontalBookCardComponent(
                     ) {
                         it
                     },
-                    exit = fadeOut() + shrinkHorizontally {
+                    exit = fadeOut(
+                        animationSpec = tween(
+                            durationMillis = 500
+                        )
+                    ) + shrinkHorizontally {
                         it
                     }
                 ) {

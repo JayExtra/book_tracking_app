@@ -189,6 +189,9 @@ class ReadingListScreenViewModel @Inject constructor(
                     DialogType.PENDING_BOOK_REMOVED -> {
                         pendingBookRemovedDialogState = false
                     }
+                    DialogType.CONFIRM_REMOVING_PENDING_BOOK -> {
+                        confirmRemovePendingBookDialogState = false
+                    }
                     else -> {}
                 }
             }

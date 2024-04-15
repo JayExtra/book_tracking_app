@@ -20,4 +20,6 @@ interface ReadingListLocalDatasource {
 
     suspend fun removeFromPendingList(readingListId: String , bookId : String)
 
+    suspend fun createPendingReadingList(readingListId: String)
+
 }

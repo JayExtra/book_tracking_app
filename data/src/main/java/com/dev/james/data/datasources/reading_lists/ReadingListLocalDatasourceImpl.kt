@@ -41,4 +41,8 @@ class ReadingListLocalDatasourceImpl @Inject constructor(
     override suspend fun removeFromPendingList(readingListId: String, bookId: String) {
         dataStoreManager.removeFromPendingList(readingListId , bookId)
     }
+
+    override suspend fun createPendingReadingList(readingListId: String) {
+        dataStoreManager.createPendingReadingList(readingListId = readingListId)
+    }
 }
