@@ -110,6 +110,7 @@ fun ReadingListScreen(
     val state = viewModel.state.collectAsStateWithLifecycle()
     val savedBooksState = viewModel.savedBooks.collectAsStateWithLifecycle()
 
+
     var selectedBook by remember {
         mutableStateOf(LibraryBookData())
     }
@@ -119,6 +120,68 @@ fun ReadingListScreen(
     var sheetOptionsState by rememberSaveable {
         mutableStateOf(BookSheetOptions.ALL)
     }
+
+    if(viewModel.pendingBookDialogState){
+        SingleActionConfirmationPrompt(
+            title = "Success!",
+            body = "${selectedBook.title} successfully added!",
+            showAnimation = true,
+            confirmationText = "Done",
+            onAccept = {
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .DismissDialog(
+                            dialogType = ReadingListScreenViewModel.DialogType.PENDING_BOOK_ADDED_DIALOG
+                        )
+                )
+            }
+        )
+    }
+
+    if (viewModel.pendingBookRemovedDialogState) {
+        SingleActionConfirmationPrompt(
+            title = "Success!",
+            body = "${selectedBook.title} successfully removed!",
+            showAnimation = true,
+            confirmationText = "Done",
+            onAccept = {
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .DismissDialog(
+                            dialogType = ReadingListScreenViewModel.DialogType.PENDING_BOOK_REMOVED
+                        )
+                )
+            }
+        )
+    }
+
+    if (viewModel.confirmRemovePendingBookDialogState) {
+        ConfirmationPrompt(
+            title = "Remove This Book?",
+            showCheckBox = false,
+            body = "Do you wish to remove ${selectedBook.title} from this list? ",
+            confirmationText = "Remove",
+            onAccept = {
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .RemoveBookFromApi(
+                            bookId = selectedBook.id,
+                            readingListId = readingListId
+                        )
+                )
+            },
+            onCancel = {
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .DismissDialog(
+                            dialogType = ReadingListScreenViewModel.DialogType.CONFIRM_REMOVING_PENDING_BOOK
+                        )
+                )
+            }
+        )
+    }
+
+
 
     if (viewModel.deleteReadingListDialogState) {
         ConfirmationPrompt(
@@ -237,10 +300,27 @@ fun ReadingListScreen(
             )
         } ,
         onBookSelected = {
-            //Save book to db
+            //add to pending books
+            viewModel.onAction(
+                action = ReadingListScreenViewModel.ReadingListScreenAction
+                    .AddBookFromApi(
+                        book = it ,
+                        readingListId = readingListId
+                    )
+            )
+
         } ,
         onSearchBook = { query ->
             viewModel.searchForBook(query)
+        } ,
+        onRemovePendingBook = { pendingBook ->
+            selectedBook = pendingBook
+            viewModel.onAction(
+                action = ReadingListScreenViewModel.ReadingListScreenAction
+                    .ShowDialog(
+                        dialogType = ReadingListScreenViewModel.DialogType.CONFIRM_REMOVING_PENDING_BOOK
+                    )
+            )
         }
     )
 }
@@ -259,7 +339,8 @@ fun StatelessReadingListScreen(
     onDeleteList: () -> Unit = {},
     onDeleteBook: (LibraryBookData) -> Unit = {},
     onBookSelected: (Book) -> Unit = {},
-    onSearchBook: (String) -> Unit = {}
+    onSearchBook: (String) -> Unit = {} ,
+    onRemovePendingBook : (LibraryBookData) -> Unit = {}
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -367,7 +448,8 @@ fun StatelessReadingListScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(color = MaterialTheme.colorScheme.background
+                    .background(
+                        color = MaterialTheme.colorScheme.background
                     )
                     //.height(600.dp)
                 ,
@@ -448,6 +530,19 @@ fun StatelessReadingListScreen(
                                 }
                             }
                         )
+                        if(state.pendingBooks.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Divider()
+                            PendingBooksSection(
+                                books = state.pendingBooks,
+                                onRemoveBook = {
+                                       onRemovePendingBook(it)
+                                },
+                                onView = {
+
+                                }
+                            )
+                        }
                     }
                 }
 
@@ -516,6 +611,43 @@ private fun BookDetailsSection(
             )
         }
     }
+}
+
+@Composable
+private fun PendingBooksSection(
+    modifier: Modifier = Modifier,
+    books : List<LibraryBookData> ,
+    errorMessage : String = "",
+    onRemoveBook : (LibraryBookData) -> Unit ,
+    onView : (LibraryBookData) -> Unit
+){
+    Box(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        if(errorMessage.isNotEmpty()){
+            Text(text = errorMessage , style = BookAppTypography.bodySmall , textAlign = TextAlign.Center)
+        }else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+            ){
+                items(items = books , key = { it.id }){ book ->
+                    HorizontalBookCardComponent(
+                        bookData = book,
+                        onDeleteBook = {
+                            //delete book from vm
+                            onRemoveBook(book)
+                        },
+                        onViewBook = {
+                            //navigate to book data screen
+                            onView(book)
+                        }
+                    )
+                }
+
+            }
+        }
+    }
+
 }
 
 
@@ -594,8 +726,8 @@ private fun BooksSection(
                             //delete book from vm
                             onDelete(book)
                         },
-                        onViewBook = {
-                            //view book
+                        onNavigate = {
+                            //navigate to book data screen
                         }
                     )
                 }

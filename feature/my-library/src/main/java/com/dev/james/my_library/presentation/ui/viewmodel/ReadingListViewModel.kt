@@ -81,6 +81,11 @@ class ReadingListScreenViewModel @Inject constructor(
 
     var pendingBookDialogState by mutableStateOf(false)
         private set
+    var confirmRemovePendingBookDialogState by mutableStateOf(false)
+        private set
+
+    var pendingBookRemovedDialogState by mutableStateOf(false)
+        private set
 
     private val searchQueryStateFlow = savedStateHandle.getStateFlow("search_query" ,
         AddBookViewModel.DEFAULT_SEARCH_QUERY
@@ -121,6 +126,7 @@ class ReadingListScreenViewModel @Inject constructor(
     fun onAction(action: ReadingListScreenAction) = viewModelScope.launch {
         when (action) {
             is ReadingListScreenAction.FetchReadingList -> {
+                val id = action.readingListId
                 _state.update { screenState ->
                     screenState.copy(
                         isLoading = true,
@@ -129,7 +135,10 @@ class ReadingListScreenViewModel @Inject constructor(
                     )
                 }
                 fetchReadingListDetails(
-                    action.readingListId
+                   id
+                )
+                fetchPendingBooks(
+                    id
                 )
             }
             is ReadingListScreenAction.DeleteReadingList -> {
@@ -177,6 +186,10 @@ class ReadingListScreenViewModel @Inject constructor(
                     DialogType.PENDING_BOOK_ADDED_DIALOG -> {
                         pendingBookDialogState = false
                     }
+                    DialogType.PENDING_BOOK_REMOVED -> {
+                        pendingBookRemovedDialogState = false
+                    }
+                    else -> {}
                 }
             }
 
@@ -188,15 +201,24 @@ class ReadingListScreenViewModel @Inject constructor(
                     DialogType.CONFIRM_BOOK_DELETE_DIALOG -> {
                         deleteBookConfirmationDialogState = true
                     }
+                    DialogType.CONFIRM_REMOVING_PENDING_BOOK -> {
+                        confirmRemovePendingBookDialogState = true
+                    }
                     else -> {}
                 }
             }
 
             is ReadingListScreenAction.AddBookFromApi -> {
-                TODO()
+               addToPendingBooksList(
+                   readingListId = action.readingListId ,
+                   book = action.book.mapToPresentation()
+               )
             }
             is ReadingListScreenAction.RemoveBookFromApi -> {
-                TODO()
+                removeFromPendingBooksList(
+                    readingListId = action.readingListId ,
+                    bookId = action.bookId
+                )
             }
         }
     }
@@ -291,7 +313,8 @@ class ReadingListScreenViewModel @Inject constructor(
         when(result){
             is Resource.Success -> {
                 if(result.data == true){
-                    deleteBookConfirmationDialogState = true
+                    confirmRemovePendingBookDialogState = false
+                    pendingBookRemovedDialogState = true
                 }else{
                     Timber.tag(TAG).e("Could not add book to pending list")
                 }
@@ -384,7 +407,7 @@ class ReadingListScreenViewModel @Inject constructor(
 
         data class DeleteBook(val book : LibraryBookData , val readingListId: String) : ReadingListScreenAction()
 
-        data class AddBookFromApi(val book : BaseBookData , val readingListId: String) : ReadingListScreenAction()
+        data class AddBookFromApi(val book : Book , val readingListId: String) : ReadingListScreenAction()
 
         data class RemoveBookFromApi(val bookId : String , val readingListId: String) : ReadingListScreenAction()
 
@@ -405,7 +428,9 @@ class ReadingListScreenViewModel @Inject constructor(
         READING_LIST_DELETED_DIALOG ,
         BOOK_DELETED_DIALOG ,
         PENDING_BOOK_ADDED_DIALOG ,
+        PENDING_BOOK_REMOVED ,
         CONFIRM_DELETE_READING_LIST_DIALOG ,
-        CONFIRM_BOOK_DELETE_DIALOG
+        CONFIRM_BOOK_DELETE_DIALOG ,
+        CONFIRM_REMOVING_PENDING_BOOK
     }
 }
