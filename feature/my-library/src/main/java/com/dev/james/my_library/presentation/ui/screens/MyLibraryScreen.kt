@@ -510,13 +510,13 @@ fun CurrentlyReadingSection(
 
                 items(items = bookList) { book ->
                     LibraryBookCardComponent(
-                        image = book.image,
-                        title = book.title,
-                        author = book.author,
+                        image = book.baseData.image,
+                        title = book.baseData.title,
+                        author = book.baseData.authors,
                         shouldShowProgress = true,
                         progress = book.progress,
                         onItemSelected = {
-                            onBookSelected(book.id)
+                            onBookSelected(book.baseData.id)
                         }
                     )
                 }

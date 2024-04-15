@@ -20,7 +20,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
-import com.dev.james.booktracker.core.common_models.LibraryBookData
 
 @Preview(showBackground = true)
 @Composable

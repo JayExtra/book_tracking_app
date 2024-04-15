@@ -20,6 +20,7 @@ import com.dev.james.booktracker.core.common_models.mappers.mapToDomainObject
 import com.dev.james.booktracker.core.common_models.mappers.mapToLibraryData
 import com.dev.james.booktracker.core.common_models.mappers.mapToPresentation
 import com.dev.james.booktracker.core.utilities.Resource
+import com.dev.james.booktracker.core.utilities.convertToOrganisedString
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
 import com.dev.james.domain.usecases.FetchActiveBookProgress
@@ -37,7 +38,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -48,7 +48,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okhttp3.internal.toImmutableList
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -87,6 +86,15 @@ class ReadingListScreenViewModel @Inject constructor(
     var pendingBookRemovedDialogState by mutableStateOf(false)
         private set
 
+    var bookDetailsDialogState by mutableStateOf(false)
+        private set
+
+    var addedToShelfDialogState by mutableStateOf(false)
+        private set
+
+    var cachedBookAddedDialogState by mutableStateOf(false)
+        private set
+
     private val searchQueryStateFlow = savedStateHandle.getStateFlow("search_query" ,
         AddBookViewModel.DEFAULT_SEARCH_QUERY
     )
@@ -99,10 +107,6 @@ class ReadingListScreenViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000) ,
             emptyList()
         )
-
-
-    var selectedBookState by mutableStateOf(Book())
-        private set
 
     var selectedSavedBookState by mutableStateOf(BookSave())
         private set
@@ -152,7 +156,7 @@ class ReadingListScreenViewModel @Inject constructor(
             is ReadingListScreenAction.DeleteBook -> {
                /* selectedBookState = action.book*/
                 val result = booksRepository.addOrRemoveBookFromReadingList(
-                    bookId = action.book.id ,
+                    bookId = action.book.baseData.id ,
                     readingListId = action.readingListId
                 )
                 when(result){
@@ -192,6 +196,15 @@ class ReadingListScreenViewModel @Inject constructor(
                     DialogType.CONFIRM_REMOVING_PENDING_BOOK -> {
                         confirmRemovePendingBookDialogState = false
                     }
+                    DialogType.BOOK_DETAILS_DIALOG -> {
+                        bookDetailsDialogState = false
+                    }
+                    DialogType.BOOK_SAVED_TO_DB -> {
+                        addedToShelfDialogState = false
+                    }
+                    DialogType.CACHED_BOOK_ADDED_DIALOG -> {
+                        cachedBookAddedDialogState = false
+                    }
                     else -> {}
                 }
             }
@@ -207,6 +220,12 @@ class ReadingListScreenViewModel @Inject constructor(
                     DialogType.CONFIRM_REMOVING_PENDING_BOOK -> {
                         confirmRemovePendingBookDialogState = true
                     }
+                    DialogType.BOOK_DETAILS_DIALOG -> {
+                        bookDetailsDialogState = true
+                    }
+                    DialogType.BOOK_SAVED_TO_DB -> {
+                        addedToShelfDialogState = true
+                    }
                     else -> {}
                 }
             }
@@ -220,7 +239,22 @@ class ReadingListScreenViewModel @Inject constructor(
             is ReadingListScreenAction.RemoveBookFromApi -> {
                 removeFromPendingBooksList(
                     readingListId = action.readingListId ,
-                    bookId = action.bookId
+                    bookId = action.bookId ,
+                    showDialog = true
+                )
+            }
+
+            is ReadingListScreenAction.SaveCachedBookToReadingList -> {
+                    addBookToReadingList(
+                        readingListId = action.readingListId ,
+                        bookId = action.book.bookId
+                    )
+            }
+            is ReadingListScreenAction.SavePendingBookToShelfDb -> {
+                saveBookToDatabase(
+                    readingListId = action.readingListId ,
+                    baseBookData = action.baseBookData ,
+                    chapters = action.chapters
                 )
             }
         }
@@ -308,7 +342,7 @@ class ReadingListScreenViewModel @Inject constructor(
             else -> {}
         }
     }
-    private fun removeFromPendingBooksList(readingListId: String , bookId: String) = viewModelScope.launch {
+    private fun removeFromPendingBooksList(readingListId: String , bookId: String , showDialog : Boolean) = viewModelScope.launch {
         val result = readingListsRepository.removeFromPendingList(
             readingListId ,
             bookId
@@ -316,8 +350,10 @@ class ReadingListScreenViewModel @Inject constructor(
         when(result){
             is Resource.Success -> {
                 if(result.data == true){
-                    confirmRemovePendingBookDialogState = false
-                    pendingBookRemovedDialogState = true
+                    if(showDialog){
+                        confirmRemovePendingBookDialogState = false
+                        pendingBookRemovedDialogState = true
+                    }
                 }else{
                     Timber.tag(TAG).e("Could not add book to pending list")
                 }
@@ -394,6 +430,60 @@ class ReadingListScreenViewModel @Inject constructor(
         }
     }
 
+
+    private fun saveBookToDatabase(
+        readingListId: String ,
+        baseBookData: BaseBookData ,
+        chapters : Int
+    ) = viewModelScope.launch {
+        val bookSave = BookSave(
+            bookId = baseBookData.id ,
+            bookImage = baseBookData.image ,
+            bookTitle = baseBookData.title ,
+            bookAuthors = baseBookData.authors ,
+            bookDescription = baseBookData.description ,
+            bookSmallThumbnail = "",
+            bookPagesCount = baseBookData.pages ,
+            publisher = baseBookData.publisher ,
+            publishedDate = baseBookData.publishedDate ,
+            isUri = false ,
+            category = baseBookData.category.convertToOrganisedString() ,
+            chapters = chapters
+        )
+        val result = booksRepository.saveBookToDatabase(bookSave)
+        if(result){
+            Timber.tag(MyLibraryViewModel.TAG).d("Book saved to database.")
+            removeFromPendingBooksList(readingListId , bookId = baseBookData.id , showDialog = false)
+            val result = booksRepository.addOrRemoveBookFromReadingList(readingListId = readingListId , bookId = baseBookData.id)
+            when(result){
+                is Resource.Success -> {
+                    addedToShelfDialogState = true
+                    bookDetailsDialogState = false
+                }
+                is Resource.Error -> {
+                    Timber.tag(TAG).d("saveBookToDatabase =>  Could not save to reading list.")
+                }
+                else -> {}
+            }
+        }else {
+            Timber.tag(TAG).d("saveBookToDatabase => Could not save to db.")
+        }
+    }
+
+    private fun addBookToReadingList(readingListId: String , bookId : String) = viewModelScope.launch {
+        when(val result = booksRepository.addOrRemoveBookFromReadingList(readingListId = readingListId , bookId = bookId) ){
+            is Resource.Success -> {
+                //show dialog
+                cachedBookAddedDialogState = true
+            }
+            is Resource.Error -> {
+                Timber.tag(TAG).d("Could not save to reading list.")
+                cachedBookAddedDialogState = false
+            }
+            else -> {}
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         queryJob?.cancel()
@@ -417,6 +507,10 @@ class ReadingListScreenViewModel @Inject constructor(
         data class DismissDialog(val dialogType : DialogType) : ReadingListScreenAction()
 
         data class ShowDialog(val dialogType: DialogType) : ReadingListScreenAction()
+
+        data class SaveCachedBookToReadingList(val readingListId: String, val book: BookSave) : ReadingListScreenAction()
+
+        data class SavePendingBookToShelfDb(val readingListId: String , val baseBookData: BaseBookData , val chapters : Int) : ReadingListScreenAction()
     }
 
     data class ReadingListScreenState(
@@ -428,12 +522,15 @@ class ReadingListScreenViewModel @Inject constructor(
     )
 
     enum class DialogType {
+        CACHED_BOOK_ADDED_DIALOG ,
+        BOOK_SAVED_TO_DB ,
         READING_LIST_DELETED_DIALOG ,
         BOOK_DELETED_DIALOG ,
         PENDING_BOOK_ADDED_DIALOG ,
         PENDING_BOOK_REMOVED ,
         CONFIRM_DELETE_READING_LIST_DIALOG ,
         CONFIRM_BOOK_DELETE_DIALOG ,
-        CONFIRM_REMOVING_PENDING_BOOK
+        CONFIRM_REMOVING_PENDING_BOOK ,
+        BOOK_DETAILS_DIALOG
     }
 }
