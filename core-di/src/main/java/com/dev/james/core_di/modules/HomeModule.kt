@@ -121,8 +121,9 @@ object HomeModule {
     @Provides
     @Singleton
     fun provideReadingListLocalDatasource(
-        readingListDao: ReadingListDao
-    ) : ReadingListLocalDatasource = ReadingListLocalDatasourceImpl(readingListDao)
+        readingListDao: ReadingListDao ,
+        dataStoreManager: DataStoreManager
+    ) : ReadingListLocalDatasource = ReadingListLocalDatasourceImpl(readingListDao , dataStoreManager)
 
     @Provides
     @Singleton

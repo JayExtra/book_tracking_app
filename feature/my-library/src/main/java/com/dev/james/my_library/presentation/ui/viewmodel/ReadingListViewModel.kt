@@ -11,12 +11,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.viewmodel.AddBookViewModel
 import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
+import com.dev.james.booktracker.core.common_models.BaseBookData
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookSave
 import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.booktracker.core.common_models.ReadingLists
 import com.dev.james.booktracker.core.common_models.mappers.mapToDomainObject
 import com.dev.james.booktracker.core.common_models.mappers.mapToLibraryData
+import com.dev.james.booktracker.core.common_models.mappers.mapToPresentation
 import com.dev.james.booktracker.core.utilities.Resource
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.reading_lists.ReadingListsRepository
@@ -35,6 +37,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -45,6 +48,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.internal.toImmutableList
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -75,6 +79,14 @@ class ReadingListScreenViewModel @Inject constructor(
     var bookDeletedDialogState by mutableStateOf(false)
         private set
 
+    var pendingBookDialogState by mutableStateOf(false)
+        private set
+    var confirmRemovePendingBookDialogState by mutableStateOf(false)
+        private set
+
+    var pendingBookRemovedDialogState by mutableStateOf(false)
+        private set
+
     private val searchQueryStateFlow = savedStateHandle.getStateFlow("search_query" ,
         AddBookViewModel.DEFAULT_SEARCH_QUERY
     )
@@ -90,6 +102,9 @@ class ReadingListScreenViewModel @Inject constructor(
 
 
     var selectedBookState by mutableStateOf(Book())
+        private set
+
+    var selectedSavedBookState by mutableStateOf(BookSave())
         private set
 
     val bottomSheetSearchFieldState = FormState(
@@ -111,6 +126,7 @@ class ReadingListScreenViewModel @Inject constructor(
     fun onAction(action: ReadingListScreenAction) = viewModelScope.launch {
         when (action) {
             is ReadingListScreenAction.FetchReadingList -> {
+                val id = action.readingListId
                 _state.update { screenState ->
                     screenState.copy(
                         isLoading = true,
@@ -119,7 +135,10 @@ class ReadingListScreenViewModel @Inject constructor(
                     )
                 }
                 fetchReadingListDetails(
-                    action.readingListId
+                   id
+                )
+                fetchPendingBooks(
+                    id
                 )
             }
             is ReadingListScreenAction.DeleteReadingList -> {
@@ -164,6 +183,16 @@ class ReadingListScreenViewModel @Inject constructor(
                     DialogType.CONFIRM_BOOK_DELETE_DIALOG -> {
                         deleteBookConfirmationDialogState = false
                     }
+                    DialogType.PENDING_BOOK_ADDED_DIALOG -> {
+                        pendingBookDialogState = false
+                    }
+                    DialogType.PENDING_BOOK_REMOVED -> {
+                        pendingBookRemovedDialogState = false
+                    }
+                    DialogType.CONFIRM_REMOVING_PENDING_BOOK -> {
+                        confirmRemovePendingBookDialogState = false
+                    }
+                    else -> {}
                 }
             }
 
@@ -175,8 +204,24 @@ class ReadingListScreenViewModel @Inject constructor(
                     DialogType.CONFIRM_BOOK_DELETE_DIALOG -> {
                         deleteBookConfirmationDialogState = true
                     }
+                    DialogType.CONFIRM_REMOVING_PENDING_BOOK -> {
+                        confirmRemovePendingBookDialogState = true
+                    }
                     else -> {}
                 }
+            }
+
+            is ReadingListScreenAction.AddBookFromApi -> {
+               addToPendingBooksList(
+                   readingListId = action.readingListId ,
+                   book = action.book.mapToPresentation()
+               )
+            }
+            is ReadingListScreenAction.RemoveBookFromApi -> {
+                removeFromPendingBooksList(
+                    readingListId = action.readingListId ,
+                    bookId = action.bookId
+                )
             }
         }
     }
@@ -201,7 +246,8 @@ class ReadingListScreenViewModel @Inject constructor(
                     date = item.date,
                     starred = item.starred
                 )
-            }.catch { t ->
+            }
+            .catch { t ->
                 Timber.tag(TAG).e("Error fetching reading list => ${t.printStackTrace()}")
                 _state.update { screenState ->
                     screenState.copy(
@@ -221,6 +267,69 @@ class ReadingListScreenViewModel @Inject constructor(
                 }
             }
     }
+
+    private fun fetchPendingBooks(readingListId: String) = viewModelScope.launch {
+        readingListsRepository.getPendingReadingListItem(readingListId)
+            .map { readingLists ->
+                readingLists.books
+            }.catch { t ->
+                Timber.tag(TAG).e("Error getting pending books! => ${t.printStackTrace()}")
+                _state.update { screenState ->
+                    screenState.copy(
+                        pendingListFetchError = "Oops there was a problem fetching these books. Please refresh."
+                    )
+                }
+            }.collectLatest { books ->
+                _state.update { screenState ->
+                    screenState.copy(
+                        pendingBooks = books.map { it.mapToPresentation() } ,
+                        pendingListFetchError = ""
+                    )
+                }
+            }
+    }
+
+    private fun addToPendingBooksList(readingListId: String , book: BaseBookData) = viewModelScope.launch {
+        val result = readingListsRepository.addToPendingList(
+            readingListId ,
+            book
+        )
+        when(result){
+            is Resource.Success -> {
+                if(result.data == true){
+                    pendingBookDialogState = true
+                }else{
+                    Timber.tag(TAG).e("Could not add book to pending list")
+                }
+            }
+            is Resource.Error -> {
+                Timber.tag(TAG).e("Could not add book to pending list => ${result.message}")
+            }
+            else -> {}
+        }
+    }
+    private fun removeFromPendingBooksList(readingListId: String , bookId: String) = viewModelScope.launch {
+        val result = readingListsRepository.removeFromPendingList(
+            readingListId ,
+            bookId
+        )
+        when(result){
+            is Resource.Success -> {
+                if(result.data == true){
+                    confirmRemovePendingBookDialogState = false
+                    pendingBookRemovedDialogState = true
+                }else{
+                    Timber.tag(TAG).e("Could not add book to pending list")
+                }
+            }
+            is Resource.Error -> {
+                Timber.tag(TAG).e("Could not add book to pending list => ${result.message}")
+            }
+            else -> {}
+        }
+    }
+
+
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     fun searchForBook(searchQuery: String) {
@@ -301,6 +410,10 @@ class ReadingListScreenViewModel @Inject constructor(
 
         data class DeleteBook(val book : LibraryBookData , val readingListId: String) : ReadingListScreenAction()
 
+        data class AddBookFromApi(val book : Book , val readingListId: String) : ReadingListScreenAction()
+
+        data class RemoveBookFromApi(val bookId : String , val readingListId: String) : ReadingListScreenAction()
+
         data class DismissDialog(val dialogType : DialogType) : ReadingListScreenAction()
 
         data class ShowDialog(val dialogType: DialogType) : ReadingListScreenAction()
@@ -309,13 +422,18 @@ class ReadingListScreenViewModel @Inject constructor(
     data class ReadingListScreenState(
         val isLoading: Boolean = false,
         val readingList: ReadingLists = ReadingLists(),
-        val readingListFetchError: String = ""
+        val readingListFetchError: String = "" ,
+        val pendingBooks : List<LibraryBookData> = listOf() ,
+        val pendingListFetchError : String = ""
     )
 
     enum class DialogType {
         READING_LIST_DELETED_DIALOG ,
         BOOK_DELETED_DIALOG ,
+        PENDING_BOOK_ADDED_DIALOG ,
+        PENDING_BOOK_REMOVED ,
         CONFIRM_DELETE_READING_LIST_DIALOG ,
-        CONFIRM_BOOK_DELETE_DIALOG
+        CONFIRM_BOOK_DELETE_DIALOG ,
+        CONFIRM_REMOVING_PENDING_BOOK
     }
 }

@@ -52,9 +52,22 @@ fun BookStatisticsData.mapToLibraryData() : LibraryBookData {
        id = this.bookId ,
        image = this.bookImage ,
        title = this.bookTitle ,
+       description = this.description,
        author = this.authors ,
        progress = (this.progress * 100).toInt() ,
        pagesRead = this.currentPage ,
        pages = this.totalPages
+    )
+}
+
+fun BaseBookData.mapToPresentation() : LibraryBookData {
+    return LibraryBookData(
+        id = this.id ,
+        image = this.image,
+        title = this.title ,
+        author = this.authors ,
+        description = this.description,
+        pages = this.pages ,
+        isPending = true
     )
 }

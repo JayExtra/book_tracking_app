@@ -5,10 +5,14 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.dev.james.booktracker.core.common_models.BaseBookData
+import com.dev.james.booktracker.core.datastore.proto.PendingReadingList
+import com.dev.james.booktracker.core.datastore.proto.PendingReadingListItems
 import com.dev.james.booktracker.core.datastore.proto.WishlistItems
+import com.dev.james.booktracker.core_datastore.local.datastore.proto.PendingReadingListItemsSerializer
 import com.dev.james.booktracker.core_datastore.local.datastore.proto.WishListSerializer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.mutate
@@ -26,6 +30,7 @@ class DataStoreManagerImpl @Inject constructor(
     companion object {
         private val Context.datastore : DataStore<Preferences> by preferencesDataStore(name = Constants.STORE_NAME)
         private val Context.protoDatastore by dataStore(fileName = Constants.FILE_NAME , WishListSerializer )
+        private val Context.readingListProtoDataStore by dataStore(fileName = Constants.READING_LIST_FILE_NAME , PendingReadingListItemsSerializer )
         const val TAG = "DataStoreManagerImpl"
     }
 
@@ -122,6 +127,90 @@ class DataStoreManagerImpl @Inject constructor(
                 wishlist = list.mutate {
                     it.remove(book)
                 }
+            )
+        }
+    }
+
+    override fun pendingReadingListItems(): Flow<List<PendingReadingListItems>> {
+        return context.readingListProtoDataStore.data.map { it.pendingItems }
+    }
+
+
+    override suspend fun removeFromPendingList(readingListId: String, bookId: String) {
+        context.readingListProtoDataStore.updateData { pendingReadingList ->
+
+            val readingList = pendingReadingList.pendingItems.find { item ->
+                item.readingListId == readingListId
+            }
+            val readingListIndex = pendingReadingList.pendingItems.indexOf(readingList)
+
+
+            val book = readingList?.books?.find { it.id == bookId }
+            val bookIndex = readingList?.books?.indexOf(book)!!
+
+
+
+            val newBooksList = readingList.books.mutate {
+                it.removeAt(bookIndex)
+            }
+            val newReadingList = readingList.copy(
+                books = newBooksList
+            )
+
+            val newPendingItemList = pendingReadingList.pendingItems.mutate {
+                it.removeAt(readingListIndex)
+            }.mutate {
+                it.add(newReadingList)
+            }
+            pendingReadingList.copy(
+                pendingItems = newPendingItemList
+            )
+
+        }
+    }
+
+
+
+    override suspend fun addToPendingReadingList(readingListId: String, book: BaseBookData) {
+        context.readingListProtoDataStore.updateData { pendingReadingList ->
+
+            val readingList = pendingReadingList.pendingItems.find { item ->
+                item.readingListId == readingListId
+            }
+            val readingListIndex = pendingReadingList.pendingItems.indexOf(readingList)
+
+
+            val newBooksList = readingList?.books?.mutate {
+                it.add(book)
+            }
+            val newReadingList = newBooksList?.let {
+                readingList.copy(
+                    books = it
+                )
+            }!!
+
+            val newPendingItemList = pendingReadingList.pendingItems.mutate {
+                it.removeAt(readingListIndex)
+            }.mutate {
+                it.add(newReadingList)
+            }
+            pendingReadingList.copy(
+                pendingItems = newPendingItemList
+            )
+        }
+    }
+
+    override suspend fun createPendingReadingList(readingListId: String) {
+        context.readingListProtoDataStore.updateData { list ->
+           val newList = list.pendingItems.mutate {
+               it.add(
+                   PendingReadingListItems(
+                      readingListId = readingListId
+                   )
+               )
+           }
+            list.copy(
+                pendingItems = newList
             )
         }
     }

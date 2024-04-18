@@ -64,6 +64,7 @@ fun HorizontalBookCardComponent(
     bookData: LibraryBookData = LibraryBookData(),
     onBookSelected: () -> Unit = {},
     onViewBook : () -> Unit = {} ,
+    onNavigate : () -> Unit = {} ,
     onDeleteBook : () -> Unit = {}
     // onShowOptions : () -> Unit = {}
 ) {
@@ -104,21 +105,25 @@ fun HorizontalBookCardComponent(
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(2.dp))
+                val pagesText = if(bookData.isPending) "${bookData.pages} pages" else "${bookData.pagesRead}/${bookData.pages} pages"
                 Text(
                     modifier = Modifier.width(230.dp),
-                    text = "${bookData.pagesRead}/${bookData.pages} pages",
+                    text = pagesText ,
                     style = BookAppTypography.bodySmall,
                     textAlign = TextAlign.Start
                 )
-                LinearProgressIndicator(
-                    modifier = Modifier.width(230.dp),
-                    progress = bookData.progress.toFloat() / 100,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                DoneOrReading(
-                    isDone = bookData.progress >= 100
-                )
+                if(!bookData.isPending){
+                    LinearProgressIndicator(
+                        modifier = Modifier.width(230.dp),
+                        progress = bookData.progress.toFloat() / 100,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    DoneOrReading(
+                        isDone = bookData.progress >= 100
+                    )
+                }
+
             }
 
             Column(
@@ -128,7 +133,7 @@ fun HorizontalBookCardComponent(
                     visible = showPopupMenuState,
                     enter = fadeIn(
                         animationSpec = tween(
-                            durationMillis = 2000
+                            durationMillis = 500
                         )
                     ) + expandHorizontally(
                         animationSpec =
@@ -139,19 +144,27 @@ fun HorizontalBookCardComponent(
                     ) {
                         it
                     },
-                    exit = fadeOut() + shrinkHorizontally {
+                    exit = fadeOut(
+                        animationSpec = tween(
+                            durationMillis = 500
+                        )
+                    ) + shrinkHorizontally {
                         it
                     }
                 ) {
                     MenuPopUp(
+                        isPending = bookData.isPending,
                         onDismiss = {
                             showPopupMenuState = false
                         } ,
                         onOpen = {
-                            onViewBook()
+                            onNavigate()
                         } ,
                         onDelete = {
                             onDeleteBook()
+                        } ,
+                        onView = {
+                            onViewBook()
                         }
                     )
                 }
@@ -222,8 +235,10 @@ private fun DoneOrReading(
 @Composable
 @Preview()
 private fun MenuPopUp(
+    isPending : Boolean = false ,
     onDismiss: () -> Unit = {},
     onOpen: () -> Unit = {},
+    onView : () -> Unit = {},
     onDelete: () -> Unit = {}
 ) {
     Popup(
@@ -250,9 +265,15 @@ private fun MenuPopUp(
             ) {
                 TextButton(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                    onClick = { onOpen() }) {
+                    onClick = {
+                        if(isPending) {
+                            onView()
+                        }else {
+                            onOpen()
+                        }
+                    }) {
                     Text(
-                        text = "Continue",
+                        text = if(isPending)"View" else "Continue",
                         style = BookAppTypography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary
                     )
@@ -261,7 +282,7 @@ private fun MenuPopUp(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                     onClick = { onDelete() }) {
                     Text(
-                        text = "Delete",
+                        text = "Remove",
                         style = BookAppTypography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary
                     )
