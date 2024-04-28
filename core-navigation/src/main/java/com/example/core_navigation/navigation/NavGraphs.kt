@@ -97,7 +97,9 @@ object NavGraphs {
             = TrackBookScreenDestination routedIn this
         override val destinationsByRoute = listOf<DestinationSpec<*>>(
             AchievementsScreenDestination ,
-            HomeScreenDestination
+            HomeScreenDestination ,
+            MyLibraryScreenDestination ,
+            ReadingListScreenDestination
         ).routedIn(this)
             .associateBy { it.route }
     }

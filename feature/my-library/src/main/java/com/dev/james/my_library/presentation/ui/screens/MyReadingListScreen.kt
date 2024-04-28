@@ -434,7 +434,11 @@ fun ReadingListScreen(
                         book = it
                     )
             )
+        } ,
+        onContinueBook = {
+            readingListScreenNavigator.navToBookDetailsScreen(it.baseData.id)
         }
+
     )
 }
 
@@ -455,6 +459,7 @@ fun StatelessReadingListScreen(
     onSearchBook: (String) -> Unit = {} ,
     onRemovePendingBook : (LibraryBookData) -> Unit = {} ,
     onViewBookDetails : (LibraryBookData) -> Unit = {} ,
+    onContinueBook : (LibraryBookData) -> Unit = {},
     onSaveCachedBook : (BookSave) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -690,6 +695,9 @@ fun StatelessReadingListScreen(
                                     books = state.readingList.books,
                                     onDelete = {
                                         onDeleteBook(it)
+                                    } ,
+                                    onContinue = {
+                                        onContinueBook(it)
                                     }
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -717,6 +725,9 @@ fun StatelessReadingListScreen(
                                     books = state.readingList.books,
                                     onDelete = {
                                         onDeleteBook(it)
+                                    } ,
+                                    onContinue = {
+                                        onContinueBook(it)
                                     }
                                 )
                             }
@@ -900,7 +911,8 @@ private fun PendingBooksSection(
 private fun BooksSection(
     modifier: Modifier = Modifier,
     books: List<LibraryBookData> = emptyList(),
-    onDelete: (LibraryBookData) -> Unit = {}
+    onDelete: (LibraryBookData) -> Unit = {} ,
+    onContinue : (LibraryBookData) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -952,6 +964,7 @@ private fun BooksSection(
                         },
                         onNavigate = {
                             //navigate to book data screen
+                            onContinue(book)
                         }
                     )
                 }

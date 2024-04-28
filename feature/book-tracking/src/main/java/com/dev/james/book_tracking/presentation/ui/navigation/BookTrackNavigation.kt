@@ -5,4 +5,5 @@ interface BookTrackNavigation {
     fun openPdfScreen()
 
     fun backToMyLibraryScreen()
+    fun backToReadingListScreen()
 }

@@ -67,6 +67,8 @@ class ReadingListScreenViewModel @Inject constructor(
         MutableStateFlow(value = ReadingListScreenState())
     val state get() = _state.asStateFlow()
 
+    var readingListBooksIds : List<String>? = null
+
     var deleteConfirmationDialogState by mutableStateOf(value = false)
         private set
     var deleteReadingListDialogState by mutableStateOf(false)
@@ -101,12 +103,15 @@ class ReadingListScreenViewModel @Inject constructor(
 
     private var queryJob: Job? = null
 
-    val savedBooks = booksRepository.getSavedBooks()
-        .stateIn(
-            viewModelScope ,
-            started = SharingStarted.WhileSubscribed(5000) ,
-            emptyList()
-        )
+    private var _savedBooks : MutableStateFlow<List<BookSave>> = MutableStateFlow(emptyList())
+    val savedBooks get() = _savedBooks.asStateFlow()
+/*
+    val s = booksRepository.getSavedBooks()
+    .stateIn(
+    viewModelScope ,
+    started = SharingStarted.WhileSubscribed(5000) ,
+    emptyList()
+    )*/
 
     var selectedSavedBookState by mutableStateOf(BookSave())
         private set
@@ -264,6 +269,11 @@ class ReadingListScreenViewModel @Inject constructor(
     private fun fetchReadingListDetails(id: String) = viewModelScope.launch {
         readingListsRepository.getSingleReadingList(id)
             .map { item ->
+                //readingListBooksIds = item.readingList
+
+                fetchSavedBooks(
+                    booksList = item.readingList
+                )
                 val differedBooks = item.readingList.map {
                     async { fetchActiveBookProgress.invoke(it) }
                 }
@@ -321,6 +331,14 @@ class ReadingListScreenViewModel @Inject constructor(
                     )
                 }
             }
+    }
+    private fun fetchSavedBooks(booksList : List<String>) = viewModelScope.launch {
+        booksRepository.getSavedBooks().collectLatest { cachedBooks ->
+            val filteredList = cachedBooks.filter { book->
+                !booksList.contains(book.bookId)
+            }
+            _savedBooks.value = filteredList
+        }
     }
 
     private fun addToPendingBooksList(readingListId: String , book: BaseBookData) = viewModelScope.launch {
