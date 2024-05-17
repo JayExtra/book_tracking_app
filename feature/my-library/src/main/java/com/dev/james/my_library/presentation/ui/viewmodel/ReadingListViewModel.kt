@@ -34,7 +34,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -45,7 +44,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -244,7 +242,7 @@ class ReadingListScreenViewModel @Inject constructor(
             is ReadingListScreenAction.RemoveBookFromApi -> {
                 removeFromPendingBooksList(
                     readingListId = action.readingListId ,
-                    bookId = action.bookId ,
+                    book = action.book ,
                     showDialog = true
                 )
             }
@@ -349,6 +347,9 @@ class ReadingListScreenViewModel @Inject constructor(
         when(result){
             is Resource.Success -> {
                 if(result.data == true){
+                    booksRepository.addOrRemoveFromWishList(
+                        baseBookData = book
+                    )
                     pendingBookDialogState = true
                 }else{
                     Timber.tag(TAG).e("Could not add book to pending list")
@@ -360,15 +361,16 @@ class ReadingListScreenViewModel @Inject constructor(
             else -> {}
         }
     }
-    private fun removeFromPendingBooksList(readingListId: String , bookId: String , showDialog : Boolean) = viewModelScope.launch {
+    private fun removeFromPendingBooksList(readingListId: String, book: BaseBookData, showDialog : Boolean) = viewModelScope.launch {
         val result = readingListsRepository.removeFromPendingList(
             readingListId ,
-            bookId
+            book.id
         )
         when(result){
             is Resource.Success -> {
                 if(result.data == true){
                     if(showDialog){
+                        booksRepository.addOrRemoveFromWishList(baseBookData = book)
                         confirmRemovePendingBookDialogState = false
                         pendingBookRemovedDialogState = true
                     }
@@ -471,7 +473,7 @@ class ReadingListScreenViewModel @Inject constructor(
         val result = booksRepository.saveBookToDatabase(bookSave)
         if(result){
             Timber.tag(MyLibraryViewModel.TAG).d("Book saved to database.")
-            removeFromPendingBooksList(readingListId , bookId = baseBookData.id , showDialog = false)
+            removeFromPendingBooksList(readingListId , book = baseBookData , showDialog = false)
             val result = booksRepository.addOrRemoveBookFromReadingList(readingListId = readingListId , bookId = baseBookData.id)
             when(result){
                 is Resource.Success -> {
@@ -520,7 +522,7 @@ class ReadingListScreenViewModel @Inject constructor(
 
         data class AddBookFromApi(val book : Book , val readingListId: String) : ReadingListScreenAction()
 
-        data class RemoveBookFromApi(val bookId : String , val readingListId: String) : ReadingListScreenAction()
+        data class RemoveBookFromApi(val book  : BaseBookData , val readingListId: String) : ReadingListScreenAction()
 
         data class DismissDialog(val dialogType : DialogType) : ReadingListScreenAction()
 

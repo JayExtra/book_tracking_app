@@ -259,7 +259,7 @@ fun ReadingListScreen(
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
                         .RemoveBookFromApi(
-                            bookId = selectedBook.baseData.id,
+                            book = selectedBook.baseData,
                             readingListId = readingListId
                         )
                 )

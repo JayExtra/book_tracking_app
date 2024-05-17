@@ -133,7 +133,7 @@ fun MyLibraryScreen(
             SingleActionConfirmationPrompt(
                 title = "Added to Wishlist",
                 body = "${selectedBookData.title} added to my wishlist" ,
-                showAnimation = false ,
+                showAnimation = true ,
                 onAccept = {
                     selectedBookData = BaseBookData()
                     myLibraryViewModel.closeWishListDialog()
@@ -447,7 +447,7 @@ private fun MyWishListSection(
 @Composable
 fun CurrentlyReadingSection(
     modifier: Modifier = Modifier,
-    bookList: List<LibraryBookData> = listOf(LibraryBookData()),
+    bookList: List<LibraryBookData> = emptyList(),
     onSeeAllClicked: () -> Unit = {},
     onBookSelected: (String) -> Unit = {},
     onAddMoreClicked: () -> Unit = {}
