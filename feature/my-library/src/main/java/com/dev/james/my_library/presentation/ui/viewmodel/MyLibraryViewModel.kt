@@ -67,6 +67,11 @@ class MyLibraryViewModel @Inject constructor(
     var suggestionsErrorMessage by mutableStateOf(value = "")
         private set
 
+    var addedWishlistDialogState by mutableStateOf(value = false)
+        private set
+    var removedFromWishlistDialogState by mutableStateOf(value = false)
+        private set
+
     var isFetchingSuggestions by mutableStateOf(value = false)
         private set
 
@@ -76,13 +81,13 @@ class MyLibraryViewModel @Inject constructor(
     private val _uiEvents : Channel<MyLibraryScreenUiEvents> = Channel<MyLibraryScreenUiEvents>()
     val uiEvents get() = _uiEvents.receiveAsFlow()
 
-
+/*
     val myWishList = booksRepository.getWishList()
         .stateIn(
             scope = viewModelScope ,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000L) ,
             initialValue = listOf()
-        )
+        )*/
 
     init {
         isLoading = true
@@ -173,8 +178,23 @@ class MyLibraryViewModel @Inject constructor(
     }
 
     fun addOrRemoveFromWishList(baseBookData: BaseBookData) = viewModelScope.launch {
-        val result = booksRepository.addOrRemoveFromWishList(baseBookData)
+        val result = booksRepository.addOrRemoveFromWishList(baseBookData).split(":")[0]
+        when(result){
+            "added" -> {
+               addedWishlistDialogState = true
+            }
+            "removed" -> {
+                removedFromWishlistDialogState = true
+            }
+            else -> {}
+        }
         Timber.tag(TAG).d(result)
+    }
+    fun closeWishListDialog() {
+        addedWishlistDialogState = false
+    }
+    fun closeRemovedWishListDialog() {
+        removedFromWishlistDialogState = false
     }
 
 
@@ -210,7 +230,7 @@ class MyLibraryViewModel @Inject constructor(
     private fun getBooksWithProgress() = viewModelScope.launch {
         getBooksAndProgressUsecase.invoke().collectLatest { booksList ->
             isLoading = false
-            _booksWithProgress.value = booksList
+            _booksWithProgress.value = booksList.take(10)
         }
     }
 

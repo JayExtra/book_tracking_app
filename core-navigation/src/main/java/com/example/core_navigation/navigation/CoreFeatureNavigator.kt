@@ -158,6 +158,10 @@ class CoreFeatureNavigator(
         }
     }
 
+    override fun backToReadingListScreen() {
+        navController.popBackStack()
+    }
+
     override fun backToHomeDestination() {
         //navigate to home from add book
         navController.navigate(
@@ -188,6 +192,16 @@ class CoreFeatureNavigator(
                 inclusive = true
             }
         }
+    }
+
+    override fun navToBookDetailsScreen(bookId: String) {
+        navController.navigate(
+            TrackBookScreenDestination(
+                previousScreenDestinations = PreviousScreenDestinations.READING_LIST_SCREEN,
+                bookId = bookId
+            )
+            within navGraph
+        )
     }
 
 }

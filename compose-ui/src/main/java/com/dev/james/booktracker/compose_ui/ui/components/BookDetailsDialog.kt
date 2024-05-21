@@ -50,6 +50,7 @@ import com.dev.james.booktracker.core.common_models.BaseBookData
 fun BookDetailsDialog(
     book : BaseBookData = BaseBookData(),
     removeFromWishlist : (BaseBookData) -> Unit = {},
+    showRemoveBtn : Boolean = true ,
     addBook : (BaseBookData) -> Unit = {},
     onDismiss : () -> Unit = {}
 ){
@@ -117,21 +118,23 @@ fun BookDetailsDialog(
                         Row(
                             modifier = Modifier.padding(top = 8.dp)
                         ) {
-                            IconButton(
-                                modifier = Modifier.clip(
-                                    CircleShape
-                                ),
-                                colors = IconButtonDefaults
-                                    .iconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary
+                            if(showRemoveBtn){
+                                IconButton(
+                                    modifier = Modifier.clip(
+                                        CircleShape
                                     ),
-                                onClick = { removeFromWishlist(book) }
-                            ) {
-                               Icon(
-                                   imageVector = Icons.Default.Delete,
-                                   contentDescription = "" ,
-                                   tint = MaterialTheme.colorScheme.background
-                               )
+                                    colors = IconButtonDefaults
+                                        .iconButtonColors(
+                                            containerColor = MaterialTheme.colorScheme.secondary
+                                        ),
+                                    onClick = { removeFromWishlist(book) }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "" ,
+                                        tint = MaterialTheme.colorScheme.background
+                                    )
+                                }
                             }
 
                             IconButton(
@@ -215,7 +218,7 @@ fun BookDetailsDialog(
                 ) {
                     Button(onClick = { onDismiss() }) {
                         Text(
-                            text = "Done" ,
+                            text = "Dismiss" ,
                             style = BookAppTypography.labelMedium
                         )
                     }

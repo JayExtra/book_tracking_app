@@ -49,25 +49,25 @@ fun Book.mapToPresentation() : BaseBookData {
 
 fun BookStatisticsData.mapToLibraryData() : LibraryBookData {
    return LibraryBookData(
-       id = this.bookId ,
-       image = this.bookImage ,
-       title = this.bookTitle ,
-       description = this.description,
-       author = this.authors ,
+       baseData = BaseBookData(
+           id = this.bookId ,
+           image = this.bookImage ,
+           description = this.description ,
+           title = this.bookTitle ,
+           authors = this.authors ,
+           publisher = this.publisher ,
+           publishedDate = this.publishedDate ,
+           category = this.category.trim().replace("\\s+".toRegex(), "").split(",") ?: emptyList() ,
+           pages = this.totalPages
+       ) ,
        progress = (this.progress * 100).toInt() ,
        pagesRead = this.currentPage ,
-       pages = this.totalPages
     )
 }
 
 fun BaseBookData.mapToPresentation() : LibraryBookData {
     return LibraryBookData(
-        id = this.id ,
-        image = this.image,
-        title = this.title ,
-        author = this.authors ,
-        description = this.description,
-        pages = this.pages ,
+        baseData = this,
         isPending = true
     )
 }

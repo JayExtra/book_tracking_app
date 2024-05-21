@@ -1,7 +1,6 @@
 package com.dev.james.data.repositories.goals
 
 import android.database.sqlite.SQLiteException
-import com.dev.james.booktracker.core.common_models.BookGoal
 import com.dev.james.booktracker.core.common_models.Goal
 import com.dev.james.booktracker.core.common_models.SpecificGoal
 import com.dev.james.booktracker.core.common_models.mappers.mapToEntityObject

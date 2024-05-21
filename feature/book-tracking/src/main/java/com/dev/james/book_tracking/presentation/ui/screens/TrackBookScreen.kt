@@ -318,6 +318,10 @@ fun TrackBookScreen(
                             navigation.backToMyLibraryScreen()
                         }
 
+                        PreviousScreenDestinations.READING_LIST_SCREEN -> {
+                            navigation.backToReadingListScreen()
+                        }
+
                         else -> {}
                     }
                 },

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="to_read_empty_message">Ready to fill your reading list with future adventures? Explore new titles and build your To-Read list!</string>
+    <string name="empty_currently_reading_section">Let\'s get your bookshelf started! Add some books and unlock the world of reading progress tracking.</string>
+</resources>

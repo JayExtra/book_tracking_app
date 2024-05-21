@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -36,6 +37,8 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -65,22 +68,28 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dev.james.booktracker.compose_ui.ui.components.BookChaptersDialog
+import com.dev.james.booktracker.compose_ui.ui.components.BookDetailsDialog
 import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.ConfirmationPrompt
 import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
 import com.dev.james.booktracker.compose_ui.ui.components.HorizontalBookCardComponent
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
+import com.dev.james.booktracker.compose_ui.ui.components.SelectableChip
 import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
+import com.dev.james.booktracker.compose_ui.ui.theme.Brown80
+import com.dev.james.booktracker.compose_ui.ui.theme.Brown90
 import com.dev.james.booktracker.compose_ui.ui.theme.Theme
 import com.dev.james.booktracker.core.common_models.Book
 import com.dev.james.booktracker.core.common_models.BookSave
@@ -116,16 +125,99 @@ fun ReadingListScreen(
         mutableStateOf(LibraryBookData())
     }
 
+    var selectedSavedBook by remember {
+        mutableStateOf(BookSave())
+    }
+
     val googleBottomSheetUiState by viewModel.googleBottomSheetSearchState.collectAsStateWithLifecycle()
 
     var sheetOptionsState by rememberSaveable {
         mutableStateOf(BookSheetOptions.ALL)
     }
+    var showBookChaptersDialog by remember {
+        mutableStateOf(false)
+    }
+
+
+    if(viewModel.cachedBookAddedDialogState){
+        SingleActionConfirmationPrompt(
+            title = "Success!",
+            body = "${selectedSavedBook.bookTitle} successfully added to this reading list!.",
+            showAnimation = true,
+            confirmationText = "Done",
+            onAccept = {
+                selectedSavedBook = BookSave()
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .DismissDialog(
+                            dialogType = ReadingListScreenViewModel.DialogType.CACHED_BOOK_ADDED_DIALOG
+                        )
+                )
+            }
+        )
+    }
+
+
+    if(showBookChaptersDialog){
+        BookChaptersDialog(
+            onSave = { chapters ->
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .SavePendingBookToShelfDb(
+                            readingListId = readingListId ,
+                            chapters = chapters ,
+                            baseBookData = selectedBook.baseData
+                        )
+                )
+                showBookChaptersDialog =  false
+            } ,
+            onDismiss = {
+                showBookChaptersDialog = false
+            }
+        )
+    }
+
+    if(viewModel.addedToShelfDialogState){
+        SingleActionConfirmationPrompt(
+            title = "Success!",
+            body = "${selectedBook.baseData.title} successfully added to the bookshelf! You can now start tracking the progress.",
+            showAnimation = true,
+            confirmationText = "Done",
+            onAccept = {
+                selectedBook = LibraryBookData()
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .DismissDialog(
+                            dialogType = ReadingListScreenViewModel.DialogType.BOOK_SAVED_TO_DB
+                        )
+                )
+            }
+        )
+    }
+
+    if(viewModel.bookDetailsDialogState){
+        BookDetailsDialog(
+            book = selectedBook.baseData ,
+            addBook = { book ->
+                //ADD TO DB
+                showBookChaptersDialog = true
+            } ,
+            onDismiss = {
+                viewModel.onAction(
+                    action = ReadingListScreenViewModel.ReadingListScreenAction
+                        .DismissDialog(
+                            dialogType = ReadingListScreenViewModel.DialogType.BOOK_DETAILS_DIALOG
+                        )
+                )
+            } ,
+            showRemoveBtn = false
+        )
+    }
 
     if(viewModel.pendingBookDialogState){
         SingleActionConfirmationPrompt(
             title = "Success!",
-            body = "${selectedBook.title} successfully added!",
+            body = "${selectedBook.baseData.title} successfully added!",
             showAnimation = true,
             confirmationText = "Done",
             onAccept = {
@@ -142,7 +234,7 @@ fun ReadingListScreen(
     if (viewModel.pendingBookRemovedDialogState) {
         SingleActionConfirmationPrompt(
             title = "Success!",
-            body = "${selectedBook.title} successfully removed!",
+            body = "${selectedBook.baseData.title} successfully removed!",
             showAnimation = true,
             confirmationText = "Done",
             onAccept = {
@@ -161,13 +253,13 @@ fun ReadingListScreen(
         ConfirmationPrompt(
             title = "Remove This Book?",
             showCheckBox = false,
-            body = "Do you wish to remove ${selectedBook.title} from this list? ",
+            body = "Do you wish to remove ${selectedBook.baseData.title} from this list? ",
             confirmationText = "Remove",
             onAccept = {
                 viewModel.onAction(
                     action = ReadingListScreenViewModel.ReadingListScreenAction
                         .RemoveBookFromApi(
-                            bookId = selectedBook.id,
+                            book = selectedBook.baseData,
                             readingListId = readingListId
                         )
                 )
@@ -230,7 +322,7 @@ fun ReadingListScreen(
         ConfirmationPrompt(
             title = "Remove This Book?",
             showCheckBox = false,
-            body = "Do you wish to remove ${selectedBook.title} from this list? ",
+            body = "Do you wish to remove ${selectedBook.baseData.title} from this list? ",
             confirmationText = "Remove",
             onAccept = {
                 viewModel.onAction(
@@ -255,7 +347,7 @@ fun ReadingListScreen(
     if (viewModel.bookDeletedDialogState) {
         SingleActionConfirmationPrompt(
             title = "Success!",
-            body = "${selectedBook.title} successfully removed!",
+            body = "${selectedBook.baseData.title} successfully removed!",
             showAnimation = true,
             confirmationText = "Done",
             onAccept = {
@@ -323,7 +415,30 @@ fun ReadingListScreen(
                         dialogType = ReadingListScreenViewModel.DialogType.CONFIRM_REMOVING_PENDING_BOOK
                     )
             )
+        } ,
+        onViewBookDetails = {
+            selectedBook = it
+            viewModel.onAction(
+                action = ReadingListScreenViewModel.ReadingListScreenAction
+                    .ShowDialog(
+                        dialogType = ReadingListScreenViewModel.DialogType.BOOK_DETAILS_DIALOG
+                    )
+            )
+        } ,
+        onSaveCachedBook = {
+            selectedSavedBook = it
+            viewModel.onAction(
+                action = ReadingListScreenViewModel.ReadingListScreenAction
+                    .SaveCachedBookToReadingList(
+                        readingListId = readingListId ,
+                        book = it
+                    )
+            )
+        } ,
+        onContinueBook = {
+            readingListScreenNavigator.navToBookDetailsScreen(it.baseData.id)
         }
+
     )
 }
 
@@ -342,7 +457,10 @@ fun StatelessReadingListScreen(
     onDeleteBook: (LibraryBookData) -> Unit = {},
     onBookSelected: (Book) -> Unit = {},
     onSearchBook: (String) -> Unit = {} ,
-    onRemovePendingBook : (LibraryBookData) -> Unit = {}
+    onRemovePendingBook : (LibraryBookData) -> Unit = {} ,
+    onViewBookDetails : (LibraryBookData) -> Unit = {} ,
+    onContinueBook : (LibraryBookData) -> Unit = {},
+    onSaveCachedBook : (BookSave) -> Unit = {}
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -358,6 +476,11 @@ fun StatelessReadingListScreen(
     )
     val keyboardController = LocalSoftwareKeyboardController.current
     val coroutineScope = rememberCoroutineScope()
+
+    val chipsList = listOf("All" , "Currently Reading" , "To Read")
+    var selectedChip by rememberSaveable {
+        mutableStateOf(chipsList.first())
+    }
 
 
     BottomSheetScaffold(
@@ -487,7 +610,7 @@ fun StatelessReadingListScreen(
                         SavedBooksSection(
                             books = savedBooks,
                             onSavedBookSelected = {
-
+                                onSaveCachedBook(it)
                             }
                         )
                     }
@@ -525,29 +648,108 @@ fun StatelessReadingListScreen(
                         )
                         Divider()
                         Spacer(modifier = Modifier.height(4.dp))
-                        BooksSection(
-                            books = state.readingList.books,
-                            onDelete = {
-                                onDeleteBook(it)
-                            } ,
-                            onAddBook = {
-                                coroutineScope.launch {
-                                    sheetState.expand()
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FloatingActionButton(
+                                modifier = Modifier.size(50.dp),
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(5.dp),
+                                elevation = FloatingActionButtonDefaults.elevation(
+                                    defaultElevation = 0.dp
+                                ),
+                                onClick = {
+                                    coroutineScope.launch {
+                                        sheetState.expand()
+                                    }
                                 }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = ""
+                                )
                             }
-                        )
-                        if(state.pendingBooks.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Divider()
-                            PendingBooksSection(
-                                books = state.pendingBooks,
-                                onRemoveBook = {
-                                       onRemovePendingBook(it)
-                                },
-                                onView = {
-
+                            Text(
+                                modifier = Modifier.weight(2f),
+                                text = "Add a book",
+                                style = BookAppTypography.labelMedium,
+                                textAlign = TextAlign.Start
+                            )
+                        }
+                        
+                            SelectableChipGroup(
+                                chips = chipsList,
+                                onChipSelected = { chipName ->
+                                    selectedChip = chipName
                                 }
                             )
+                        
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        when(selectedChip){
+                            "All" -> {
+                                BooksSection(
+                                    books = state.readingList.books,
+                                    onDelete = {
+                                        onDeleteBook(it)
+                                    } ,
+                                    onContinue = {
+                                        onContinueBook(it)
+                                    }
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Divider()
+                                Text(
+                                    modifier = Modifier.fillMaxWidth() ,
+                                    text = "Not Started",
+                                    style = BookAppTypography.headlineMedium ,
+                                    fontWeight = FontWeight.Bold ,
+                                    textAlign = TextAlign.Start
+                                )
+                                PendingBooksSection(
+                                    books = state.pendingBooks,
+                                    onRemoveBook = {
+                                        onRemovePendingBook(it)
+                                    },
+                                    onView = {
+                                        onViewBookDetails(it)
+                                    }
+                                )
+
+                            }
+                            "Currently Reading" -> {
+                                BooksSection(
+                                    books = state.readingList.books,
+                                    onDelete = {
+                                        onDeleteBook(it)
+                                    } ,
+                                    onContinue = {
+                                        onContinueBook(it)
+                                    }
+                                )
+                            }
+                            "To Read" -> {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth() ,
+                                    text = "Not Started",
+                                    style = BookAppTypography.headlineMedium ,
+                                    fontWeight = FontWeight.Bold ,
+                                    textAlign = TextAlign.Start
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                PendingBooksSection(
+                                    books = state.pendingBooks,
+                                    onRemoveBook = {
+                                        onRemovePendingBook(it)
+                                    },
+                                    onView = {
+                                        onViewBookDetails(it)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -555,6 +757,40 @@ fun StatelessReadingListScreen(
             }
         }
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SelectableChipGroup(
+    chips : List<String> = emptyList() ,
+    onChipSelected : (String) -> Unit = {}
+){
+    val (currentlySelected , setCurrentlySelected) = rememberSaveable {
+        mutableStateOf(chips.firstOrNull())
+    }
+    
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(chips){ chipName ->
+            FilterChip(
+                shape = RoundedCornerShape(15.dp),
+                selected = chipName == currentlySelected ,
+                onClick = {
+                        setCurrentlySelected(chipName)
+                        onChipSelected(chipName)
+                },
+                label = {
+                    Text(text = chipName , style = BookAppTypography.labelMedium)
+                } ,
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.secondary ,
+                    selectedLabelColor = Brown90
+                )
+            )
+        }
+    }
+
 }
 
 @Composable
@@ -580,7 +816,7 @@ private fun BookDetailsSection(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         ImageSection(
-            imagesList = readingListItem.books.map { it.image },
+            imagesList = if(readingListItem.books.isNotEmpty()) readingListItem.books.map { it.baseData.image } else pendingBooks.map { it.baseData.image },
             onAddImage = {
                 onAddImage()
             }
@@ -629,16 +865,29 @@ private fun PendingBooksSection(
     onView : (LibraryBookData) -> Unit
 ){
     Box(
-        modifier = modifier.fillMaxWidth()
-            .height(400.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .height(400.dp) ,
+        contentAlignment = Alignment.TopCenter
     ) {
         if(errorMessage.isNotEmpty()){
             Text(text = errorMessage , style = BookAppTypography.bodySmall , textAlign = TextAlign.Center)
-        }else {
+        } else if (books.isEmpty()){
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                modifier = Modifier
+                    .width(300.dp)
+                    .wrapContentHeight() ,
+                text = stringResource(com.dev.james.mylibrary.R.string.to_read_empty_message) ,
+                style = BookAppTypography.bodyMedium ,
+                textAlign = TextAlign.Center
+            )
+        } else {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth() ,
+                verticalArrangement = Arrangement.spacedBy(5.dp)
             ){
-                items(items = books , key = { it.id }){ book ->
+                items(items = books , key = { it.baseData.id }){ book ->
                     HorizontalBookCardComponent(
                         bookData = book,
                         onDeleteBook = {
@@ -655,7 +904,6 @@ private fun PendingBooksSection(
             }
         }
     }
-
 }
 
 
@@ -663,47 +911,26 @@ private fun PendingBooksSection(
 private fun BooksSection(
     modifier: Modifier = Modifier,
     books: List<LibraryBookData> = emptyList(),
-    onDelete: (LibraryBookData) -> Unit = {},
-    onAddBook: () -> Unit = {}
+    onDelete: (LibraryBookData) -> Unit = {} ,
+    onContinue : (LibraryBookData) -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .height(400.dp),
-        verticalArrangement = Arrangement.spacedBy(space = 8.dp, alignment = Alignment.Top),
+        verticalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.Top),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            FloatingActionButton(
-                modifier = Modifier.size(50.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(5.dp),
-                elevation = FloatingActionButtonDefaults.elevation(
-                    defaultElevation = 0.dp
-                ),
-                onClick = {
-                    onAddBook()
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = ""
-                )
-            }
-            Text(
-                modifier = Modifier.weight(2f),
-                text = "Add a book",
-                style = BookAppTypography.labelMedium,
-                textAlign = TextAlign.Start
-            )
-        }
+        Text(
+            modifier = Modifier.fillMaxWidth() ,
+            text = "Currently Reading" ,
+            style = BookAppTypography.headlineMedium ,
+            fontWeight = FontWeight.Bold ,
+            textAlign = TextAlign.Start
+        )
 
         val verticalArrangement =
-            if (books.isEmpty()) Arrangement.Center else Arrangement.spacedBy(6.dp)
+            if (books.isEmpty()) Arrangement.Top else Arrangement.spacedBy(6.dp)
 
         LazyColumn(
             modifier = Modifier
@@ -714,10 +941,11 @@ private fun BooksSection(
         ) {
             if (books.isEmpty()) {
                 item {
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "No books added in this reading list.",
-                        style = BookAppTypography.labelMedium,
+                        text = stringResource(com.dev.james.mylibrary.R.string.empty_currently_reading_section),
+                        style = BookAppTypography.bodyMedium,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -725,7 +953,7 @@ private fun BooksSection(
                 items(
                     items = books,
                     key = {
-                        it.id
+                        it.baseData.id
                     }
                 ) { book ->
                     HorizontalBookCardComponent(
@@ -736,6 +964,7 @@ private fun BooksSection(
                         },
                         onNavigate = {
                             //navigate to book data screen
+                            onContinue(book)
                         }
                     )
                 }

@@ -60,6 +60,7 @@ import com.dev.james.booktracker.compose_ui.ui.components.BookDetailsDialog
 import com.dev.james.booktracker.compose_ui.ui.components.CoilImageComponent
 import com.dev.james.booktracker.compose_ui.ui.components.CreateReadingListDialog
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
+import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
 import com.dev.james.booktracker.compose_ui.ui.enums.PreviousScreenDestinations
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.core.common_models.LibraryBookData
@@ -85,7 +86,7 @@ fun MyLibraryScreen(
         val myBooksList = myLibraryViewModel.booksWithProgress.collectAsStateWithLifecycle()
         val suggestedBooksList = myLibraryViewModel.suggestedBooksList.collectAsStateWithLifecycle()
         val readingList = myLibraryViewModel.readingLists.collectAsStateWithLifecycle()
-        val wishList = myLibraryViewModel.myWishList.collectAsStateWithLifecycle()
+       // val wishList = myLibraryViewModel.myWishList.collectAsStateWithLifecycle()
         /*val uiEvents = myLibraryViewModel.uiEvents.collectAsStateWithLifecycle(
             initialValue = MyLibraryViewModel.MyLibraryScreenUiEvents.DefaultState
         )*/
@@ -114,6 +115,30 @@ fun MyLibraryScreen(
 
                 else -> {}
             }*/
+        }
+
+        if(myLibraryViewModel.removedFromWishlistDialogState){
+            SingleActionConfirmationPrompt(
+                title = "Removed from Wishlist",
+                body = "${selectedBookData.title} removed from my wishlist" ,
+                showAnimation = true ,
+                onAccept = {
+                    selectedBookData = BaseBookData()
+                    myLibraryViewModel.closeRemovedWishListDialog()
+                }
+            )
+        }
+
+        if(myLibraryViewModel.addedWishlistDialogState){
+            SingleActionConfirmationPrompt(
+                title = "Added to Wishlist",
+                body = "${selectedBookData.title} added to my wishlist" ,
+                showAnimation = true ,
+                onAccept = {
+                    selectedBookData = BaseBookData()
+                    myLibraryViewModel.closeWishListDialog()
+                }
+            )
         }
 
         if (shouldShowCreateReadingListDialog) {
@@ -180,7 +205,7 @@ fun MyLibraryScreen(
                 booksList = myBooksList.value,
                 baseBooksListData = suggestedBooksList.value,
                 readingLists = readingList.value,
-                wishlist = wishList.value,
+               // wishlist = wishList.value,
                 isFetchingSuggestions = myLibraryViewModel.isFetchingSuggestions,
                 suggestionsErrorMessage = myLibraryViewModel.suggestionsErrorMessage,
                 retryNetCall = {
@@ -208,6 +233,7 @@ fun MyLibraryScreen(
                     )
                 } ,
                 addToWishList = {
+                    selectedBookData = it
                     myLibraryViewModel.addOrRemoveFromWishList(it)
                 } ,
                 onWishListBookSelected = {
@@ -229,7 +255,7 @@ fun MyLibraryStatelessScreen(
     booksList: List<LibraryBookData> = listOf(),
     baseBooksListData: List<BaseBookData> = listOf(),
     readingLists: List<ReadingLists> = listOf(),
-    wishlist: List<BaseBookData> = listOf() ,
+   // wishlist: List<BaseBookData> = listOf() ,
     isFetchingSuggestions: Boolean = false,
     suggestionsErrorMessage: String = "",
     addToWishList : (BaseBookData) -> Unit = {} ,
@@ -297,20 +323,20 @@ fun MyLibraryStatelessScreen(
                 onDeleteList(it)
             }
         )
-
+/*
         MyWishListSection(
             modifier = Modifier.fillMaxWidth() ,
             wishlist = wishlist ,
             onBookSelected = {
                 onWishListBookSelected(it)
             }
-        )
+        )*/
 
     }
 }
 
 @Composable
-fun MyWishListSection(
+private fun MyWishListSection(
     modifier : Modifier = Modifier,
     wishlist : List<BaseBookData> = emptyList() ,
     onBookSelected : (BaseBookData) -> Unit = {}
@@ -421,7 +447,7 @@ fun MyWishListSection(
 @Composable
 fun CurrentlyReadingSection(
     modifier: Modifier = Modifier,
-    bookList: List<LibraryBookData> = listOf(LibraryBookData()),
+    bookList: List<LibraryBookData> = emptyList(),
     onSeeAllClicked: () -> Unit = {},
     onBookSelected: (String) -> Unit = {},
     onAddMoreClicked: () -> Unit = {}
@@ -510,13 +536,13 @@ fun CurrentlyReadingSection(
 
                 items(items = bookList) { book ->
                     LibraryBookCardComponent(
-                        image = book.image,
-                        title = book.title,
-                        author = book.author,
+                        image = book.baseData.image,
+                        title = book.baseData.title,
+                        author = book.baseData.authors,
                         shouldShowProgress = true,
                         progress = book.progress,
                         onItemSelected = {
-                            onBookSelected(book.id)
+                            onBookSelected(book.baseData.id)
                         }
                     )
                 }

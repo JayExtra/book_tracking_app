@@ -83,7 +83,7 @@ fun HorizontalBookCardComponent(
                 modifier = Modifier
                     .width(50.dp)
                     .height(80.dp),
-                image = bookData.image
+                image = bookData.baseData.image
             )
 
             Column(
@@ -93,19 +93,19 @@ fun HorizontalBookCardComponent(
             ) {
                 Text(
                     modifier = Modifier.width(230.dp),
-                    text = bookData.title,
+                    text = bookData.baseData.title,
                     style = BookAppTypography.labelMedium,
                     textAlign = TextAlign.Start,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = bookData.author,
+                    text = bookData.baseData.authors,
                     style = BookAppTypography.bodySmall,
                     textAlign = TextAlign.Start
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                val pagesText = if(bookData.isPending) "${bookData.pages} pages" else "${bookData.pagesRead}/${bookData.pages} pages"
+                val pagesText = if(bookData.isPending) "${bookData.baseData.pages} pages" else "${bookData.pagesRead}/${bookData.baseData.pages} pages"
                 Text(
                     modifier = Modifier.width(230.dp),
                     text = pagesText ,

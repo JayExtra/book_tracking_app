@@ -1,7 +1,9 @@
 package com.dev.james.domain.usecases
 
+import com.dev.james.booktracker.core.common_models.BaseBookData
 import com.dev.james.booktracker.core.common_models.BookLog
 import com.dev.james.booktracker.core.common_models.LibraryBookData
+import com.dev.james.booktracker.core.common_models.mappers.mapToLibraryData
 import com.dev.james.domain.repository.home.BooksRepository
 import com.dev.james.domain.repository.home.LogsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -40,10 +42,17 @@ class GetBooksAndProgressUsecase @Inject constructor(
                     }*/
                     val latestLog = logsRepository.getRecentBookLog(book.bookId)
                     LibraryBookData(
-                        id = book.bookId ,
-                        image = book.bookImage ,
-                        title = book.bookTitle ,
-                        author = book.bookAuthors ,
+                        baseData = BaseBookData(
+                            id = book.bookId ,
+                            image = book.bookImage ,
+                            description = book.bookDescription ,
+                            title = book.bookTitle ,
+                            authors = book.bookAuthors ,
+                            publisher = book.publisher ,
+                            publishedDate = book.publishedDate ,
+                            category = book.category.trim().replace("\\s+".toRegex(), "").split(",") ,
+                            pages = book.bookPagesCount
+                        ) ,
                         progress = calculateProgress(
                             totalPages = book.bookPagesCount ,
                             totalPagesRead = latestLog.currentPage
