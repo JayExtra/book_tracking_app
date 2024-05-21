@@ -75,7 +75,7 @@ import timber.log.Timber
 @Composable
 @Destination
 fun MyLibraryScreen(
-    myLibraryScreenNavigator: MyLibraryScreenNavigator,
+    navigator: MyLibraryScreenNavigator,
     myLibraryViewModel: MyLibraryViewModel = hiltViewModel()
 ) {
     Box(
@@ -211,11 +211,14 @@ fun MyLibraryScreen(
                 retryNetCall = {
                     myLibraryViewModel.getSuggestedBooks()
                 },
+                onCurrentlyReadingSeeAll = {
+                       navigator.fromMyLibraryToMyBookShelf()
+                },
                 onAddMoreBookClicked = {
-                    myLibraryScreenNavigator.openAddBookScreenDestination()
+                    navigator.openAddBookScreenDestination()
                 },
                 onSeeAllBookSelected = { bookId ->
-                    myLibraryScreenNavigator.openBookTrackingScreenDestination(
+                    navigator.openBookTrackingScreenDestination(
                         bookId,
                         PreviousScreenDestinations.LIBRARY_SCREEN
                     )
@@ -228,7 +231,7 @@ fun MyLibraryScreen(
                 } ,
                 onListSelected = {
                     //navigate to reading list screen
-                    myLibraryScreenNavigator.openReadingListScreenDestination(
+                    navigator.openReadingListScreenDestination(
                         readingListId = it
                     )
                 } ,

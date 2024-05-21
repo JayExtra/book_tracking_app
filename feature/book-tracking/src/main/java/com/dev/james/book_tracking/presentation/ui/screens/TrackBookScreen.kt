@@ -322,6 +322,10 @@ fun TrackBookScreen(
                             navigation.backToReadingListScreen()
                         }
 
+                        PreviousScreenDestinations.MY_BOOKSHELF_SCREEN -> {
+                            navigation.fromBookTrackToBookShelf()
+                        }
+
                         else -> {}
                     }
                 },

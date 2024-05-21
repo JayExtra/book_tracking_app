@@ -6,4 +6,6 @@ interface BookTrackNavigation {
 
     fun backToMyLibraryScreen()
     fun backToReadingListScreen()
+
+    fun fromBookTrackToBookShelf()
 }

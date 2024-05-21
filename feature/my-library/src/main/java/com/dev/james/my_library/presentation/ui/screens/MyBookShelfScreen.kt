@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,11 +31,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
@@ -43,25 +52,82 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.dev.james.booktracker.compose_ui.ui.components.BookDetailsDialog
 import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
+import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
 import com.dev.james.booktracker.compose_ui.ui.components.PortraitBooksRowComponent
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
 import com.dev.james.booktracker.core.common_models.BaseBookData
+import com.dev.james.my_library.presentation.navigation.MyBookShelfScreenNavigator
 import com.dev.james.my_library.presentation.ui.viewmodel.BookShelfUIState
 import com.dev.james.my_library.presentation.ui.viewmodel.MyBookShelfViewModel
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
+import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.N)
+@Destination
 @Composable
 fun MyBookShelfScreen(
     viewModel : MyBookShelfViewModel = hiltViewModel(),
+    navigator : MyBookShelfScreenNavigator
 ){
+
+    LaunchedEffect(key1 = true){
+        viewModel.onAction(
+            MyBookShelfViewModel.BookShelfUIActions
+                .FetchData
+        )
+    }
+
     val state = viewModel.screenState.collectAsStateWithLifecycle()
+    val events = viewModel.screenEvents.collectAsStateWithLifecycle(initialValue = MyBookShelfViewModel.BookShelfUiEvents.Default)
+    var selectedBookState by remember {
+        mutableStateOf(BaseBookData())
+    }
+    var showBookDetailsDialog by remember {
+        mutableStateOf(false)
+    }
+
+
+    when(val event = events.value){
+        is MyBookShelfViewModel.BookShelfUiEvents.Default -> {}
+        is MyBookShelfViewModel.BookShelfUiEvents.NavigateBack -> {
+            navigator.popBackStack()
+        }
+        is MyBookShelfViewModel.BookShelfUiEvents.NavigateToBookDetailsScreen -> {
+            navigator.fromBookShelfToTrackBookScreen(
+                bookId = event.baseBookData.id
+            )
+        }
+
+        is MyBookShelfViewModel.BookShelfUiEvents.ShowBookDetailsDialog -> {
+            //show book details dialog
+            showBookDetailsDialog = true
+            selectedBookState = event.baseBookData
+        }
+
+        is MyBookShelfViewModel.BookShelfUiEvents.CloseBookDetailsDialog -> {
+            showBookDetailsDialog = false
+            selectedBookState = BaseBookData()
+        }
+    }
+
+    if(showBookDetailsDialog){
+        BookDetailsDialog(
+            book = selectedBookState ,
+            onDismiss = {
+               viewModel.onAction(
+                   MyBookShelfViewModel.BookShelfUIActions.CloseBookDetailsDialog
+               )
+            }
+        )
+    }
+
     MyBookShelfStatelessScreen(
         state = state.value ,
         onAction = { action ->
@@ -107,22 +173,21 @@ private fun MyBookShelfStatelessScreen(
                     Text(text = "My Book Shelf", style = BookAppTypography.headlineMedium)
                 },
                 navigate = {
-
+                    onAction(MyBookShelfViewModel.BookShelfUIActions.NavigateBack)
                 },
-
                 showBackArrow = true,
-               /* navActions = {
+                navActions = {
                     IconButton(
                         modifier = Modifier.clip(CircleShape),
-                        onClick = { onDeleteList() }
+                        onClick = {  }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Delete,
+                            imageVector = Icons.Default.Add,
                             contentDescription = "",
                             tint = MaterialTheme.colorScheme.secondary
                         )
                     }
-                }*/
+                }
             )
         },
         sheetDragHandle = {
@@ -179,7 +244,7 @@ private fun MyBookShelfStatelessScreen(
                 contentAlignment = Alignment.Center
             ) {
 
-                GoogleBooksSearchBottomSheet(
+                /*GoogleBooksSearchBottomSheet(
                     context = context,
                     googleSearchBottomSheetUiState = googleBottomSheetUiState,
                     searchFieldState = searchFieldState,
@@ -194,13 +259,17 @@ private fun MyBookShelfStatelessScreen(
                         //trigger search action
                         //onSearchBook(it)
                     }
-                )
+                )*/
             }
         } ,
         content = { paddingValues ->
             Box(modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)){
+                .padding(8.dp)
+                .verticalScroll(scrollState)
+                ,
+                contentAlignment = Alignment.Center
+                ){
                 if(state.isLoading){
                     CircularProgressIndicator(
                         strokeCap = StrokeCap.Round ,
@@ -209,17 +278,101 @@ private fun MyBookShelfStatelessScreen(
                 }else {
                     Column(
                         modifier = Modifier.fillMaxSize() ,
-                        verticalArrangement = Arrangement.SpaceBetween
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         val sections = listOf("Currently Reading" , "Not Started" , "Completed" , "My Wish List")
-                        for(section in sections){
-                            PortraitBooksRowComponent(
-                                sectionTitle = section ,
-                                items = listOf(BaseBookData)
-                            ) {
 
+                        if(state.currentlyReading.isNotEmpty()){
+                            PortraitBooksRowComponent(
+                                modifier = Modifier.fillMaxWidth(),
+                                sectionTitle = sections[0] ,
+                                showAddButton = false ,
+                                items = state.currentlyReading
+                            ) {
+                                LibraryBookCardComponent(
+                                    image = it.baseData.image ,
+                                    title = it.baseData.title ,
+                                    author = it.baseData.authors ,
+                                    progress = it.progress ,
+                                    shouldShowProgress = true ,
+                                    onItemSelected = {
+                                        onAction(
+                                            MyBookShelfViewModel.BookShelfUIActions.OpenBookDetailsScreen(
+                                                it.baseData
+                                            )
+                                        )
+                                    }
+                                )
                             }
                         }
+
+                        if(state.notRead.isNotEmpty()){
+                            PortraitBooksRowComponent(
+                                sectionTitle = sections[1] ,
+                                showAddButton = false,
+                                items = state.notRead
+                            ) {
+                                LibraryBookCardComponent(
+                                    image = it.baseData.image ,
+                                    title = it.baseData.title ,
+                                    author = it.baseData.authors ,
+                                    shouldShowProgress = false ,
+                                    onItemSelected = {
+                                        onAction(
+                                            MyBookShelfViewModel.BookShelfUIActions.OpenBookDetailsScreen(
+                                                it.baseData
+                                            )
+                                        )
+                                    }
+                                )
+                            }
+                        }
+
+                        if(state.finishedReading.isNotEmpty()){
+                            PortraitBooksRowComponent(
+                                sectionTitle = sections[2] ,
+                                items = state.finishedReading ,
+                                showAddButton = false
+                            ) {
+                                LibraryBookCardComponent(
+                                    image = it.baseData.image ,
+                                    title = it.baseData.title ,
+                                    author = it.baseData.authors ,
+                                    progress = it.progress ,
+                                    shouldShowProgress = true ,
+                                    onItemSelected = {
+                                        onAction(
+                                            MyBookShelfViewModel.BookShelfUIActions.OpenBookDetailsScreen(
+                                                it.baseData
+                                            )
+                                        )
+                                    }
+                                )
+                            }
+                        }
+
+                        if(state.wishList.isNotEmpty()) {
+                            PortraitBooksRowComponent(
+                                sectionTitle = sections[3] ,
+                                items = state.wishList ,
+                                showAddButton = false
+                            ) {
+                                LibraryBookCardComponent(
+                                    image = it.image ,
+                                    title = it.title ,
+                                    author = it.authors ,
+                                    shouldShowProgress = false ,
+                                    onItemSelected = {
+                                        onAction(
+                                            MyBookShelfViewModel.BookShelfUIActions.ShowBookDetailsDialog(
+                                                it
+                                            )
+                                        )
+                                    }
+                                )
+                            }
+                        }
+
                     }
                 }
             }
