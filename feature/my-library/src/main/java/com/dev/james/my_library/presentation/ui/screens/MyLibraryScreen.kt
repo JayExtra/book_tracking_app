@@ -475,7 +475,7 @@ fun CurrentlyReadingSection(
                 onClick = { onSeeAllClicked() }
             ) {
                 Text(
-                    text = "see more",
+                    text = "bookshelf",
                     style = BookAppTypography.labelSmall,
                     color = MaterialTheme.colorScheme.secondary
                 )

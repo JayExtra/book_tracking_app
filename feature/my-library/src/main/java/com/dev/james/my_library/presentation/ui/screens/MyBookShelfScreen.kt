@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,10 +58,12 @@ import com.dev.james.booktracker.compose_ui.ui.components.BookDetailsDialog
 import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
 import com.dev.james.booktracker.compose_ui.ui.components.PortraitBooksRowComponent
+import com.dev.james.booktracker.compose_ui.ui.components.SearchTextFieldComponent
 import com.dev.james.booktracker.compose_ui.ui.components.StandardToolBar
 import com.dev.james.booktracker.compose_ui.ui.states.GoogleBottomSheetUiState
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 import com.dev.james.booktracker.compose_ui.ui.theme.BookTrackerTheme
+import com.dev.james.booktracker.compose_ui.ui.theme.Theme
 import com.dev.james.booktracker.core.common_models.BaseBookData
 import com.dev.james.my_library.presentation.navigation.MyBookShelfScreenNavigator
 import com.dev.james.my_library.presentation.ui.viewmodel.BookShelfUIState
@@ -167,6 +171,7 @@ private fun MyBookShelfStatelessScreen(
         sheetTonalElevation = 3.dp,
         sheetSwipeEnabled = false ,
         sheetContainerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             StandardToolBar(
                 title = {
@@ -262,120 +267,139 @@ private fun MyBookShelfStatelessScreen(
                 )*/
             }
         } ,
+       // contentColor = MaterialTheme.colorScheme.background,
         content = { paddingValues ->
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-                .verticalScroll(scrollState)
-                ,
-                contentAlignment = Alignment.Center
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = MaterialTheme.colorScheme.background) ,
+               // verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+
+                SearchTextFieldComponent(
+                    modifier= Modifier.fillMaxWidth().padding(8.dp)
+                )
+
+                Box(modifier = Modifier
+                    .weight(0.5f)
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .verticalScroll(scrollState)
+                    .background(color = MaterialTheme.colorScheme.background)
+                    ,
+                    contentAlignment = Alignment.Center
                 ){
-                if(state.isLoading){
-                    CircularProgressIndicator(
-                        strokeCap = StrokeCap.Round ,
-                        strokeWidth = 3.dp
-                    )
-                }else {
-                    Column(
-                        modifier = Modifier.fillMaxSize() ,
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        val sections = listOf("Currently Reading" , "Not Started" , "Completed" , "My Wish List")
+                    if(state.isLoading){
+                        CircularProgressIndicator(
+                            strokeCap = StrokeCap.Round ,
+                            strokeWidth = 3.dp
+                        )
+                    }else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = MaterialTheme.colorScheme.background) ,
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
 
-                        if(state.currentlyReading.isNotEmpty()){
-                            PortraitBooksRowComponent(
-                                modifier = Modifier.fillMaxWidth(),
-                                sectionTitle = sections[0] ,
-                                showAddButton = false ,
-                                items = state.currentlyReading
-                            ) {
-                                LibraryBookCardComponent(
-                                    image = it.baseData.image ,
-                                    title = it.baseData.title ,
-                                    author = it.baseData.authors ,
-                                    progress = it.progress ,
-                                    shouldShowProgress = true ,
-                                    onItemSelected = {
-                                        onAction(
-                                            MyBookShelfViewModel.BookShelfUIActions.OpenBookDetailsScreen(
-                                                it.baseData
+                            val sections = listOf("Currently Reading" , "Not Started" , "Completed" , "My Wish List")
+
+                            if(state.currentlyReading.isNotEmpty()){
+                                PortraitBooksRowComponent(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    sectionTitle = sections[0] ,
+                                    showAddButton = false ,
+                                    items = state.currentlyReading
+                                ) {
+                                    LibraryBookCardComponent(
+                                        image = it.baseData.image ,
+                                        title = it.baseData.title ,
+                                        author = it.baseData.authors ,
+                                        progress = it.progress ,
+                                        shouldShowProgress = true ,
+                                        onItemSelected = {
+                                            onAction(
+                                                MyBookShelfViewModel.BookShelfUIActions.OpenBookDetailsScreen(
+                                                    it.baseData
+                                                )
                                             )
-                                        )
-                                    }
-                                )
+                                        }
+                                    )
+                                }
                             }
-                        }
 
-                        if(state.notRead.isNotEmpty()){
-                            PortraitBooksRowComponent(
-                                sectionTitle = sections[1] ,
-                                showAddButton = false,
-                                items = state.notRead
-                            ) {
-                                LibraryBookCardComponent(
-                                    image = it.baseData.image ,
-                                    title = it.baseData.title ,
-                                    author = it.baseData.authors ,
-                                    shouldShowProgress = false ,
-                                    onItemSelected = {
-                                        onAction(
-                                            MyBookShelfViewModel.BookShelfUIActions.OpenBookDetailsScreen(
-                                                it.baseData
+                            if(state.notRead.isNotEmpty()){
+                                PortraitBooksRowComponent(
+                                    sectionTitle = sections[1] ,
+                                    showAddButton = false,
+                                    items = state.notRead
+                                ) {
+                                    LibraryBookCardComponent(
+                                        image = it.baseData.image ,
+                                        title = it.baseData.title ,
+                                        author = it.baseData.authors ,
+                                        shouldShowProgress = false ,
+                                        onItemSelected = {
+                                            onAction(
+                                                MyBookShelfViewModel.BookShelfUIActions.OpenBookDetailsScreen(
+                                                    it.baseData
+                                                )
                                             )
-                                        )
-                                    }
-                                )
+                                        }
+                                    )
+                                }
                             }
-                        }
 
-                        if(state.finishedReading.isNotEmpty()){
-                            PortraitBooksRowComponent(
-                                sectionTitle = sections[2] ,
-                                items = state.finishedReading ,
-                                showAddButton = false
-                            ) {
-                                LibraryBookCardComponent(
-                                    image = it.baseData.image ,
-                                    title = it.baseData.title ,
-                                    author = it.baseData.authors ,
-                                    progress = it.progress ,
-                                    shouldShowProgress = true ,
-                                    onItemSelected = {
-                                        onAction(
-                                            MyBookShelfViewModel.BookShelfUIActions.OpenBookDetailsScreen(
-                                                it.baseData
+                            if(state.finishedReading.isNotEmpty()){
+                                PortraitBooksRowComponent(
+                                    sectionTitle = sections[2] ,
+                                    items = state.finishedReading ,
+                                    showAddButton = false
+                                ) {
+                                    LibraryBookCardComponent(
+                                        image = it.baseData.image ,
+                                        title = it.baseData.title ,
+                                        author = it.baseData.authors ,
+                                        progress = it.progress ,
+                                        shouldShowProgress = true ,
+                                        onItemSelected = {
+                                            onAction(
+                                                MyBookShelfViewModel.BookShelfUIActions.OpenBookDetailsScreen(
+                                                    it.baseData
+                                                )
                                             )
-                                        )
-                                    }
-                                )
+                                        }
+                                    )
+                                }
                             }
-                        }
 
-                        if(state.wishList.isNotEmpty()) {
-                            PortraitBooksRowComponent(
-                                sectionTitle = sections[3] ,
-                                items = state.wishList ,
-                                showAddButton = false
-                            ) {
-                                LibraryBookCardComponent(
-                                    image = it.image ,
-                                    title = it.title ,
-                                    author = it.authors ,
-                                    shouldShowProgress = false ,
-                                    onItemSelected = {
-                                        onAction(
-                                            MyBookShelfViewModel.BookShelfUIActions.ShowBookDetailsDialog(
-                                                it
+                            if(state.wishList.isNotEmpty()) {
+                                PortraitBooksRowComponent(
+                                    sectionTitle = sections[3] ,
+                                    items = state.wishList ,
+                                    showAddButton = false
+                                ) {
+                                    LibraryBookCardComponent(
+                                        image = it.image ,
+                                        title = it.title ,
+                                        author = it.authors ,
+                                        shouldShowProgress = false ,
+                                        onItemSelected = {
+                                            onAction(
+                                                MyBookShelfViewModel.BookShelfUIActions.ShowBookDetailsDialog(
+                                                    it
+                                                )
                                             )
-                                        )
-                                    }
-                                )
+                                        }
+                                    )
+                                }
                             }
-                        }
 
+                        }
                     }
                 }
             }
+
         }
     )
 
@@ -385,7 +409,18 @@ private fun MyBookShelfStatelessScreen(
 @Preview
 @Composable
 private fun MyBookShelfScreenPreview(){
-    BookTrackerTheme{
+    BookTrackerTheme (theme = Theme.LIGHT_THEME.themeValue){
+        MyBookShelfStatelessScreen(
+            state = BookShelfUIState() ,
+            onAction = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun MyBookShelfScreenDarkPreview(){
+    BookTrackerTheme (theme = Theme.DARK_THEME.themeValue){
         MyBookShelfStatelessScreen(
             state = BookShelfUIState() ,
             onAction = {}
