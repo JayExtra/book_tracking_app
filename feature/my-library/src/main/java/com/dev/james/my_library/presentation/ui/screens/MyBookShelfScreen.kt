@@ -306,14 +306,15 @@ private fun MyBookShelfStatelessScreen(
                     }
                 )
 
+                val boxAlignment = if(state.isLoading) Alignment.Center else Alignment.TopCenter
                 Box(
                     modifier = Modifier
                         .weight(0.5f)
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .padding(8.dp)
                         .verticalScroll(scrollState)
                         .background(color = MaterialTheme.colorScheme.background),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = boxAlignment
                 ) {
                     if (state.isLoading) {
                         CircularProgressIndicator(
@@ -330,7 +331,9 @@ private fun MyBookShelfStatelessScreen(
                                 searchResult= state.searchResult ,
                                 searchMessage = state.searchEmptyMessage ,
                                 onBookSelected = {
-
+                                    onAction(
+                                        MyBookShelfViewModel.BookShelfUIActions.OpenBookDetailsScreen(it.baseData)
+                                    )
                                 }
                             )
                         }else {
@@ -474,14 +477,14 @@ private fun SearchResultView(
         } else {
             val gridHorizontalArrangement = if(searchMessage.isNotEmpty()) Arrangement.Center else Arrangement.Start
             val gridVerticalAlignment = if(searchMessage.isNotEmpty()) Arrangement.Center else Arrangement.Top
-            Toast.makeText(LocalContext.current , searchResult.toString() , Toast.LENGTH_SHORT).show()
+            //Toast.makeText(LocalContext.current , searchResult.toString() , Toast.LENGTH_SHORT).show()
 
             if(searchMessage.isNotEmpty()){
                 Text(modifier = Modifier.fillMaxWidth() , text = searchMessage , style = BookAppTypography.bodyMedium , textAlign = TextAlign.Center)
             }else {
                 LazyVerticalGrid(
-                    modifier= Modifier.fillMaxWidth().height(200.dp) ,
-                    columns = GridCells.Adaptive(minSize = 128.dp),
+                    modifier= Modifier.fillMaxWidth().height(600.dp) ,
+                    columns = GridCells.Fixed(count = 3),
                     contentPadding = PaddingValues(start = 2.dp, end = 2.dp) ,
                     verticalArrangement = gridVerticalAlignment ,
                     horizontalArrangement = gridHorizontalArrangement

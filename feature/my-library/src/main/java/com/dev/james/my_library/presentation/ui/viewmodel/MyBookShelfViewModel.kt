@@ -131,7 +131,8 @@ class MyBookShelfViewModel @Inject constructor(
                     it.copy(
                         isSearching = true ,
                         isSearchLoading = true ,
-                        searchEmptyMessage = ""
+                        searchEmptyMessage = "" ,
+                        searchResult = emptyList()
                     )
                 }
                 savedStateHandle[SEARCH_QUERY] = action.queryString
