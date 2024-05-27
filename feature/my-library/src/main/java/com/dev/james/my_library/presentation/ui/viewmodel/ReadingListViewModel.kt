@@ -59,6 +59,7 @@ class ReadingListScreenViewModel @Inject constructor(
 
     companion object {
         const val TAG = "ReadingListScreenViewModel"
+        const val DEFAULT_QUERY = "search_query"
     }
 
     private val _state: MutableStateFlow<ReadingListScreenState> =
@@ -96,7 +97,7 @@ class ReadingListScreenViewModel @Inject constructor(
         private set
 
     private val searchQueryStateFlow = savedStateHandle.getStateFlow("search_query" ,
-        AddBookViewModel.DEFAULT_SEARCH_QUERY
+        DEFAULT_QUERY
     )
 
     private var queryJob: Job? = null
@@ -391,7 +392,7 @@ class ReadingListScreenViewModel @Inject constructor(
     fun searchForBook(searchQuery: String) {
         queryJob = viewModelScope.launch {
             //searchQueryStateFlow.value = searchQuery
-            savedStateHandle["search_query"] = searchQuery
+            savedStateHandle[DEFAULT_QUERY] = searchQuery
             searchQueryStateFlow
                 .debounce(200)
                 .filter { query ->

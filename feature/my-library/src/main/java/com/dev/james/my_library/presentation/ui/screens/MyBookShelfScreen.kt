@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -27,14 +26,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,9 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.dev.james.booktracker.compose_ui.ui.components.BookDetailsDialog
-import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
 import com.dev.james.booktracker.compose_ui.ui.components.LibraryBookCardComponent
 import com.dev.james.booktracker.compose_ui.ui.components.PortraitBooksRowComponent
 import com.dev.james.booktracker.compose_ui.ui.components.SearchTextFieldComponent
@@ -144,7 +139,8 @@ fun MyBookShelfScreen(
 @Composable
 private fun MyBookShelfStatelessScreen(
     state : BookShelfUIState = BookShelfUIState(),
-    searchFieldState: FormState<TextFieldState> = FormState(fields = listOf()),
+    textSearchFieldState: String = "" ,
+    googleSearchFieldState: FormState<TextFieldState> = FormState(fields = listOf()),
     googleBottomSheetUiState: GoogleBottomSheetUiState = GoogleBottomSheetUiState.StandbyState,
     onAction : (MyBookShelfViewModel.BookShelfUIActions) -> Unit = {}
 ){
@@ -306,7 +302,7 @@ private fun MyBookShelfStatelessScreen(
 
                             if(state.currentlyReading.isNotEmpty()){
                                 PortraitBooksRowComponent(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(bottom = 6.dp),
                                     sectionTitle = sections[0] ,
                                     showAddButton = false ,
                                     items = state.currentlyReading

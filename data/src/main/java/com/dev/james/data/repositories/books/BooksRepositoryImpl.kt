@@ -127,6 +127,15 @@ class BooksRepositoryImpl
         }
     }
 
+    override fun searchBook(query: String): Flow<List<BookSave>> {
+        return booksLocalDataSource.searchBook(query)
+            .map { cachedBooksList->
+                cachedBooksList.map { bookEntity ->
+                    bookEntity.mapToBookDomainObject()
+                }
+            }
+    }
+
     override suspend fun setAsActiveBook(
         bookId: String,
         onSuccess: (Boolean) -> Unit,

@@ -46,7 +46,7 @@ fun <T> PortraitBooksRowComponent(
     itemContent : @Composable (T) -> Unit = {}
 ) {
     Column(
-        modifier = modifier.height(254.dp),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
