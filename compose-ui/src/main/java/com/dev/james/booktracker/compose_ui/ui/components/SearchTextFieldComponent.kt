@@ -1,9 +1,11 @@
 package com.dev.james.booktracker.compose_ui.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -29,7 +31,8 @@ import com.dev.james.booktracker.compose_ui.ui.theme.Theme
 fun SearchTextFieldComponent(
     modifier : Modifier = Modifier ,
     text : String = "" ,
-    onTextChanged : (String) -> Unit = {}
+    onTextChanged : (String) -> Unit = {} ,
+    onClearText : () -> Unit = {}
 ){
 
         TextField(
@@ -40,6 +43,11 @@ fun SearchTextFieldComponent(
             },
             leadingIcon = {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "")
+            } ,
+            trailingIcon = {
+                if(text.isNotEmpty()){
+                    Icon(modifier = Modifier.clickable( onClick = { onClearText() }) ,imageVector = Icons.Default.Close, contentDescription = "")
+                }
             },
             shape = RoundedCornerShape(10.dp),
             colors = TextFieldDefaults.colors(

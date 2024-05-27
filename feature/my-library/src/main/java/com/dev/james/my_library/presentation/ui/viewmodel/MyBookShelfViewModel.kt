@@ -129,7 +129,9 @@ class MyBookShelfViewModel @Inject constructor(
             is BookShelfUIActions.OnSearch -> {
                 _screenState.update {
                     it.copy(
-                        isSearching = true
+                        isSearching = true ,
+                        isSearchLoading = true ,
+                        searchEmptyMessage = ""
                     )
                 }
                 savedStateHandle[SEARCH_QUERY] = action.queryString
@@ -139,7 +141,9 @@ class MyBookShelfViewModel @Inject constructor(
                         if(query.isEmpty()){
                             _screenState.update { state ->
                                 state.copy(
-                                    isSearching = false
+                                    isSearching = false ,
+                                    isSearchLoading = false,
+                                    searchEmptyMessage = ""
                                 )
                             }
                             return@filter false
@@ -169,10 +173,20 @@ class MyBookShelfViewModel @Inject constructor(
                                     searchEmptyMessage = ""
                                 )
                             }
+                            val booksList = mutableListOf<LibraryBookData>()
                             cachedBooks.forEach {
-                                val bookWithStats = bookDataUsecase.invoke(it.bookId).mapToLibraryData()
+                                val bookWithStatsDiffered = async { bookDataUsecase.invoke(it.bookId).mapToLibraryData() }
+                                booksList.add(bookWithStatsDiffered.await())
                             }
+                            Timber.tag(TAG).d("search result=> $booksList")
+                            _screenState.update {
+                                it.copy(
+                                    searchResult = booksList
+                                )
+                            }
+
                         }
+
                     }
             }
 

@@ -71,6 +71,6 @@ class BooksLocalDataSourceImpl @Inject constructor(
     }
 
     override fun searchBook(query: String): Flow<List<BookEntity>> {
-        return booksDao.searchBook(query)
+        return booksDao.searchBook("%$query%")
     }
 }

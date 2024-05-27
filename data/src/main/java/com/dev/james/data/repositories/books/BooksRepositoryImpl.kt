@@ -44,7 +44,7 @@ class BooksRepositoryImpl
 ) : BooksRepository {
 
     companion object {
-        const val TAG = "BooksRemoteRepositoryImpl"
+        const val TAG = "BooksRepositoryImpl"
     }
 
     override fun getBooksFromApi(
@@ -130,6 +130,7 @@ class BooksRepositoryImpl
     override fun searchBook(query: String): Flow<List<BookSave>> {
         return booksLocalDataSource.searchBook(query)
             .map { cachedBooksList->
+                Timber.tag(TAG).d("Searched book => ${cachedBooksList.toString()} ")
                 cachedBooksList.map { bookEntity ->
                     bookEntity.mapToBookDomainObject()
                 }
