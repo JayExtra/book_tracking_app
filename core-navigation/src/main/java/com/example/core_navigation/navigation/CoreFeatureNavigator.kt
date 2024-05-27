@@ -16,8 +16,10 @@ import com.dev.james.booktracker.on_boarding.ui.navigation.UserSetupScreenNaviga
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.OnBoardingWelcomeScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.UserPreferenceSetupScreenDestination
 import com.dev.james.booktracker.on_boarding.ui.screens.destinations.WelcomeHelloMessageScreenDestination
+import com.dev.james.my_library.presentation.navigation.MyBookShelfScreenNavigator
 import com.dev.james.my_library.presentation.navigation.MyLibraryScreenNavigator
 import com.dev.james.my_library.presentation.navigation.ReadingListScreenNavigator
+import com.dev.james.my_library.presentation.ui.screens.destinations.MyBookShelfScreenDestination
 import com.dev.james.my_library.presentation.ui.screens.destinations.MyLibraryScreenDestination
 import com.dev.james.my_library.presentation.ui.screens.destinations.ReadingListScreenDestination
 import com.ramcosta.composedestinations.dynamic.within
@@ -36,7 +38,8 @@ class CoreFeatureNavigator(
         MyLibraryScreenNavigator ,
         BookTrackNavigation ,
         AddBookScreenNavigator ,
-        ReadingListScreenNavigator
+        ReadingListScreenNavigator ,
+    MyBookShelfScreenNavigator
 {
 
     override fun openOnBoardingWelcomeScreen() {
@@ -133,6 +136,12 @@ class CoreFeatureNavigator(
         )
     }
 
+    override fun fromMyLibraryToMyBookShelf() {
+        navController.navigate(
+            MyBookShelfScreenDestination within navGraph
+        )
+    }
+
     override fun backToHomeScreen() {
         navController.navigate(
             HomeScreenDestination within navGraph ,
@@ -160,6 +169,15 @@ class CoreFeatureNavigator(
 
     override fun backToReadingListScreen() {
         navController.popBackStack()
+    }
+
+    override fun fromBookTrackToBookShelf() {
+        navController.popBackStack()
+       /* navController.navigate(
+            MyBookShelfScreenDestination within navGraph
+        ) {
+
+        }*/
     }
 
     override fun backToHomeDestination() {
@@ -204,4 +222,24 @@ class CoreFeatureNavigator(
         )
     }
 
+    override fun popBackStack() {
+        navController.popBackStack()
+    }
+
+    override fun navToAddBookScreen() {
+        navController.navigate(
+            direction = AddBookScreenDestination(
+                PreviousScreenDestinations.MY_BOOKSHELF_SCREEN
+            ) within navGraph
+        )
+    }
+
+    override fun fromBookShelfToTrackBookScreen(bookId: String) {
+        navController.navigate(
+            TrackBookScreenDestination(
+                previousScreenDestinations = PreviousScreenDestinations.MY_BOOKSHELF_SCREEN,
+                bookId = bookId
+            ) within navGraph
+        )
+    }
 }

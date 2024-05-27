@@ -21,6 +21,8 @@ interface BooksRepository {
 
     suspend fun getSingleSavedBook(id : String) : BookSave
 
+    fun searchBook(query : String) : Flow<List<BookSave>>
+
     suspend fun setAsActiveBook(bookId : String , onSuccess : (Boolean) -> Unit , onFailure: (String) -> Unit)
 
     suspend fun getActiveBookId(onSuccess: (String) -> Unit , onFailure: (String) -> Unit)

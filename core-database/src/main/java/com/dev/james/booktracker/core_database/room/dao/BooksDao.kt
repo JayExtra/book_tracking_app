@@ -20,6 +20,9 @@ interface BooksDao {
     @Query("SELECT * FROM books_table WHERE id =:id")
     suspend fun getBook(id : String) : BookEntity
 
+    @Query("SELECT * FROM books_table WHERE book_title LIKE :query")
+    fun searchBook(query: String):Flow<List<BookEntity>>
+
 
     @Query("DELETE FROM books_table WHERE id =:id")
     suspend fun deleteBook(id: String)

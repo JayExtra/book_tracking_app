@@ -39,22 +39,24 @@ import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
 fun <T> PortraitBooksRowComponent(
     modifier: Modifier = Modifier,
     sectionTitle : String = "",
+    showAddButton : Boolean = true ,
     items: List<T> = listOf<T>(),
     onSeeAllClicked: () -> Unit = {},
     onAddMoreClicked: () -> Unit = {} ,
     itemContent : @Composable (T) -> Unit = {}
 ) {
     Column(
-        modifier = modifier.height(254.dp),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Text(
-            modifier = Modifier.wrapContentWidth(),
+            modifier = Modifier.fillMaxWidth(),
             text = sectionTitle,
             style = BookAppTypography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold ,
+            textAlign = TextAlign.Start
         )
         LazyRow(
             modifier = Modifier
@@ -114,34 +116,38 @@ fun <T> PortraitBooksRowComponent(
                     itemContent(item)
                 }
 
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .wrapContentWidth()
-                            .padding(start = 10.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        FloatingActionButton(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            shape = CircleShape,
-                            elevation = FloatingActionButtonDefaults.elevation(
-                                defaultElevation = 0.dp
-                            ),
-                            onClick = { onAddMoreClicked() }
+                if(showAddButton) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .wrapContentWidth()
+                                .padding(start = 10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "")
+                            FloatingActionButton(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                shape = CircleShape,
+                                elevation = FloatingActionButtonDefaults.elevation(
+                                    defaultElevation = 0.dp
+                                ),
+                                onClick = { onAddMoreClicked() }
+                            ) {
+                                Icon(imageVector = Icons.Default.Add, contentDescription = "")
+                            }
+                            Text(
+                                modifier = Modifier.padding(top = 4.dp),
+                                text = "add more",
+                                style = BookAppTypography.labelSmall,
+                                textAlign = TextAlign.Center
+                            )
                         }
-                        Text(
-                            modifier = Modifier.padding(top = 4.dp),
-                            text = "add more",
-                            style = BookAppTypography.labelSmall,
-                            textAlign = TextAlign.Center
-                        )
-                    }
 
+                    }
                 }
+
+
             }
 
 

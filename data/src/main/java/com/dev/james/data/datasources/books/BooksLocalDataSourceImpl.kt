@@ -69,4 +69,8 @@ class BooksLocalDataSourceImpl @Inject constructor(
     override suspend fun addBookToReadingList(readingListBookUpdate: ReadingListBookUpdate) {
         booksDao.addBookToReadingList(readingListBookUpdate)
     }
+
+    override fun searchBook(query: String): Flow<List<BookEntity>> {
+        return booksDao.searchBook("%$query%")
+    }
 }

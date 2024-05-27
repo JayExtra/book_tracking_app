@@ -5,5 +5,6 @@ enum class PreviousScreenDestinations {
     LIBRARY_SCREEN ,
     SET_GOAL_SCREEN,
     READING_LIST_SCREEN,
+    MY_BOOKSHELF_SCREEN ,
     NONE
 }

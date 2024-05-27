@@ -11,4 +11,6 @@ interface BooksLocalDataSource {
     suspend fun getCachedBook(id : String) : BookEntity
 
     suspend fun addBookToReadingList(readingListBookUpdate: ReadingListBookUpdate)
+
+    fun searchBook(query : String) : Flow<List<BookEntity>>
 }
