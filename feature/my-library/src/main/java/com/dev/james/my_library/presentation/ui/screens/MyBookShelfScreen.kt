@@ -4,6 +4,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -34,7 +36,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
@@ -54,9 +58,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dev.james.booktracker.compose_ui.ui.components.BookDetailsDialog
@@ -73,11 +80,18 @@ import com.dev.james.booktracker.core.common_models.LibraryBookData
 import com.dev.james.my_library.presentation.navigation.MyBookShelfScreenNavigator
 import com.dev.james.my_library.presentation.ui.viewmodel.BookShelfUIState
 import com.dev.james.my_library.presentation.ui.viewmodel.MyBookShelfViewModel
+import com.dev.james.booktracker.compose_ui.R
+import com.dev.james.booktracker.compose_ui.ui.components.AddBookOptionsDialog
+import com.dev.james.booktracker.compose_ui.ui.components.BookChaptersDialog
+import com.dev.james.booktracker.compose_ui.ui.components.GoogleBooksSearchBottomSheet
+import com.dev.james.booktracker.compose_ui.ui.components.SingleActionConfirmationPrompt
 import com.dsc.form_builder.FormState
 import com.dsc.form_builder.TextFieldState
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.N)
 @Destination
 @Composable
@@ -96,11 +110,58 @@ fun MyBookShelfScreen(
     val state = viewModel.screenState.collectAsStateWithLifecycle()
     val events =
         viewModel.screenEvents.collectAsStateWithLifecycle(initialValue = MyBookShelfViewModel.BookShelfUiEvents.Default)
+
+    val googleBottomSheetUiState = viewModel.googleBottomSheetSearchState.collectAsStateWithLifecycle()
     var selectedBookState by remember {
         mutableStateOf(BaseBookData())
     }
     var showBookDetailsDialog by remember {
         mutableStateOf(false)
+    }
+    var showBookAddedDialog by remember {
+        mutableStateOf(false)
+    }
+    var showRemovedFromWishListDialog by remember {
+        mutableStateOf(false)
+    }
+    var showChaptersDialog by remember{
+        mutableStateOf(false)
+    }
+    var showBookSavedToDbDialog by remember {
+        mutableStateOf(false)
+    }
+    val coroutineScope : CoroutineScope = rememberCoroutineScope()
+
+    val sheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        skipHiddenState = false,
+        confirmValueChange = {
+            it != SheetValue.Hidden
+        }
+    )
+
+    val bookOptionsDialogState = viewModel.bookOptionsDialogState.value
+    val googleSearchFieldState = viewModel.bottomSheetSearchFieldState
+
+
+    if(bookOptionsDialogState){
+        AddBookOptionsDialog(
+            onWishlist = {
+                coroutineScope.launch {
+                    sheetState.show()
+                }
+            } ,
+            onExists = {
+                navigator.navToAddBookScreen()
+            } ,
+            onDismiss = {
+                viewModel.onAction(
+                    MyBookShelfViewModel.BookShelfUIActions
+                        .HideBookOptionDialog
+                )
+            }
+
+        )
     }
 
 
@@ -126,11 +187,95 @@ fun MyBookShelfScreen(
             showBookDetailsDialog = false
             selectedBookState = BaseBookData()
         }
+
+        is MyBookShelfViewModel.BookShelfUiEvents.HideBookAddedDialog -> {
+            showBookAddedDialog = false
+            selectedBookState = BaseBookData()
+        }
+        is MyBookShelfViewModel.BookShelfUiEvents.ShowBookAddedDialog -> {
+            selectedBookState = event.book
+            showBookAddedDialog = true
+        }
+
+        MyBookShelfViewModel.BookShelfUiEvents.ShowRemoveFromWishListDialog -> {
+            showRemovedFromWishListDialog = true
+        }
+
+        MyBookShelfViewModel.BookShelfUiEvents.ShowBookAddedToDBDialog -> {
+            showBookSavedToDbDialog = true
+        }
+    }
+
+    if(showBookSavedToDbDialog){
+        SingleActionConfirmationPrompt(
+            title = "Alright!",
+            body = "${selectedBookState.title} added to my bookshelf ready for be tracking!" ,
+            onAccept = {
+                showBookSavedToDbDialog = false
+                selectedBookState = BaseBookData()
+            }
+        )
+    }
+
+    if(showChaptersDialog){
+        BookChaptersDialog(
+            onSave = {
+                viewModel.onAction(
+                    MyBookShelfViewModel.BookShelfUIActions
+                        .OnSaveBook(
+                            baseBookData = selectedBookState ,
+                            chapters = it
+                        )
+                )
+            } ,
+            onDismiss = {
+                showChaptersDialog = false
+                selectedBookState = BaseBookData()
+            }
+        )
+    }
+
+
+    if(showRemovedFromWishListDialog){
+        SingleActionConfirmationPrompt(
+            title = "Success!",
+            body = "${selectedBookState.title} removed from my wishlist." ,
+            onAccept = {
+                showRemovedFromWishListDialog = false
+                selectedBookState = BaseBookData()
+            }
+        )
+    }
+
+    if(showBookAddedDialog){
+        SingleActionConfirmationPrompt(
+            title = "Right On!",
+            body = "${selectedBookState.title} added to my wishlist." ,
+            onAccept = {
+                viewModel.onAction(
+                    MyBookShelfViewModel.BookShelfUIActions
+                        .HideBookAddedDialog
+                )
+            }
+        )
     }
 
     if (showBookDetailsDialog) {
         BookDetailsDialog(
             book = selectedBookState,
+            removeFromWishlist = {
+                selectedBookState = it
+                viewModel.onAction(
+                    MyBookShelfViewModel.BookShelfUIActions
+                        .OnRemoveFromWishList(
+                            it
+                        )
+                )
+            },
+            addBook = {
+                selectedBookState = it
+                showChaptersDialog = true
+            },
             onDismiss = {
                 viewModel.onAction(
                     MyBookShelfViewModel.BookShelfUIActions.CloseBookDetailsDialog
@@ -141,6 +286,13 @@ fun MyBookShelfScreen(
 
     MyBookShelfStatelessScreen(
         state = state.value,
+        sheetState = sheetState,
+        coroutineScope = coroutineScope,
+        googleSearchFieldState = googleSearchFieldState,
+        googleBottomSheetUiState = googleBottomSheetUiState.value,
+        cancelNetworkJob = {
+            viewModel.cancelQuery()
+        },
         onAction = { action ->
             viewModel.onAction(action)
         }
@@ -151,25 +303,19 @@ fun MyBookShelfScreen(
 @Composable
 private fun MyBookShelfStatelessScreen(
     state: BookShelfUIState = BookShelfUIState(),
-    textSearchFieldState: String = "",
+    coroutineScope : CoroutineScope = rememberCoroutineScope(),
+    sheetState : SheetState = SheetState(skipPartiallyExpanded = false),
     googleSearchFieldState: FormState<TextFieldState> = FormState(fields = listOf()),
     googleBottomSheetUiState: GoogleBottomSheetUiState = GoogleBottomSheetUiState.StandbyState,
+    cancelNetworkJob : () -> Unit = {},
     onAction: (MyBookShelfViewModel.BookShelfUIActions) -> Unit = {}
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    val sheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        skipHiddenState = false,
-        confirmValueChange = {
-            it != SheetValue.Hidden
-        }
-    )
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = sheetState
     )
     val keyboardController = LocalSoftwareKeyboardController.current
-    val coroutineScope = rememberCoroutineScope()
 
     BottomSheetScaffold(
         modifier = Modifier.fillMaxSize(),
@@ -192,7 +338,12 @@ private fun MyBookShelfStatelessScreen(
                 navActions = {
                     IconButton(
                         modifier = Modifier.clip(CircleShape),
-                        onClick = { }
+                        onClick = {
+                            onAction(
+                                MyBookShelfViewModel
+                                    .BookShelfUIActions.ShowBookOptionDialog
+                            )
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -227,7 +378,7 @@ private fun MyBookShelfStatelessScreen(
                             keyboardController?.hide()
                             coroutineScope.launch {
                                 sheetState.hide()
-                                //cancelQuery()
+                                cancelNetworkJob()
                             }
                         },
                         colors = IconButtonDefaults.iconButtonColors(
@@ -261,22 +412,33 @@ private fun MyBookShelfStatelessScreen(
                 contentAlignment = Alignment.Center
             ) {
 
-                /*GoogleBooksSearchBottomSheet(
+                GoogleBooksSearchBottomSheet(
                     context = context,
                     googleSearchBottomSheetUiState = googleBottomSheetUiState,
-                    searchFieldState = searchFieldState,
+                    searchFieldState = googleSearchFieldState,
                     onBookSelected = {
-                        //onBookSelected(it)
                         //add a book to the wishlist section
+                        onAction(
+                            MyBookShelfViewModel.BookShelfUIActions
+                                .OnBookSelected(
+                                    it
+                                )
+                        )
+
                         coroutineScope.launch {
                             sheetState.hide()
                         }
                     },
                     searchForBook = {
                         //trigger search action
-                        //onSearchBook(it)
+                        onAction(
+                            MyBookShelfViewModel.BookShelfUIActions
+                                .OnNetworkSearch(
+                                    query = it
+                                )
+                        )
                     }
-                )*/
+                )
             }
         },
         // contentColor = MaterialTheme.colorScheme.background,
@@ -483,7 +645,9 @@ private fun SearchResultView(
                 Text(modifier = Modifier.fillMaxWidth() , text = searchMessage , style = BookAppTypography.bodyMedium , textAlign = TextAlign.Center)
             }else {
                 LazyVerticalGrid(
-                    modifier= Modifier.fillMaxWidth().height(600.dp) ,
+                    modifier= Modifier
+                        .fillMaxWidth()
+                        .height(600.dp) ,
                     columns = GridCells.Fixed(count = 3),
                     contentPadding = PaddingValues(start = 2.dp, end = 2.dp) ,
                     verticalArrangement = gridVerticalAlignment ,
@@ -513,6 +677,7 @@ private fun SearchResultView(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun MyBookShelfScreenPreview() {
@@ -524,6 +689,7 @@ private fun MyBookShelfScreenPreview() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun MyBookShelfScreenDarkPreview() {
