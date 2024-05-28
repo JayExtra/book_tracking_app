@@ -258,6 +258,18 @@ class MyBookShelfViewModel @Inject constructor(
                 )
             }
 
+            is BookShelfUIActions.HideRemovedFromWishlistDialog -> {
+                _screenEvents.send(
+                    BookShelfUiEvents.HideRemoveFromWishList
+                )
+            }
+
+            is BookShelfUIActions.HideBookSavedToDbDialog -> {
+                _screenEvents.send(
+                    BookShelfUiEvents.HideBookSavedToDbDialog
+                )
+            }
+
             else -> {}
         }
 
@@ -418,6 +430,10 @@ class MyBookShelfViewModel @Inject constructor(
 
         object HideBookAddedDialog : BookShelfUIActions()
 
+        object HideRemovedFromWishlistDialog : BookShelfUIActions()
+
+        object HideBookSavedToDbDialog : BookShelfUIActions()
+
 
         
     }
@@ -438,7 +454,11 @@ class MyBookShelfViewModel @Inject constructor(
 
         object ShowRemoveFromWishListDialog : BookShelfUiEvents()
 
+        object HideRemoveFromWishList : BookShelfUiEvents()
+
         object ShowBookAddedToDBDialog : BookShelfUiEvents()
+
+        object HideBookSavedToDbDialog : BookShelfUiEvents()
 
 
     }

@@ -256,6 +256,9 @@ fun AddBookScreen(
                             PreviousScreenDestinations.SET_GOAL_SCREEN -> {
                                 addBookScreenNavigator.backToHomeDestination()
                             }
+                            PreviousScreenDestinations.MY_BOOKSHELF_SCREEN -> {
+                                addBookScreenNavigator.fromAddBookToBookShelfScreen()
+                            }
 
                             else -> {
                                 Timber.tag("AddBookScreen").d("No naviation event received!")
@@ -393,6 +396,10 @@ fun AddBookScreen(
 
                         PreviousScreenDestinations.LIBRARY_SCREEN -> {
                             addBookScreenNavigator.backToLibraryScreen()
+                        }
+
+                        PreviousScreenDestinations.MY_BOOKSHELF_SCREEN -> {
+                            addBookScreenNavigator.fromAddBookToBookShelfScreen()
                         }
                         else -> {
                             Timber.tag("AddBookScreen").d("No naviation event received!")

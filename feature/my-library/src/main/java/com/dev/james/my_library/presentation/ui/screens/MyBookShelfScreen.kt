@@ -148,10 +148,18 @@ fun MyBookShelfScreen(
         AddBookOptionsDialog(
             onWishlist = {
                 coroutineScope.launch {
-                    sheetState.show()
+                    sheetState.expand()
                 }
+                viewModel.onAction(
+                    MyBookShelfViewModel.BookShelfUIActions
+                        .HideBookOptionDialog
+                )
             } ,
             onExists = {
+                viewModel.onAction(
+                    MyBookShelfViewModel.BookShelfUIActions
+                        .HideBookOptionDialog
+                )
                 navigator.navToAddBookScreen()
             } ,
             onDismiss = {
@@ -160,7 +168,6 @@ fun MyBookShelfScreen(
                         .HideBookOptionDialog
                 )
             }
-
         )
     }
 
@@ -197,22 +204,36 @@ fun MyBookShelfScreen(
             showBookAddedDialog = true
         }
 
-        MyBookShelfViewModel.BookShelfUiEvents.ShowRemoveFromWishListDialog -> {
+        is MyBookShelfViewModel.BookShelfUiEvents.ShowRemoveFromWishListDialog -> {
             showRemovedFromWishListDialog = true
+            showBookDetailsDialog = false
         }
 
-        MyBookShelfViewModel.BookShelfUiEvents.ShowBookAddedToDBDialog -> {
+        is MyBookShelfViewModel.BookShelfUiEvents.ShowBookAddedToDBDialog -> {
             showBookSavedToDbDialog = true
+            showBookDetailsDialog = false
+            showChaptersDialog = false
+        }
+
+        is MyBookShelfViewModel.BookShelfUiEvents.HideRemoveFromWishList -> {
+            showRemovedFromWishListDialog = false
+            selectedBookState = BaseBookData()
+        }
+
+        is MyBookShelfViewModel.BookShelfUiEvents.HideBookSavedToDbDialog -> {
+            showBookSavedToDbDialog = false
+            selectedBookState = BaseBookData()
         }
     }
 
     if(showBookSavedToDbDialog){
         SingleActionConfirmationPrompt(
             title = "Alright!",
-            body = "${selectedBookState.title} added to my bookshelf ready for be tracking!" ,
+            body = "${selectedBookState.title} added to my bookshelf, book ready for tracking!" ,
             onAccept = {
-                showBookSavedToDbDialog = false
-                selectedBookState = BaseBookData()
+                viewModel.onAction(
+                    MyBookShelfViewModel.BookShelfUIActions.HideBookSavedToDbDialog
+                )
             }
         )
     }
@@ -241,8 +262,10 @@ fun MyBookShelfScreen(
             title = "Success!",
             body = "${selectedBookState.title} removed from my wishlist." ,
             onAccept = {
-                showRemovedFromWishListDialog = false
-                selectedBookState = BaseBookData()
+                viewModel.onAction(
+                    MyBookShelfViewModel.BookShelfUIActions
+                        .HideRemovedFromWishlistDialog
+                )
             }
         )
     }
@@ -304,7 +327,7 @@ fun MyBookShelfScreen(
 private fun MyBookShelfStatelessScreen(
     state: BookShelfUIState = BookShelfUIState(),
     coroutineScope : CoroutineScope = rememberCoroutineScope(),
-    sheetState : SheetState = SheetState(skipPartiallyExpanded = false),
+    sheetState : SheetState = rememberStandardBottomSheetState(),
     googleSearchFieldState: FormState<TextFieldState> = FormState(fields = listOf()),
     googleBottomSheetUiState: GoogleBottomSheetUiState = GoogleBottomSheetUiState.StandbyState,
     cancelNetworkJob : () -> Unit = {},

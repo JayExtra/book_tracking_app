@@ -259,6 +259,9 @@ fun TrackBookScreen(
                     PreviousScreenDestinations.LIBRARY_SCREEN -> {
                         navigation.backToMyLibraryScreen()
                     }
+                    PreviousScreenDestinations.MY_BOOKSHELF_SCREEN -> {
+                        navigation.fromBookTrackToBookShelf()
+                    }
 
                     else -> {}
                 }

@@ -2,6 +2,7 @@ package com.dev.james.booktracker.compose_ui.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,8 +40,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.dev.james.booktracker.compose_ui.R
 import com.dev.james.booktracker.compose_ui.ui.theme.BookAppTypography
+import com.dev.james.booktracker.compose_ui.ui.theme.SurfaceDark30
+import com.dev.james.booktracker.compose_ui.ui.theme.SurfaceDark40
+import com.dev.james.booktracker.compose_ui.ui.theme.SurfaceDark70
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun AddBookOptionsDialog(
@@ -45,36 +53,44 @@ fun AddBookOptionsDialog(
     onExists : () -> Unit = {} ,
     onDismiss : () -> Unit = {}
 ){
-    Dialog(
+    AlertDialog(
         onDismissRequest = { onDismiss() }
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(6.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly ,
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            modifier = Modifier.fillMaxWidth() ,
+            tonalElevation = AlertDialogDefaults.TonalElevation ,
+            color = MaterialTheme.colorScheme.background ,
+            shape = RoundedCornerShape(12.dp)
         ) {
-            OptionPlaque(
-                modifier = Modifier.padding(4.dp) ,
-                message = "Already have the book? Let's add it to start tracking it!" ,
-                iconPainter = R.drawable.book_icon ,
-                onSelected = {
-                    onExists()
-                }
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly ,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OptionPlaque(
+                    modifier = Modifier.padding(4.dp) ,
+                    message = "Already have the book? Let's add it to start tracking it!" ,
+                    iconPainter = R.drawable.book_icon ,
+                    onSelected = {
+                        onExists()
+                    }
+                )
 
-            OptionPlaque(
-                modifier = Modifier.padding(4.dp) ,
-                message = "Add book to wishlist. Book will be searched online.",
-                iconPainter = 0 ,
-                iconVector = Icons.Default.Star,
-                onSelected = {
-                    onWishlist()
-                }
-            )
+                OptionPlaque(
+                    modifier = Modifier.padding(4.dp) ,
+                    message = "Add book to wishlist. Book will be searched online.",
+                    iconPainter = 0 ,
+                    iconVector = Icons.Default.Star,
+                    onSelected = {
+                        onWishlist()
+                    }
+                )
+            }
         }
+
     }
 }
 
@@ -89,9 +105,10 @@ fun OptionPlaque(
     @DrawableRes iconPainter : Int = 0 ,
     onSelected : () -> Unit = {},
 ){
+    val color = if(isSystemInDarkTheme()) SurfaceDark30 else SurfaceDark70
     Surface(
         modifier = modifier
-            .height(100.dp)
+            .height(150.dp)
             .width(150.dp)
             .clickable(
                 onClick = {
@@ -99,6 +116,7 @@ fun OptionPlaque(
                 }
             ),
         shape = RoundedCornerShape(10.dp) ,
+        color = color
     ) {
         Column(
             modifier = Modifier
@@ -112,7 +130,7 @@ fun OptionPlaque(
                 text = message ,
                 style = BookAppTypography.bodySmall ,
                 textAlign = TextAlign.Start,
-                fontSize = 11.sp ,
+                fontSize = 14.sp ,
                 fontWeight = FontWeight.Medium
             )
             Row(
