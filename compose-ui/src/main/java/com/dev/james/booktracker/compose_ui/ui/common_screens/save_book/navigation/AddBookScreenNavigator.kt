@@ -3,4 +3,6 @@ package com.dev.james.booktracker.compose_ui.ui.common_screens.save_book.navigat
 interface AddBookScreenNavigator {
     fun backToHomeDestination()
     fun backToLibraryScreen()
+
+    fun fromAddBookToBookShelfScreen()
 }

@@ -198,6 +198,19 @@ class CoreFeatureNavigator(
         navController.popBackStack()
     }
 
+    override fun fromAddBookToBookShelfScreen() {
+        navController.popBackStack()
+        /*navController.navigate(
+            MyBookShelfScreenDestination within navGraph
+        ) {
+            popUpTo(
+                route =
+            ){
+                inclusive = true
+            }
+        }*/
+    }
+
     override fun openPdfScreen() {
         //will open pdf screen
     }
