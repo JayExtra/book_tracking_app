@@ -1,6 +1,8 @@
 package com.dev.james.booktracker.compose_ui.ui.components
 
+import android.graphics.Color
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize

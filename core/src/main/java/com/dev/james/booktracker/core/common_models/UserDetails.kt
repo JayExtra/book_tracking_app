@@ -1,7 +1,7 @@
 package com.dev.james.booktracker.core.common_models
 
 data class UserDetails(
-    val username : String ,
-    val favouriteGenres : List<String> ,
-    val selectedAvatar : Int
+    val username : String = "Fetching username..." ,
+    val favouriteGenres : List<String> = listOf() ,
+    val selectedAvatar : Int = 0
 )

@@ -138,7 +138,7 @@ fun LottieAnimationSection(
                 ) + fadeIn() with slideOutHorizontally(
                     targetOffsetX = { -it }
                 ) + fadeOut()
-            }
+            }, label = ""
         ) {
             val isLottiePlaying by remember {
                 mutableStateOf(true)
@@ -196,7 +196,7 @@ fun OnBoardingMessageBlock(
                 ) + fadeIn() with slideOutHorizontally(
                     targetOffsetX = { -it }
                 ) + fadeOut()
-            }
+            }, label = ""
         ) { targetState ->
             Text(
                 text = stringResource(id = targetState),
@@ -218,7 +218,7 @@ fun OnBoardingMessageBlock(
                 ) + fadeIn() with slideOutHorizontally(
                     targetOffsetX = { -it }
                 ) + fadeOut()
-            }
+            }, label = ""
         ) { targetState ->
             Text(
                 text = stringResource(id = targetState),
@@ -250,10 +250,11 @@ fun CircularProgressIndicator(
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessVeryLow
-                )
+                ), label = ""
             )
             val indicatorColor by animateColorAsState(
-                targetValue = if (item == progress) Color.White.copy(alpha = 0.5f) else Color.Transparent
+                targetValue = if (item == progress) Color.White.copy(alpha = 0.5f) else Color.Transparent,
+                label = ""
             )
             val size by animateDpAsState(
                 targetValue = if (item == progress) 30.dp else 20.dp,

@@ -65,6 +65,7 @@ dependencies {
     implementation(project(Modules.coreDatabase))
 
     implementation("io.github.raamcosta.compose-destinations:animations-core:${Versions.navDestinations}")
+    implementation("androidx.compose.material3:material3-android:1.2.1")
     ksp("io.github.raamcosta.compose-destinations:ksp:${Versions.navDestinations}")
 
 }
